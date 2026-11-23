@@ -4,16 +4,17 @@ The DEC10 design (layout, colours, illustrations, every interactive block, the c
 
 ## The course outline: by skill, not by week
 
-The course is six skills, and each skill has its own ordered list of lessons. Students work through each skill's lessons in order. There are no weeks or days.
+The course has seven parts: the four skills, with Writing split into Task 1 (Academic) and Task 2 because each task has its own lessons, plus Grammar and Vocabulary. Each part has its own ordered list of lessons. Students work through each skill's lessons in order. There are no weeks or days.
 
 | # | Skill | Lesson folder |
 |---|---|---|
 | 1 | Listening | `lessons/b2/listening/` |
 | 2 | Reading | `lessons/b2/reading/` |
-| 3 | Writing | `lessons/b2/writing/` |
-| 4 | Speaking | `lessons/b2/speaking/` |
-| 5 | Grammar | `lessons/b2/grammar/` |
-| 6 | Vocabulary | `lessons/b2/vocabulary/` |
+| 3 | Writing Task 1 (Academic) | `lessons/b2/writing-task1/` |
+| 4 | Writing Task 2 | `lessons/b2/writing-task2/` |
+| 5 | Speaking | `lessons/b2/speaking/` |
+| 6 | Grammar | `lessons/b2/grammar/` |
+| 7 | Vocabulary | `lessons/b2/vocabulary/` |
 
 The lessons are still to be planned: each skill is empty in `lessons/course.js` and shows "To plan" on the course map. Add each lesson to its skill's `days`, in the order students study it.
 
@@ -48,7 +49,7 @@ Site (after GitHub Pages is switched on): `https://ma-jalali.github.io/ielts-pre
 |---|---|
 | `index.html` | the single page |
 | `js/config.js` | settings: Supabase keys, version |
-| `lessons/course.js` | **the course outline**: the six skills and their lessons (to plan), downloads |
+| `lessons/course.js` | **the course outline**: the seven parts (skills) and their lessons (to plan), downloads |
 | `lessons/guide.js` | Course calendar + Assessments pages (dates, mock tests, the four skills) |
 | `lessons/b2/<skill>/` | the lesson files of each skill (empty for now) |
 | `lessons/studio/ieblocks.js` | **Block gallery**: every block, working (built from `js/studio-blocks.js`). Not on the course map; Studio links to it |
