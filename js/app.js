@@ -697,7 +697,7 @@ function overview() {
    finish. Everything decorative sits behind the road or in the foreground, away from the stops and their labels. */
 function courseMapRich(current, stops = course.map, opt = {}) {
   const N = stops.length, H = 300;
-  const pts = stops.map((_, i) => { const k = N > 1 ? i / (N - 1) : 0; return [Math.round(150 + 760 * k), Math.round(160 - 84 * k + (i % 2 ? -10 : 8))]; });
+  const pts = stops.map((_, i) => { const k = N > 1 ? i / (N - 1) : opt.single === 'end' ? 1 : 0; return [Math.round(150 + 760 * k), Math.round(160 - 84 * k + (i % 2 ? -10 : 8))]; });
   const road = `M-10 196C40 192 ${pts[0][0] - 40} ${pts[0][1]} ${pts[0][0]} ${pts[0][1]}` + pts.slice(1).map(([x, y], i) => `S${x - Math.round((x - pts[i][0]) / 2)} ${y} ${x} ${y}`).join('');
   const T = (x, y, k, s) => `<g transform="translate(${x} ${y})${k && k !== 1 ? ` scale(${k})` : ''}">${s}</g>`;
   const tree = (x, y, k = 1, c = ['#8fb47a', '#6f9d5c', '#a9c995']) => T(x, y, k, `<ellipse cy="9" rx="12" ry="2.6" fill="#18213f" opacity=".08"/><path d="M-1.8 9V-4h3.6V9z" fill="#8a6f4e"/><path d="M0 0 4-5M0 2-3-3" stroke="#8a6f4e" stroke-width="1.2" stroke-linecap="round"/><circle cy="-12" r="10.5" fill="${c[0]}"/><circle cx="5.5" cy="-8" r="7.5" fill="${c[1]}"/><circle cx="-5" cy="-7" r="6" fill="${c[1]}" opacity=".55"/><circle cx="-4" cy="-16" r="4.4" fill="${c[2]}"/><circle cx="2" cy="-19" r="2" fill="#fff" opacity=".35"/>`);
@@ -914,17 +914,7 @@ function dayCard(d) {
    The open week is remembered for this visit; the "You are here" week opens first. */
 let homeWeek = null, skillRoute = null;
 /* The skills in the side panel (course.units), under the course map: one link each, in course.js order. */
-/* Each part's icon: two-tone (a tinted body + a line drawing in the part's colour), clearly different from the others. */
-const SKILL_IC = {
-  listening: '<path d="M4 15v-3a8 8 0 0 1 16 0v3" /><rect x="2.8" y="13.5" width="5" height="7" rx="2" fill="currentColor" fill-opacity=".22"/><rect x="16.2" y="13.5" width="5" height="7" rx="2" fill="currentColor" fill-opacity=".22"/><path d="M10 15.5v2M12 14v5M14 15.5v2"/>',
-  reading: '<path d="M2.8 5.2c3.2-1.1 6.4-.6 9.2 1.6v13c-2.8-2.2-6-2.7-9.2-1.6z" fill="currentColor" fill-opacity=".22"/><path d="M21.2 5.2c-3.2-1.1-6.4-.6-9.2 1.6v13c2.8-2.2 6-2.7 9.2-1.6z"/><path d="M14.5 9.5c1.6-.7 3.2-.8 4.6-.4M14.5 12.5c1.6-.7 3.2-.8 4.6-.4"/>',
-  chart: '<rect x="3" y="3" width="18" height="18" rx="3" fill="currentColor" fill-opacity=".14"/><path d="M7 17v-4M11 17V9M15 17v-6M19 17V7" stroke-width="2.2"/><path d="m5.5 11.5 4-4 3.5 2.5 6-5" stroke-width="1.5"/>',
-  essay: '<path d="M6 2.8h8.5L19 7.3V20a1.2 1.2 0 0 1-1.2 1.2H6A1.2 1.2 0 0 1 4.8 20V4A1.2 1.2 0 0 1 6 2.8z" fill="currentColor" fill-opacity=".16"/><path d="M14.5 2.8V7.3H19"/><path d="M8 10.5h7.5M8 13.5h7.5M8 16.5h4.5"/>',
-  discussion: '<path d="M3.5 4.5h11a2 2 0 0 1 2 2v5.5a2 2 0 0 1-2 2H9l-3.8 3v-3H3.5a2 2 0 0 1-2-2V6.5a2 2 0 0 1 2-2z" fill="currentColor" fill-opacity=".22"/><path d="M19 9h1.5a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H20v3l-3.2-3H12a2 2 0 0 1-2-2v-.5"/><circle cx="6" cy="9.3" r=".9" fill="currentColor"/><circle cx="9" cy="9.3" r=".9" fill="currentColor"/><circle cx="12" cy="9.3" r=".9" fill="currentColor"/>',
-  research: '<rect x="6.5" y="2.5" width="14" height="16" rx="2.5" fill="currentColor" fill-opacity=".12" transform="rotate(8 13.5 10.5)"/><rect x="3.5" y="5" width="14" height="16" rx="2.5" fill="currentColor" fill-opacity=".2"/><path d="m6.8 16.5 2.7-7.5h.6l2.7 7.5M7.8 14h4"/><path d="M14.8 12.2a1.6 1.6 0 1 1 0 3.2 1.6 1.6 0 0 1 0-3.2zM16.4 11.6v4.9"/>',
-  critical: '<path d="M4 8h4a2.2 2.2 0 1 1 4.4 0H16v4a2.2 2.2 0 1 1 0 4.4V20H4v-4a2.2 2.2 0 1 0 0-4.4z" fill="currentColor" fill-opacity=".22"/><path d="M16 8h4v4M20 16v4h-4"/>'
-};
-const partIcon = (w, cls = '') => `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${SKILL_IC[w.art] || SKILL_IC.reading}</svg>`;
+const partIcon = (w, cls = '') => `<img class="part-ic ${cls}" src="assets/ui/parts/${esc(w.art || 'reading')}.svg" alt="" width="64" height="64" decoding="async">`;   // assets/ui/parts/*.svg: one detailed icon per part
 const partColor = w => w.color || (TONES[w.tone] || TONES.blue)[0];
 const partStyle = w => `--accent:${partColor(w)};--accent-bg:color-mix(in srgb, ${partColor(w)} 9%, #fff)`;
 /* Menus the teacher can hide from students (side panel → Settings → "Side panel for students").
@@ -975,10 +965,14 @@ function paintSkillNav(route) {
 const pickHomeWeek = () => { const ws = course.weeks; if (!ws.some(w => w.n === homeWeek)) homeWeek = (ws.find(w => w.n === lesson.week) || ws[0]).n; };
 /* By skill (course.units): the skills have no order, so the home page shows them as cards side by side (not on a road);
    the road map is drawn inside each skill, with its lessons as the stops. */
+/* one line on a part's progress: "To plan", "3 lessons", "2 of 3 done" */
+function partMeta(w) { const ready = w.days.filter(d => d.status === 'ready'), done = ready.filter(d => { const [a, b] = dayProgress(d); return b && a === b; }).length;
+  return !w.days.length ? 'To plan' : !ready.length ? `${w.days.length} planned` : done ? `${done} of ${ready.length} done` : `${ready.length} lesson${ready.length === 1 ? '' : 's'}`; }
+/* the home page's course map: an illustrated town, one landmark per part (js/campus.js) */
+const campusMap = () => window.IELTSCampus ? `<section class="campus" aria-label="Course map"><div class="campus-scroll">${window.IELTSCampus({ parts: course.weeks, esc, meta: partMeta })}</div></section>` : '';
 function skillGrid() {
   pickHomeWeek();
-  const card = w => { const ready = w.days.filter(d => d.status === 'ready'), done = ready.filter(d => { const [a, b] = dayProgress(d); return b && a === b; }).length;
-    const meta = !w.days.length ? 'To plan' : !ready.length ? `${w.days.length} planned` : done ? `${done} of ${ready.length} done` : `${ready.length} lesson${ready.length === 1 ? '' : 's'}`;
+  const card = w => { const ready = w.days.filter(d => d.status === 'ready'), done = ready.filter(d => { const [a, b] = dayProgress(d); return b && a === b; }).length, meta = partMeta(w);
     return `<a class="skill-card" href="#/skill/${w.n}" style="${partStyle(w)};--p:${ready.length ? (done / ready.length).toFixed(3) : 0}">
       <span class="skill-card-art">${partIcon(w, 'skill-card-ic')}</span>
       <span class="skill-card-tx"><b>${esc(w.theme)}</b>${w.tag ? `<small>${esc(w.tag)}</small>` : ''}</span>
@@ -988,13 +982,13 @@ function skillGrid() {
 }
 /* The road map of one skill: its lessons in order. Done lessons are ticked, the first unfinished one is "Up next". */
 function skillMap(w) {
-  if (!w.days.length) return '';
+  if (!w.days.length) return `<section class="course-map skill-map is-empty" aria-label="${esc(w.theme)}: lessons on the way">${courseMapRich(0, [{ n: '', label: 'Lessons on the way', sub: '', st: 'next' }], { single: 'end', aria: `${w.theme}: the lessons are on the way` })}</section>`;
   let next = false;
   const short = t => t.length > 26 ? t.slice(0, 24).trim() + '…' : t;
   const stops = w.days.map(d => { const [a, b] = dayProgress(d), ready = d.status === 'ready', done = ready && b && a === b;
     const st = done ? 'past' : ready && !next ? (next = true, 'now') : 'next';
     return { n: d.day, label: short(d.title), sub: ready ? (done ? 'Done' : a ? 'In progress' : 'Open') : 'Coming soon', st, go: ready ? '#/' + d.id : '', aria: `Open ${DW} ${d.day}: ${d.title}` }; });
-  return `<section class="course-map skill-map" aria-label="${esc(w.theme)}: map of the lessons">${courseMap(0, stops, { nowText: 'Up next', aria: `${w.theme}: ${w.days.length} lessons in order` })}</section>`;
+  return `<section class="course-map skill-map" aria-label="${esc(w.theme)}: map of the lessons">${courseMapRich(0, stops, { nowText: 'Up next', aria: `${w.theme}: ${w.days.length} lessons in order` })}</section>`;
 }
 function weekTabs() {
   const ws = course.weeks;
@@ -1006,7 +1000,7 @@ function weekTabs() {
     <div class="week-panel" id="panel-week" ${UNITS ? `role="region" aria-label="${esc(w.theme)}"` : `role="tabpanel" aria-labelledby="tab-week-${w.n}"`}>
       <header class="week-head">${UNITS ? `<span class="week-art" style="${partStyle(w)}">${partIcon(w)}</span>` : `<span class="week-num"><small>${UW}</small>${w.n}</span>`}<div>${UNITS ? `<span class="eyebrow">${esc(course.code)} · ${esc((partGroups().find(g => g.parts.includes(w)) || {}).title || UW)}</span><h1>${esc(w.theme)}</h1>` : `<h2>${esc(w.theme)}</h2>`}<p>${esc(w.summary || '')}</p></div></header>
       ${UNITS ? skillMap(w) : ''}
-      ${w.days.length ? `<ol class="day-grid${w.days.length > 3 ? ' many' : ''}">${w.days.map(dayCard).join('')}</ol>` : `<p class="week-empty" style="margin:0 0 2rem;color:#5b6b78">The lessons for ${esc(unitName(w.n))} are on the way.</p>`}
+      ${w.days.length ? `<ol class="day-grid${w.days.length > 3 ? ' many' : ''}">${w.days.map(dayCard).join('')}</ol>` : ''}
     </div></section>`;
 }
 function courseHome() {
@@ -1018,7 +1012,7 @@ function courseHome() {
       ${classToday ? (() => { const { d, week, day } = classToday, ready = d.status === 'ready', inner = `<span class="ht-dot" aria-hidden="true"></span><span class="ht-hi">${GREET()}</span><span class="ht-txt">Today in class · ${WEEKDAY[day - 1]}, Week ${week}</span><b>${esc(d.title)}</b>${ready ? icon('arrow') : '<small>Coming soon</small>'}`;
         return ready ? `<a class="home-today" href="#/${d.id}">${inner}</a>` : `<span class="home-today is-soon">${inner}</span>`; })() : ''}
     </header>
-    ${UNITS ? skillGrid() : `<section class="course-map" aria-label="Course map">${courseMap(lesson.week)}</section>`}
+    ${UNITS ? campusMap() + skillGrid() : `<section class="course-map" aria-label="Course map">${courseMap(lesson.week)}</section>`}
     ${lesson.week ? `<section class="resume" style="${tone(n ? n.s : lesson.sections[lesson.sections.length - 1])}">
       <img class="resume-art" src="${artSrc(n ? n.s.art : 'writing')}" alt="" width="220" height="170">
       <div class="resume-copy">

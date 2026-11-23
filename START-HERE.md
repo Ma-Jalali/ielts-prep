@@ -30,6 +30,8 @@ Site (after GitHub Pages is switched on): `https://ma-jalali.github.io/ielts-pre
 
 ## Look and tools
 
+- **Course map (home page):** an illustrated town (`js/campus.js`), with one landmark for each part around a central plaza that says "Start anywhere". Each landmark opens its part. Inside each part, the road map shows its lessons in order. While a part has no lessons, the road leads to a flag that says "Lessons on the way".
+- **Part icons:** `assets/ui/parts/<art>.svg`, one detailed icon for each part, used in the side panel, the cards and the part pages.
 - **Theme:** `css/theme.css` holds the colours and type: IELTS-style red, a deep indigo-navy, cool paper, and Outfit for headings. Change the look there.
 - **Side panel colour:** Settings (gear) → Side panel colour offers 13 colours, chosen on each device.
 - **Top bar:** "Word game" is removed. "Word meanings" (the lesson's own glossary) appears only on lessons that have one. The dictionary is the book button at the bottom right.
