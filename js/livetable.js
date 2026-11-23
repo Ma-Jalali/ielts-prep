@@ -11,7 +11,7 @@
 window.DEC15LiveTable = (() => {
   const live = new Map();   // docId → instance (kept while it is on the page; moved, not rebuilt, when the page re-draws)
   const COLORS = ['#2b776e', '#b0512a', '#7a4a8c', '#3a58a0', '#985c0e', '#3f7a3a', '#a3305a', '#1f6f8b'];
-  const TEXT = [['', 'Default', '#14293a'], ['#b0322b', 'Red'], ['#c26412', 'Orange'], ['#2f7a52', 'Green'], ['#2f55b0', 'Blue'], ['#7a4a8c', 'Purple'], ['#6b7680', 'Grey']];
+  const TEXT = [['', 'Default', '#18213f'], ['#b0322b', 'Red'], ['#c26412', 'Orange'], ['#2f7a52', 'Green'], ['#2f55b0', 'Blue'], ['#7a4a8c', 'Purple'], ['#6b7680', 'Grey']];
   const MARK = [['', 'No highlight'], ['#fff1a8', 'Yellow'], ['#c9f0d4', 'Green'], ['#cde6fb', 'Blue'], ['#f9d3e2', 'Pink'], ['#ffe0c2', 'Orange']];
   const SIZES = ['0.8em', '0.9em', null, '1.15em', '1.3em', '1.5em', '1.75em', '2em'];   // null = normal
   const svg = p => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;
@@ -133,7 +133,7 @@ window.DEC15LiveTable = (() => {
       const b = bub(); b.hidden = false;
       ['bold', 'italic', 'underline', 'strike'].forEach(k => b.querySelector(`[data-lb="${k}"]`).classList.toggle('on', editor.isActive(k)));
       const ts = editor.getAttributes('textStyle'), hl = editor.getAttributes('highlight');
-      b.querySelector('[data-lb-cbar]').style.background = ts.color || '#14293a'; b.querySelector('[data-lb-mbar]').style.background = hl.color || 'transparent';
+      b.querySelector('[data-lb-cbar]').style.background = ts.color || '#18213f'; b.querySelector('[data-lb-mbar]').style.background = hl.color || 'transparent';
       const a = editor.view.coordsAtPos(from), z = editor.view.coordsAtPos(to), r = root.getBoundingClientRect(), w = b.offsetWidth, h = b.offsetHeight;
       const mid = (Math.min(a.left, z.left) + Math.max(a.right, z.right)) / 2;
       let x = mid - r.left - w / 2, y = Math.min(a.top, z.top) - r.top - h - 10;

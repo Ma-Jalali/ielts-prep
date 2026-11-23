@@ -227,14 +227,14 @@ window.DEC15Dictionary = (() => {
           <linearGradient id="dxa-hl" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ffd76a" stop-opacity=".25"/><stop offset=".15" stop-color="#ffd76a" stop-opacity=".85"/><stop offset=".9" stop-color="#ffcf4d" stop-opacity=".85"/><stop offset="1" stop-color="#ffcf4d" stop-opacity=".2"/></linearGradient>
           <filter id="dxa-blur8" x="-30%" y="-100%" width="160%" height="300%"><feGaussianBlur stdDeviation="8"/></filter>
           <filter id="dxa-blur3" x="-20%" y="-100%" width="140%" height="300%"><feGaussianBlur stdDeviation="2.6"/></filter>
-          <filter id="dxa-card" x="-60%" y="-80%" width="220%" height="300%" filterUnits="objectBoundingBox"><feDropShadow dx="0" dy="10" stdDeviation="9" flood-color="#14293a" flood-opacity=".18"/><feDropShadow dx="0" dy="1.5" stdDeviation="1.2" flood-color="#14293a" flood-opacity=".12"/></filter>
-          <filter id="dxa-soft" x="-10%" y="-10%" width="120%" height="130%"><feDropShadow dx="0" dy="2" stdDeviation="1.6" flood-color="#14293a" flood-opacity=".22"/></filter>
+          <filter id="dxa-card" x="-60%" y="-80%" width="220%" height="300%" filterUnits="objectBoundingBox"><feDropShadow dx="0" dy="10" stdDeviation="9" flood-color="#18213f" flood-opacity=".18"/><feDropShadow dx="0" dy="1.5" stdDeviation="1.2" flood-color="#18213f" flood-opacity=".12"/></filter>
+          <filter id="dxa-soft" x="-10%" y="-10%" width="120%" height="130%"><feDropShadow dx="0" dy="2" stdDeviation="1.6" flood-color="#18213f" flood-opacity=".22"/></filter>
           <clipPath id="dxa-clipL"><path d="M160 78C140 63 94 55 52 64L54 158C94 148 138 153 160 168Z"/></clipPath>
           <clipPath id="dxa-clipR"><path d="M160 78C180 63 226 55 268 64L266 158C226 148 182 153 160 168Z"/></clipPath>
         </defs>
         <ellipse cx="160" cy="104" rx="150" ry="100" fill="url(#dxa-spot)"/>
         <!-- shadows on the desk: a wide soft one and a tight contact one -->
-        <g class="dxa-shadow"><ellipse cx="162" cy="190" rx="122" ry="15" fill="#14293a" opacity=".22" filter="url(#dxa-blur8)"/><ellipse cx="160" cy="182" rx="104" ry="5" fill="#14293a" opacity=".35" filter="url(#dxa-blur3)"/></g>
+        <g class="dxa-shadow"><ellipse cx="162" cy="190" rx="122" ry="15" fill="#18213f" opacity=".22" filter="url(#dxa-blur8)"/><ellipse cx="160" cy="182" rx="104" ry="5" fill="#18213f" opacity=".35" filter="url(#dxa-blur3)"/></g>
         <g class="dxa-book">
           <!-- the ribbon bookmark, hanging out under the book -->
           <path class="dxa-rib" d="M168 166C169 178 171 190 174 204L168.5 199.5L163.5 205C162 192 161.5 179 162 166Z" fill="url(#dxa-rib)" filter="url(#dxa-soft)"/>
@@ -258,7 +258,7 @@ window.DEC15Dictionary = (() => {
           <path d="M52 64C94 55 140 63 160 78C180 63 226 55 268 64" fill="none" stroke="#fff" stroke-width="1.2" stroke-opacity=".9"/>
           <!-- what is printed: a headword, its sounds, lines of text -->
           <g clip-path="url(#dxa-clipL)">
-            <text x="64" y="84" font-family="Fraunces, Georgia, serif" font-size="13.5" font-weight="600" fill="#14293a" transform="rotate(-3 64 84)">lexicon</text>
+            <text x="64" y="84" font-family="Fraunces, Georgia, serif" font-size="13.5" font-weight="600" fill="#18213f" transform="rotate(-3 64 84)">lexicon</text>
             <text x="118" y="83" font-family="Manrope, sans-serif" font-size="6" fill="#8b7a5c" transform="rotate(-1 118 83)">/ˈlek·sə·kən/</text>
             <path class="dxa-hl" d="M62 107C92 99 120 100 146 110" fill="none" stroke="url(#dxa-hl)" stroke-width="8" stroke-linecap="round"/>
             <g fill="none" stroke="#7d6e55" stroke-opacity=".45" stroke-width="2" stroke-linecap="round"><path d="M62 110C92 102 122 103 148 112"/><path d="M62 120C92 112 106 113 132 122"/><path d="M62 130C92 122 120 123 146 132"/><path d="M62 140C92 132 94 133 120 142"/></g>
@@ -276,21 +276,21 @@ window.DEC15Dictionary = (() => {
         <!-- floating cards, frosted glass -->
         <g class="dxa-card">
           <rect x="190" y="10" width="118" height="58" rx="13" fill="url(#dxa-glass)" stroke="#fff" filter="url(#dxa-card)"/>
-          <rect x="190.5" y="10.5" width="117" height="57" rx="12.5" fill="none" stroke="#14293a" stroke-opacity=".06"/>
-          <text x="203" y="32" font-family="Fraunces, Georgia, serif" font-size="14" font-weight="600" fill="#14293a">lexicon</text>
+          <rect x="190.5" y="10.5" width="117" height="57" rx="12.5" fill="none" stroke="#18213f" stroke-opacity=".06"/>
+          <text x="203" y="32" font-family="Fraunces, Georgia, serif" font-size="14" font-weight="600" fill="#18213f">lexicon</text>
           <rect x="203" y="40" width="30" height="13" rx="6.5" fill="#eef4fc"/><text x="218" y="49.2" text-anchor="middle" font-family="Manrope, sans-serif" font-size="7" font-weight="700" fill="#2f6db5">noun</text>
           <text x="238" y="49.2" font-family="Manrope, sans-serif" font-size="6.6" fill="#8b969e">all the words</text>
-          <circle cx="290" cy="27" r="9.5" fill="#14293a"/><path d="M287.5 23v8l6.5-4z" fill="#fff"/>
+          <circle cx="290" cy="27" r="9.5" fill="#18213f"/><path d="M287.5 23v8l6.5-4z" fill="#fff"/>
           <g class="dxa-wave" fill="#e3a843"><rect x="281" y="44" width="2.2" height="8" rx="1.1"/><rect x="285" y="41" width="2.2" height="11" rx="1.1"/><rect x="289" y="45" width="2.2" height="7" rx="1.1"/><rect x="293" y="42" width="2.2" height="10" rx="1.1"/><rect x="297" y="46" width="2.2" height="6" rx="1.1"/></g>
         </g>
         <g class="dxa-chip c1">
           <rect x="12" y="30" width="68" height="26" rx="13" fill="url(#dxa-glass)" stroke="#fff" filter="url(#dxa-card)"/>
           <path d="M27 36.5l2 4.2 4.6.5-3.4 3.1.9 4.5-4.1-2.3-4.1 2.3.9-4.5-3.4-3.1 4.6-.5z" fill="#e3a843"/>
-          <text x="38" y="47" font-family="Manrope, sans-serif" font-size="9" font-weight="700" fill="#14293a">Saved</text>
+          <text x="38" y="47" font-family="Manrope, sans-serif" font-size="9" font-weight="700" fill="#18213f">Saved</text>
         </g>
         <g class="dxa-chip c2">
           <rect x="8" y="122" width="44" height="44" rx="14" fill="url(#dxa-glass)" stroke="#fff" filter="url(#dxa-card)"/>
-          <text x="30" y="150" text-anchor="middle" font-family="Fraunces, Georgia, serif" font-size="17" font-weight="600" fill="#14293a">Aa</text>
+          <text x="30" y="150" text-anchor="middle" font-family="Fraunces, Georgia, serif" font-size="17" font-weight="600" fill="#18213f">Aa</text>
           <circle cx="45" cy="129" r="3" fill="#2f9a63"/>
         </g>
         <path class="dxa-tw t1" d="M118 26l1.6 3.9 3.9 1.6-3.9 1.6-1.6 3.9-1.6-3.9-3.9-1.6 3.9-1.6z" fill="#e3a843"/>
@@ -327,9 +327,9 @@ window.DEC15Dictionary = (() => {
     fab = document.createElement('button'); fab.type = 'button'; fab.className = 'dx-fab'; fab.setAttribute('aria-label', 'Open the dictionary'); fab.setAttribute('aria-expanded', 'false'); fab.title = 'Dictionary';
     fab.innerHTML = `<span class="dx-fab-ic"><svg viewBox="0 0 28 28" aria-hidden="true"><defs><linearGradient id="dxf-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f6d27a"/><stop offset="1" stop-color="#d9952a"/></linearGradient></defs>
         <path d="M4 7.5c3.2-1.4 6.5-1.4 10 1.2 3.5-2.6 6.8-2.6 10-1.2v14.2c-3.2-1.4-6.5-1.4-10 1.2-3.5-2.6-6.8-2.6-10-1.2z" fill="#fffaf0"/>
-        <path d="M14 8.7v14.2" fill="none" stroke="#14293a" stroke-opacity=".35" stroke-width="1.4"/>
-        <path d="M4 7.5c3.2-1.4 6.5-1.4 10 1.2 3.5-2.6 6.8-2.6 10-1.2v14.2c-3.2-1.4-6.5-1.4-10 1.2-3.5-2.6-6.8-2.6-10-1.2z" fill="none" stroke="#14293a" stroke-width="1.7" stroke-linejoin="round"/>
-        <path d="M7 12.2c2-.7 4-.7 6 .3M7 15.4c2-.7 4-.7 6 .3M17.5 12.5c2-1 4-1 5.5-.3M17.5 15.7c2-1 4-1 5.5-.3" fill="none" stroke="#14293a" stroke-opacity=".5" stroke-width="1.3" stroke-linecap="round"/>
+        <path d="M14 8.7v14.2" fill="none" stroke="#18213f" stroke-opacity=".35" stroke-width="1.4"/>
+        <path d="M4 7.5c3.2-1.4 6.5-1.4 10 1.2 3.5-2.6 6.8-2.6 10-1.2v14.2c-3.2-1.4-6.5-1.4-10 1.2-3.5-2.6-6.8-2.6-10-1.2z" fill="none" stroke="#18213f" stroke-width="1.7" stroke-linejoin="round"/>
+        <path d="M7 12.2c2-.7 4-.7 6 .3M7 15.4c2-.7 4-.7 6 .3M17.5 12.5c2-1 4-1 5.5-.3M17.5 15.7c2-1 4-1 5.5-.3" fill="none" stroke="#18213f" stroke-opacity=".5" stroke-width="1.3" stroke-linecap="round"/>
         <path d="M8 18.4c2-.7 4-.7 6 .3" fill="none" stroke="url(#dxf-g)" stroke-width="2.2" stroke-linecap="round"/>
         <path d="M19.5 5.5v6l-1.6-1.5-1.6 1.5v-6z" fill="url(#dxf-g)"/></svg></span><span class="dx-fab-tx">Dictionary</span>`;
     panel = document.createElement('aside'); panel.className = 'dx-panel'; panel.setAttribute('role', 'dialog'); panel.setAttribute('aria-label', 'Dictionary'); panel.setAttribute('aria-modal', 'false');

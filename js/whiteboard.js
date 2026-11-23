@@ -74,7 +74,7 @@ window.DEC15Whiteboard = (() => {
   }
   function nodeSkeleton({ id, x, y, width, height, depth, colors, text, mm }) {   // one idea: a clean rounded box (no hand-drawn wobble)
     return { type: 'rectangle', id, x, y, width, height, roundness: { type: 3 }, customData: { mm },
-      backgroundColor: depth ? colors[0] : '#14293a', strokeColor: depth ? colors[1] : '#14293a', fillStyle: 'solid', strokeWidth: depth === 1 ? 2 : 1.5, roughness: 0,
+      backgroundColor: depth ? colors[0] : '#18213f', strokeColor: depth ? colors[1] : '#18213f', fillStyle: 'solid', strokeWidth: depth === 1 ? 2 : 1.5, roughness: 0,
       label: { text: text || ' ', fontSize: depth ? (depth === 1 ? 20 : 17) : 26, fontFamily: 6, strokeColor: depth ? INK : '#ffffff' } };
   }
   function linkSkeleton(a, b, side, colors, width) {   // a curved line from the parent's outer edge to the child's inner edge
@@ -165,7 +165,7 @@ window.DEC15Whiteboard = (() => {
     const root = createRoot(host);
     const render = () => root.render(React.createElement(Excalidraw, {
       excalidrawAPI: a => { api = a; },
-      initialData: { elements: initial, files: { [SHADOW_FILE]: shadowFile() }, scrollToContent: true, appState: { viewBackgroundColor: '#fffdf8', currentItemFontFamily: 6, currentItemStrokeColor: '#14293a', currentItemRoughness: 0, currentItemRoundness: 'round' } },
+      initialData: { elements: initial, files: { [SHADOW_FILE]: shadowFile() }, scrollToContent: true, appState: { viewBackgroundColor: '#fffdf8', currentItemFontFamily: 6, currentItemStrokeColor: '#18213f', currentItemRoughness: 0, currentItemRoundness: 'round' } },
       viewModeEnabled: !editable, isCollaborating: true, zenModeEnabled: false, gridModeEnabled: false, theme: 'light', name: o.board.title || 'Class whiteboard',
       onChange, onPointerUpdate: onPointer, autoFocus: false, handleKeyboardGlobally: false,
       UIOptions: { canvasActions: { loadScene: false, saveToActiveFile: false, toggleTheme: false, changeViewBackgroundColor: !!o.teacher, clearCanvas: !!o.teacher, export: { saveFileToDisk: true }, saveAsImage: true }, tools: { image: false } },
@@ -401,7 +401,7 @@ window.DEC15Whiteboard = (() => {
       newMind: settled(newMind),
       addIdea(kind) { const n = selectedNode(); if (n) growMind(n, kind === 'sibling' && n.customData.mm.parent ? 'sibling' : 'child'); else o.toast?.('Select an idea in a mind map first.'); },
       brainstorm(topic) {
-        const sk = [{ type: 'rectangle', x: -130, y: -45, width: 260, height: 90, roundness: { type: 3 }, backgroundColor: '#14293a', strokeColor: '#14293a', fillStyle: 'solid', roughness: 0,
+        const sk = [{ type: 'rectangle', x: -130, y: -45, width: 260, height: 90, roundness: { type: 3 }, backgroundColor: '#18213f', strokeColor: '#18213f', fillStyle: 'solid', roughness: 0,
           label: { text: topic || 'Our question', fontSize: 24, fontFamily: 6, strokeColor: '#ffffff' } }];
         for (let i = 0; i < 6; i++) { const a = (i / 6) * Math.PI * 2 - Math.PI / 2, x = Math.cos(a) * 360 - 90, y = Math.sin(a) * 250 - 90;
           sk.push(...stickySkeleton(x, y, STICKIES[i % STICKIES.length][1], '', 180)); }

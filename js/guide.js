@@ -283,12 +283,12 @@ window.createDEC15Guide = function ({ esc, icon, days, toast }) {
   const READY = (G.ready?.items || []).map((t, i) => Array.isArray(t) ? t : ['r' + i, t]);
   /* the ten weeks as one strip: a dot for each assessment, a bar for the Seminar + Portfolio weeks, and where we are now */
   function stripHTML() {
-    const ws = weeks.filter(w => !w.brk), KC = { real: '#e64626', practice: '#3a58a0', check: '#2f7a52' };
+    const ws = weeks.filter(w => !w.brk), KC = { real: '#d6283c', practice: '#3a58a0', check: '#2f7a52' };
     const cur = (() => { const w = weeks[nowIdx]; return w?.brk ? null : w?.n; })();
     const cells = ws.map(w => { const items = (G.timeline || []).filter(t => { const m = String(t.week).match(/^(\d+)(?:–(\d+))?$/); if (!m) return false; const a = +m[1], b = m[2] ? +m[2] : a; return w.n >= a && w.n <= b; });
       const range = items.find(t => /–/.test(String(t.week)));
       return `<li class="${w.n === cur ? 'is-now' : ''}${range ? ' in-range' : ''}"><b>${w.n}</b>${items.filter(t => !/–/.test(String(t.week))).map(t => `<i style="--k:${KC[t.kind] || '#5d6a74'}" title="${esc(t.title)}"></i>`).join('')}${range ? `<span class="gd-sc-bar" style="--k:${KC[range.kind]}"></span>` : ''}</li>`; }).join('');
-    return `<ol class="gd-strip" aria-label="The weeks">${cells}</ol><p class="gd-strip-key"><span style="--k:#e64626">Counts</span><span style="--k:#3a58a0">Practice</span><span style="--k:#2f7a52">Check-in</span>${cur ? `<span class="is-now">Week ${cur} · now</span>` : ''}</p>`;
+    return `<ol class="gd-strip" aria-label="The weeks">${cells}</ol><p class="gd-strip-key"><span style="--k:#d6283c">Counts</span><span style="--k:#3a58a0">Practice</span><span style="--k:#2f7a52">Check-in</span>${cur ? `<span class="is-now">Week ${cur} · now</span>` : ''}</p>`;
   }
   /* the day a timeline item happens: the week's assessment event (the one that counts, if there are two) */
   function tlDate(t) {

@@ -1,6 +1,6 @@
 /* Looks that belong to one course only. dec10.html starts with <html data-course="ielts"> (added by tools/build-sw.js);
    DEC15 (index.html) has no data-course, so nothing here can change it.
-   Colours: University of Sydney palette — Charcoal #424242, Ochre #e64626, Light grey #f1f1f1, Sandstone #fcede2,
+   Colours: University of Sydney palette — Charcoal #424242, Ochre #d6283c, Light grey #f1f1f1, Sandstone #fcede2,
    Navy #1a355e, Eucalypt (darkened for white text) #4f7d74.
 
    ───────── DEC10: a dark side panel (when chosen) ─────────
@@ -39,7 +39,7 @@
 [data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .side-link:hover { background: rgba(255, 255, 255, .08); color: #fff; }
 [data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .side-ic { box-shadow: 0 0 0 .5px rgba(0, 0, 0, .2); }
 [data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .side-link.active { background: rgba(255, 255, 255, .13); color: #fff; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .12); }
-[data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .side-link.active::before { background: #e64626; }
+[data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .side-link.active::before { background: #d6283c; }
 [data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .side-ext { color: var(--side-faint); }
 [data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .side-group, [data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .nav-label { color: var(--side-faint) !important; }
 [data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .side-group::after { background: var(--side-line); }
@@ -54,21 +54,21 @@
 [data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .side-gear:hover, [data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .side-gear[aria-expanded="true"] { background: rgba(255, 255, 255, .18); color: #fff; }
 
 /* Settings → Side panel colour: a row of round swatches (the settings menu itself stays white) */
-.side-colours { display: grid; gap: 8px; margin-top: 4px; padding: 10px 8px 6px; border-top: 1px solid rgba(20, 41, 58, .08); }
+.side-colours { display: grid; gap: 8px; margin-top: 4px; padding: 10px 8px 6px; border-top: 1px solid rgba(24, 33, 63, .08); }
 .side-colours .sc-label { font-size: .84rem; font-weight: 600; color: #3a4d5d; }
 .side-colours .sc-row { display: flex; gap: 8px; }
 .side-colours button { width: 26px; height: 26px; padding: 0; border-radius: 50%; border: 0; cursor: pointer; background: var(--sc);
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .18); transition: transform .15s; }
 .side-colours button:hover { transform: scale(1.1); }
-.side-colours button[aria-checked="true"] { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .18), 0 0 0 2px #fff, 0 0 0 4px #e64626; }
-.side-colours button:focus-visible { outline: 2px solid #e64626; outline-offset: 3px; }
+.side-colours button[aria-checked="true"] { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .18), 0 0 0 2px #fff, 0 0 0 4px #d6283c; }
+.side-colours button:focus-visible { outline: 2px solid #d6283c; outline-offset: 3px; }
 
 /* ───────── DEC10: the light side panel (the default) ─────────
    A crisp white sheet that floats clearly above the page: a hairline edge and a deep soft shadow, an Ochre rule along
    the top, a Sandstone header with a fine dot pattern behind the logo, a course badge, Sandstone hover rows, a white
    "you are here" card with an Ochre edge, and a warm progress card at the foot. */
 :is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar {
-  --ochre: #e64626; --sand: #fcede2; --ink-2: #1f2d3a; --soft-2: #5b6874; --faint-2: #8d97a0; --line-2: rgba(20, 41, 58, .08);
+  --ochre: #d6283c; --sand: #fcede2; --ink-2: #1f2d3a; --soft-2: #5b6874; --faint-2: #8d97a0; --line-2: rgba(24, 33, 63, .08);
   color: var(--ink-2);
   /* the dot pattern only behind the header: a white veil fades it out below the logo */
   /* the dot pattern also rises softly from the foot, so the sheet reads as one designed panel */
@@ -79,11 +79,11 @@
 }
 @media (min-width: 901px) {
   :is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar {
-    box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(20, 41, 58, .09), 0 1px 2px rgba(20, 41, 58, .06),
-      0 10px 22px -10px rgba(20, 41, 58, .22), 0 34px 70px -22px rgba(20, 41, 58, .45) !important;
+    box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(24, 33, 63, .09), 0 1px 2px rgba(24, 33, 63, .06),
+      0 10px 22px -10px rgba(24, 33, 63, .22), 0 34px 70px -22px rgba(24, 33, 63, .45) !important;
   }
   /* a fine frame a few pixels outside the sheet: it reads as a separate panel, not another card on the page */
-  :is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar { outline: 1px solid rgba(20, 41, 58, .1); outline-offset: 5px; }
+  :is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar { outline: 1px solid rgba(24, 33, 63, .1); outline-offset: 5px; }
   /* an Ochre rule along the top edge of the sheet */
   :is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar::before {
     content: ""; position: absolute; top: 0; left: 24px; right: 24px; height: 3px; border-radius: 0 0 3px 3px;
@@ -100,12 +100,12 @@
 
 /* search */
 :is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar .side-search input {
-  background: #f4f4f4; border: 0; border-radius: 12px; color: var(--ink-2); box-shadow: inset 0 0 0 1px rgba(20, 41, 58, .06), inset 0 1px 2px rgba(20, 41, 58, .05);
+  background: #f4f4f4; border: 0; border-radius: 12px; color: var(--ink-2); box-shadow: inset 0 0 0 1px rgba(24, 33, 63, .06), inset 0 1px 2px rgba(24, 33, 63, .05);
 }
 :is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar .side-search input:focus {
   background: #fff; box-shadow: inset 0 0 0 1px rgba(230, 70, 38, .5), 0 0 0 4px rgba(230, 70, 38, .14);
 }
-:is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar .side-search kbd { background: #fff; border-color: rgba(20, 41, 58, .12); color: var(--faint-2); box-shadow: 0 1px 0 rgba(20, 41, 58, .12); }
+:is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar .side-search kbd { background: #fff; border-color: rgba(24, 33, 63, .12); color: var(--faint-2); box-shadow: 0 1px 0 rgba(24, 33, 63, .12); }
 
 /* section label: small caps with an Ochre diamond */
 :is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar .side-group { color: var(--faint-2) !important; letter-spacing: .14em; }
@@ -118,7 +118,7 @@
 :is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar .side-link:hover { background: color-mix(in srgb, var(--sand) 75%, #fff); color: var(--ink-2); }
 :is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar .side-link.active {
   background: #fff; color: var(--ink-2); font-weight: 750;
-  box-shadow: 0 0 0 1px rgba(20, 41, 58, .07), 0 2px 4px rgba(20, 41, 58, .05), 0 10px 20px -12px rgba(20, 41, 58, .4);
+  box-shadow: 0 0 0 1px rgba(24, 33, 63, .07), 0 2px 4px rgba(24, 33, 63, .05), 0 10px 20px -12px rgba(24, 33, 63, .4);
 }
 :is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar .side-link.active::before { background: var(--ochre); }
 :is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar .side-link.active::after {
@@ -141,7 +141,7 @@
    The course card, icon tiles in University of Sydney colours, and frosted-glass "you are here" and progress cards. */
 :is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar {
   /* each link's colour, from the University palette (Ochre, Jacaranda, Heritage Rose, Eucalypt, Navy …) */
-  --dec-map: #e64626; --dec-read: #4f68b8; --dec-note: #8a4f9e; --dec-planner: #3f8f7f;
+  --dec-map: #d6283c; --dec-read: #4f68b8; --dec-note: #8a4f9e; --dec-planner: #3f8f7f;
   --dec-board: #d9902a; --dec-chats: #2f9a63; --dec-shared: #1a355e; --dec-copy: #c0727a; --dec-cal: #b8331a; --dec-assess: #5b4f9e; --dec-pebble: #1f7f86;
 }
 :is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar .t-map { --tc: var(--dec-map); }
@@ -166,7 +166,7 @@
 }
 :is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar .sc-code {
   padding: 6px 9px; border-radius: 8px; color: #fff; font: 800 .74rem/1 var(--sans, Manrope, sans-serif); letter-spacing: .06em;
-  background: linear-gradient(160deg, #ee5a3a, #e64626); box-shadow: 0 4px 10px -5px rgba(230, 70, 38, .8);
+  background: linear-gradient(160deg, #ee5a3a, #d6283c); box-shadow: 0 4px 10px -5px rgba(230, 70, 38, .8);
 }
 :is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar .sc-name {
   display: grid; gap: 2px; color: var(--ink-2); font: 750 .82rem/1.15 var(--sans, Manrope, sans-serif);
@@ -198,8 +198,8 @@
 :is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar .side-link.active {
   background: linear-gradient(90deg, color-mix(in srgb, var(--tc) 11%, rgba(255, 255, 255, .9)), rgba(255, 255, 255, .78));
   -webkit-backdrop-filter: blur(12px) saturate(1.5); backdrop-filter: blur(12px) saturate(1.5);
-  box-shadow: inset 0 1px 0 #fff, inset 0 0 0 1px rgba(255, 255, 255, .7), 0 0 0 1px color-mix(in srgb, var(--tc) 20%, rgba(20, 41, 58, .06)),
-    0 2px 4px rgba(20, 41, 58, .04), 0 12px 22px -14px color-mix(in srgb, var(--tc) 70%, rgba(20, 41, 58, .5));
+  box-shadow: inset 0 1px 0 #fff, inset 0 0 0 1px rgba(255, 255, 255, .7), 0 0 0 1px color-mix(in srgb, var(--tc) 20%, rgba(24, 33, 63, .06)),
+    0 2px 4px rgba(24, 33, 63, .04), 0 12px 22px -14px color-mix(in srgb, var(--tc) 70%, rgba(24, 33, 63, .5));
 }
 :is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar .side-link.active::before { background: var(--tc); box-shadow: 0 0 10px color-mix(in srgb, var(--tc) 60%, transparent); }
 :is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar .side-link.active::after { background: var(--tc); box-shadow: 0 0 0 3px color-mix(in srgb, var(--tc) 18%, transparent); }
@@ -211,7 +211,7 @@
   box-shadow: inset 0 1px 0 #fff, inset 0 0 0 1px rgba(255, 255, 255, .6), 0 0 0 1px rgba(230, 70, 38, .15), 0 10px 20px -14px rgba(230, 70, 38, .6) !important;
 }
 :is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar .side-gear {
-  background: linear-gradient(180deg, #fff, #f6f6f6); box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(20, 41, 58, .1), 0 3px 8px -4px rgba(20, 41, 58, .35);
+  background: linear-gradient(180deg, #fff, #f6f6f6); box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(24, 33, 63, .1), 0 3px 8px -4px rgba(24, 33, 63, .35);
 }
 @media (prefers-reduced-motion: reduce) {
   :is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar .side-ic { transition: none; }
@@ -250,21 +250,21 @@ button.wall-bar:focus-visible { outline: 2px solid var(--talk); outline-offset: 
 @media (prefers-reduced-motion: reduce) { .wall-new { animation: none; } .wall-body { animation: none; } }
 
 /* ───── DEC10 · side panel details (v2.95) ───── */
-[data-course="ielts"] .side-ic { width: 34px; height: 34px; border-radius: 11px; color: color-mix(in srgb, var(--tc) 72%, #14293a);
+[data-course="ielts"] .side-ic { width: 34px; height: 34px; border-radius: 11px; color: color-mix(in srgb, var(--tc) 72%, #18213f);
   background: linear-gradient(150deg, color-mix(in srgb, var(--tc) 26%, #fff), color-mix(in srgb, var(--tc) 9%, #fff));
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, .95), inset 0 -1px 0 color-mix(in srgb, var(--tc) 14%, transparent), 0 0 0 .5px color-mix(in srgb, var(--tc) 32%, transparent), 0 3px 8px -5px color-mix(in srgb, var(--tc) 60%, transparent); }
 [data-course="ielts"] .side-ic svg { width: 19px; height: 19px; filter: drop-shadow(0 1px 0 rgba(255, 255, 255, .7)); }
 [data-course="ielts"] .side-link:hover .side-ic { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .95), 0 0 0 .5px color-mix(in srgb, var(--tc) 45%, transparent), 0 8px 16px -8px color-mix(in srgb, var(--tc) 80%, transparent); }
-[data-course="ielts"] .side-link.active .side-ic { color: #fff; background: linear-gradient(150deg, color-mix(in srgb, var(--tc) 88%, #fff), color-mix(in srgb, var(--tc) 85%, #14293a)); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .4), 0 8px 18px -8px color-mix(in srgb, var(--tc) 90%, transparent); }
+[data-course="ielts"] .side-link.active .side-ic { color: #fff; background: linear-gradient(150deg, color-mix(in srgb, var(--tc) 88%, #fff), color-mix(in srgb, var(--tc) 85%, #18213f)); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .4), 0 8px 18px -8px color-mix(in srgb, var(--tc) 90%, transparent); }
 [data-course="ielts"] .side-link.active .side-ic svg { filter: none; }
 [data-course="ielts"] .side-link .side-tx { letter-spacing: .005em; }
 [data-course="ielts"] .side-link.active::after { content: ""; position: absolute; right: 12px; top: 50%; width: 6px; height: 6px; border-radius: 50%; background: var(--tc); transform: translateY(-50%); box-shadow: 0 0 0 3px color-mix(in srgb, var(--tc) 22%, #fff); }
 [data-course="ielts"] .sc-weeks { display: grid; grid-template-columns: repeat(10, 1fr); gap: 3px; margin-top: 7px; }
-[data-course="ielts"] .sc-weeks i { height: 5px; border-radius: 3px; background: rgba(20, 41, 58, .1); }
-[data-course="ielts"] .sc-weeks i.is-done { background: #e64626; opacity: .55; }
-[data-course="ielts"] .sc-weeks i.is-now { background: #e64626; box-shadow: 0 0 0 2px rgba(230, 70, 38, .2); animation: cbPulse 2.4s ease-in-out infinite; }
+[data-course="ielts"] .sc-weeks i { height: 5px; border-radius: 3px; background: rgba(24, 33, 63, .1); }
+[data-course="ielts"] .sc-weeks i.is-done { background: #d6283c; opacity: .55; }
+[data-course="ielts"] .sc-weeks i.is-now { background: #d6283c; box-shadow: 0 0 0 2px rgba(230, 70, 38, .2); animation: cbPulse 2.4s ease-in-out infinite; }
 [data-course="ielts"][data-side]:not([data-side="light"]) .sc-weeks i { background: rgba(255, 255, 255, .16); }
 [data-course="ielts"] .side-ring { width: 32px; height: 32px; }
-[data-course="ielts"] .side-ring circle + circle { stroke: #e64626; filter: drop-shadow(0 0 3px rgba(230, 70, 38, .45)); }
+[data-course="ielts"] .side-ring circle + circle { stroke: #d6283c; filter: drop-shadow(0 0 3px rgba(230, 70, 38, .45)); }
 [data-course="ielts"] .side-ring.is-done circle + circle { stroke: #2f9a63; }
 @media (prefers-reduced-motion: reduce) { [data-course="ielts"] .sc-weeks i.is-now { animation: none; } }

@@ -2,14 +2,14 @@
    and each skill's own road map of its lessons above the lesson cards. */
 .skill-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 210px), 1fr)); gap: 14px; margin: 6px 0 34px; }
 .skill-card { position: relative; display: grid; grid-template-rows: auto 1fr auto; gap: 10px; text-align: left; padding: 14px 16px 14px; border-radius: var(--r-lg, 18px);
-  border: 1px solid var(--line); background: #fffdf8; box-shadow: var(--shadow); color: var(--ink); font: inherit; cursor: pointer;
+  border: 1px solid var(--line); background: #ffffff; box-shadow: var(--shadow); color: var(--ink); font: inherit; cursor: pointer;
   transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
 .skill-card::before { content: ""; position: absolute; inset: 0 0 auto; height: 4px; border-radius: inherit; border-bottom-left-radius: 0; border-bottom-right-radius: 0; background: var(--accent); opacity: .75; }
 .skill-card:hover { transform: translateY(-2px); border-color: color-mix(in srgb, var(--accent) 35%, transparent); }
 .skill-card:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 .skill-card.is-on { border-color: var(--accent); background: var(--accent-bg); box-shadow: 0 0 0 1px var(--accent), var(--shadow); }
 .skill-card-art { display: grid; place-items: center; height: 74px; border-radius: 12px; background: var(--accent-bg); }
-.skill-card.is-on .skill-card-art { background: #fffdf8; }
+.skill-card.is-on .skill-card-art { background: #ffffff; }
 .skill-card-art img { width: 96px; height: 74px; object-fit: contain; }
 .skill-card-tx b { display: block; font-family: var(--serif, Georgia, serif); font-size: 1.12rem; line-height: 1.25; font-weight: 600; }
 .skill-card-tx small { display: block; margin-top: 3px; color: var(--muted); font-size: .84rem; line-height: 1.35; }
@@ -23,7 +23,7 @@
 .cm-stop[data-go]:focus-visible circle:first-of-type { stroke: var(--ink); stroke-width: 3; }
 @media (prefers-reduced-motion: reduce) { .skill-card { transition: none; } .skill-card:hover { transform: none; } }
 /* the narrow week bar labels its row; by skill it says "Skill" */
-@media (max-width: 1359px) { [data-course="ielts"] .weekbar .wb-row::before { content: "Skill"; } }
+@media (max-width: 1359px) { [data-course="ielts"] .weekbar .wb-row::before { content: "Part"; } }
 /* phones: compact cards, two to a row, picture beside nothing (small) */
 @media (max-width: 640px) {
   .skill-grid { grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 26px; }
@@ -42,7 +42,7 @@ a.skill-card { text-decoration: none; }
 /* menus the teacher hid: gone for students; the teacher still sees them, dimmed */
 .menu-off { display: none !important; }
 .side-link.menu-off-teacher { opacity: .5; }
-.side-link.menu-off-teacher .side-tx::after { content: "hidden"; margin-left: 6px; padding: 1px 6px; border-radius: 8px; background: rgba(20, 41, 58, .08); font-size: .66rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; vertical-align: 1px; }
+.side-link.menu-off-teacher .side-tx::after { content: "hidden"; margin-left: 6px; padding: 1px 6px; border-radius: 8px; background: rgba(24, 33, 63, .08); font-size: .66rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; vertical-align: 1px; }
 .side-menus { display: grid; gap: 2px; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--line); }
 .side-menus .sc-label { font-size: .84rem; font-weight: 600; color: #3a4d5d; padding: 2px 4px 4px; }
 .side-menus .tt-state { margin-left: auto; }

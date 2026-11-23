@@ -5,8 +5,8 @@
    (the board the teacher is showing now). Loaded only on #/board. Needs window.Tiptap and window.DEC15Blocks. */
 window.DEC15Board = (() => {
   let ctx = null, root = null, mounted = false, editor = null, blocks = null, ch = null;
-  let boards = [], cur = null, live = null, mode = 'write', pen = { c: '#14293a', w: 4 }, saveT = 0, dirty = false, follow = true, wb = null, wbFor = null, myView = {};
-  const PENS = [['#14293a', 'Ink'], ['#c0392b', 'Red'], ['#2a8a7d', 'Teal'], ['#3a58a0', 'Blue'], ['#e9a23b', 'Gold'], ['#7a4a8c', 'Plum']];
+  let boards = [], cur = null, live = null, mode = 'write', pen = { c: '#18213f', w: 4 }, saveT = 0, dirty = false, follow = true, wb = null, wbFor = null, myView = {};
+  const PENS = [['#18213f', 'Ink'], ['#c0392b', 'Red'], ['#2a8a7d', 'Teal'], ['#3a58a0', 'Blue'], ['#e9a23b', 'Gold'], ['#7a4a8c', 'Plum']];
   const esc = s => ctx.esc(s), icon = (n, c) => ctx.icon(n, c);
   const CLS = window.DEC15_CLASS;   // boards belong to this page's course (js/config.js)
   const cloud = () => ctx.getCloud(), db = () => (cloud()?.user && cloud().client) || null, teacher = () => cloud()?.profile?.role === 'teacher';
@@ -72,17 +72,17 @@ window.DEC15Board = (() => {
   const art = () => document.documentElement.getAttribute('data-course') === 'ielts' ? '<img class="bd-art bd-art-x" src="assets/ui/class/board.svg" alt="" width="360" height="240">' : `<svg class="bd-art" viewBox="0 0 240 170" aria-hidden="true"><defs>
     <linearGradient id="bd-fr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f4f6f8"/><stop offset="1" stop-color="#cdd5dc"/></linearGradient>
     <linearGradient id="bd-pa" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#f6f3ec"/></linearGradient></defs>
-    <ellipse cx="120" cy="160" rx="86" ry="6" fill="#14293a" opacity=".07"/>
+    <ellipse cx="120" cy="160" rx="86" ry="6" fill="#18213f" opacity=".07"/>
     <path d="M62 150 82 112M178 150 158 112M120 112v44" stroke="#9aa6b0" stroke-width="4" stroke-linecap="round"/>
     <rect x="30" y="14" width="180" height="104" rx="10" fill="url(#bd-fr)"/><rect x="36" y="20" width="168" height="92" rx="6" fill="url(#bd-pa)"/>
     <circle cx="36" cy="20" r="1.6" fill="#aab4bd"/><circle cx="204" cy="20" r="1.6" fill="#aab4bd"/>
-    <path d="M52 40c14-3 34-3 52 0" stroke="#14293a" stroke-width="4" fill="none" stroke-linecap="round"/>
+    <path d="M52 40c14-3 34-3 52 0" stroke="#18213f" stroke-width="4" fill="none" stroke-linecap="round"/>
     <path d="M52 56h70M52 68h86M52 80h58" stroke="#8b97a1" stroke-width="2.6" stroke-linecap="round"/>
-    <circle cx="46" cy="56" r="2" fill="#e64626"/><circle cx="46" cy="68" r="2" fill="#e64626"/><circle cx="46" cy="80" r="2" fill="#e64626"/>
+    <circle cx="46" cy="56" r="2" fill="#d6283c"/><circle cx="46" cy="68" r="2" fill="#d6283c"/><circle cx="46" cy="80" r="2" fill="#d6283c"/>
     <path d="m154 80 7 7 15-17" stroke="#2b776e" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
     <g transform="rotate(6 172 40)"><rect x="158" y="28" width="30" height="28" rx="2" fill="#fff1a6"/><path d="M162 37h20M162 44h14" stroke="#c9a93d" stroke-width="1.8" stroke-linecap="round"/></g>
     <rect x="40" y="116" width="160" height="7" rx="3.5" fill="#c3ccd4"/>
-    <g transform="rotate(-8 92 113)"><rect x="70" y="109" width="40" height="7" rx="3.5" fill="#e64626"/><rect x="104" y="109" width="9" height="7" rx="2" fill="#14293a"/></g>
+    <g transform="rotate(-8 92 113)"><rect x="70" y="109" width="40" height="7" rx="3.5" fill="#d6283c"/><rect x="104" y="109" width="9" height="7" rx="2" fill="#18213f"/></g>
     <rect x="132" y="110" width="22" height="8" rx="2" fill="#3a58a0"/><rect x="132" y="114" width="22" height="4" rx="1" fill="#e9edf2"/></svg>`;
 
   /* small line icons for the board's own buttons, and the board badge in the header */
@@ -91,7 +91,7 @@ window.DEC15Board = (() => {
     trash: '<path d="M4 7h16M10 11v6M14 11v6M6 7l.9 11.2A2 2 0 0 0 8.9 20h6.2a2 2 0 0 0 2-1.8L18 7M9 7V4.5h6V7"/>',
     cast: '<path d="M3 15.5a5.5 5.5 0 0 1 5.5 5.5M3 11.5a9.5 9.5 0 0 1 9.5 9.5"/><path d="M3 8V6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-4"/><circle cx="3.6" cy="20.4" r=".9" fill="currentColor"/>' };
   const bi = n => `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${BI[n]}</svg>`;
-  const BOARD_GLYPH = '<svg viewBox="0 0 32 32" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="26" height="18" rx="3" fill="#fff" stroke="currentColor" stroke-width="1.8"/><path d="M8 10.5h9M8 14.5h13" stroke="currentColor" stroke-width="1.8"/><path d="M11 22l-3 6M21 22l3 6M16 22v5" stroke="currentColor" stroke-width="1.8"/><circle cx="23.5" cy="10" r="2" fill="var(--bd-accent, #e64626)"/></svg>';
+  const BOARD_GLYPH = '<svg viewBox="0 0 32 32" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="26" height="18" rx="3" fill="#fff" stroke="currentColor" stroke-width="1.8"/><path d="M8 10.5h9M8 14.5h13" stroke="currentColor" stroke-width="1.8"/><path d="M11 22l-3 6M21 22l3 6M16 22v5" stroke="currentColor" stroke-width="1.8"/><circle cx="23.5" cy="10" r="2" fill="var(--bd-accent, #d6283c)"/></svg>';
 
   /* ───────── whiteboard (js/whiteboard.js, Excalidraw) ───────── */
   /* sticky-note settings on this device: the next colour, and (off by default) the writer's name on new notes */
@@ -274,7 +274,7 @@ window.DEC15Board = (() => {
     if (d.bdShow !== undefined) { save(); showLive(cur).then(paint); return; }
     if (d.bdMode) { save(); mode = d.bdMode; paint(); return; }
     if (d.bdPen) { pen.c = d.bdPen; root.querySelectorAll('[data-bd-pen],[data-bd-eraser]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.bdPen === pen.c))); return; }
-    if (d.bdW) { pen.w = +d.bdW; if (pen.c === 'erase') pen.c = '#14293a'; root.querySelectorAll('[data-bd-w]').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.bdW === pen.w))); return; }
+    if (d.bdW) { pen.w = +d.bdW; if (pen.c === 'erase') pen.c = '#18213f'; root.querySelectorAll('[data-bd-w]').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.bdW === pen.w))); return; }
     if (d.bdEraser !== undefined) { pen.c = 'erase'; root.querySelectorAll('[data-bd-pen]').forEach(b => b.setAttribute('aria-pressed', 'false')); t.setAttribute('aria-pressed', 'true'); return; }
     if (d.bdUndo !== undefined) { strokes.pop(); drawInk(strokes); queueSave(); return; }
     if (d.bdClear !== undefined) { if (!confirm('Clear the whole drawing on this board?')) return; strokes = []; drawInk(strokes); queueSave(); return; }

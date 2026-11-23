@@ -144,14 +144,14 @@ window.createDEC15Notebook = function ({ lesson, getState, planParts, tableRows,
       if (it.t === 'check') return `<p style="margin:10pt 0 2pt;font-family:${F};font-size:9pt;font-weight:bold;color:#5d6b75;text-transform:uppercase">${esc(it.title)}</p>${it.items.map(([c, ok]) => `<p style="margin:0 0 2pt;font-family:${F};font-size:10.5pt">${ok ? '☑' : '☐'} ${esc(c)}</p>`).join('')}`;
       return '';
     };
-    const body = `<h1 style="font-family:${S};font-size:26pt;margin:0 0 4pt;color:#14293a">My notebook</h1>
+    const body = `<h1 style="font-family:${S};font-size:26pt;margin:0 0 4pt;color:#18213f">My notebook</h1>
       <p style="font-family:${F};font-size:10pt;color:#5d6b75;margin:0 0 2pt">${esc(m.lesson)}</p>
       <p style="font-family:${F};font-size:10pt;color:#5d6b75;margin:0 0 12pt">${m.student ? esc(m.student) + ' · ' : ''}${esc(m.date)} · ${m.stats.finished}/${m.stats.total} activities finished</p>
       <table style="border-collapse:collapse;width:100%;margin:0 0 16pt"><tr><td style="border:1px solid #e6d7b6;background:#fffaf0;padding:10pt 12pt;font-family:${S};font-size:13pt"><span style="font-family:${F};font-size:8.5pt;font-weight:bold;color:#93600f;text-transform:uppercase;letter-spacing:1pt">${esc(m.qLabel)}${m.wordTarget ? ' · ' + esc(m.wordTarget) : ''}</span><br>${esc(m.question)}</td></tr></table>
-      ${m.sections.map(s => `<h2 style="font-family:${S};font-size:18pt;color:${s.color};margin:22pt 0 6pt;padding-bottom:4pt;border-bottom:2px solid ${s.color}">${stagePrefix(s)}${esc(s.title)}</h2>${s.activities.map(a => `<h3 style="font-family:${F};font-size:12.5pt;color:#14293a;margin:14pt 0 2pt">${esc(a.title)}${a.done ? ' <span style="color:#2f7a52;font-size:9pt">✓ Finished</span>' : ''}</h3>${a.items.map(item).join('')}`).join('')}`).join('')}
+      ${m.sections.map(s => `<h2 style="font-family:${S};font-size:18pt;color:${s.color};margin:22pt 0 6pt;padding-bottom:4pt;border-bottom:2px solid ${s.color}">${stagePrefix(s)}${esc(s.title)}</h2>${s.activities.map(a => `<h3 style="font-family:${F};font-size:12.5pt;color:#18213f;margin:14pt 0 2pt">${esc(a.title)}${a.done ? ' <span style="color:#2f7a52;font-size:9pt">✓ Finished</span>' : ''}</h3>${a.items.map(item).join('')}`).join('')}`).join('')}
       ${m.marks.length ? `<h2 style="font-family:${S};font-size:18pt;color:#8a6a1f;margin:22pt 0 6pt;padding-bottom:4pt;border-bottom:2px solid #8a6a1f">My highlights</h2>${m.marks.map(r => `<p style="margin:10pt 0 2pt;font-family:${F};font-size:9pt;font-weight:bold;color:#5d6b75">${esc(r.title)}</p><p style="margin:0 0 6pt;font-family:${S};font-size:11pt;line-height:1.6">${r.html.replace(/class="annotation mark-yellow( mark-underline)?"/g, (x, u) => `style="background:#ffe08a${u ? ';text-decoration:underline' : ''}"`).replace(/class="annotation mark-blue( mark-underline)?"/g, (x, u) => `style="background:#c7e6f8${u ? ';text-decoration:underline' : ''}"`).replace(/class="annotation  ?mark-underline"/g, 'style="text-decoration:underline"')}</p>`).join('')}` : ''}`;
     if (!forPrint) return `<meta charset="utf-8"><div>${body}</div>`;
-    return `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>My notebook — ${CODE}</title><link rel="stylesheet" href="${new URL('css/fonts.css', location.href)}"><style>@page{size:A4;margin:16mm 16mm 18mm}body{margin:0;color:#14293a;-webkit-print-color-adjust:exact;print-color-adjust:exact}table{page-break-inside:auto}tr,h3{page-break-inside:avoid}h2,h3{page-break-after:avoid}</style></head><body>${body}</body></html>`;
+    return `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>My notebook — ${CODE}</title><link rel="stylesheet" href="${new URL('css/fonts.css', location.href)}"><style>@page{size:A4;margin:16mm 16mm 18mm}body{margin:0;color:#18213f;-webkit-print-color-adjust:exact;print-color-adjust:exact}table{page-break-inside:auto}tr,h3{page-break-inside:avoid}h2,h3{page-break-after:avoid}</style></head><body>${body}</body></html>`;
   }
 
   /* ───────── PDF ───────── */
@@ -169,7 +169,7 @@ window.createDEC15Notebook = function ({ lesson, getState, planParts, tableRows,
     const doc = new jsPDF({ unit: 'mm', format: 'a4' });
     const fonts = [['manrope-normal-400', 'Manrope', 'normal'], ['manrope-normal-700', 'Manrope', 'bold'], ['fraunces-normal-600', 'Fraunces', 'normal']];
     for (const [file, name, style] of fonts) { doc.addFileToVFS(file + '.ttf', await b64('assets/fonts/' + file + '.ttf')); doc.addFont(file + '.ttf', name, style); }
-    const W = 210, M = 18, CW = W - 2 * M, ink = [20, 41, 58], muted = [93, 107, 117];
+    const W = 210, M = 18, CW = W - 2 * M, ink = [24, 33, 63], muted = [93, 107, 117];
     let y = M;
     const need = h => { if (y + h > 297 - 20) { doc.addPage(); y = M; } };
     const text = (s, { size = 10.5, font = 'Manrope', style = 'normal', color = ink, gap = 1.45, width = CW, x = M } = {}) => {

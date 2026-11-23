@@ -18,14 +18,22 @@ The course has seven parts: the four skills, with Writing split into Task 1 (Aca
 
 The lessons are still to be planned: each skill is empty in `lessons/course.js` and shows "To plan" on the course map. Add each lesson to its skill's `days`, in the order students study it.
 
-- **Side panel.** Under **Course map**, a **Skills** list links to each part's page (`#/skill/<n>`), in the order of course.js: Listening, Reading, Writing Task 1 (Academic), Writing Task 2, Speaking, Vocabulary, Grammar. Readings and Copy Detector are removed.
-- **Hide or show menus for students.** Sign in as a teacher, open the side panel's **Settings** (gear), then use **Side panel for students** to switch Course calendar, Assessments, Class board, Chats, Shared with me and Name wheel on or off. This applies to every student at once. It is saved in the class settings, so students who aren't signed in follow it too. Students can't open a hidden page. You still see hidden menus, dimmed and marked "hidden". `menusHidden` in course.js sets which menus start hidden before you choose.
+- **Skills and Language.** Listening, Reading, Writing Task 1 (Academic), Writing Task 2 and Speaking are the **Skills**. Vocabulary and Grammar are **Language**: they are language systems, not skills. Each part's `group` in course.js decides which heading it sits under, in the side panel and on the home page. Each part also has its own `color` and icon.
+- **Side panel.** Under **Course map** come the **Skills**, then **Language**, then **Course** (calendar, assessments, Band calculator, My workspace), then **Class & tools**. Click a group's heading to fold it shut or open it again. This is remembered on each device, and a folded group still shows the page you are on. Readings and Copy Detector are removed.
+- **Hide or show menus for students.** Sign in as a teacher, open the side panel's **Settings** (gear), then use **Side panel for students** to switch Course calendar, Assessments, Band calculator, Class board, Chats, Shared with me and Name wheel on or off. This applies to every student at once. It is saved in the class settings, so students who aren't signed in follow it too. Students can't open a hidden page. You still see hidden menus, dimmed and marked "hidden". `menusHidden` in course.js sets which menus start hidden before you choose.
 - **No order between the parts.** Students can start with any part. The home page shows the seven parts as cards side by side. Choosing one shows that part's own road map, with its lessons as the stops in order (done lessons are ticked, and the first unfinished one is "Up next"), then its lesson cards.
 - **How the data is stored.** The app keeps its original weeks/days structure: each entry in `weeks` is a **skill** and each of its `days` is a **lesson**. The setting `units: { unit: 'Skill', lesson: 'Lesson' }` makes the app say "Reading · Lesson 3" instead of "Week 2, Day 3".
 - **Lesson ids carry the level:** `ieb2w<skill>d<lesson>`. For example, `ieb2w2d3` is B2 · Reading · Lesson 3. A future level gets its own prefix, such as `ieb1` or `iec1`, so ids never clash.
 - **Lesson files go in the skill's folder:** `lessons/b2/<skill>/<id>.js`, as set by `folder` in course.js.
 
 Site (after GitHub Pages is switched on): `https://ma-jalali.github.io/ielts-prep/`
+
+## Look and tools
+
+- **Theme:** `css/theme.css` holds the colours and type: IELTS-style red, a deep indigo-navy, cool paper, and Outfit for headings. Change the look there.
+- **Side panel colour:** Settings (gear) → Side panel colour offers 13 colours, chosen on each device.
+- **Top bar:** "Word game" is removed. "Word meanings" (the lesson's own glossary) appears only on lessons that have one. The dictionary is the book button at the bottom right.
+- **Band score calculator** (`#/band`, `js/band.js`): students enter Listening and Reading correct answers and Writing and Speaking bands. It shows each band and the overall band with the official rounding, compared with the course target of 6.5–7. Results are saved on the device only.
 
 ## Adding a lower or higher level later
 

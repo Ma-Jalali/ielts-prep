@@ -20,7 +20,7 @@
   background: radial-gradient(circle at 1px 1px, color-mix(in srgb, var(--accent, #2b776e) 18%, transparent) 1px, transparent 1.4px) 0 0 / 10px 10px, linear-gradient(180deg, color-mix(in srgb, var(--accent, #2b776e) 7%, #fff), transparent);
   -webkit-mask: linear-gradient(180deg, #000, transparent); mask: linear-gradient(180deg, #000, transparent); }
 [data-course="ielts"] .cards-block .card::after { content: ""; position: absolute; right: 0; bottom: 0; width: 18px; height: 18px; pointer-events: none;
-  background: linear-gradient(135deg, color-mix(in srgb, var(--accent, #2b776e) 14%, #f3efe6) 50%, transparent 50%); border-top-left-radius: 5px; box-shadow: -1px -1px 2px rgba(20, 41, 58, .06); transform: rotate(180deg); }
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent, #2b776e) 14%, #f3efe6) 50%, transparent 50%); border-top-left-radius: 5px; box-shadow: -1px -1px 2px rgba(24, 33, 63, .06); transform: rotate(180deg); }
 [data-course="ielts"] .cards-block .card-label { letter-spacing: .12em; }
 [data-course="ielts"] .cards-block .card-label::before { content: ""; display: inline-block; width: 7px; height: 7px; margin-right: 7px; border-radius: 50%; vertical-align: 1px; background: currentColor; box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 16%, transparent); }
 
@@ -33,7 +33,7 @@
 /* ── sorting: grip dots on each card; empty boxes show where to drop ── */
 [data-course="ielts"] .sort-card { padding-left: 24px; }
 [data-course="ielts"] .sort-card::before { content: ""; position: absolute; left: 9px; top: 50%; width: 6px; height: 12px; transform: translateY(-50%); opacity: .35;
-  background: radial-gradient(circle, #14293a 1.1px, transparent 1.4px) 0 0 / 3px 4px; }
+  background: radial-gradient(circle, #18213f 1.1px, transparent 1.4px) 0 0 / 3px 4px; }
 [data-course="ielts"] .sort-empty { display: inline-flex; align-items: center; gap: 7px; padding: 7px 12px; border-radius: 10px; border: 1.5px dashed color-mix(in srgb, var(--c, #13887a) 35%, transparent); color: color-mix(in srgb, var(--c, #13887a) 70%, #5d6a74); background: rgba(255, 255, 255, .55); }
 [data-course="ielts"] .sort-empty::before { content: ""; width: 12px; height: 12px; background: currentColor; opacity: .8;
   -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 4v12M6.5 10.5 12 16l5.5-5.5M5 20h14'/%3E%3C/svg%3E") center / contain no-repeat;
@@ -41,26 +41,26 @@
 [data-course="ielts"] .sort-bucket header .sort-letter { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35), 0 3px 6px -3px var(--c, #13887a); }
 
 /* ── flip cards: a stack of paper behind each card, a soft dotted band and a folded corner ── */
-[data-course="ielts"] .flip:not(.is-flipped) .flip-front { box-shadow: inset 0 1px 0 #fff, 0 0 0 .5px rgba(20, 41, 58, .08), 4px 5px 0 -1px #f6f1e7, 4px 5px 0 0 rgba(20, 41, 58, .07), 8px 10px 0 -2px #efe9dd, 8px 10px 0 -1px rgba(20, 41, 58, .05), 0 14px 26px -18px rgba(20, 41, 58, .45) !important; }
+[data-course="ielts"] .flip:not(.is-flipped) .flip-front { box-shadow: inset 0 1px 0 #fff, 0 0 0 .5px rgba(24, 33, 63, .08), 4px 5px 0 -1px #f6f1e7, 4px 5px 0 0 rgba(24, 33, 63, .07), 8px 10px 0 -2px #e9edf5, 8px 10px 0 -1px rgba(24, 33, 63, .05), 0 14px 26px -18px rgba(24, 33, 63, .45) !important; }
 [data-course="ielts"] .flip-grid { padding: 0 10px 12px 0; }
 [data-course="ielts"] .flip.is-text .flip-front { background: radial-gradient(circle at 1px 1px, color-mix(in srgb, var(--accent, #2b776e) 12%, transparent) 1px, transparent 1.5px) 0 6px / 12px 12px no-repeat, #fff !important; background-size: 12px 12px, auto !important; background-repeat: repeat-x, no-repeat !important; }
 [data-course="ielts"] .flip-front::after { content: ""; position: absolute; right: 0; bottom: 0; width: 22px; height: 22px; border-top-left-radius: 6px;
-  background: linear-gradient(315deg, transparent 50%, color-mix(in srgb, var(--accent, #2b776e) 16%, #f1ece2) 50%); box-shadow: -2px -2px 4px rgba(20, 41, 58, .07); }
+  background: linear-gradient(315deg, transparent 50%, color-mix(in srgb, var(--accent, #2b776e) 16%, #f1ece2) 50%); box-shadow: -2px -2px 4px rgba(24, 33, 63, .07); }
 
 /* ── grids and work tables: a calm header, quiet zebra rows, the row you work in lights up ── */
 [data-course="ielts"] .grid-block .work-table thead th { background: linear-gradient(180deg, #f3f6f8, #eaeff3); letter-spacing: .06em; }
-[data-course="ielts"] .grid-block .work-table tbody tr:nth-child(even) > * { background-color: rgba(20, 41, 58, .018); }
+[data-course="ielts"] .grid-block .work-table tbody tr:nth-child(even) > * { background-color: rgba(24, 33, 63, .018); }
 [data-course="ielts"] .grid-block .work-table tbody tr:focus-within > * { background-color: color-mix(in srgb, var(--accent, #2b776e) 6%, #fff); }
 [data-course="ielts"] .grid-block .work-table tbody tr:focus-within > :first-child { box-shadow: inset 3px 0 0 var(--accent, #2b776e); }
 
 /* ── order lists: the position badge shades from light (first) to deep (last) ── */
 [data-course="ielts"] .order-list { counter-reset: none; }
-[data-course="ielts"] .order-item .order-pos { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .5), 0 2px 5px -2px rgba(20, 41, 58, .35); }
+[data-course="ielts"] .order-item .order-pos { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .5), 0 2px 5px -2px rgba(24, 33, 63, .35); }
 [data-course="ielts"] .order-end { gap: 6px; }
 
 /* ── the speaking spinner: a slot-machine window with glass, tick marks and a centre line ── */
 [data-course="ielts"] .reel-window { position: relative; background: linear-gradient(180deg, #f3f0e9, #fff 26%, #fff 74%, #f3f0e9) !important;
-  box-shadow: inset 0 12px 14px -12px rgba(20, 41, 58, .35), inset 0 -12px 14px -12px rgba(20, 41, 58, .35), 0 6px 14px -10px rgba(20, 41, 58, .4) !important; }
+  box-shadow: inset 0 12px 14px -12px rgba(24, 33, 63, .35), inset 0 -12px 14px -12px rgba(24, 33, 63, .35), 0 6px 14px -10px rgba(24, 33, 63, .4) !important; }
 [data-course="ielts"] .reel-window::before { content: ""; position: absolute; z-index: 1; inset: 0; pointer-events: none; border-radius: inherit;
   background: linear-gradient(180deg, rgba(255, 255, 255, .55), transparent 30%),
     linear-gradient(90deg, color-mix(in srgb, var(--c) 45%, transparent) 0 8px, transparent 8px calc(100% - 8px), color-mix(in srgb, var(--c) 45%, transparent) calc(100% - 8px)) center / 100% 2px no-repeat; }

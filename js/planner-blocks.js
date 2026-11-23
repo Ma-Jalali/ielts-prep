@@ -239,10 +239,10 @@ window.DEC15Blocks = (() => {
 
   /* ── the formatting toolbar (Word "Home" tab), used by My planner and the class board ── */
   const SIZES = [['.85em', 'Small'], ['', 'Normal'], ['1.25em', 'Large'], ['1.6em', 'Extra large'], ['2.2em', 'Huge']];
-  const FONT_COLORS = ['#14293a', '#3d505e', '#7a868e', '#b0512a', '#c0392b', '#985c0e', '#3f7a3a', '#2b776e', '#3a58a0', '#7a4a8c'];
+  const FONT_COLORS = ['#18213f', '#3d505e', '#7a868e', '#b0512a', '#c0392b', '#985c0e', '#3f7a3a', '#2b776e', '#3a58a0', '#7a4a8c'];
   const HIGHLIGHTS = [['#fff59d', 'Yellow'], ['#c8f0c0', 'Green'], ['#b9f3f0', 'Turquoise'], ['#ffd0e6', 'Pink'], ['#cfe6ff', 'Blue'], ['#ffd9b0', 'Orange'], ['#e4d4f4', 'Violet'], ['#e3e3e3', 'Grey']];
-  const CELL_FILLS = [['#fdf1c7', 'Butter'], ['#fde2d0', 'Peach'], ['#fbd5dc', 'Rose'], ['#e6dcf5', 'Lilac'], ['#d8e6fb', 'Sky'], ['#d2efe9', 'Mint'], ['#dcefd2', 'Sage'], ['#eceae4', 'Stone'], ['#14293a', 'Ink'], ['#2b776e', 'Teal']];
-  const BORDER_COLORS = [['#14293a', 'Ink'], ['#3d505e', 'Slate'], ['#9aa5ad', 'Grey'], ['#b0512a', 'Rust'], ['#c0392b', 'Red'], ['#c98a12', 'Gold'], ['#3f7a3a', 'Green'], ['#2b776e', 'Teal'], ['#3a58a0', 'Blue'], ['#7a4a8c', 'Plum']];
+  const CELL_FILLS = [['#fdf1c7', 'Butter'], ['#fde2d0', 'Peach'], ['#fbd5dc', 'Rose'], ['#e6dcf5', 'Lilac'], ['#d8e6fb', 'Sky'], ['#d2efe9', 'Mint'], ['#dcefd2', 'Sage'], ['#eceae4', 'Stone'], ['#18213f', 'Ink'], ['#2b776e', 'Teal']];
+  const BORDER_COLORS = [['#18213f', 'Ink'], ['#3d505e', 'Slate'], ['#9aa5ad', 'Grey'], ['#b0512a', 'Rust'], ['#c0392b', 'Red'], ['#c98a12', 'Gold'], ['#3f7a3a', 'Green'], ['#2b776e', 'Teal'], ['#3a58a0', 'Blue'], ['#7a4a8c', 'Plum']];
   const BORDER_STYLES = [['none', 'None'], ['light', 'Light'], ['thin', 'All lines'], ['thick', 'Bold'], ['outer', 'Outside only'], ['rows', 'Rows only']];
   const tableAttrs = e => { if (!e) return null; const $f = e.state.selection.$from; for (let d = $f.depth; d > 0; d--) if ($f.node(d).type.name === 'table') return $f.node(d).attrs; return null; };
   const cellAttr = (e, k) => { const $f = e.state.selection.$anchorCell || e.state.selection.$from; const n = $f.nodeAfter && /^table(Cell|Header)$/.test($f.nodeAfter.type.name) ? $f.nodeAfter : null;
