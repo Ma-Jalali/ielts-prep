@@ -917,11 +917,11 @@ function weekTabs() {
   if (!ws.some(w => w.n === homeWeek)) homeWeek = (ws.find(w => w.n === lesson.week) || ws[ws.length - 1]).n;
   const w = ws.find(x => x.n === homeWeek);
   const tabs = ws.length > 1 ? `<div class="week-tabs" role="tablist" aria-label="${UNITS ? UW + 's' : 'Weeks'}">${ws.map(x => { const st = x.days.filter(d => d.status === 'ready').length, done = x.days.filter(d => { const [a, b] = dayProgress(d); return b && a === b; }).length;
-    return `<button type="button" role="tab" id="tab-week-${x.n}" aria-controls="panel-week" aria-selected="${x.n === homeWeek}" tabindex="${x.n === homeWeek ? 0 : -1}" class="week-tab${classToday?.week === x.n ? ' has-today' : ''}" data-week-tab="${x.n}" style="--p:${st ? Math.round(100 * done / st) : 0}%"><span class="week-tab-num">${x.n}</span><span class="week-tab-text"><b>${esc(unitName(x.n))}</b><small>${esc(UNITS ? x.tag || '' : x.theme)}</small></span><span class="week-tab-meta">${done ? `${done}/${st} done` : st || !UNITS ? `${st} lesson${st === 1 ? '' : 's'}` : `${x.days.length} planned`}</span></button>`; }).join('')}</div>` : '';
+    return `<button type="button" role="tab" id="tab-week-${x.n}" aria-controls="panel-week" aria-selected="${x.n === homeWeek}" tabindex="${x.n === homeWeek ? 0 : -1}" class="week-tab${classToday?.week === x.n ? ' has-today' : ''}" data-week-tab="${x.n}" style="--p:${st ? Math.round(100 * done / st) : 0}%"><span class="week-tab-num">${x.n}</span><span class="week-tab-text"><b>${esc(unitName(x.n))}</b><small>${esc(UNITS ? x.tag || '' : x.theme)}</small></span><span class="week-tab-meta">${done ? `${done}/${st} done` : st || !UNITS ? `${st} lesson${st === 1 ? '' : 's'}` : x.days.length ? `${x.days.length} planned` : 'To plan'}</span></button>`; }).join('')}</div>` : '';
   return `<section class="week" aria-label="Lessons by ${UNITS ? UW.toLowerCase() : 'week'}">${tabs}
     <div class="week-panel" id="panel-week" role="tabpanel" aria-labelledby="tab-week-${w.n}">
       <header class="week-head"><span class="week-num"><small>${UW}</small>${w.n}</span><div><h2>${esc(w.theme)}</h2><p>${esc(w.summary || '')}</p></div></header>
-      <ol class="day-grid${w.days.length > 3 ? ' many' : ''}">${w.days.map(dayCard).join('')}</ol>
+      ${w.days.length ? `<ol class="day-grid${w.days.length > 3 ? ' many' : ''}">${w.days.map(dayCard).join('')}</ol>` : `<p class="week-empty" style="margin:0 0 2rem;color:#5b6b78">The lessons for ${esc(unitName(w.n))} are on the way.</p>`}
     </div></section>`;
 }
 function courseHome() {

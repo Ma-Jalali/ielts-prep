@@ -1,25 +1,25 @@
 # IELTS Prep — course app
 
-The DEC10 design (layout, colours, illustrations, every interactive block, the class tools) with **none of its course content**, set up as one course: **IELTS Preparation** (Academic, B2 → Band 6.5–7).
+The DEC10 design (layout, colours, illustrations, every interactive block, the class tools) with **none of its course content**, set up as one course: **IELTS Preparation** (Academic, B2 → Band 6.5–7). It adds **Studio**, an editor that lets you change any page in place and build new pages from the blocks.
 
 ## The course outline: by skill, not by week
 
 The course is six skills, and each skill has its own ordered list of lessons. Students work through each skill's lessons in order. There are no weeks or days.
 
-| # | Skill | Lessons |
+| # | Skill | Lesson folder |
 |---|---|---|
-| 1 | Listening | 10 |
-| 2 | Reading | 10 |
-| 3 | Writing | 12 (5 for Task 1, 7 for Task 2) |
-| 4 | Speaking | 8 |
-| 5 | Grammar | 10 |
-| 6 | Vocabulary | 10 |
+| 1 | Listening | `lessons/b2/listening/` |
+| 2 | Reading | `lessons/b2/reading/` |
+| 3 | Writing | `lessons/b2/writing/` |
+| 4 | Speaking | `lessons/b2/speaking/` |
+| 5 | Grammar | `lessons/b2/grammar/` |
+| 6 | Vocabulary | `lessons/b2/vocabulary/` |
 
-The full list of lessons is in `lessons/course.js`. Every lesson starts as `status: 'soon'` (planned). When a lesson is written, set its status to `'ready'` and add its file.
+The lessons are still to be planned: each skill is empty in `lessons/course.js` and shows "To plan" on the course map. Add each lesson to its skill's `days`, in the order students study it.
 
 - **How the data is stored.** The app keeps its original weeks/days structure: each entry in `weeks` is a **skill** and each of its `days` is a **lesson**. The setting `units: { unit: 'Skill', lesson: 'Lesson' }` makes the app say "Reading · Lesson 3" instead of "Week 2, Day 3".
 - **Lesson ids carry the level:** `ieb2w<skill>d<lesson>`. For example, `ieb2w2d3` is B2 · Reading · Lesson 3. A future level gets its own prefix, such as `ieb1` or `iec1`, so ids never clash.
-- **Lesson files go in the skill's folder:** `lessons/b2/<skill>/<id>.js`, as set by `folder` in course.js. It adds **Studio**, an editor that lets you change any page in place and build new pages from the blocks.
+- **Lesson files go in the skill's folder:** `lessons/b2/<skill>/<id>.js`, as set by `folder` in course.js.
 
 Site (after GitHub Pages is switched on): `https://ma-jalali.github.io/ielts-prep/`
 
@@ -38,7 +38,7 @@ Site (after GitHub Pages is switched on): `https://ma-jalali.github.io/ielts-pre
 
 ### Publishing a draft
 
-- **Option A:** In Studio → Drafts, press **Lesson file**. Put the file in the skill's folder (`lessons/b2/<skill>/`). In `lessons/course.js`, set that lesson's status to `'ready'` and add its `scripts`. For a lesson that is not in the outline, press **course.js entry** and paste it into that skill.
+- **Option A:** In Studio → Drafts, press **Lesson file**. Put the file in the skill's folder (`lessons/b2/<skill>/`). Then press **course.js entry** and paste it into that skill's `days` in `lessons/course.js`.
 - **Option B:** Press **Download all drafts** and give the `.json` file to Claude. Claude runs `node tools/import-drafts.js <file>`, adds the course.js entries and publishes.
 - Then raise the version (see below) and discard the drafts in Studio.
 
@@ -48,9 +48,9 @@ Site (after GitHub Pages is switched on): `https://ma-jalali.github.io/ielts-pre
 |---|---|
 | `index.html` | the single page |
 | `js/config.js` | settings: Supabase keys, version |
-| `lessons/course.js` | **the course outline**: the six skills, their ordered lessons, downloads |
+| `lessons/course.js` | **the course outline**: the six skills and their lessons (to plan), downloads |
 | `lessons/guide.js` | Course calendar + Assessments pages (dates, mock tests, the four skills) |
-| `lessons/b2/<skill>/` | the lesson files of each skill (empty until the first lessons are written) |
+| `lessons/b2/<skill>/` | the lesson files of each skill (empty for now) |
 | `lessons/studio/ieblocks.js` | **Block gallery**: every block, working (built from `js/studio-blocks.js`). Not on the course map; Studio links to it |
 | `lessons/_template.js` | every block type documented, for writing lessons by hand |
 | `lessons/lab/_template.js` | a Skills Lab lesson (Warm-up · Learn · Practise · Use it) |

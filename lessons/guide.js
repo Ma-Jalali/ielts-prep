@@ -22,8 +22,8 @@ window.DEC15_GUIDE = {
   },
   weeks: [
     { n: 1, theme: 'Getting started', sub: '', start: '2027-01-04', dates: '4–8 Jan', days: [
-      { class: [['W1 D1', 'The Listening test']], events: [{ type: 'info', title: 'Welcome and course overview' }] },
-      { class: [['W2 D1', 'The Academic Reading test']] }, {}, {},
+      { events: [{ type: 'info', title: 'Welcome and course overview' }] },
+      {}, {}, {},
       { events: [{ type: 'assess', title: 'Diagnostic mock test', note: 'Shows your starting band' }] }
     ] },
     { n: 2, theme: 'Week 2', start: '2027-01-11', dates: '11–15 Jan', days: [{}, {}, {}, {}, {}] },
