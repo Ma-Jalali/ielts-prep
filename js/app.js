@@ -158,7 +158,9 @@ function whoBadge(w) {
   return `<span class="who who-${w}"><svg viewBox="0 0 ${Math.min(d.dots, 3) * 6 + 6} 19" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6">${people}</svg>${d.label}</span>`;
 }
 
-const findBlock = id => allActivities.flatMap(a => a.blocks).find(x => x.id === id);
+/* every block of an activity, including blocks inside layouts (tabs, slides, folds, the IELTS test screen) */
+const deepBlocks = blocks => (blocks || []).flatMap(b => [b, ...deepBlocks(b.blocks), ...(b.tabs || []).flatMap(t => deepBlocks(t.blocks)), ...(b.slides || []).flatMap(t => deepBlocks(t.blocks))]);
+const findBlock = id => allActivities.flatMap(a => deepBlocks(a.blocks)).find(x => x.id === id);
 const play = window.createDEC15Play ? window.createDEC15Play({ getState: () => state, save, rerender: () => rerender(), esc, strip, icon, toast, findBlock }) : null;
 const bandCalc = window.createIELTSBand ? window.createIELTSBand({ esc }) : null;   // side panel → Band calculator (#/band)
 const guide = window.createDEC15Guide ? window.createDEC15Guide({ esc, icon, days, toast }) : null;   // DEC10: Course calendar + Assessments pages
@@ -167,6 +169,7 @@ if (LAB) { const el = document.getElementById('side-lab'); if (el) el.hidden = f
 if (DL) { const el = document.getElementById('side-downloads'); if (el) el.hidden = false; }
 if (PR) { const el = document.getElementById('side-print'); if (el) el.hidden = false; }   // shown by CSS only for teacher accounts (body.is-teacher)
 if (PICK) { const el = document.getElementById('side-pick'); if (el) el.hidden = false; }
+const ielts = window.createIELTSKit ? window.createIELTSKit({ getState: () => state, save, rerender: () => rerender(), esc, strip, icon, toast, findBlock, confetti: el => play?.confetti(el), inner: (bl, a) => inner(bl, a) }) : null;   // js/ielts.js: IELTS question types and test screens
 const kit = window.createDEC10Kit ? window.createDEC10Kit({ getState: () => state, save, rerender: () => rerender(), esc, strip, icon, toast, findBlock, confetti: el => play?.confetti(el) }) : null;
 /* feedback forms, stance scale, quiz board and "Share with classmates" (js/forms.js) */
 /* Chats: the WhatsApp-style page for the class (js/chats.js) */
@@ -186,7 +189,8 @@ const planParts = [
 ];
 function register(a) {
   const reg = (k, l) => { labels[k] = l; owner[k] = a.id; };
-  for (const b of a.blocks) {
+  for (const b of deepBlocks(a.blocks)) {
+    ielts?.register(b, reg);
     play?.register(b, reg);
     kit?.register(b, reg);
     forms?.register(b, reg);
@@ -273,6 +277,7 @@ B.cards = b => `<section class="block cards-block${b.pick ? ' cards-pick' : ''}"
 /* games and interactive blocks (js/play.js): flash, sort, flip, spinner, chat, promptbuilder, contract */
 if (play) Object.assign(B, play.B);
 if (kit) Object.assign(B, kit.B);
+if (ielts) Object.assign(B, ielts.B);
 B.tip = b => `<p class="block tip" data-help>${icon('bulb')}<span>${b.text}</span></p>`;
 /* rule: one grammar or referencing rule, explained the way a teacher presents it (Language Lab "Learn" tab)
    { type: 'rule', n, title, explain, form?: 'pattern (HTML)', examples?: [['ok' | 'no', 'sentence (HTML)', 'why / fix (HTML)?']], note?, check?: { q, a } }
@@ -914,7 +919,8 @@ function dayCard(d) {
    The open week is remembered for this visit; the "You are here" week opens first. */
 let homeWeek = null, skillRoute = null;
 /* The skills in the side panel (course.units), under the course map: one link each, in course.js order. */
-const partIcon = (w, cls = '') => `<img class="part-ic ${cls}" src="assets/ui/parts/${esc(w.art || 'reading')}.svg" alt="" width="64" height="64" decoding="async">`;   // assets/ui/parts/*.svg: one detailed icon per part
+const partSvg = w => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${(window.IELTS_PART_ICONS || {})[w.art] || ''}</svg>`;   // js/part-icons.js
+const partIcon = (w, cls = '') => `<span class="pi-tile ${cls}" style="--tc:${partColor(w)}">${partSvg(w)}</span>`;   // the side panel's icon style, larger
 const partColor = w => w.color || (TONES[w.tone] || TONES.blue)[0];
 const partStyle = w => `--accent:${partColor(w)};--accent-bg:color-mix(in srgb, ${partColor(w)} 9%, #fff)`;
 /* Menus the teacher can hide from students (side panel → Settings → "Side panel for students").
@@ -959,7 +965,7 @@ function paintSkillNav(route) {
   if (!box) return;
   const cur = route === 'skill' ? skillRoute : route !== 'home' && !labHere && lesson.week ? lesson.week : null;
   const link = w => { const on = cur === w.n;
-    return `<a class="side-link side-skill${on ? ' active' : ''}" id="side-skill-${w.n}" href="#/skill/${w.n}" style="--tc:${partColor(w)}" title="${esc(w.theme)}"${on ? ' aria-current="page"' : ''}><span class="side-ic">${partIcon(w)}</span><span class="side-tx">${esc(w.theme)}</span></a>`; };
+    return `<a class="side-link side-skill${on ? ' active' : ''}" id="side-skill-${w.n}" href="#/skill/${w.n}" style="--tc:${partColor(w)}" title="${esc(w.theme)}"${on ? ' aria-current="page"' : ''}><span class="side-ic">${partSvg(w)}</span><span class="side-tx">${esc(w.theme)}</span></a>`; };
   box.innerHTML = partGroups().map(g => `<p class="nav-label side-group" data-fold="${esc(g.id)}">${esc(g.title)}</p>${g.parts.map(link).join('')}`).join('');
 }
 const pickHomeWeek = () => { const ws = course.weeks; if (!ws.some(w => w.n === homeWeek)) homeWeek = (ws.find(w => w.n === lesson.week) || ws[0]).n; };
@@ -998,7 +1004,7 @@ function weekTabs() {
     return `<button type="button" role="tab" id="tab-week-${x.n}" aria-controls="panel-week" aria-selected="${x.n === homeWeek}" tabindex="${x.n === homeWeek ? 0 : -1}" class="week-tab${classToday?.week === x.n ? ' has-today' : ''}" data-week-tab="${x.n}" style="--p:${st ? Math.round(100 * done / st) : 0}%"><span class="week-tab-num">${x.n}</span><span class="week-tab-text"><b>${esc(unitName(x.n))}</b><small>${esc(UNITS ? x.tag || '' : x.theme)}</small></span><span class="week-tab-meta">${done ? `${done}/${st} done` : st || !UNITS ? `${st} lesson${st === 1 ? '' : 's'}` : x.days.length ? `${x.days.length} planned` : 'To plan'}</span></button>`; }).join('')}</div>` : '';
   return `<section class="week" aria-label="Lessons by ${UNITS ? UW.toLowerCase() : 'week'}">${tabs}
     <div class="week-panel" id="panel-week" ${UNITS ? `role="region" aria-label="${esc(w.theme)}"` : `role="tabpanel" aria-labelledby="tab-week-${w.n}"`}>
-      <header class="week-head">${UNITS ? `<span class="week-art" style="${partStyle(w)}">${partIcon(w)}</span>` : `<span class="week-num"><small>${UW}</small>${w.n}</span>`}<div>${UNITS ? `<span class="eyebrow">${esc(course.code)} · ${esc((partGroups().find(g => g.parts.includes(w)) || {}).title || UW)}</span><h1>${esc(w.theme)}</h1>` : `<h2>${esc(w.theme)}</h2>`}<p>${esc(w.summary || '')}</p></div></header>
+      <header class="week-head">${UNITS ? partIcon(w, 'is-on week-art') : `<span class="week-num"><small>${UW}</small>${w.n}</span>`}<div>${UNITS ? `<span class="eyebrow">${esc(course.code)} · ${esc((partGroups().find(g => g.parts.includes(w)) || {}).title || UW)}</span><h1>${esc(w.theme)}</h1>` : `<h2>${esc(w.theme)}</h2>`}<p>${esc(w.summary || '')}</p></div></header>
       ${UNITS ? skillMap(w) : ''}
       ${w.days.length ? `<ol class="day-grid${w.days.length > 3 ? ' many' : ''}">${w.days.map(dayCard).join('')}</ol>` : ''}
     </div></section>`;
@@ -1985,7 +1991,7 @@ function glossary(find = '') {
 }
 
 /* ───────── notebook exports ───────── */
-const nb = window.createDEC15Notebook({ lesson, getState: () => state, planParts, tableRows, reader, esc, strip, toast, person: () => cloudInfo.profile?.full_name || '', extraItems: b => [...(play ? play.notebookItems(b) : []), ...(kit ? kit.notebookItems(b) : []), ...(forms ? forms.notebookItems(b) : [])] });
+const nb = window.createDEC15Notebook({ lesson, getState: () => state, planParts, tableRows, reader, esc, strip, toast, person: () => cloudInfo.profile?.full_name || '', extraItems: b => [...(play ? play.notebookItems(b) : []), ...(kit ? kit.notebookItems(b) : []), ...(forms ? forms.notebookItems(b) : []), ...(ielts ? deepBlocks([b]).flatMap(x => ielts.notebookItems(x)) : [])] });
 async function runExport(kind, btn) {
   if (kind === 'gdocs') {
     const copied = await nb.gdocs();
@@ -2254,6 +2260,7 @@ document.addEventListener('input', e => {
   state.values[t.dataset.save] = t.type === 'checkbox' ? t.checked : t.value; save();
   play?.onInput(t);
   kit?.onInput(t);
+  ielts?.onInput(t);
   forms?.onInput(t);
   if (t.type === 'checkbox' && t.closest('.checklist')?.querySelector('.check-meter')) rerender();
 });
@@ -2277,6 +2284,7 @@ document.addEventListener('click', e => {
   const d = t.dataset;
   if (play && play.onClick(t, d)) return;
   if (kit && kit.onClick(t, d)) return;
+  if (ielts && ielts.onClick(t, d)) return;
   if (guide && guide.onClick(t, d, () => rerender())) return;
   if (forms && forms.onClick(t, d)) return;
   if (d.langTab) { const box = t.closest('.language'); box.querySelectorAll('[role=tab]').forEach((x, i) => { const on = x === t; x.setAttribute('aria-selected', on); x.tabIndex = on ? 0 : -1; box.querySelectorAll('[role=tabpanel]')[i].hidden = !on; }); return; }

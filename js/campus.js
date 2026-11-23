@@ -42,14 +42,15 @@ window.IELTSCampus = function ({ parts, esc, meta }) {
         <path d="M-34-4-16-16 2-10 20-26 38-18" fill="none" stroke="${ink}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>${[[-34, -4], [-16, -16], [2, -10], [20, -26], [38, -18]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="2.6" fill="#fff" stroke="${ink}" stroke-width="1.6"/>`).join('')}
         <rect x="-6" y="40" width="4" height="22" fill="#2b3556"/><rect x="2" y="40" width="4" height="22" fill="#2b3556"/></g>
       <g transform="translate(52 -120)"><path d="M-16 0a16 16 0 0 1 32 0z" fill="${c}"/><rect x="-3" y="-22" width="6" height="12" rx="2" fill="#2b3556" transform="rotate(-30)"/></g>`,
-    essay: c => `${shadow(78)}
-      <rect x="-64" y="-80" width="128" height="80" rx="3" fill="#fff"/>${shade(30, -80, 34, 80)}<path d="M-72-80h144l-10-20H-62z" fill="${c}"/><path d="M-72-80h144" stroke="#fff" stroke-opacity=".35" stroke-width="2"/><rect x="-66" y="-6" width="132" height="6" fill="#e9eef8"/>
-      ${[-44, -16, 16, 44].map(x => `<rect x="${x - 8}" y="-66" width="16" height="22" rx="8" fill="#f3d4e0"/><rect x="${x - 8}" y="-66" width="16" height="22" rx="8" fill="none" stroke="#e6b5c8" stroke-width="1.5"/>`).join('')}
-      <rect x="-11" y="-32" width="22" height="32" rx="11" fill="#2b3556"/>
-      <rect x="-22" y="-176" width="44" height="80" fill="#fff"/>${shade(8, -176, 14, 80)}<rect x="-24" y="-100" width="48" height="5" rx="2" fill="${c}" opacity=".5"/><path d="M-28-176h56L0-206z" fill="${c}"/>
-      <circle cy="-146" r="15" fill="#fff" stroke="#2b3556" stroke-width="3"/><path d="M0-146v-9M0-146l6 4" stroke="${ink}" stroke-width="2" stroke-linecap="round"/>${[0, 90, 180, 270].map(a => `<rect x="-1" y="-159" width="2" height="3" fill="${ink}" transform="rotate(${a} 0 -146)"/>`).join('')}
-      <rect x="-8" y="-122" width="16" height="22" rx="8" fill="#f3d4e0"/>
-      <g transform="translate(0 -206)"><rect x="-1" y="-18" width="2" height="18" fill="#2b3556"/><g transform="rotate(35 0 -22)"><path d="M0-40c8 4 10 14 4 26l-4 4-4-4c-6-12-4-22 4-26z" fill="#fff" stroke="#2b3556" stroke-width="1.5"/><path d="M0-36v22" stroke="${c}" stroke-width="1.5"/></g></g>`,
+    essay: c => `${shadow(80)}
+      <rect x="-70" y="-110" width="140" height="110" rx="3" fill="#fff"/>${shade(36, -110, 34, 110)}<path d="M-76-110h152l-10-18H-66z" fill="${c}"/><path d="M-76-110h152" stroke="#fff" stroke-opacity=".35" stroke-width="2"/>
+      ${[-50, -26, 26, 50].map(x => `<rect x="${x - 8}" y="-92" width="16" height="24" rx="8" fill="#f3d4e0"/><rect x="${x - 8}" y="-56" width="16" height="24" rx="8" fill="#f3d4e0"/>`).join('')}${win(-8, -92, 16, 22, '#f3d4e0')}
+      <rect x="-12" y="-40" width="24" height="40" rx="12" fill="#2b3556"/><rect x="-16" y="-44" width="32" height="5" rx="2" fill="${c}"/>
+      <g transform="translate(0 -176)"><rect x="-6" y="40" width="4" height="26" fill="#2b3556"/><rect x="2" y="40" width="4" height="26" fill="#2b3556"/>
+        <rect x="-60" y="-38" width="120" height="80" rx="6" fill="#2b3556"/><rect x="-54" y="-32" width="108" height="68" rx="3" fill="#fff"/>
+        <text x="-44" y="-15" font-family="Outfit, Manrope, sans-serif" font-size="10" font-weight="800" letter-spacing="1.5" fill="${c}">ESSAY</text>
+        <path d="M-44-5h68M-44 3h74M-44 11h70M-44 19h48M-44 27h60" stroke="#c9cfdd" stroke-width="2.4" stroke-linecap="round"/>
+        <g transform="translate(40 14) rotate(38)"><rect x="-3.5" y="-30" width="7" height="26" rx="3" fill="${c}"/><rect x="-3.5" y="-12" width="7" height="3" fill="#f4c35a"/><path d="M-3.5-4h7L0 6z" fill="#f4c35a"/><path d="M0-3v7" stroke="#9a6a10" stroke-width=".8"/></g></g>`,
     discussion: c => `${shadow(96)}
       <path d="M-92 0a92 30 0 0 1 184 0z" fill="#e7ebf4"/><path d="M-78-8a78 24 0 0 1 156 0" fill="none" stroke="#d3dae8" stroke-width="5"/><path d="M-62-14a62 18 0 0 1 124 0" fill="none" stroke="#d3dae8" stroke-width="5"/>
       <rect x="-46" y="-30" width="92" height="12" rx="3" fill="#fff"/><path d="M-56-112q56-30 112 0v8h-112z" fill="${c}"/><path d="M-56-104h112" stroke="#fff" stroke-opacity=".3" stroke-width="2"/>
@@ -73,12 +74,15 @@ window.IELTSCampus = function ({ parts, esc, meta }) {
       <g transform="translate(78 0)">${[['S', -30, 0], ['V', -4, 0], ['O', 22, 0], ['', -17, -24], ['', 9, -24]].map(([t, x, y], k) => `<g transform="translate(${x} ${y - 24})"><rect width="24" height="24" rx="4" fill="${k < 3 ? '#fff' : '#fff4dc'}" stroke="${c}" stroke-width="2"/><rect width="24" height="6" rx="3" fill="${c}" opacity=".18"/>${t ? `<text x="12" y="18" text-anchor="middle" font-family="Outfit, Manrope, sans-serif" font-size="14" font-weight="800" fill="${c}">${t}</text>` : `<path d="M7 12h10M12 7v10" stroke="${c}" stroke-width="2" stroke-linecap="round"/>`}</g>`).join('')}</g>`
   };
   /* a label over each landmark: the part's icon, name and progress */
-  const label = (w, x, y) => { const t = w.short || w.theme, sub = meta(w), wd = Math.max(t.length * 8.4, sub.length * 6.4) + 64;
-    return `<g class="cp-label" transform="translate(${x} ${y})"><rect x="${-wd / 2}" y="-22" width="${wd}" height="44" rx="22" fill="#fff" filter="url(#cp-sh)"/>
-      <image href="assets/ui/parts/${esc(w.art)}.svg" x="${-wd / 2 + 6}" y="-17" width="34" height="34"/>
-      <text x="${-wd / 2 + 48}" y="-2" font-family="Outfit, Manrope, sans-serif" font-size="15" font-weight="700" fill="${ink}">${esc(t)}</text>
-      <text x="${-wd / 2 + 48}" y="13" font-family="Manrope, sans-serif" font-size="11" font-weight="700" letter-spacing=".6" fill="${w.color}">${esc(sub.toUpperCase())}</text></g>`; };
-  const TOPS = { listening: -232, reading: -176, chart: -230, essay: -262, discussion: -206, research: -150, critical: -128 };
+  const icon = (w, x, y, size) => `<svg x="${x}" y="${y}" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${w.color}" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${(window.IELTS_PART_ICONS || {})[w.art] || ''}</svg>`;
+  /* a label over each landmark: a solid pill in the part's colour (white icon tile, name, progress) with a pointer to the building,
+     large and high-contrast so every part is easy to find */
+  const label = (w, x, y) => { const t = w.short || w.theme, sub = meta(w), wd = Math.max(t.length * 9.6, sub.length * 6.9) + 70;
+    return `<g class="cp-label" transform="translate(${x} ${y})"><path d="M-9 23 0 34 9 23z" fill="${w.color}"/><rect x="${-wd / 2}" y="-25" width="${wd}" height="50" rx="25" fill="${w.color}" filter="url(#cp-sh)"/>
+      <rect x="${-wd / 2 + 7}" y="-18" width="36" height="36" rx="11" fill="#fff"/>${icon(w, -wd / 2 + 13, -12, 24)}
+      <text x="${-wd / 2 + 53}" y="-1" font-family="Outfit, Manrope, sans-serif" font-size="17" font-weight="700" fill="#fff">${esc(t)}</text>
+      <text x="${-wd / 2 + 53}" y="15" font-family="Manrope, sans-serif" font-size="11" font-weight="800" letter-spacing=".7" fill="#fff" fill-opacity=".85">${esc(sub.toUpperCase())}</text></g>`; };
+  const TOPS = { listening: -232, reading: -176, chart: -230, essay: -238, discussion: -206, research: -150, critical: -128 };
   const paths = Object.entries(POS).filter(([a]) => by(a)).map(([, [x, y]]) => { const mx = (PL[0] + x) / 2, my = (PL[1] + y) / 2 + (y < PL[1] ? 34 : -18);
     return `M${PL[0]} ${PL[1]}Q${mx} ${my} ${x} ${y + 6}`; });
   /* draw landmarks back to front (smaller y first) so nearer ones overlap farther ones */

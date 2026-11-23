@@ -31,11 +31,36 @@ Site (after GitHub Pages is switched on): `https://ma-jalali.github.io/ielts-pre
 ## Look and tools
 
 - **Course map (home page):** an illustrated town (`js/campus.js`), with one landmark for each part around a central plaza that says "Start anywhere". Each landmark opens its part. Inside each part, the road map shows its lessons in order. While a part has no lessons, the road leads to a flag that says "Lessons on the way".
-- **Part icons:** `assets/ui/parts/<art>.svg`, one detailed icon for each part, used in the side panel, the cards and the part pages.
+- **Part icons:** `js/part-icons.js`, one line icon for each part, drawn in the same style as the side panel's other icons (a tinted tile that turns solid when the part is open). They are inline, so they stay sharp at any zoom.
 - **Theme:** `css/theme.css` holds the colours and type: IELTS-style red, a deep indigo-navy, cool paper, and Outfit for headings. Change the look there.
 - **Side panel colour:** Settings (gear) → Side panel colour offers 13 colours, chosen on each device.
 - **Top bar:** "Word game" is removed. "Word meanings" (the lesson's own glossary) appears only on lessons that have one. The dictionary is the book button at the bottom right.
 - **Band score calculator** (`#/band`, `js/band.js`): students enter Listening and Reading correct answers and Writing and Speaking bands. It shows each band and the overall band with the official rounding, compared with the course target of 6.5–7. Results are saved on the device only.
+
+## IELTS question types you can add (Studio → Add block)
+
+Everything is in `js/ielts.js` (blocks), `css/ielts.css` (look) and `js/studio-blocks.js` (the ready-made blocks). Each block checks answers itself: **Check answers** marks every question, shows the right answers and gives a score. Answers are saved like every other answer, online too.
+
+| Group | Blocks |
+|---|---|
+| **IELTS Reading** | Reading test screen (passage left, questions right, timer) · True/False/Not Given · Yes/No/Not Given · Multiple choice (A–D) · Choose TWO letters · Matching headings · Matching information (which paragraph?) · Matching features · Matching sentence endings · Classification · Sentence completion · Summary completion · Summary completion with a box · Note completion · Table completion · Flow-chart completion · Diagram labelling · Short-answer questions |
+| **IELTS Listening** | Recording · Recording in exam mode (plays once) · Listening test screen · Form, note, sentence, table and flow-chart completion · Multiple choice (A–C) · Choose TWO letters · Map/plan labelling · Diagram labelling with a box · Matching · Classification · Short-answer questions |
+| **IELTS Writing** | Writing Task 1 (Academic): the picture, the task, an answer box with a word count and a 20-minute timer · Writing Task 2: the question, the answer box, a 40-minute timer · Band descriptor self-check |
+| **IELTS Speaking** | Part 1 · Part 2 cue card with 1-minute and 2-minute timers · Part 3. Each has a voice recorder; recordings stay on the student's device. |
+| **IELTS Media** | Video (YouTube, Vimeo, Google Drive, mp4) · Audio (mp3 link, Google Drive, Dropbox, OneDrive, SoundCloud, YouTube) |
+| **Grammar & vocabulary** | Quizzes: choose the correct answer · complete the sentences · gap fill with a word box · match words and meanings · right or wrong |
+
+**How to write them (in Studio → Edit):**
+- **Gaps:** write the answer in double brackets: `The tower is made of [[stone|granite]].` Separate alternative right answers with `|`. Capitals and extra spaces don't matter. `max` sets the word limit, so an answer over the limit is marked wrong, as in the test.
+- **First question number:** `from` (for example, 14).
+- **Instruction:** `instruction`, with `**bold**` for the capitals in the rubric.
+- **Notes layout:** a line starting `# ` is a heading, and a line starting `- ` is a bullet point.
+- **Form layout:** write each line as `Label: [[answer]]`.
+- **Flow-chart layout:** one box per line.
+- **Word box:** add `bank` (a list of words). The gaps then take a letter, and the answer is the letter.
+- **Matching:** `options` is the box, and each item's `answer` is a letter. For headings, set `numbering: 'roman'` and use answers i, ii, iii. `reuse: true` adds "NB You may use any letter more than once".
+- **Pictures and recordings:** paste a link in `src`. Google Drive files must be shared as "Anyone with the link".
+- **Test screens:** the questions sit inside the test screen. Add, move or edit them on the page, like any other block.
 
 ## Adding a lower or higher level later
 
@@ -59,7 +84,7 @@ When the time comes, there are two ways to do it:
    - **Stage bar:** the same actions for a stage. **Page bar** (on the overview): edit the page details or add a stage.
    - **Add a block** opens the catalogue. It starts with IELTS question types: True/False/Not Given, Yes/No/Not Given, sentence and note completion, gap-fill, multiple choice, matching, reading passage, listening recording, writing task box, Speaking Part 1/2/3 and a band-descriptor self-check. After those come all the design's blocks.
    - **Undo:** the dock button, or Ctrl/⌘ + Z when you're not typing in a box.
-3. **New page:** Studio → New page. Pick a skill, the lesson number, a title and a starting point (blank, Listening, Reading, Writing, Speaking, all four skills, or a copy of an existing page).
+3. **New page:** Studio → New page. Pick a part, the lesson number, a title and a starting point: blank, Listening, Reading, Writing Task 1, Writing Task 2, Speaking, Vocabulary or grammar, all four skills, or a copy of an existing page.
 4. Everything is saved at once as a **draft on this device**. A draft replaces the published page on this device only.
 
 ### Publishing a draft
