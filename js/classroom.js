@@ -322,6 +322,14 @@ window.createDEC15Class = function ({ getCloud, lesson, esc, icon, toast, avatar
 
   return {
     connect, disconnect, setWhere, answersLocked, paintCounts, loadCounts, toggle,
+    setting: k => settings[k],
+    async saveSetting(k, v) {   // teacher only: a class-wide switch everyone follows (table class_settings)
+      const c = db(); if (!c || !isTeacher()) return false; const was = settings[k];
+      settings[k] = v; rerender(); paintTop();
+      const { error } = await c.from('class_settings').upsert({ key: CLS.key(k), value: v, updated_at: new Date().toISOString() });
+      if (error) { settings[k] = was; rerender(); paintTop(); toast('The change could not be saved. Check your internet.'); return false; }
+      return true;
+    },
     isTeacher, note: ref => (notes ? notes[ref] ?? '' : null), get answersOpen() { return settings.answers_open !== false; },
     message: id => toggle(true, 'chat', id),
     people: () => people, online: () => online.size, onlineIds: () => [...online.keys()], onlineStudents, typing, onTyping: fn => (typingFns.add(fn), () => typingFns.delete(fn)),

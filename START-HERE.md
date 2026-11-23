@@ -18,12 +18,26 @@ The course has seven parts: the four skills, with Writing split into Task 1 (Aca
 
 The lessons are still to be planned: each skill is empty in `lessons/course.js` and shows "To plan" on the course map. Add each lesson to its skill's `days`, in the order students study it.
 
+- **Side panel.** Under **Course map**, a **Skills** list links to each part's page (`#/skill/<n>`), in the order of course.js: Listening, Reading, Writing Task 1 (Academic), Writing Task 2, Speaking, Vocabulary, Grammar. Readings and Copy Detector are removed.
+- **Hide or show menus for students.** Sign in as a teacher, open the side panel's **Settings** (gear), then use **Side panel for students** to switch Course calendar, Assessments, Class board, Chats, Shared with me and Name wheel on or off. This applies to every student at once. It is saved in the class settings, so students who aren't signed in follow it too. Students can't open a hidden page. You still see hidden menus, dimmed and marked "hidden". `menusHidden` in course.js sets which menus start hidden before you choose.
 - **No order between the parts.** Students can start with any part. The home page shows the seven parts as cards side by side. Choosing one shows that part's own road map, with its lessons as the stops in order (done lessons are ticked, and the first unfinished one is "Up next"), then its lesson cards.
 - **How the data is stored.** The app keeps its original weeks/days structure: each entry in `weeks` is a **skill** and each of its `days` is a **lesson**. The setting `units: { unit: 'Skill', lesson: 'Lesson' }` makes the app say "Reading · Lesson 3" instead of "Week 2, Day 3".
 - **Lesson ids carry the level:** `ieb2w<skill>d<lesson>`. For example, `ieb2w2d3` is B2 · Reading · Lesson 3. A future level gets its own prefix, such as `ieb1` or `iec1`, so ids never clash.
 - **Lesson files go in the skill's folder:** `lessons/b2/<skill>/<id>.js`, as set by `folder` in course.js.
 
 Site (after GitHub Pages is switched on): `https://ma-jalali.github.io/ielts-prep/`
+
+## Adding a lower or higher level later
+
+The course is set up so that a new level can be added without touching this one:
+
+- Lesson ids carry the level (`ieb2…`), and lesson files sit in a folder per level (`lessons/b2/`).
+- A new level gets its own prefix and folder: for example, `ieb1` and `lessons/b1/` for Band 5–5.5, or `iec1` and `lessons/c1/` for Band 7.5+.
+
+When the time comes, there are two ways to do it:
+
+1. **Recommended: one site, a level switch.** Each level gets its own course file (`lessons/b1/course.js` and so on) and its own course id (`ielts-b1`). That keeps each level's class list, chats, board and announcements separate. A **Level** choice in the side panel decides which course file opens, and students choose once (it is remembered). Logins, the design and Studio stay shared, and a Grammar or Vocabulary lesson can be used in two levels by listing the same file in both. This needs a small change to `js/boot.js` and a level picker.
+2. **A separate copy of the site per level** (for example a repository `ielts-b1`). It needs no code, but every fix to the app then has to be made in each copy.
 
 ## Studio: edit and build pages in the browser
 

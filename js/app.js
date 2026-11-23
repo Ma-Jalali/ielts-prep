@@ -911,19 +911,58 @@ function dayCard(d) {
 }
 /* One week at a time on the course map: with 5 weeks × 5 days the page would be very long.
    The open week is remembered for this visit; the "You are here" week opens first. */
-let homeWeek = null;
+let homeWeek = null, skillRoute = null;
+/* The skills in the side panel (course.units), under the course map: one link each, in course.js order. */
+const SKILL_IC = { listening: '<path d="M4 14v-2a8 8 0 0 1 16 0v2"/><rect x="3" y="14" width="4" height="6" rx="1.5"/><rect x="17" y="14" width="4" height="6" rx="1.5"/>',
+  reading: '<path d="M3.5 5.5c3-1 6-.5 8.5 1.5 2.5-2 5.5-2.5 8.5-1.5v13c-3-1-6-.5-8.5 1.5-2.5-2-5.5-2.5-8.5-1.5z"/><path d="M12 7v13"/>',
+  writing: '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/>',
+  discussion: '<path d="M4 5h11a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H9l-4 3v-3H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z"/><path d="M19 9h1a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-1v3l-3-3h-4"/>',
+  research: '<path d="M4 18 8.5 6h1L14 18"/><path d="M5.5 14h7"/><path d="M16 12.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM18.5 11v7"/>',
+  critical: '<path d="M8 4H6a2 2 0 0 0-2 2v4l-2 2 2 2v4a2 2 0 0 0 2 2h2M16 4h2a2 2 0 0 1 2 2v4l2 2-2 2v4a2 2 0 0 1-2 2h-2"/>' };
+/* Menus the teacher can hide from students (side panel → Settings → "Side panel for students").
+   The choice is a class-wide setting (class_settings 'menu_hidden', read live by every student, also signed out);
+   course.menusHidden in course.js is the default before the teacher has chosen. A hidden page cannot be opened by students. */
+const MENUS = [['calendar', 'side-calendar', 'Course calendar'], ['assessments', 'side-assess', 'Assessments'], ['board', 'side-board', 'Class board'],
+  ['chats', 'side-chats', 'Chats'], ['shared', 'side-shared', 'Shared with me'], ['picker', 'side-pick', 'Name wheel']];
+const menusHidden = () => { const v = klass?.setting?.('menu_hidden'); return Array.isArray(v) ? v : course.menusHidden || []; };
+const menuOff = route => !isTeacher() && menusHidden().includes(route);
+function paintMenus() {
+  const off = menusHidden(), t = isTeacher();
+  MENUS.forEach(([k, id]) => { const el = $('#' + id); if (!el) return; const h = off.includes(k); el.classList.toggle('menu-off', h && !t); el.classList.toggle('menu-off-teacher', h && t); el.title = h && t ? 'Hidden from students' : el.title === 'Hidden from students' ? '' : el.title; });
+  const groups = [...document.querySelectorAll('#sidebar .side-group')];   // a group label with nothing left under it is hidden too
+  groups.forEach(g => { let n = g.nextElementSibling, any = false; while (n && !n.classList.contains('side-group')) { if ((n.matches('.side-link') && !n.hidden && !n.classList.contains('menu-off')) || n.querySelector?.('.side-link')) any = true; n = n.nextElementSibling; } g.classList.toggle('menu-off', !any); });
+  let box = $('#side-menus'); const menu = $('#side-menu');
+  if (!t) { box?.remove(); return; }
+  if (!box && menu) { box = menu.appendChild(document.createElement('div')); box.id = 'side-menus'; box.className = 'side-menus'; }
+  if (!box) return;
+  const avail = MENUS.filter(([, id]) => { const el = $('#' + id); return el && !el.hidden; });
+  box.innerHTML = `<span class="sc-label">Side panel for students</span>${avail.map(([k, , label]) => { const on = !off.includes(k);
+    return `<button type="button" class="teacher-toggle" data-menu-toggle="${k}" aria-pressed="${on}"><span class="tt-switch" aria-hidden="true"><i></i></span>${esc(label)} <span class="tt-state">${on ? 'Shown' : 'Hidden'}</span></button>`; }).join('')}<small class="side-menus-note">Applies to every student, straight away.</small>`;
+}
+document.addEventListener('click', async e => { const b = e.target.closest?.('[data-menu-toggle]'); if (!b) return;
+  const k = b.dataset.menuToggle, off = menusHidden(), next = off.includes(k) ? off.filter(x => x !== k) : [...off, k];
+  if (await klass?.saveSetting?.('menu_hidden', next)) toast(`${MENUS.find(m => m[0] === k)[2]} is now ${next.includes(k) ? 'hidden from' : 'shown to'} students.`); });
+function paintSkillNav(route) {
+  if (!UNITS) return;
+  let box = $('#side-skills');
+  if (!box) { $('#side-home')?.insertAdjacentHTML('afterend', `<p class="nav-label side-group">${esc(UW)}s</p><div id="side-skills" class="side-skills"></div><p class="nav-label side-group">Course</p>`); box = $('#side-skills'); }
+  if (!box) return;
+  const cur = route === 'skill' ? skillRoute : route !== 'home' && !labHere && lesson.week ? lesson.week : null;
+  box.innerHTML = course.weeks.map(w => { const on = cur === w.n, [c] = TONES[w.tone] || TONES.blue;
+    return `<a class="side-link side-skill${on ? ' active' : ''}" id="side-skill-${w.n}" href="#/skill/${w.n}" style="--tc:${c}" title="${esc(w.theme)}"${on ? ' aria-current="page"' : ''}><span class="side-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${SKILL_IC[w.art] || SKILL_IC.reading}</svg></span><span class="side-tx">${esc(w.theme)}</span></a>`; }).join('');
+}
 const pickHomeWeek = () => { const ws = course.weeks; if (!ws.some(w => w.n === homeWeek)) homeWeek = (ws.find(w => w.n === lesson.week) || ws[0]).n; };
 /* By skill (course.units): the skills have no order, so the home page shows them as cards side by side (not on a road);
    the road map is drawn inside each skill, with its lessons as the stops. */
 function skillGrid() {
   pickHomeWeek();
-  return `<section class="skill-grid" aria-label="${esc(UW)}s: choose one">${course.weeks.map(w => {
-    const ready = w.days.filter(d => d.status === 'ready'), done = ready.filter(d => { const [a, b] = dayProgress(d); return b && a === b; }).length, on = w.n === homeWeek;
+  return `<section class="skill-grid" aria-label="${esc(UW)}s">${course.weeks.map(w => {
+    const ready = w.days.filter(d => d.status === 'ready'), done = ready.filter(d => { const [a, b] = dayProgress(d); return b && a === b; }).length;
     const meta = !w.days.length ? 'To plan' : !ready.length ? `${w.days.length} planned` : done ? `${done} of ${ready.length} done` : `${ready.length} lesson${ready.length === 1 ? '' : 's'}`;
-    return `<button type="button" class="skill-card${on ? ' is-on' : ''}" data-week-tab="${w.n}" aria-pressed="${on}" style="${tone({ tone: TONES[w.tone] ? w.tone : 'blue' })};--p:${ready.length ? (done / ready.length).toFixed(3) : 0}">
+    return `<a class="skill-card" href="#/skill/${w.n}" style="${tone({ tone: TONES[w.tone] ? w.tone : 'blue' })};--p:${ready.length ? (done / ready.length).toFixed(3) : 0}">
       <span class="skill-card-art"><img src="${artSrc(w.art || 'reading')}" alt="" width="96" height="74" loading="lazy"></span>
       <span class="skill-card-tx"><b>${esc(w.theme)}</b>${w.tag ? `<small>${esc(w.tag)}</small>` : ''}</span>
-      <span class="skill-card-meta"><span>${meta}</span><i aria-hidden="true"><i></i></i></span></button>`; }).join('')}</section>`;
+      <span class="skill-card-meta"><span>${meta}</span><i aria-hidden="true"><i></i></i></span></a>`; }).join('')}</section>`;
 }
 /* The road map of one skill: its lessons in order. Done lessons are ticked, the first unfinished one is "Up next". */
 function skillMap(w) {
@@ -943,7 +982,7 @@ function weekTabs() {
     return `<button type="button" role="tab" id="tab-week-${x.n}" aria-controls="panel-week" aria-selected="${x.n === homeWeek}" tabindex="${x.n === homeWeek ? 0 : -1}" class="week-tab${classToday?.week === x.n ? ' has-today' : ''}" data-week-tab="${x.n}" style="--p:${st ? Math.round(100 * done / st) : 0}%"><span class="week-tab-num">${x.n}</span><span class="week-tab-text"><b>${esc(unitName(x.n))}</b><small>${esc(UNITS ? x.tag || '' : x.theme)}</small></span><span class="week-tab-meta">${done ? `${done}/${st} done` : st || !UNITS ? `${st} lesson${st === 1 ? '' : 's'}` : x.days.length ? `${x.days.length} planned` : 'To plan'}</span></button>`; }).join('')}</div>` : '';
   return `<section class="week" aria-label="Lessons by ${UNITS ? UW.toLowerCase() : 'week'}">${tabs}
     <div class="week-panel" id="panel-week" ${UNITS ? `role="region" aria-label="${esc(w.theme)}"` : `role="tabpanel" aria-labelledby="tab-week-${w.n}"`}>
-      <header class="week-head">${UNITS ? `<img class="week-art" src="${artSrc(w.art || 'reading')}" alt="" width="64" height="50">` : `<span class="week-num"><small>${UW}</small>${w.n}</span>`}<div><h2>${esc(w.theme)}</h2><p>${esc(w.summary || '')}</p></div></header>
+      <header class="week-head">${UNITS ? `<img class="week-art" src="${artSrc(w.art || 'reading')}" alt="" width="64" height="50">` : `<span class="week-num"><small>${UW}</small>${w.n}</span>`}<div>${UNITS ? `<span class="eyebrow">${esc(course.code)} · ${esc(UW)}</span><h1>${esc(w.theme)}</h1>` : `<h2>${esc(w.theme)}</h2>`}<p>${esc(w.summary || '')}</p></div></header>
       ${UNITS ? skillMap(w) : ''}
       ${w.days.length ? `<ol class="day-grid${w.days.length > 3 ? ' many' : ''}">${w.days.map(dayCard).join('')}</ol>` : `<p class="week-empty" style="margin:0 0 2rem;color:#5b6b78">The lessons for ${esc(unitName(w.n))} are on the way.</p>`}
     </div></section>`;
@@ -968,7 +1007,7 @@ function courseHome() {
       </div>
       <div class="resume-actions">${continueButton(true)}<a class="btn-quiet" href="${L('overview')}">Lesson overview</a></div>
     </section>` : ''}
-    ${weekTabs()}`;
+    ${UNITS ? '' : weekTabs()}`;
 }
 /* page header with a small vector picture on the right (Source library, Extra activities) */
 const pageHero = (eyebrow, title, text, art, extra = '') => `<header class="page-head page-hero"><div><span class="eyebrow">${eyebrow}</span><h1>${title}</h1><p>${text}</p>${extra}</div><img class="page-hero-art" src="assets/art/${art}.svg" alt="" width="440" height="340"></header>`;
@@ -1389,6 +1428,7 @@ function paintNav(route = navRoute) {
   if (route !== 'home' && lesson.week !== navLessonWeek) { navLessonWeek = lesson.week; navWeekOpen = null; }   // a lesson in another week opens its own week
   [['side-lesson', 'overview'], ['side-readings', 'sources'], ['side-board', 'board'], ['side-chats', 'chats'], ['side-shared', 'shared'], ['side-calendar', 'calendar'], ['side-assess', 'assessments'], ['side-studio', 'studio'], ['side-lab', 'lab'], ['side-downloads', 'downloads'], ['side-print', 'print'], ['side-pick', 'picker']].forEach(([id, r]) => { const el = $('#' + id); if (!el) return; el.classList.toggle('active', route === r); if (route === r) el.setAttribute('aria-current', 'page'); else el.removeAttribute('aria-current'); });
   paintLessonNav(route);
+  paintSkillNav(route); paintMenus();
   $('#side-home').classList.toggle('active', route === 'home');
   const ws = route === 'planner' || route === 'notebook';   // My workspace: planner + notebook
   $('#side-planner')?.classList.toggle('active', ws);
@@ -1617,6 +1657,7 @@ function parseRoute() {
   if (!h || h === '/' || h === '/home') return { home: true };
   if (h === '/planner' || h.startsWith('/planner/') || h === '/workspace') return { page: 'planner' };   // My workspace
   if (h === '/board') return { page: 'board' };
+  const sk = UNITS && h.match(/^\/skill\/(\d+)$/); if (sk && course.weeks.some(w => w.n === +sk[1])) return { page: 'skill', n: +sk[1] };   // a skill's page
   if (h === '/chats' || h.startsWith('/chats/')) return { page: 'chats' };
   if (h === '/shared' || h.startsWith('/shared/')) return { page: 'shared' };
   if (guide && (h === '/calendar' || h === '/assessments')) return { page: h.slice(1) };
@@ -1642,13 +1683,15 @@ function render() {
   }
   if (r.home && labHere) { location.reload(); return; }   // the course map shows the weekly lesson, so leave the lab lesson
   const route = r.home ? 'home' : r.page;
+  if (menuOff(route)) { toast('This page is not open right now.'); history.replaceState(null, '', '#/'); return render(); }
+  if (route === 'skill') skillRoute = r.n;
   document.body.classList.toggle('is-lab', !!labHere && !['studio', 'planner', 'notebook', 'lab', 'downloads', 'print', 'picker', 'calendar', 'assessments', 'board', 'chats', 'shared'].includes(route));   // a ${LABT} lesson page
   if (!r.home && !labHere && r.page !== 'lab' && r.page !== 'downloads' && r.page !== 'print' && r.page !== 'picker') try { localStorage.setItem(CLS.id + '-last-lesson', lesson.id); } catch (e) { /* ignore */ }   // the course map keeps the weekly lesson, not a lab lesson
   const done = coreActivities.filter(a => state.done[a.id]).length;
   paintNav(route);
   $('#progress').value = done; $('#progress').max = coreActivities.length;
   $('#progress-label').innerHTML = `<b>${done}</b> of ${coreActivities.length} activities finished`;
-  $('#side-readings').href = L('sources');
+  const sr = $('#side-readings'); if (sr) sr.href = L('sources');
   paintSideRing(done, coreActivities.length);
   const s = lesson.sections.find(x => x.id === route);
   if (route === 'planner' || route === 'notebook') {   // My workspace = the planner (Notes, Calendar, To-dos) + this lesson's Notebook; kept open across re-renders
@@ -1755,6 +1798,19 @@ function render() {
     if (changed) window.scrollTo(0, 0);
     $('#teacher-toggle').hidden = !isTeacher(); $('#present-toggle').hidden = !isTeacher(); document.body.classList.toggle('is-teacher', isTeacher());
     paintNav(route); studio.afterRender(route);
+    return;
+  }
+  if (route === 'skill') {   // a skill's page: its map and its lessons (course.units)
+    const w = course.weeks.find(x => x.n === skillRoute); homeWeek = w.n;
+    document.body.dataset.page = 'skill'; document.body.style.setProperty('--accent', TONES[w.tone]?.[0] || TONES.blue[0]); document.body.style.setProperty('--accent-bg', TONES[w.tone]?.[1] || TONES.blue[1]);
+    $('#crumb').innerHTML = `<a href="#/" aria-label="${esc(course.code)} course map" title="Course map">${icon('home')}</a><i>/</i><b>${esc(w.theme)}</b>`;
+    document.title = `${course.code} · ${w.theme}`; paintStatus();
+    const main = $('#main'), changed = main.dataset.route !== route + w.n; main.dataset.route = route + w.n;
+    main.innerHTML = `<div class="skill-page">${weekTabs()}</div>`;
+    if (changed && !matchMedia('(prefers-reduced-motion: reduce)').matches) { main.classList.remove('route-in'); void main.offsetWidth; main.classList.add('route-in'); }
+    if (changed) window.scrollTo(0, 0);
+    $('#teacher-toggle').hidden = !isTeacher(); $('#present-toggle').hidden = !isTeacher(); document.body.classList.toggle('is-teacher', isTeacher());
+    klass?.setWhere('skill:' + w.n, w.theme);
     return;
   }
   if (route === 'calendar' || route === 'assessments') {   // DEC10 course guide (js/guide.js)

@@ -2,7 +2,7 @@
    THE COURSE IS ORGANISED BY SKILL, NOT BY WEEK. Each skill has its own lessons, studied in order:
      the four skills  1 Listening · 2 Reading · 3 Writing Task 1 (Academic) · 4 Writing Task 2 · 5 Speaking
                       (Writing is two parts because each task has its own lessons)
-     two sub-skills   6 Grammar · 7 Vocabulary
+     two sub-skills   6 Vocabulary · 7 Grammar
    The data keeps the app's weeks/days shape: each entry in `weeks` is a SKILL and each of its `days` is a LESSON
    (`day` = the lesson's number in that skill). `units` below makes the app say "Reading · Lesson 3", not "Week 2, Day 3".
    LEVEL: this course is B2 → Band 6.5–7. Lesson ids carry the level: <idPrefix>w<skill>d<lesson>, e.g. ieb2w2d3 =
@@ -38,6 +38,10 @@ window.DEC15_COURSE = {
   scripts: ['lessons/guide.js'],       // loaded before every lesson: the Course calendar and Assessments pages
   downloads: [],                       // side panel → Downloads (see the DEC10 course for the format)
   printables: [],                      // side panel → Photocopiables (teachers only)
+  /* Menus hidden from students by default. The teacher hides or shows them for the whole class in the side panel →
+     Settings (gear) → "Side panel for students"; that live switch then replaces this list.
+     Keys: 'calendar', 'assessments', 'board', 'chats', 'shared', 'picker' (Name wheel). */
+  menusHidden: [],
   /* Pages outside the skills: not on the course map, opened by a link (the Block gallery is linked from Studio). */
   pages: [
     { id: 'ieblocks', status: 'ready', title: 'Block gallery', where: 'Studio', art: 'research',
@@ -55,8 +59,8 @@ window.DEC15_COURSE = {
     { n: 3, label: 'Writing Task 1', sub: 'To plan' },
     { n: 4, label: 'Writing Task 2', sub: 'To plan' },
     { n: 5, label: 'Speaking', sub: 'To plan' },
-    { n: 6, label: 'Grammar', sub: 'To plan' },
-    { n: 7, label: 'Vocabulary', sub: 'To plan' }
+    { n: 6, label: 'Vocabulary', sub: 'To plan' },
+    { n: 7, label: 'Grammar', sub: 'To plan' }
   ],
   weeks: [
     { n: 1, theme: 'Listening', art: 'listening', short: 'Listening', tag: '4 sections · 40 questions', tone: 'teal', folder: 'lessons/b2/listening', summary: '', days: [] },
@@ -64,7 +68,7 @@ window.DEC15_COURSE = {
     { n: 3, theme: 'Writing Task 1 (Academic)', art: 'writing', short: 'Writing Task 1', tag: '150+ words · about 20 minutes', tone: 'clay', folder: 'lessons/b2/writing-task1', summary: '', days: [] },
     { n: 4, theme: 'Writing Task 2', art: 'writing', short: 'Writing Task 2', tag: '250+ words · about 40 minutes', tone: 'clay', folder: 'lessons/b2/writing-task2', summary: '', days: [] },
     { n: 5, theme: 'Speaking', art: 'discussion', short: 'Speaking', tag: 'Parts 1, 2 and 3', tone: 'plum', folder: 'lessons/b2/speaking', summary: '', days: [] },
-    { n: 6, theme: 'Grammar', art: 'critical', short: 'Grammar', tag: '', tone: 'amber', folder: 'lessons/b2/grammar', summary: '', days: [] },
-    { n: 7, theme: 'Vocabulary', art: 'research', short: 'Vocabulary', tag: '', tone: 'green', folder: 'lessons/b2/vocabulary', summary: '', days: [] }
+    { n: 6, theme: 'Vocabulary', art: 'research', short: 'Vocabulary', tag: '', tone: 'green', folder: 'lessons/b2/vocabulary', summary: '', days: [] },
+    { n: 7, theme: 'Grammar', art: 'critical', short: 'Grammar', tag: '', tone: 'amber', folder: 'lessons/b2/grammar', summary: '', days: [] }
   ]
 };
