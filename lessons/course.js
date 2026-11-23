@@ -45,7 +45,7 @@ window.DEC15_COURSE = {
       stages: ['ielts', 'teach', 'practise', 'write', 'media', 'layout', 'games'], tones: ['teal', 'amber', 'teal', 'clay', 'blue', 'plum', 'green'],
       scripts: ['lessons/studio/ieblocks.js'] }
   ],
-  /* THE SKILLS. Each skill: n (its number; never change), theme (name), short, tag (one line under the name),
+  /* THE SKILLS. Each skill: n (its number; never change), theme (name), art (its picture), short, tag (one line under the name),
      tone, folder (where its lesson files go), summary, and days = its lessons, in the order students study them.
      A lesson: { id: 'ieb2w<n>d<lesson>', day: <lesson number>, status: 'soon' | 'ready', title, sub, art, parts, scripts }
      ('soon' shows it as planned; 'ready' publishes it). The lessons are still to be planned. */
@@ -59,12 +59,12 @@ window.DEC15_COURSE = {
     { n: 7, label: 'Vocabulary', sub: 'To plan' }
   ],
   weeks: [
-    { n: 1, theme: 'Listening', short: 'Listening', tag: '4 sections · 40 questions', tone: 'teal', folder: 'lessons/b2/listening', summary: '', days: [] },
-    { n: 2, theme: 'Reading', short: 'Reading', tag: '3 passages · 60 minutes', tone: 'blue', folder: 'lessons/b2/reading', summary: '', days: [] },
-    { n: 3, theme: 'Writing Task 1 (Academic)', short: 'Writing Task 1', tag: '150+ words · about 20 minutes', tone: 'clay', folder: 'lessons/b2/writing-task1', summary: '', days: [] },
-    { n: 4, theme: 'Writing Task 2', short: 'Writing Task 2', tag: '250+ words · about 40 minutes', tone: 'clay', folder: 'lessons/b2/writing-task2', summary: '', days: [] },
-    { n: 5, theme: 'Speaking', short: 'Speaking', tag: 'Parts 1, 2 and 3', tone: 'plum', folder: 'lessons/b2/speaking', summary: '', days: [] },
-    { n: 6, theme: 'Grammar', short: 'Grammar', tag: '', tone: 'amber', folder: 'lessons/b2/grammar', summary: '', days: [] },
-    { n: 7, theme: 'Vocabulary', short: 'Vocabulary', tag: '', tone: 'green', folder: 'lessons/b2/vocabulary', summary: '', days: [] }
+    { n: 1, theme: 'Listening', art: 'listening', short: 'Listening', tag: '4 sections · 40 questions', tone: 'teal', folder: 'lessons/b2/listening', summary: '', days: [] },
+    { n: 2, theme: 'Reading', art: 'reading', short: 'Reading', tag: '3 passages · 60 minutes', tone: 'blue', folder: 'lessons/b2/reading', summary: '', days: [] },
+    { n: 3, theme: 'Writing Task 1 (Academic)', art: 'writing', short: 'Writing Task 1', tag: '150+ words · about 20 minutes', tone: 'clay', folder: 'lessons/b2/writing-task1', summary: '', days: [] },
+    { n: 4, theme: 'Writing Task 2', art: 'writing', short: 'Writing Task 2', tag: '250+ words · about 40 minutes', tone: 'clay', folder: 'lessons/b2/writing-task2', summary: '', days: [] },
+    { n: 5, theme: 'Speaking', art: 'discussion', short: 'Speaking', tag: 'Parts 1, 2 and 3', tone: 'plum', folder: 'lessons/b2/speaking', summary: '', days: [] },
+    { n: 6, theme: 'Grammar', art: 'critical', short: 'Grammar', tag: '', tone: 'amber', folder: 'lessons/b2/grammar', summary: '', days: [] },
+    { n: 7, theme: 'Vocabulary', art: 'research', short: 'Vocabulary', tag: '', tone: 'green', folder: 'lessons/b2/vocabulary', summary: '', days: [] }
   ]
 };

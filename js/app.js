@@ -694,9 +694,9 @@ function overview() {
 /* DEC10's ten-week map: a road climbing through a detailed (but quiet) landscape — far mountains, a ridge with
    pines and turning wind turbines, a river under a little bridge into a lake, fields with sheep, a campus at the
    finish. Everything decorative sits behind the road or in the foreground, away from the stops and their labels. */
-function courseMapRich(current) {
-  const N = course.map.length, H = 300;
-  const pts = course.map.map((_, i) => { const k = N > 1 ? i / (N - 1) : 0; return [Math.round(150 + 760 * k), Math.round(160 - 84 * k + (i % 2 ? -10 : 8))]; });
+function courseMapRich(current, stops = course.map, opt = {}) {
+  const N = stops.length, H = 300;
+  const pts = stops.map((_, i) => { const k = N > 1 ? i / (N - 1) : 0; return [Math.round(150 + 760 * k), Math.round(160 - 84 * k + (i % 2 ? -10 : 8))]; });
   const road = `M-10 196C40 192 ${pts[0][0] - 40} ${pts[0][1]} ${pts[0][0]} ${pts[0][1]}` + pts.slice(1).map(([x, y], i) => `S${x - Math.round((x - pts[i][0]) / 2)} ${y} ${x} ${y}`).join('');
   const T = (x, y, k, s) => `<g transform="translate(${x} ${y})${k && k !== 1 ? ` scale(${k})` : ''}">${s}</g>`;
   const tree = (x, y, k = 1, c = ['#8fb47a', '#6f9d5c', '#a9c995']) => T(x, y, k, `<ellipse cy="9" rx="12" ry="2.6" fill="#14293a" opacity=".08"/><path d="M-1.8 9V-4h3.6V9z" fill="#8a6f4e"/><path d="M0 0 4-5M0 2-3-3" stroke="#8a6f4e" stroke-width="1.2" stroke-linecap="round"/><circle cy="-12" r="10.5" fill="${c[0]}"/><circle cx="5.5" cy="-8" r="7.5" fill="${c[1]}"/><circle cx="-5" cy="-7" r="6" fill="${c[1]}" opacity=".55"/><circle cx="-4" cy="-16" r="4.4" fill="${c[2]}"/><circle cx="2" cy="-19" r="2" fill="#fff" opacity=".35"/>`);
@@ -718,14 +718,14 @@ function courseMapRich(current) {
   /* labels alternate below / above the road so neighbours never collide; the "You are here" bubble then sits higher */
   const up = i => i % 2 === 1 && i < N - 1;   // the finish keeps its label below, clear of the flag
   /* the week you are in: its own label becomes the navy "You are here · …" pill, so no second bubble can sit on a neighbour's label */
-  const lab = (w, i) => { const y = pts[i][1], now = w.n === current, txt = now ? 'You are here · ' + w.label : w.label, t = esc(txt), wd = Math.round(txt.length * (now ? 6.3 : 6.5) + (now ? 34 : 20)), ty = y + (up(i) ? -33 : 42);
+  const lab = (w, i) => { const y = pts[i][1], now = w.st ? w.st === 'now' : w.n === current, txt = now ? (opt.nowText || 'You are here') + ' · ' + w.label : w.label, t = esc(txt), wd = Math.round(txt.length * (now ? 6.3 : 6.5) + (now ? 34 : 20)), ty = y + (up(i) ? -33 : 42);
     const x = Math.max(wd / 2 + 8, Math.min(1000 - wd / 2 - 8, pts[i][0] + (i === N - 1 && N > 1 ? 22 : 0)));
     return now
       ? `<g class="cm-label cm-label-now"><rect x="${x - wd / 2}" y="${ty - 14.5}" width="${wd}" height="22" rx="11" fill="#14293a"/><circle cx="${x - wd / 2 + 12}" cy="${ty - 3.5}" r="3" fill="#e3a843"/><text x="${x + 7}" y="${ty}" text-anchor="middle" font-size="11.5" font-weight="700" font-family="Manrope, sans-serif" fill="#fff">${t}</text></g>`
       : `<g class="cm-label"><rect x="${x - wd / 2}" y="${ty - 13}" width="${wd}" height="19" rx="9.5" fill="#fffdf6" fill-opacity=".9" stroke="#14293a" stroke-opacity=".08"/><text x="${x}" y="${ty}" text-anchor="middle" font-size="11.5" font-weight="700" font-family="Manrope, sans-serif" fill="#14293a">${t}</text></g>`; };
   const walker = `<g transform="translate(-34 -2)"><g class="cm-walker"><ellipse cy="13" rx="7" ry="1.8" fill="#14293a" opacity=".14"/><path d="M-2 4-4 12M2 4l3 8" stroke="#2c3e50" stroke-width="2.4" stroke-linecap="round"/><rect x="-4.5" y="-7" width="9" height="12" rx="3.5" fill="#2f6db5"/><rect x="-8" y="-6" width="5" height="9" rx="2" fill="#e3a843"/><path d="M4-4l3 5" stroke="#f0c9a0" stroke-width="2.2" stroke-linecap="round"/><circle cy="-11" r="4.2" fill="#f0c9a0"/><path d="M-4.2-11.5a4.2 4.2 0 0 1 8.4-1c-2 .6-5 .6-8.4 1z" fill="#3b2a20"/></g></g>`;
   const peaks = [[60, 92], [150, 70], [240, 82], [360, 66], [470, 74], [585, 56], [700, 70], [820, 58], [940, 66]];
-  return `<svg class="course-map-svg cm-rich" viewBox="0 0 1000 ${H}" role="group" aria-label="Course map: ${course.map.map(w => UNITS ? w.label : `Week ${w.n}, ${w.label}`).join('; ')}. You are in ${esc(unitName(current))}.">
+  return `<svg class="course-map-svg cm-rich" viewBox="0 0 1000 ${H}" role="group" aria-label="${esc(opt.aria || `Course map: ${stops.map(w => UNITS ? w.label : `Week ${w.n}, ${w.label}`).join('; ')}. You are in ${unitName(current)}.`)}">
     <defs>
       <linearGradient id="cm-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fbf6ec"/><stop offset=".55" stop-color="#f8eedb"/><stop offset="1" stop-color="#f3e3c4"/></linearGradient>
       <radialGradient id="cm-sun" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fbd98a" stop-opacity=".95"/><stop offset=".5" stop-color="#f7dfa9" stop-opacity=".4"/><stop offset="1" stop-color="#f7dfa9" stop-opacity="0"/></radialGradient>
@@ -804,9 +804,9 @@ function courseMapRich(current) {
     <path d="${road}" stroke="#14293a" stroke-opacity=".32" stroke-width="2.4" stroke-dasharray="2 9" fill="none" stroke-linecap="round"/>
     <g transform="translate(${bx} ${by}) rotate(${ang})">${rail(-11.5)}${rail(11.5)}</g>
     <g transform="translate(74 158)"><rect x="-1.5" y="-26" width="3" height="30" rx="1" fill="#8a6f4e"/><rect x="-2" y="-35" width="32" height="14" rx="3" fill="#fffdf5" stroke="#c9bfae" stroke-width="1.2"/><path d="M30-35l5 7-5 7" fill="#fffdf5" stroke="#c9bfae" stroke-width="1.2"/><text x="13" y="-25" text-anchor="middle" font-size="7.5" font-weight="800" font-family="Manrope, sans-serif" fill="#8b969e" letter-spacing=".06em">START</text></g>
-    ${course.map.map((w, i) => { const [x, y] = pts[i], st = w.n < current ? 'past' : w.n === current ? 'now' : 'next', last = i === N - 1;
-      const has = course.weeks.some(cw => cw.n === w.n);
-      return `<g class="cm-stop cm-${st}${has ? ' cm-link' : ''}" transform="translate(${x} ${y})"${has ? ` data-week-tab="${w.n}" role="button" tabindex="0" aria-label="Show ${esc(unitName(w.n))} lessons"` : ''}>
+    ${stops.map((w, i) => { const [x, y] = pts[i], st = w.st || (w.n < current ? 'past' : w.n === current ? 'now' : 'next'), last = i === N - 1;
+      const has = !w.st && course.weeks.some(cw => cw.n === w.n);
+      return `<g class="cm-stop cm-${st}${has || w.go ? ' cm-link' : ''}" transform="translate(${x} ${y})"${w.go ? ` data-go="${esc(w.go)}" role="link" tabindex="0" aria-label="${esc(w.aria || w.label)}"` : has ? ` data-week-tab="${w.n}" role="button" tabindex="0" aria-label="Show ${esc(unitName(w.n))} lessons"` : ''}>
         ${st === 'now' ? '<circle r="31" fill="#e3a843" opacity=".24"/><circle r="26" fill="none" stroke="#e3a843" stroke-opacity=".55" stroke-width="1.4" stroke-dasharray="3 5" class="cm-spin"/>' : ''}
         <title>${UNITS ? '' : `Week ${w.n}: `}${esc(w.label)} — ${esc(w.sub)}</title>
         ${last ? `<path d="M2-18V-62" stroke="#14293a" stroke-opacity=".12" stroke-width="3" stroke-linecap="round"/><path d="M0-20V-64" stroke="#14293a" stroke-width="3" stroke-linecap="round"/><circle cy="-65" r="2.6" fill="#e3a843"/>
@@ -819,16 +819,16 @@ function courseMapRich(current) {
         ${st === 'past' ? '<path d="m-7 0 5 5 9-10" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>' : `<text y="5.5" text-anchor="middle" font-size="16" font-weight="800" font-family="Manrope, sans-serif" fill="${st === 'now' ? '#14293a' : '#7d8992'}">${w.n}</text>`}
         ${st === 'now' ? walker : ''}
       </g>`; }).join('')}
-    ${course.map.map((w, i) => lab(w, i)).join('')}
+    ${stops.map((w, i) => lab(w, i)).join('')}
     </g>
   </svg>`;
 }
-function courseMap(current) {
-  if (course.map.length > 6) return courseMapRich(current);
+function courseMap(current, stops = course.map, opt = {}) {
+  if (stops.length > 6) return courseMapRich(current, stops, opt);
   /* five stops for DEC15; a longer course (DEC10) spreads its stops along a road that climbs gently to the flag */
-  const N = course.map.length, many = N > 6;
+  const N = stops.length, many = N > 6;
   const pts = N === 5 ? [[120, 168], [320, 116], [530, 136], [740, 96], [900, 76]]
-    : course.map.map((_, i) => { const k = N > 1 ? i / (N - 1) : 0; return [Math.round(150 + 760 * k), Math.round(160 - 84 * k + (i % 2 ? -10 : 8))]; });
+    : stops.map((_, i) => { const k = N > 1 ? i / (N - 1) : 0; return [Math.round(150 + 760 * k), Math.round(160 - 84 * k + (i % 2 ? -10 : 8))]; });
   const road = N === 5 ? 'M-10 190C60 186 80 168 120 168S250 116 320 116 470 138 530 136 670 96 740 96 850 78 900 76'
     : `M-10 190C40 186 ${pts[0][0] - 40} ${pts[0][1]} ${pts[0][0]} ${pts[0][1]}` + pts.slice(1).map(([x, y], i) => `S${x - Math.round((x - pts[i][0]) / 2)} ${y} ${x} ${y}`).join('');
   const tree = (x, y, k = 1) => `<g transform="translate(${x} ${y}) scale(${k})"><ellipse cy="9" rx="11" ry="2.4" fill="#14293a" opacity=".07"/><rect x="-1.6" y="-4" width="3.2" height="12" rx="1" fill="#8a6f4e"/><path d="M-.4 -2v9" stroke="#6b5438" stroke-width=".8"/><circle cy="-12" r="10" fill="#8fb47a"/><circle cx="5" cy="-8" r="7" fill="#6f9d5c"/><circle cx="-4" cy="-15" r="4" fill="#a7c791" opacity=".9"/></g>`;
@@ -836,7 +836,7 @@ function courseMap(current) {
   const cloud = (x, y, k = 1) => `<g transform="translate(${x} ${y}) scale(${k})" fill="#fff" opacity=".85"><ellipse cx="0" cy="0" rx="22" ry="8"/><circle cx="-6" cy="-5" r="8"/><circle cx="6" cy="-7" r="10"/><circle cx="16" cy="-3" r="7"/></g>`;
   const flowers = [[22, 244], [196, 250], [380, 236], [455, 250], [560, 230], [790, 240], [860, 228], [700, 254]].map(([x, y], i) => `<g transform="translate(${x} ${y})"><path d="M0 0v-6" stroke="#7fa36a" stroke-width="1.2"/><circle cy="-7" r="2.2" fill="${['#e9a23b', '#e0674b', '#fff', '#e9a23b'][i % 4]}"/></g>`).join('');
   const grass = [[200, 258], [250, 226], [330, 250], [500, 238], [640, 226], [730, 246], [940, 236]].map(([x, y]) => `<path d="M${x} ${y}c-1-4-3-7-3-9m3 9c1-4 1-8 2-10m-2 10c2-3 4-5 6-6" stroke="#9fbf8a" stroke-width="1.3" fill="none" stroke-linecap="round"/>`).join('');
-  return `<svg class="course-map-svg" viewBox="0 0 1000 262" role="group" aria-label="Course map: ${course.map.map(w => UNITS ? w.label : `Week ${w.n}, ${w.label}`).join('; ')}. You are in ${esc(unitName(current))}.">
+  return `<svg class="course-map-svg" viewBox="0 0 1000 262" role="group" aria-label="${esc(opt.aria || `Course map: ${stops.map(w => UNITS ? w.label : `Week ${w.n}, ${w.label}`).join('; ')}. You are in ${unitName(current)}.`)}">
     <defs>
       <linearGradient id="cm-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fbf7ec"/><stop offset="1" stop-color="#f6efdf"/></linearGradient>
       <radialGradient id="cm-sun" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#f9d98f" stop-opacity=".9"/><stop offset=".55" stop-color="#f6dfae" stop-opacity=".35"/><stop offset="1" stop-color="#f6dfae" stop-opacity="0"/></radialGradient>
@@ -864,10 +864,10 @@ function courseMap(current) {
     <path d="${road}" stroke="#fffdf5" stroke-width="16" fill="none" stroke-linecap="round"/>
     <path d="${road}" stroke="#14293a" stroke-opacity=".35" stroke-width="2.4" stroke-dasharray="2 9" fill="none" stroke-linecap="round"/>
     <g transform="translate(74 152)"><rect x="-1.5" y="-26" width="3" height="30" rx="1" fill="#8a6f4e"/><rect x="-2" y="-34" width="30" height="13" rx="3" fill="#fffdf5" stroke="#c9bfae" stroke-width="1.2"/><path d="M28 -34l5 6.5-5 6.5" fill="#fffdf5" stroke="#c9bfae" stroke-width="1.2"/><text x="12" y="-24.5" text-anchor="middle" font-size="7.5" font-weight="800" font-family="Manrope, sans-serif" fill="#8b969e" letter-spacing=".06em">START</text></g>
-    ${course.map.map((w, i) => { const [x, y] = pts[i] || pts[pts.length - 1], st = w.n < current ? 'past' : w.n === current ? 'now' : 'next', last = i === course.map.length - 1;
-      const has = course.weeks.some(cw => cw.n === w.n);
-      return `<g class="cm-stop cm-${st}${has ? ' cm-link' : ''}" transform="translate(${x} ${y})"${has ? ` data-week-tab="${w.n}" role="button" tabindex="0" aria-label="Show ${esc(unitName(w.n))} lessons"` : ''}>
-        ${st === 'now' ? `<circle r="30" fill="#e3a843" opacity=".22"/><g transform="translate(${last ? -66 : 0} ${last ? -40 : -52})"><rect x="-50" y="-15" width="100" height="26" rx="13" fill="#14293a"/>${last ? '' : '<path d="M-6 11h12l-6 8z" fill="#14293a"/>'}<text y="3" text-anchor="middle" fill="#fff" font-size="12" font-weight="700" font-family="Manrope, sans-serif">You are here</text></g>` : ''}
+    ${stops.map((w, i) => { const [x, y] = pts[i] || pts[pts.length - 1], st = w.st || (w.n < current ? 'past' : w.n === current ? 'now' : 'next'), last = i === stops.length - 1;
+      const has = !w.st && course.weeks.some(cw => cw.n === w.n);
+      return `<g class="cm-stop cm-${st}${has || w.go ? ' cm-link' : ''}" transform="translate(${x} ${y})"${w.go ? ` data-go="${esc(w.go)}" role="link" tabindex="0" aria-label="${esc(w.aria || w.label)}"` : has ? ` data-week-tab="${w.n}" role="button" tabindex="0" aria-label="Show ${esc(unitName(w.n))} lessons"` : ''}>
+        ${st === 'now' ? `<circle r="30" fill="#e3a843" opacity=".22"/><g transform="translate(${last ? -66 : 0} ${last ? -40 : -52})"><rect x="-50" y="-15" width="100" height="26" rx="13" fill="#14293a"/>${last ? '' : '<path d="M-6 11h12l-6 8z" fill="#14293a"/>'}<text y="3" text-anchor="middle" fill="#fff" font-size="12" font-weight="700" font-family="Manrope, sans-serif">${esc(opt.nowText || 'You are here')}</text></g>` : ''}
         ${last ? '<path d="M2 -18V-60" stroke="#14293a" stroke-opacity=".12" stroke-width="3" stroke-linecap="round"/><path d="M0 -20V-62" stroke="#14293a" stroke-width="3" stroke-linecap="round"/><path d="M0 -62h30l-7 9 7 9H0z" fill="#e64626"/><path d="M0 -62h30l-7 9H0z" fill="#fff" opacity=".18"/>' : ''}
         <ellipse cy="22" rx="16" ry="3.5" fill="#14293a" opacity=".1"/>
         <circle r="19" fill="${st === 'past' ? '#14293a' : st === 'now' ? '#e3a843' : '#fffdf5'}" stroke="${st === 'next' ? '#c9bfae' : '#fffdf5'}" stroke-width="3" filter="url(#cm-sh)"/>
@@ -912,15 +912,39 @@ function dayCard(d) {
 /* One week at a time on the course map: with 5 weeks × 5 days the page would be very long.
    The open week is remembered for this visit; the "You are here" week opens first. */
 let homeWeek = null;
+const pickHomeWeek = () => { const ws = course.weeks; if (!ws.some(w => w.n === homeWeek)) homeWeek = (ws.find(w => w.n === lesson.week) || ws[0]).n; };
+/* By skill (course.units): the skills have no order, so the home page shows them as cards side by side (not on a road);
+   the road map is drawn inside each skill, with its lessons as the stops. */
+function skillGrid() {
+  pickHomeWeek();
+  return `<section class="skill-grid" aria-label="${esc(UW)}s: choose one">${course.weeks.map(w => {
+    const ready = w.days.filter(d => d.status === 'ready'), done = ready.filter(d => { const [a, b] = dayProgress(d); return b && a === b; }).length, on = w.n === homeWeek;
+    const meta = !w.days.length ? 'To plan' : !ready.length ? `${w.days.length} planned` : done ? `${done} of ${ready.length} done` : `${ready.length} lesson${ready.length === 1 ? '' : 's'}`;
+    return `<button type="button" class="skill-card${on ? ' is-on' : ''}" data-week-tab="${w.n}" aria-pressed="${on}" style="${tone({ tone: TONES[w.tone] ? w.tone : 'blue' })};--p:${ready.length ? (done / ready.length).toFixed(3) : 0}">
+      <span class="skill-card-art"><img src="${artSrc(w.art || 'reading')}" alt="" width="96" height="74" loading="lazy"></span>
+      <span class="skill-card-tx"><b>${esc(w.theme)}</b>${w.tag ? `<small>${esc(w.tag)}</small>` : ''}</span>
+      <span class="skill-card-meta"><span>${meta}</span><i aria-hidden="true"><i></i></i></span></button>`; }).join('')}</section>`;
+}
+/* The road map of one skill: its lessons in order. Done lessons are ticked, the first unfinished one is "Up next". */
+function skillMap(w) {
+  if (!w.days.length) return '';
+  let next = false;
+  const short = t => t.length > 26 ? t.slice(0, 24).trim() + '…' : t;
+  const stops = w.days.map(d => { const [a, b] = dayProgress(d), ready = d.status === 'ready', done = ready && b && a === b;
+    const st = done ? 'past' : ready && !next ? (next = true, 'now') : 'next';
+    return { n: d.day, label: short(d.title), sub: ready ? (done ? 'Done' : a ? 'In progress' : 'Open') : 'Coming soon', st, go: ready ? '#/' + d.id : '', aria: `Open ${DW} ${d.day}: ${d.title}` }; });
+  return `<section class="course-map skill-map" aria-label="${esc(w.theme)}: map of the lessons">${courseMap(0, stops, { nowText: 'Up next', aria: `${w.theme}: ${w.days.length} lessons in order` })}</section>`;
+}
 function weekTabs() {
   const ws = course.weeks;
-  if (!ws.some(w => w.n === homeWeek)) homeWeek = (ws.find(w => w.n === lesson.week) || ws[ws.length - 1]).n;
+  pickHomeWeek();
   const w = ws.find(x => x.n === homeWeek);
-  const tabs = ws.length > 1 ? `<div class="week-tabs" role="tablist" aria-label="${UNITS ? UW + 's' : 'Weeks'}">${ws.map(x => { const st = x.days.filter(d => d.status === 'ready').length, done = x.days.filter(d => { const [a, b] = dayProgress(d); return b && a === b; }).length;
+  const tabs = UNITS ? '' : ws.length > 1 ? `<div class="week-tabs" role="tablist" aria-label="${UNITS ? UW + 's' : 'Weeks'}">${ws.map(x => { const st = x.days.filter(d => d.status === 'ready').length, done = x.days.filter(d => { const [a, b] = dayProgress(d); return b && a === b; }).length;
     return `<button type="button" role="tab" id="tab-week-${x.n}" aria-controls="panel-week" aria-selected="${x.n === homeWeek}" tabindex="${x.n === homeWeek ? 0 : -1}" class="week-tab${classToday?.week === x.n ? ' has-today' : ''}" data-week-tab="${x.n}" style="--p:${st ? Math.round(100 * done / st) : 0}%"><span class="week-tab-num">${x.n}</span><span class="week-tab-text"><b>${esc(unitName(x.n))}</b><small>${esc(UNITS ? x.tag || '' : x.theme)}</small></span><span class="week-tab-meta">${done ? `${done}/${st} done` : st || !UNITS ? `${st} lesson${st === 1 ? '' : 's'}` : x.days.length ? `${x.days.length} planned` : 'To plan'}</span></button>`; }).join('')}</div>` : '';
   return `<section class="week" aria-label="Lessons by ${UNITS ? UW.toLowerCase() : 'week'}">${tabs}
-    <div class="week-panel" id="panel-week" role="tabpanel" aria-labelledby="tab-week-${w.n}">
-      <header class="week-head"><span class="week-num"><small>${UW}</small>${w.n}</span><div><h2>${esc(w.theme)}</h2><p>${esc(w.summary || '')}</p></div></header>
+    <div class="week-panel" id="panel-week" ${UNITS ? `role="region" aria-label="${esc(w.theme)}"` : `role="tabpanel" aria-labelledby="tab-week-${w.n}"`}>
+      <header class="week-head">${UNITS ? `<img class="week-art" src="${artSrc(w.art || 'reading')}" alt="" width="64" height="50">` : `<span class="week-num"><small>${UW}</small>${w.n}</span>`}<div><h2>${esc(w.theme)}</h2><p>${esc(w.summary || '')}</p></div></header>
+      ${UNITS ? skillMap(w) : ''}
       ${w.days.length ? `<ol class="day-grid${w.days.length > 3 ? ' many' : ''}">${w.days.map(dayCard).join('')}</ol>` : `<p class="week-empty" style="margin:0 0 2rem;color:#5b6b78">The lessons for ${esc(unitName(w.n))} are on the way.</p>`}
     </div></section>`;
 }
@@ -933,7 +957,7 @@ function courseHome() {
       ${classToday ? (() => { const { d, week, day } = classToday, ready = d.status === 'ready', inner = `<span class="ht-dot" aria-hidden="true"></span><span class="ht-hi">${GREET()}</span><span class="ht-txt">Today in class · ${WEEKDAY[day - 1]}, Week ${week}</span><b>${esc(d.title)}</b>${ready ? icon('arrow') : '<small>Coming soon</small>'}`;
         return ready ? `<a class="home-today" href="#/${d.id}">${inner}</a>` : `<span class="home-today is-soon">${inner}</span>`; })() : ''}
     </header>
-    <section class="course-map" aria-label="Course map">${courseMap(lesson.week)}</section>
+    ${UNITS ? skillGrid() : `<section class="course-map" aria-label="Course map">${courseMap(lesson.week)}</section>`}
     ${lesson.week ? `<section class="resume" style="${tone(n ? n.s : lesson.sections[lesson.sections.length - 1])}">
       <img class="resume-art" src="${artSrc(n ? n.s.art : 'writing')}" alt="" width="220" height="170">
       <div class="resume-copy">
@@ -1239,6 +1263,7 @@ function dayPlaybook() {
   </section>`;
 }
 /* open the stage on the right activity when a moment is clicked in the day plan */
+document.addEventListener('click', e => { const g = e.target.closest?.('.cm-stop[data-go]'); if (g) location.hash = g.dataset.go; });   // a lesson on a skill's map
 document.addEventListener('click', e => { const g = e.target.closest?.('[data-pb-go]'); if (!g) return;
   state.active[g.dataset.pbStage] = g.dataset.pbGo; save(false); });
 function downloadsPage() {

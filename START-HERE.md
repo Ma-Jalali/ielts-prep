@@ -18,6 +18,7 @@ The course has seven parts: the four skills, with Writing split into Task 1 (Aca
 
 The lessons are still to be planned: each skill is empty in `lessons/course.js` and shows "To plan" on the course map. Add each lesson to its skill's `days`, in the order students study it.
 
+- **No order between the parts.** Students can start with any part. The home page shows the seven parts as cards side by side. Choosing one shows that part's own road map, with its lessons as the stops in order (done lessons are ticked, and the first unfinished one is "Up next"), then its lesson cards.
 - **How the data is stored.** The app keeps its original weeks/days structure: each entry in `weeks` is a **skill** and each of its `days` is a **lesson**. The setting `units: { unit: 'Skill', lesson: 'Lesson' }` makes the app say "Reading · Lesson 3" instead of "Week 2, Day 3".
 - **Lesson ids carry the level:** `ieb2w<skill>d<lesson>`. For example, `ieb2w2d3` is B2 · Reading · Lesson 3. A future level gets its own prefix, such as `ieb1` or `iec1`, so ids never clash.
 - **Lesson files go in the skill's folder:** `lessons/b2/<skill>/<id>.js`, as set by `folder` in course.js.

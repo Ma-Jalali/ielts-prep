@@ -83,6 +83,7 @@ const PRECACHE = [
   "css/play.css?v=1.1",
   "css/polish.css?v=1.1",
   "css/precision.css?v=1.1",
+  "css/skills.css?v=1.1",
   "css/studio.css?v=1.1",
   "css/workspace.css?v=1.1",
   "index.html",
