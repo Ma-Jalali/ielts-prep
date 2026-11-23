@@ -69,7 +69,28 @@ window.DEC15_COURSE = {
     { n: 7, label: 'Grammar', sub: 'To plan' }
   ],
   weeks: [
-    { n: 1, theme: 'Listening', color: '#0e8a8f', group: 'skills', art: 'listening', short: 'Listening', tag: '4 sections · 40 questions', tone: 'teal', folder: 'lessons/b2/listening', summary: '', days: [] },
+    { n: 1, theme: 'Listening', color: '#0e8a8f', group: 'skills', art: 'listening', short: 'Listening', tag: '4 parts · 40 questions', tone: 'teal', folder: 'lessons/b2/listening', summary: '',
+      /* Learn · Practise · Test. Each group owns a block of lesson numbers (base + 1 … base + size), so every exercise has a
+         fixed place and a fixed id: Part 2 · Exercise 7 = lesson 207 = id ieb2w1d207; Practice test 3 = 2003. A place with no
+         lesson yet shows as "coming soon". Rename anything here; never change a base once students have started. */
+      sections: [
+        { id: 'learn', title: 'Learn', icon: 'book', blurb: 'Strategy lessons: how the test works and how to approach each part. Start here, in order.', groups: [
+          { id: 'learn', title: 'Strategy lessons', base: 0, size: 6, map: true, slots: ['Listening overview', 'Part 1: everyday conversation', 'Part 2: everyday monologue', 'Part 3: academic discussion', 'Part 4: academic lecture', 'Skills and strategies'] }] },
+        { id: 'practise', title: 'Practise', icon: 'target', blurb: 'Short exercises. Practise one part of the test, or one question type, at a time.', groups: [
+          { id: 'part1', title: 'Part 1', by: 'By part', sub: 'A conversation in an everyday context', base: 100, size: 20 },
+          { id: 'part2', title: 'Part 2', by: 'By part', sub: 'A monologue in an everyday context', base: 200, size: 20 },
+          { id: 'part3', title: 'Part 3', by: 'By part', sub: 'A discussion in an educational context', base: 300, size: 20 },
+          { id: 'part4', title: 'Part 4', by: 'By part', sub: 'A lecture on an academic subject', base: 400, size: 20 },
+          { id: 'mcq', title: 'Multiple choice', by: 'By question type', sub: 'One answer from A–C, or two or more from a list', base: 500, size: 10 },
+          { id: 'matching', title: 'Matching', by: 'By question type', sub: 'Items matched to a box of options', base: 600, size: 10 },
+          { id: 'notes', title: 'Note completion', by: 'By question type', sub: 'Notes, forms and sentences with gaps', base: 700, size: 10 },
+          { id: 'table', title: 'Table completion', by: 'By question type', sub: 'Tables with gaps in the cells', base: 800, size: 10 },
+          { id: 'diagram', title: 'Diagram completion', by: 'By question type', sub: 'Label a diagram, a process or a flow-chart', base: 900, size: 10 },
+          { id: 'maps', title: 'Maps', by: 'By question type', sub: 'Label a map or a plan', base: 1000, size: 10 }] },
+        { id: 'test', title: 'Test', icon: 'clock', blurb: 'Full practice tests: all four parts, 40 questions, about 30 minutes, under test conditions.', groups: [
+          { id: 'tests', title: 'Practice tests', base: 2000, size: 10, test: true }] }
+      ],
+      days: [] },
     { n: 2, theme: 'Reading', color: '#2b67d1', group: 'skills', art: 'reading', short: 'Reading', tag: '3 passages · 60 minutes', tone: 'blue', folder: 'lessons/b2/reading', summary: '', days: [] },
     { n: 3, theme: 'Writing Task 1 (Academic)', color: '#e2552f', group: 'skills', art: 'chart', short: 'Writing Task 1', tag: '150+ words · about 20 minutes', tone: 'clay', folder: 'lessons/b2/writing-task1', summary: '', days: [] },
     { n: 4, theme: 'Writing Task 2', color: '#c2185b', group: 'skills', art: 'essay', short: 'Writing Task 2', tag: '250+ words · about 40 minutes', tone: 'clay', folder: 'lessons/b2/writing-task2', summary: '', days: [] },

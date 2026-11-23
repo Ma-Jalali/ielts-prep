@@ -15,10 +15,10 @@
       <path d="M5.8 9.1c1.4-.2 2.8 0 4.1.5M5.8 11.8c1.4-.2 2.8 0 4.1.5M5.8 14.5c1.4-.2 2.8 0 4.1.5M14.1 12.3c1.3-.5 2.7-.7 4.1-.5M14.1 15c1.3-.5 2.7-.7 4.1-.5" ${T}/>
       <path d="M15.3 5.5v4.6l1.25-.95 1.25.95V5.1" fill="currentColor" fill-opacity=".9" ${T}/>`,
     /* Writing Task 1: a report: title, grid, axis, bars and a trend line */
-    chart: `<rect x="3.2" y="3.4" width="17.6" height="17.2" rx="2.7"/><path d="M6.4 6.9h4.6" ${M}/><circle cx="17.3" cy="6.9" r=".8" fill="currentColor" stroke="none"/>
-      <path d="M6.4 10.6h11.2M6.4 13.8h11.2" ${T} opacity=".35"/><path d="M6.4 17.3h11.2" stroke-width="1.2"/>
+    chart: `<rect x="3.2" y="3.4" width="17.6" height="17.2" rx="2.7"/><path d="M6.4 6.9h4.6" ${M}/>
+      <path d="M6.4 17.3h11.2" stroke-width="1.2"/>
       <rect x="7.1" y="14.3" width="2" height="3" rx=".5" ${F} ${T}/><rect x="10.1" y="11.8" width="2" height="5.5" rx=".5" ${F} ${T}/><rect x="13.1" y="13" width="2" height="4.3" rx=".5" ${F} ${T}/><rect x="16.1" y="10" width="2" height="7.3" rx=".5" ${F} ${T}/>
-      <path d="m8.1 12.3 3-2.6 3 1.3 3.1-3.3" ${M}/><circle cx="8.1" cy="12.3" r=".75" fill="currentColor" stroke="none"/><circle cx="11.1" cy="9.7" r=".75" fill="currentColor" stroke="none"/><circle cx="14.1" cy="11" r=".75" fill="currentColor" stroke="none"/><circle cx="17.2" cy="7.7" r=".75" fill="currentColor" stroke="none"/>`,
+      <path d="m8.1 12.1 3-2.6 3 1.3 3.1-3.3" stroke-width="1.15"/><circle cx="8.1" cy="12.1" r=".7" fill="currentColor" stroke="none"/><circle cx="11.1" cy="9.5" r=".7" fill="currentColor" stroke="none"/><circle cx="14.1" cy="10.8" r=".7" fill="currentColor" stroke="none"/><circle cx="17.2" cy="7.5" r=".95" fill="currentColor" stroke="none"/>`,
     /* Writing Task 2: an essay page (title and paragraphs) and a pen writing */
     essay: `<path d="M14.6 20.6H6.7a2 2 0 0 1-2-2V5.4a2 2 0 0 1 2-2h7.6l3.9 3.9v2.4"/><path d="M14.1 3.5v3.9H18" stroke-width="1.2" ${F}/>
       <path d="M7.7 8.8h4.4" ${M}/><path d="M7.7 11.7h7.2M7.7 14.3h6M7.7 16.9h3.6" ${T}/>

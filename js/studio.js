@@ -415,7 +415,10 @@ window.createStudio = function ({ lesson, course, days, esc, icon, toast, L, rer
     four: { name: 'All four skills', sections: () => ['listening', 'reading', 'writing', 'speaking'].flatMap(k => STARTS[k].sections()) }
   };
   function createPage(f) {
-    const week = Number(f.week.value), day = Number(f.day.value), title = f.title.value.trim() || 'New page';
+    let week = Number(f.week.value), day = Number(f.day.value); const title = f.title.value.trim() || 'New page';
+    const place = f.place?.value;   // 'week:group' — a place inside a part organised in sections (Learn · Practise · Test)
+    if (place) { const [pw, gid] = place.split(':'), g = (unitOf(+pw)?.sections || []).flatMap(x => x.groups).find(x => x.id === gid);
+      if (g) { if (!(day >= 1 && day <= 99)) { toast('Choose a number from 1 to 99.'); return; } week = +pw; day = g.base + day; } }
     if (!(week >= 1 && day >= 1)) { toast(UNITS ? `Choose a ${UW.toLowerCase()} and a ${DW.toLowerCase()} number.` : 'Choose a week and a day.'); return; }
     const id = `${PREFIX}w${week}d${day}`;
     if (days.some(d => d.id === id)) { toast(`${whereOf(week, day)} already exists — open it and switch on Edit.`); return; }
@@ -445,12 +448,13 @@ window.createStudio = function ({ lesson, course, days, esc, icon, toast, L, rer
       <section class="sx-card"><h2>${I.plus}New page</h2>
         <form class="sx-new" data-sx-new>
           ${UNITS ? `<label>${UW}<select name="week">${course.weeks.map(w => `<option value="${w.n}"${w.n === nextFree[0] ? ' selected' : ''}>${esc(w.theme)}</option>`).join('')}</select></label>` : `<label>Week<input name="week" type="number" min="1" value="${nextFree[0]}" required></label>`}
-          <label>${DW}<input name="day" type="number" min="1" value="${nextFree[1]}" required></label>
+          ${course.weeks.some(w => w.sections?.length) ? `<label class="sx-grow">Place<select name="place"><option value="">A lesson (no section)</option>${course.weeks.filter(w => w.sections?.length).map(w => `<optgroup label="${esc(w.theme)}">${w.sections.flatMap(x => x.groups.map(g => `<option value="${w.n}:${g.id}">${esc(x.title)} · ${esc(g.title)}</option>`)).join('')}</optgroup>`).join('')}</select></label>` : ''}
+          <label>Number<input name="day" type="number" min="1" value="${nextFree[1]}" required></label>
           <label class="sx-grow">Title<input name="title" type="text" placeholder="e.g. Reading: matching headings" required></label>
           <label class="sx-grow">Start from<select name="from">${Object.entries(STARTS).map(([k, v]) => `<option value="${k}">${esc(v.name)}</option>`).join('')}
             <optgroup label="A copy of …">${weekly.map(x => `<option value="copy:${x.id}">${esc(whereOf(x.week, x.day))} · ${esc(x.title)}</option>`).join('')}</optgroup></select></label>
           <button class="sx-btn" type="submit">${I.plus}Create</button></form>
-        <p class="sx-hint">The page gets the id <code>${esc(PREFIX)}w&lt;${UNITS ? UW.toLowerCase() : 'week'}&gt;d&lt;${UNITS ? DW.toLowerCase() : 'day'}&gt;</code>${UNITS ? ` (${course.weeks.map(w => `${w.n} = ${esc(w.theme)}`).join(', ')})` : ''} and appears on the course map at once (on this device).</p></section>
+        <p class="sx-hint">For Listening, choose a <b>Place</b> (for example Practise · Part 2) and the exercise <b>Number</b> in it: Part 2 · 7 becomes lesson 207. The page gets the id <code>${esc(PREFIX)}w&lt;${UNITS ? UW.toLowerCase() : 'week'}&gt;d&lt;${UNITS ? DW.toLowerCase() : 'day'}&gt;</code>${UNITS ? ` (${course.weeks.map(w => `${w.n} = ${esc(w.theme)}`).join(', ')})` : ''} and appears on the course map at once (on this device).</p></section>
       <section class="sx-card"><h2>${I.edit}Drafts on this device <em>${ids.length}</em></h2>
         ${ids.length ? `<ul class="sx-drafts">${ids.map(id => { const l = d.lessons[id]; return `<li><span class="sx-d-tag${only.has(id) ? ' is-new' : ''}">${only.has(id) ? 'New' : 'Edited'}</span>
           <a href="#/${esc(id)}"><b>${esc(l.week ? whereOf(l.week, l.day) : id)} · ${esc(l.title)}</b><small>${esc(id)} · saved ${ago(d.saved?.[id])}</small></a>
