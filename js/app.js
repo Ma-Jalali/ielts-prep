@@ -37,8 +37,15 @@ const PR = course.printables?.length ? course.printables : null;   // DEC10 phot
 const PICK = course.id === 'ielts' && window.DEC15Picker;   // side panel → Name wheel (#/picker), DEC10 only   // side panel → Downloads (#/downloads) and the 'download' lesson block
 const labOf = id => { for (const st of LAB?.strands || []) { const i = st.lessons.findIndex(l => l.id === id); if (i >= 0) return { st, n: i + 1, l: st.lessons[i] }; } return null; };
 const labHere = labOf(lesson.id);
-const whereLong = (sep = ' · ') => labHere ? `${LABT} · ${labHere.st.short} ${labHere.n}` : `Week ${lesson.week}${sep}Day ${lesson.day}`;
-const whereShort = () => labHere ? `Lab · ${labHere.st.short} ${labHere.n}` : `W${lesson.week} D${lesson.day}`;   // a name ('reading') or a picture's path ('assets/ui/week1/….svg')
+/* Units (course.units): a course can be organised by skill instead of by week. The data keeps its weeks/days shape
+   (week = unit, day = lesson in that unit, id = <prefix>w<unit>d<lesson>); only the words students see change:
+   with course.units = { unit: 'Skill', lesson: 'Lesson' } a lesson is "Reading · Lesson 3", not "Week 2, Day 3". */
+const UNITS = course.units || null, UW = UNITS?.unit || 'Week', DW = UNITS?.lesson || 'Day';
+const unitName = n => UNITS ? (course.weeks.find(w => w.n === n)?.theme || `${UW} ${n}`) : `Week ${n}`;
+const unitShort = n => UNITS ? (course.weeks.find(w => w.n === n)?.short || unitName(n)) : `W${n}`;
+const dayWhere = (w, d, sep = ', ') => `${unitName(w)}${sep}${DW} ${d}`;
+const whereLong = (sep = ' · ') => labHere ? `${LABT} · ${labHere.st.short} ${labHere.n}` : !lesson.week ? lesson.where || lesson.title : dayWhere(lesson.week, lesson.day, sep);
+const whereShort = () => labHere ? `Lab · ${labHere.st.short} ${labHere.n}` : !lesson.week ? lesson.where || lesson.title : UNITS ? `${unitShort(lesson.week)} ${lesson.day}` : `W${lesson.week} D${lesson.day}`;   // a name ('reading') or a picture's path ('assets/ui/week1/….svg')
 /* Addresses inside this lesson: L('ai') → #/w2d5/ai */
 const L = p => '#/' + lesson.id + (p && p !== 'overview' ? '/' + p : '');
 const coreActivities = lesson.sections.flatMap(s => s.activities);
@@ -153,6 +160,7 @@ function whoBadge(w) {
 
 const findBlock = id => allActivities.flatMap(a => a.blocks).find(x => x.id === id);
 const play = window.createDEC15Play ? window.createDEC15Play({ getState: () => state, save, rerender: () => rerender(), esc, strip, icon, toast, findBlock }) : null;
+const bandCalc = window.createIELTSBand ? window.createIELTSBand({ esc }) : null;   // side panel → Band calculator (#/band)
 const guide = window.createDEC15Guide ? window.createDEC15Guide({ esc, icon, days, toast }) : null;   // DEC10: Course calendar + Assessments pages
 if (guide) ['side-calendar', 'side-assess'].forEach(id => { const el = document.getElementById(id); if (el) el.hidden = false; });
 if (LAB) { const el = document.getElementById('side-lab'); if (el) el.hidden = false; }
@@ -559,12 +567,12 @@ function activity(a, i, list, section) {
   </article>`;
 }
 /* The next lesson in the course, if it is ready. */
-function nextLesson() { const i = days.findIndex(d => d.id === lesson.id), nx = days[i + 1]; return nx && nx.status === 'ready' && (nx.lab || null) === (days[i]?.lab || null) ? nx : null; }   // a lab lesson leads to the next lab lesson only
+function nextLesson() { const i = days.findIndex(d => d.id === lesson.id), nx = days[i + 1]; return nx && nx.status === 'ready' && (nx.lab || null) === (days[i]?.lab || null) && !days[i]?.page && (!UNITS || nx.week === days[i]?.week) ? nx : null; }   // a lab lesson leads to the next lab lesson only; by skill, the next lesson of the same skill
 function nextStageLink(section) {
   const n = lesson.sections.indexOf(section), next = lesson.sections[n + 1];
   if (next) return `<a class="btn" href="${L(next.id)}">Next stage: ${esc(next.title)} ${icon('arrow')}</a>`;
   const nx = nextLesson();
-  return nx ? `<a class="btn-quiet" href="${L('notebook')}">Review my notebook</a><a class="btn" href="#/${nx.id}">Next lesson: Week ${nx.week}, Day ${nx.day} ${icon('arrow')}</a>` : `<a class="btn" href="${L('notebook')}">Review my notebook ${icon('arrow')}</a>`;
+  return nx ? `<a class="btn-quiet" href="${L('notebook')}">Review my notebook</a><a class="btn" href="#/${nx.id}">Next lesson: ${esc(dayWhere(nx.week, nx.day))} ${icon('arrow')}</a>` : `<a class="btn" href="${L('notebook')}">Review my notebook ${icon('arrow')}</a>`;
 }
 
 /* ───────── pages ───────── */
@@ -624,7 +632,7 @@ function upNext(s, idx) {
   const nx = nextLesson();
   return `<aside class="upnext is-end" aria-label="End of the day">
       <div class="upnext-art"><img src="assets/art/complete.svg" alt="" width="96" height="112" loading="lazy"></div>
-      <div class="upnext-copy"><span class="eyebrow">Last stage of the day</span><h2>You reached the end of today</h2><p>Look back over your notebook${nx ? `, then go on to Week ${nx.week}, Day ${nx.day}` : ''}.</p></div>
+      <div class="upnext-copy"><span class="eyebrow">Last stage of the ${UNITS ? 'lesson' : 'day'}</span><h2>You reached the end of ${UNITS ? 'this lesson' : 'today'}</h2><p>Look back over your notebook${nx ? `, then go on to ${esc(dayWhere(nx.week, nx.day))}` : ''}.</p></div>
       <a class="btn" href="${nx ? '#/' + nx.id : L('notebook')}">${nx ? 'Next lesson' : 'Open my notebook'} ${icon('arrow')}</a></aside>`;
 }
 /* The first activity not yet finished (for "Continue" buttons). */
@@ -658,7 +666,7 @@ function overview() {
   <div class="dayline" role="group" aria-label="${lesson.sections.map(s => `${stageName(s)}, ${s.minutes} minutes`).join('; ')}; then: ${esc(lesson.finish?.title || 'Next')}.">
     ${lesson.sections.map(s => { const d = s.activities.filter(a => state.done[a.id]).length; return `<a class="dayline-seg${d === s.activities.length ? ' complete' : ''}" style="${tone(s)};flex:${s.minutes}" href="${L(s.id)}"><span class="dayline-bar"><i style="width:${Math.round(100 * d / s.activities.length)}%"></i></span><span class="dayline-num">${esc(code(s))}</span><span class="dayline-title">${esc(s.title)}</span><span class="dayline-min">${s.minutes} min</span></a>`; }).join('')}
     ${(() => { const nx = nextLesson(), inner = `<span class="dayline-bar"></span><span class="dayline-num">${icon(nx ? 'arrow' : 'pen')}</span><span class="dayline-title">${esc(lesson.finish?.title || 'Next')}</span><span class="dayline-min">${esc(lesson.finish?.text || '')}</span>`;
-      return nx ? `<a class="dayline-flag" href="#/${nx.id}" title="${nx.lab ? `Open the next lesson: ${esc(nx.title)}` : `Open Week ${nx.week}, Day ${nx.day}`}">${inner}</a>` : `<div class="dayline-flag">${inner}</div>`; })()}
+      return nx ? `<a class="dayline-flag" href="#/${nx.id}" title="${nx.lab ? `Open the next lesson: ${esc(nx.title)}` : `Open ${esc(dayWhere(nx.week, nx.day))}`}">${inner}</a>` : `<div class="dayline-flag">${inner}</div>`; })()}
   </div>
   ${dayPlaybook()}
   <ol class="journey">${lesson.sections.map(s => { const d = s.activities.filter(a => state.done[a.id]).length; return `<li><a class="journey-card${d === s.activities.length ? ' complete' : ''}" style="${tone(s)}" href="${L(s.id)}">
@@ -687,17 +695,17 @@ function overview() {
 /* DEC10's ten-week map: a road climbing through a detailed (but quiet) landscape — far mountains, a ridge with
    pines and turning wind turbines, a river under a little bridge into a lake, fields with sheep, a campus at the
    finish. Everything decorative sits behind the road or in the foreground, away from the stops and their labels. */
-function courseMapRich(current) {
-  const N = course.map.length, H = 300;
-  const pts = course.map.map((_, i) => { const k = N > 1 ? i / (N - 1) : 0; return [Math.round(150 + 760 * k), Math.round(160 - 84 * k + (i % 2 ? -10 : 8))]; });
+function courseMapRich(current, stops = course.map, opt = {}) {
+  const N = stops.length, H = 300;
+  const pts = stops.map((_, i) => { const k = N > 1 ? i / (N - 1) : 0; return [Math.round(150 + 760 * k), Math.round(160 - 84 * k + (i % 2 ? -10 : 8))]; });
   const road = `M-10 196C40 192 ${pts[0][0] - 40} ${pts[0][1]} ${pts[0][0]} ${pts[0][1]}` + pts.slice(1).map(([x, y], i) => `S${x - Math.round((x - pts[i][0]) / 2)} ${y} ${x} ${y}`).join('');
   const T = (x, y, k, s) => `<g transform="translate(${x} ${y})${k && k !== 1 ? ` scale(${k})` : ''}">${s}</g>`;
-  const tree = (x, y, k = 1, c = ['#8fb47a', '#6f9d5c', '#a9c995']) => T(x, y, k, `<ellipse cy="9" rx="12" ry="2.6" fill="#14293a" opacity=".08"/><path d="M-1.8 9V-4h3.6V9z" fill="#8a6f4e"/><path d="M0 0 4-5M0 2-3-3" stroke="#8a6f4e" stroke-width="1.2" stroke-linecap="round"/><circle cy="-12" r="10.5" fill="${c[0]}"/><circle cx="5.5" cy="-8" r="7.5" fill="${c[1]}"/><circle cx="-5" cy="-7" r="6" fill="${c[1]}" opacity=".55"/><circle cx="-4" cy="-16" r="4.4" fill="${c[2]}"/><circle cx="2" cy="-19" r="2" fill="#fff" opacity=".35"/>`);
+  const tree = (x, y, k = 1, c = ['#8fb47a', '#6f9d5c', '#a9c995']) => T(x, y, k, `<ellipse cy="9" rx="12" ry="2.6" fill="#18213f" opacity=".08"/><path d="M-1.8 9V-4h3.6V9z" fill="#8a6f4e"/><path d="M0 0 4-5M0 2-3-3" stroke="#8a6f4e" stroke-width="1.2" stroke-linecap="round"/><circle cy="-12" r="10.5" fill="${c[0]}"/><circle cx="5.5" cy="-8" r="7.5" fill="${c[1]}"/><circle cx="-5" cy="-7" r="6" fill="${c[1]}" opacity=".55"/><circle cx="-4" cy="-16" r="4.4" fill="${c[2]}"/><circle cx="2" cy="-19" r="2" fill="#fff" opacity=".35"/>`);
   const pine = (x, y, k = 1, c = '#6f9d5c') => T(x, y, k, `<path d="M-1 0h2v4h-2z" fill="#7c6446"/><path d="M0-22 7-8H3l6 8H-9l6-8h-4z" fill="${c}"/><path d="M0-22-7-8h4l-6 8h9z" fill="#fff" opacity=".12"/>`);
-  const bush = (x, y, k = 1) => T(x, y, k, `<ellipse cy="3.5" rx="13" ry="2.2" fill="#14293a" opacity=".07"/><circle cx="-5" r="5.4" fill="#9cc086"/><circle cx="3" cy="-1.5" r="6.6" fill="#86b170"/><circle cx="9" cy="1" r="4.4" fill="#9cc086"/><circle cx="1" cy="-4" r="2.2" fill="#c2dbb0"/>`);
+  const bush = (x, y, k = 1) => T(x, y, k, `<ellipse cy="3.5" rx="13" ry="2.2" fill="#18213f" opacity=".07"/><circle cx="-5" r="5.4" fill="#9cc086"/><circle cx="3" cy="-1.5" r="6.6" fill="#86b170"/><circle cx="9" cy="1" r="4.4" fill="#9cc086"/><circle cx="1" cy="-4" r="2.2" fill="#c2dbb0"/>`);
   const cloud = (x, y, k = 1, d = 0) => `<g class="cm-cloud" style="animation-delay:${d}s">${T(x, y, k, `<ellipse cx="2" cy="4" rx="26" ry="5" fill="#e9dcc2" opacity=".45"/><path d="M-24 2a9 9 0 0 1 10-10 13 13 0 0 1 24-3 9 9 0 0 1 14 7 7 7 0 0 1 2 6z" fill="#fff"/><path d="M-22 2h50" stroke="#efe4cf" stroke-width="2" stroke-linecap="round"/>`)}</g>`;
   const bird = (x, y, k = 1, d = 0) => `<g class="cm-bird" style="animation-delay:${d}s">${T(x, y, k, '<path d="M-7 0q3.5-4 7 0q3.5-4 7 0" stroke="#6f7f8b" stroke-width="1.5" fill="none" stroke-linecap="round"/>')}</g>`;
-  const sheep = (x, y, k = 1, f = 1) => T(x, y, k, `<g transform="scale(${f} 1)"><ellipse cy="7" rx="9" ry="1.8" fill="#14293a" opacity=".08"/><path d="M-4 3v4M3 3v4" stroke="#3d4a52" stroke-width="1.6" stroke-linecap="round"/><circle cx="-5" cy="-1" r="3.6" fill="#fffdf8"/><circle cx="0" cy="-2.4" r="4.4" fill="#fffdf8"/><circle cx="4.6" cy="-.6" r="3.6" fill="#fffdf8"/><circle cx="-1" cy="1.6" r="3.6" fill="#f5efe2"/><ellipse cx="8.6" cy="-2.4" rx="2.6" ry="2.2" fill="#3d4a52"/><circle cx="9.4" cy="-3" r=".5" fill="#fff"/></g>`);
+  const sheep = (x, y, k = 1, f = 1) => T(x, y, k, `<g transform="scale(${f} 1)"><ellipse cy="7" rx="9" ry="1.8" fill="#18213f" opacity=".08"/><path d="M-4 3v4M3 3v4" stroke="#3d4a52" stroke-width="1.6" stroke-linecap="round"/><circle cx="-5" cy="-1" r="3.6" fill="#fffdf8"/><circle cx="0" cy="-2.4" r="4.4" fill="#fffdf8"/><circle cx="4.6" cy="-.6" r="3.6" fill="#fffdf8"/><circle cx="-1" cy="1.6" r="3.6" fill="#f5efe2"/><ellipse cx="8.6" cy="-2.4" rx="2.6" ry="2.2" fill="#3d4a52"/><circle cx="9.4" cy="-3" r=".5" fill="#fff"/></g>`);
   const flower = (x, y, c) => T(x, y, 1, `<path d="M0 0v-7" stroke="#7fa36a" stroke-width="1.2"/><path d="M0-3 3-5" stroke="#7fa36a" stroke-width="1"/><circle cy="-8" r="2.4" fill="${c}"/><circle cy="-8" r=".9" fill="#fff8d6"/>`);
   const grass = (x, y) => `<path d="M${x} ${y}c-1-4-3-7-3-9m3 9c1-4 1-8 2-10m-2 10c2-3 4-5 6-6" stroke="#9fbf8a" stroke-width="1.3" fill="none" stroke-linecap="round"/>`;
   const turbine = (x, y, h, d) => `<g><path d="M${x - 1.4} ${y}l.8-${h}h1.2l.8 ${h}z" fill="#fbfaf6" stroke="#cfd6d8" stroke-width=".6"/>
@@ -711,14 +719,14 @@ function courseMapRich(current) {
   /* labels alternate below / above the road so neighbours never collide; the "You are here" bubble then sits higher */
   const up = i => i % 2 === 1 && i < N - 1;   // the finish keeps its label below, clear of the flag
   /* the week you are in: its own label becomes the navy "You are here · …" pill, so no second bubble can sit on a neighbour's label */
-  const lab = (w, i) => { const y = pts[i][1], now = w.n === current, txt = now ? 'You are here · ' + w.label : w.label, t = esc(txt), wd = Math.round(txt.length * (now ? 6.3 : 6.5) + (now ? 34 : 20)), ty = y + (up(i) ? -33 : 42);
+  const lab = (w, i) => { const y = pts[i][1], now = w.st ? w.st === 'now' : w.n === current, txt = now ? (opt.nowText || 'You are here') + ' · ' + w.label : w.label, t = esc(txt), wd = Math.round(txt.length * (now ? 6.3 : 6.5) + (now ? 34 : 20)), ty = y + (up(i) ? -33 : 42);
     const x = Math.max(wd / 2 + 8, Math.min(1000 - wd / 2 - 8, pts[i][0] + (i === N - 1 && N > 1 ? 22 : 0)));
     return now
-      ? `<g class="cm-label cm-label-now"><rect x="${x - wd / 2}" y="${ty - 14.5}" width="${wd}" height="22" rx="11" fill="#14293a"/><circle cx="${x - wd / 2 + 12}" cy="${ty - 3.5}" r="3" fill="#e3a843"/><text x="${x + 7}" y="${ty}" text-anchor="middle" font-size="11.5" font-weight="700" font-family="Manrope, sans-serif" fill="#fff">${t}</text></g>`
-      : `<g class="cm-label"><rect x="${x - wd / 2}" y="${ty - 13}" width="${wd}" height="19" rx="9.5" fill="#fffdf6" fill-opacity=".9" stroke="#14293a" stroke-opacity=".08"/><text x="${x}" y="${ty}" text-anchor="middle" font-size="11.5" font-weight="700" font-family="Manrope, sans-serif" fill="#14293a">${t}</text></g>`; };
-  const walker = `<g transform="translate(-34 -2)"><g class="cm-walker"><ellipse cy="13" rx="7" ry="1.8" fill="#14293a" opacity=".14"/><path d="M-2 4-4 12M2 4l3 8" stroke="#2c3e50" stroke-width="2.4" stroke-linecap="round"/><rect x="-4.5" y="-7" width="9" height="12" rx="3.5" fill="#2f6db5"/><rect x="-8" y="-6" width="5" height="9" rx="2" fill="#e3a843"/><path d="M4-4l3 5" stroke="#f0c9a0" stroke-width="2.2" stroke-linecap="round"/><circle cy="-11" r="4.2" fill="#f0c9a0"/><path d="M-4.2-11.5a4.2 4.2 0 0 1 8.4-1c-2 .6-5 .6-8.4 1z" fill="#3b2a20"/></g></g>`;
+      ? `<g class="cm-label cm-label-now"><rect x="${x - wd / 2}" y="${ty - 14.5}" width="${wd}" height="22" rx="11" fill="#18213f"/><circle cx="${x - wd / 2 + 12}" cy="${ty - 3.5}" r="3" fill="#e3a843"/><text x="${x + 7}" y="${ty}" text-anchor="middle" font-size="11.5" font-weight="700" font-family="Manrope, sans-serif" fill="#fff">${t}</text></g>`
+      : `<g class="cm-label"><rect x="${x - wd / 2}" y="${ty - 13}" width="${wd}" height="19" rx="9.5" fill="#fffdf6" fill-opacity=".9" stroke="#18213f" stroke-opacity=".08"/><text x="${x}" y="${ty}" text-anchor="middle" font-size="11.5" font-weight="700" font-family="Manrope, sans-serif" fill="#18213f">${t}</text></g>`; };
+  const walker = `<g transform="translate(-34 -2)"><g class="cm-walker"><ellipse cy="13" rx="7" ry="1.8" fill="#18213f" opacity=".14"/><path d="M-2 4-4 12M2 4l3 8" stroke="#2c3e50" stroke-width="2.4" stroke-linecap="round"/><rect x="-4.5" y="-7" width="9" height="12" rx="3.5" fill="#2f6db5"/><rect x="-8" y="-6" width="5" height="9" rx="2" fill="#e3a843"/><path d="M4-4l3 5" stroke="#f0c9a0" stroke-width="2.2" stroke-linecap="round"/><circle cy="-11" r="4.2" fill="#f0c9a0"/><path d="M-4.2-11.5a4.2 4.2 0 0 1 8.4-1c-2 .6-5 .6-8.4 1z" fill="#3b2a20"/></g></g>`;
   const peaks = [[60, 92], [150, 70], [240, 82], [360, 66], [470, 74], [585, 56], [700, 70], [820, 58], [940, 66]];
-  return `<svg class="course-map-svg cm-rich" viewBox="0 0 1000 ${H}" role="group" aria-label="Course map: ${course.map.map(w => `Week ${w.n}, ${w.label}`).join('; ')}. You are in Week ${current}.">
+  return `<svg class="course-map-svg cm-rich" viewBox="0 0 1000 ${H}" role="group" aria-label="${esc(opt.aria || `Course map: ${stops.map(w => UNITS ? w.label : `Week ${w.n}, ${w.label}`).join('; ')}. You are in ${unitName(current)}.`)}">
     <defs>
       <linearGradient id="cm-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fbf6ec"/><stop offset=".55" stop-color="#f8eedb"/><stop offset="1" stop-color="#f3e3c4"/></linearGradient>
       <radialGradient id="cm-sun" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fbd98a" stop-opacity=".95"/><stop offset=".5" stop-color="#f7dfa9" stop-opacity=".4"/><stop offset="1" stop-color="#f7dfa9" stop-opacity="0"/></radialGradient>
@@ -727,11 +735,11 @@ function courseMapRich(current) {
       <linearGradient id="cm-far" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f1e7d2"/><stop offset="1" stop-color="#e9ddc4"/></linearGradient>
       <linearGradient id="cm-near" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e3edd6"/><stop offset="1" stop-color="#cfdfbd"/></linearGradient>
       <linearGradient id="cm-lake" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a9d0d8"/><stop offset="1" stop-color="#cfe6e8"/></linearGradient>
-      <linearGradient id="cm-past" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2b4d68"/><stop offset="1" stop-color="#14293a"/></linearGradient>
+      <linearGradient id="cm-past" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2b4d68"/><stop offset="1" stop-color="#18213f"/></linearGradient>
       <linearGradient id="cm-now" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f5c862"/><stop offset="1" stop-color="#d9952a"/></linearGradient>
       <linearGradient id="cm-next" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fffdf8"/><stop offset="1" stop-color="#f2e9d7"/></linearGradient>
-      <filter id="cm-sh" x="-40%" y="-40%" width="180%" height="180%"><feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#14293a" flood-opacity=".2"/></filter>
-      <pattern id="cm-dots" width="14" height="14" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r=".9" fill="#14293a" opacity=".05"/></pattern>
+      <filter id="cm-sh" x="-40%" y="-40%" width="180%" height="180%"><feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#18213f" flood-opacity=".2"/></filter>
+      <pattern id="cm-dots" width="14" height="14" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r=".9" fill="#18213f" opacity=".05"/></pattern>
       <pattern id="cm-rows" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(-8)"><path d="M0 4h8" stroke="#b9cf9f" stroke-width="1.4"/></pattern>
       <pattern id="cm-rows2" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(12)"><path d="M0 3.5h7" stroke="#e2cf96" stroke-width="1.6"/></pattern>
     </defs>
@@ -745,10 +753,10 @@ function courseMapRich(current) {
     ${cloud(118, 44, 1, 0)}${cloud(484, 26, .78, -9)}${cloud(846, 24, .66, -18)}${cloud(40, 96, .5, -5)}
     ${bird(178, 30, 1, 0)}${bird(196, 40, .7, -.4)}${bird(706, 22, .8, -.8)}${bird(724, 30, .6, -.2)}
     <!-- hot-air balloon -->
-    <g class="cm-balloon">${T(388, 30, .9, `<path d="M0-26c-15 0-24 10-24 22 0 10 8 17 14 23l3 5h14l3-5c6-6 14-13 14-23 0-12-9-22-24-22z" fill="#e64626"/>
+    <g class="cm-balloon">${T(388, 30, .9, `<path d="M0-26c-15 0-24 10-24 22 0 10 8 17 14 23l3 5h14l3-5c6-6 14-13 14-23 0-12-9-22-24-22z" fill="#d6283c"/>
       <path d="M0-26c-7 0-11 10-11 22 0 10 4 17 6 23l2 5h6l2-5c2-6 6-13 6-23 0-12-4-22-11-22z" fill="#f2b54f"/>
       <path d="M0-26c-2 0-3.4 10-3.4 22 0 10 1.4 17 2 23l.5 5h1.8l.5-5c.6-6 2-13 2-23 0-12-1.4-22-3.4-22z" fill="#fffdf5"/>
-      <path d="M-24-4h48" stroke="#14293a" stroke-opacity=".12"/><path d="M-14-20a17 17 0 0 1 8-5" stroke="#fff" stroke-opacity=".55" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+      <path d="M-24-4h48" stroke="#18213f" stroke-opacity=".12"/><path d="M-14-20a17 17 0 0 1 8-5" stroke="#fff" stroke-opacity=".55" stroke-width="2.4" fill="none" stroke-linecap="round"/>
       <path d="M-7 24l2 8M7 24l-2 8" stroke="#8a6f4e" stroke-width=".9"/><rect x="-5.5" y="31" width="11" height="8" rx="1.6" fill="#a7774a"/><path d="M-5.5 34h11" stroke="#8a5f3a" stroke-width=".8"/>`)}</g>
     <!-- far mountains, two ranges with snow -->
     <path d="M0 120L50 98 110 108 190 78 270 102 330 88 420 104 520 80 600 96 680 74 760 92 850 70 930 86 1000 74V170H0Z" fill="url(#cm-mtn2)"/>
@@ -769,7 +777,7 @@ function courseMapRich(current) {
     <path d="M330 232l120-10 30 30-128 12z" fill="#f2e6c2"/><path d="M330 232l120-10 30 30-128 12z" fill="url(#cm-rows2)"/>
     <path d="M10 262l120-8 18 26-140 6z" fill="#e1edd2"/><path d="M10 262l120-8 18 26-140 6z" fill="url(#cm-rows)" opacity=".7"/>
     <path d="M150 236l130-14M330 232l120-10" stroke="#fff" stroke-opacity=".6" stroke-width="1.2"/>
-    ${T(70, 228, 1, `<ellipse cy="14" rx="28" ry="3" fill="#14293a" opacity=".08"/><path d="M-18 0h28v14h-28z" fill="#fbf4e4"/><path d="M-22 1l16-13 16 13z" fill="#c2562f"/><path d="M-22 1l16-13 4 3.3" fill="#fff" opacity=".18"/><rect x="-10" y="4" width="6" height="10" rx="1" fill="#8a5f3a"/><rect x="0" y="3" width="6" height="5" rx="1" fill="#a9d0d8"/><path d="M3 3v5M0 5.5h6" stroke="#fff" stroke-width=".7"/><path d="M10 14V2h12v12z" fill="#e6d3ae"/><path d="M8 3l8-7 8 7z" fill="#a74a2a"/><path d="M14 8h4v6h-4z" fill="#8a5f3a"/>`)}
+    ${T(70, 228, 1, `<ellipse cy="14" rx="28" ry="3" fill="#18213f" opacity=".08"/><path d="M-18 0h28v14h-28z" fill="#fbf4e4"/><path d="M-22 1l16-13 16 13z" fill="#c2562f"/><path d="M-22 1l16-13 4 3.3" fill="#fff" opacity=".18"/><rect x="-10" y="4" width="6" height="10" rx="1" fill="#8a5f3a"/><rect x="0" y="3" width="6" height="5" rx="1" fill="#a9d0d8"/><path d="M3 3v5M0 5.5h6" stroke="#fff" stroke-width=".7"/><path d="M10 14V2h12v12z" fill="#e6d3ae"/><path d="M8 3l8-7 8 7z" fill="#a74a2a"/><path d="M14 8h4v6h-4z" fill="#8a5f3a"/>`)}
     <path d="M110 244h170M118 238v10M150 236v10M182 234v10M214 233v10M246 232v10M278 231v10" stroke="#b49a76" stroke-width="1.4" stroke-linecap="round"/>
     ${sheep(214, 262, 1, 1)}${sheep(240, 270, .9, -1)}${sheep(190, 274, .85, 1)}
     <!-- the lake with a little boat -->
@@ -779,11 +787,11 @@ function courseMapRich(current) {
     <g class="cm-boat">${T(bx + 196, by + 118, 1, '<path d="M-10 0h20l-4 5h-12z" fill="#8a5f3a"/><path d="M0-1v-16" stroke="#6b5438" stroke-width="1.2"/><path d="M1-16l9 14H1z" fill="#fffdf5"/><path d="M-1-13l-7 11h7z" fill="#e3a843"/><path d="M-12 7h24" stroke="#fff" stroke-opacity=".6" stroke-linecap="round"/>')}</g>
     ${[[bx + 98, by + 112], [bx + 104, by + 116], [bx + 262, by + 104]].map(([x, y]) => `<path d="M${x} ${y}v-10M${x + 3} ${y}v-8M${x - 3} ${y}v-7" stroke="#7fa36a" stroke-width="1.2" stroke-linecap="round"/><rect x="${x - .9}" y="${y - 13}" width="1.8" height="5" rx=".9" fill="#8a6f4e"/>`).join('')}
     <!-- the campus at the finish -->
-    ${T(930, 200, 1, `<ellipse cy="2" rx="62" ry="4" fill="#14293a" opacity=".08"/>
+    ${T(930, 200, 1, `<ellipse cy="2" rx="62" ry="4" fill="#18213f" opacity=".08"/>
       <path d="M-56 0v-26h112V0z" fill="#ead2a4"/><path d="M-60-26h120l-6-8H-54z" fill="#b7744a"/><path d="M-56-20h112" stroke="#d9bb85" stroke-width="1"/>
       ${[-46, -32, -18, 18, 32, 46].map(x => `<path d="M${x - 4}-6v-11a4 4 0 0 1 8 0V-6z" fill="#7d93a3"/><path d="M${x}-17v11" stroke="#ead2a4" stroke-width=".8"/>`).join('')}
       <path d="M-10 0V-50h20V0z" fill="#e3c792"/><path d="M-13-50h26l-13-16z" fill="#a8663f"/><path d="M0-66v-8" stroke="#6b5438" stroke-width="1.2"/><path d="M0-74h7l-2 2.5 2 2.5H0z" fill="#2f6db5"/>
-      <circle cy="-38" r="5.5" fill="#fffdf5" stroke="#b49a76"/><path d="M0-38v-3.6M0-38h2.6" stroke="#14293a" stroke-width=".9" stroke-linecap="round"/>
+      <circle cy="-38" r="5.5" fill="#fffdf5" stroke="#b49a76"/><path d="M0-38v-3.6M0-38h2.6" stroke="#18213f" stroke-width=".9" stroke-linecap="round"/>
       <path d="M-5 0v-14a5 5 0 0 1 10 0V0z" fill="#8a5f3a"/><path d="M-26 0h52" stroke="#d9bb85" stroke-width="2"/>`)}
     ${tree(862, 206, .9)}${tree(1000, 204, .85)}${pine(880, 200, .8)}
     ${tree(196, 132, .95)}${tree(214, 138, .75)}${tree(414, 118, .8)}${tree(28, 176, .8)}${tree(560, 198, .9)}${tree(500, 266, 1.05)}${tree(976, 270, .95)}${tree(10, 282, .8)}
@@ -791,52 +799,52 @@ function courseMapRich(current) {
     ${[[22, 248], [300, 256], [424, 268], [470, 286], [560, 236], [780, 282], [880, 248], [930, 284], [700, 284], [128, 278]].map(([x, y], i) => flower(x, y, ['#e9a23b', '#e0674b', '#fff', '#c27bc9', '#e9a23b'][i % 5])).join('')}
     ${[[200, 284], [256, 232], [340, 284], [520, 240], [664, 280], [742, 270], [952, 238], [590, 250]].map(([x, y]) => grass(x, y)).join('')}
     <!-- the road, with a kerb and a dashed centre line -->
-    <path d="${road}" stroke="#14293a" stroke-opacity=".08" stroke-width="24" fill="none" stroke-linecap="round" transform="translate(0 5)"/>
+    <path d="${road}" stroke="#18213f" stroke-opacity=".08" stroke-width="24" fill="none" stroke-linecap="round" transform="translate(0 5)"/>
     <path d="${road}" stroke="#e2d4b7" stroke-width="21" fill="none" stroke-linecap="round"/>
     <path d="${road}" stroke="#fffdf5" stroke-width="16.5" fill="none" stroke-linecap="round"/>
-    <path d="${road}" stroke="#14293a" stroke-opacity=".32" stroke-width="2.4" stroke-dasharray="2 9" fill="none" stroke-linecap="round"/>
+    <path d="${road}" stroke="#18213f" stroke-opacity=".32" stroke-width="2.4" stroke-dasharray="2 9" fill="none" stroke-linecap="round"/>
     <g transform="translate(${bx} ${by}) rotate(${ang})">${rail(-11.5)}${rail(11.5)}</g>
     <g transform="translate(74 158)"><rect x="-1.5" y="-26" width="3" height="30" rx="1" fill="#8a6f4e"/><rect x="-2" y="-35" width="32" height="14" rx="3" fill="#fffdf5" stroke="#c9bfae" stroke-width="1.2"/><path d="M30-35l5 7-5 7" fill="#fffdf5" stroke="#c9bfae" stroke-width="1.2"/><text x="13" y="-25" text-anchor="middle" font-size="7.5" font-weight="800" font-family="Manrope, sans-serif" fill="#8b969e" letter-spacing=".06em">START</text></g>
-    ${course.map.map((w, i) => { const [x, y] = pts[i], st = w.n < current ? 'past' : w.n === current ? 'now' : 'next', last = i === N - 1;
-      const has = course.weeks.some(cw => cw.n === w.n);
-      return `<g class="cm-stop cm-${st}${has ? ' cm-link' : ''}" transform="translate(${x} ${y})"${has ? ` data-week-tab="${w.n}" role="button" tabindex="0" aria-label="Show Week ${w.n} lessons"` : ''}>
+    ${stops.map((w, i) => { const [x, y] = pts[i], st = w.st || (w.n < current ? 'past' : w.n === current ? 'now' : 'next'), last = i === N - 1;
+      const has = !w.st && course.weeks.some(cw => cw.n === w.n);
+      return `<g class="cm-stop cm-${st}${has || w.go ? ' cm-link' : ''}" transform="translate(${x} ${y})"${w.go ? ` data-go="${esc(w.go)}" role="link" tabindex="0" aria-label="${esc(w.aria || w.label)}"` : has ? ` data-week-tab="${w.n}" role="button" tabindex="0" aria-label="Show ${esc(unitName(w.n))} lessons"` : ''}>
         ${st === 'now' ? '<circle r="31" fill="#e3a843" opacity=".24"/><circle r="26" fill="none" stroke="#e3a843" stroke-opacity=".55" stroke-width="1.4" stroke-dasharray="3 5" class="cm-spin"/>' : ''}
-        <title>Week ${w.n}: ${esc(w.label)} — ${esc(w.sub)}</title>
-        ${last ? `<path d="M2-18V-62" stroke="#14293a" stroke-opacity=".12" stroke-width="3" stroke-linecap="round"/><path d="M0-20V-64" stroke="#14293a" stroke-width="3" stroke-linecap="round"/><circle cy="-65" r="2.6" fill="#e3a843"/>
-          <g class="cm-flag"><path d="M1.5-63h30l-7 9 7 9h-30z" fill="#e64626"/><path d="M1.5-63h30l-7 9h-23z" fill="#fff" opacity=".18"/></g>
-          ${[[-16, -50, '#e3a843'], [40, -64, '#2f6db5'], [44, -40, '#13887a'], [-12, -72, '#e64626']].map(([cx, cy, c], k) => `<path class="cm-twinkle" style="animation-delay:${-k * .7}s" d="M${cx} ${cy - 4}l1.2 2.8 2.8 1.2-2.8 1.2-1.2 2.8-1.2-2.8-2.8-1.2 2.8-1.2z" fill="${c}"/>`).join('')}` : ''}
-        <ellipse cy="23" rx="17" ry="4" fill="#14293a" opacity=".12"/>
+        <title>${UNITS ? '' : `Week ${w.n}: `}${esc(w.label)} — ${esc(w.sub)}</title>
+        ${last ? `<path d="M2-18V-62" stroke="#18213f" stroke-opacity=".12" stroke-width="3" stroke-linecap="round"/><path d="M0-20V-64" stroke="#18213f" stroke-width="3" stroke-linecap="round"/><circle cy="-65" r="2.6" fill="#e3a843"/>
+          <g class="cm-flag"><path d="M1.5-63h30l-7 9 7 9h-30z" fill="#d6283c"/><path d="M1.5-63h30l-7 9h-23z" fill="#fff" opacity=".18"/></g>
+          ${[[-16, -50, '#e3a843'], [40, -64, '#2f6db5'], [44, -40, '#13887a'], [-12, -72, '#d6283c']].map(([cx, cy, c], k) => `<path class="cm-twinkle" style="animation-delay:${-k * .7}s" d="M${cx} ${cy - 4}l1.2 2.8 2.8 1.2-2.8 1.2-1.2 2.8-1.2-2.8-2.8-1.2 2.8-1.2z" fill="${c}"/>`).join('')}` : ''}
+        <ellipse cy="23" rx="17" ry="4" fill="#18213f" opacity=".12"/>
         <circle r="22" fill="#fffdf6" filter="url(#cm-sh)"/>
         <circle class="cm-disc" r="18" fill="url(#cm-${st})" stroke="${st === 'next' ? '#d9cdb6' : 'none'}" stroke-width="1.2"/>
         <path d="M-12-7a14 14 0 0 1 11-10" stroke="#fff" stroke-opacity="${st === 'next' ? '.9' : '.45'}" stroke-width="2.4" fill="none" stroke-linecap="round"/>
-        ${st === 'past' ? '<path d="m-7 0 5 5 9-10" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>' : `<text y="5.5" text-anchor="middle" font-size="16" font-weight="800" font-family="Manrope, sans-serif" fill="${st === 'now' ? '#14293a' : '#7d8992'}">${w.n}</text>`}
+        ${st === 'past' ? '<path d="m-7 0 5 5 9-10" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>' : `<text y="5.5" text-anchor="middle" font-size="16" font-weight="800" font-family="Manrope, sans-serif" fill="${st === 'now' ? '#18213f' : '#7d8992'}">${w.n}</text>`}
         ${st === 'now' ? walker : ''}
       </g>`; }).join('')}
-    ${course.map.map((w, i) => lab(w, i)).join('')}
+    ${stops.map((w, i) => lab(w, i)).join('')}
     </g>
   </svg>`;
 }
-function courseMap(current) {
-  if (course.map.length > 6) return courseMapRich(current);
+function courseMap(current, stops = course.map, opt = {}) {
+  if (stops.length > 6) return courseMapRich(current, stops, opt);
   /* five stops for DEC15; a longer course (DEC10) spreads its stops along a road that climbs gently to the flag */
-  const N = course.map.length, many = N > 6;
+  const N = stops.length, many = N > 6;
   const pts = N === 5 ? [[120, 168], [320, 116], [530, 136], [740, 96], [900, 76]]
-    : course.map.map((_, i) => { const k = N > 1 ? i / (N - 1) : 0; return [Math.round(150 + 760 * k), Math.round(160 - 84 * k + (i % 2 ? -10 : 8))]; });
+    : stops.map((_, i) => { const k = N > 1 ? i / (N - 1) : 0; return [Math.round(150 + 760 * k), Math.round(160 - 84 * k + (i % 2 ? -10 : 8))]; });
   const road = N === 5 ? 'M-10 190C60 186 80 168 120 168S250 116 320 116 470 138 530 136 670 96 740 96 850 78 900 76'
     : `M-10 190C40 186 ${pts[0][0] - 40} ${pts[0][1]} ${pts[0][0]} ${pts[0][1]}` + pts.slice(1).map(([x, y], i) => `S${x - Math.round((x - pts[i][0]) / 2)} ${y} ${x} ${y}`).join('');
-  const tree = (x, y, k = 1) => `<g transform="translate(${x} ${y}) scale(${k})"><ellipse cy="9" rx="11" ry="2.4" fill="#14293a" opacity=".07"/><rect x="-1.6" y="-4" width="3.2" height="12" rx="1" fill="#8a6f4e"/><path d="M-.4 -2v9" stroke="#6b5438" stroke-width=".8"/><circle cy="-12" r="10" fill="#8fb47a"/><circle cx="5" cy="-8" r="7" fill="#6f9d5c"/><circle cx="-4" cy="-15" r="4" fill="#a7c791" opacity=".9"/></g>`;
-  const bush = (x, y, k = 1) => `<g transform="translate(${x} ${y}) scale(${k})"><ellipse cy="3" rx="12" ry="2" fill="#14293a" opacity=".06"/><circle cx="-5" r="5" fill="#9cc086"/><circle cx="3" cy="-1" r="6" fill="#86b170"/><circle cx="8" cy="1" r="4" fill="#9cc086"/></g>`;
+  const tree = (x, y, k = 1) => `<g transform="translate(${x} ${y}) scale(${k})"><ellipse cy="9" rx="11" ry="2.4" fill="#18213f" opacity=".07"/><rect x="-1.6" y="-4" width="3.2" height="12" rx="1" fill="#8a6f4e"/><path d="M-.4 -2v9" stroke="#6b5438" stroke-width=".8"/><circle cy="-12" r="10" fill="#8fb47a"/><circle cx="5" cy="-8" r="7" fill="#6f9d5c"/><circle cx="-4" cy="-15" r="4" fill="#a7c791" opacity=".9"/></g>`;
+  const bush = (x, y, k = 1) => `<g transform="translate(${x} ${y}) scale(${k})"><ellipse cy="3" rx="12" ry="2" fill="#18213f" opacity=".06"/><circle cx="-5" r="5" fill="#9cc086"/><circle cx="3" cy="-1" r="6" fill="#86b170"/><circle cx="8" cy="1" r="4" fill="#9cc086"/></g>`;
   const cloud = (x, y, k = 1) => `<g transform="translate(${x} ${y}) scale(${k})" fill="#fff" opacity=".85"><ellipse cx="0" cy="0" rx="22" ry="8"/><circle cx="-6" cy="-5" r="8"/><circle cx="6" cy="-7" r="10"/><circle cx="16" cy="-3" r="7"/></g>`;
   const flowers = [[22, 244], [196, 250], [380, 236], [455, 250], [560, 230], [790, 240], [860, 228], [700, 254]].map(([x, y], i) => `<g transform="translate(${x} ${y})"><path d="M0 0v-6" stroke="#7fa36a" stroke-width="1.2"/><circle cy="-7" r="2.2" fill="${['#e9a23b', '#e0674b', '#fff', '#e9a23b'][i % 4]}"/></g>`).join('');
   const grass = [[200, 258], [250, 226], [330, 250], [500, 238], [640, 226], [730, 246], [940, 236]].map(([x, y]) => `<path d="M${x} ${y}c-1-4-3-7-3-9m3 9c1-4 1-8 2-10m-2 10c2-3 4-5 6-6" stroke="#9fbf8a" stroke-width="1.3" fill="none" stroke-linecap="round"/>`).join('');
-  return `<svg class="course-map-svg" viewBox="0 0 1000 262" role="group" aria-label="Course map: ${course.map.map(w => `Week ${w.n}, ${w.label}`).join('; ')}. You are in Week ${current}.">
+  return `<svg class="course-map-svg" viewBox="0 0 1000 262" role="group" aria-label="${esc(opt.aria || `Course map: ${stops.map(w => UNITS ? w.label : `Week ${w.n}, ${w.label}`).join('; ')}. You are in ${unitName(current)}.`)}">
     <defs>
       <linearGradient id="cm-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fbf7ec"/><stop offset="1" stop-color="#f6efdf"/></linearGradient>
       <radialGradient id="cm-sun" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#f9d98f" stop-opacity=".9"/><stop offset=".55" stop-color="#f6dfae" stop-opacity=".35"/><stop offset="1" stop-color="#f6dfae" stop-opacity="0"/></radialGradient>
       <linearGradient id="cm-far" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f1e9d7"/><stop offset="1" stop-color="#ebe2cd"/></linearGradient>
       <linearGradient id="cm-near" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e6eedb"/><stop offset="1" stop-color="#d9e5c9"/></linearGradient>
-      <filter id="cm-sh" x="-40%" y="-40%" width="180%" height="180%"><feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#14293a" flood-opacity=".18"/></filter>
-      <pattern id="cm-dots" width="14" height="14" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r=".9" fill="#14293a" opacity=".06"/></pattern>
+      <filter id="cm-sh" x="-40%" y="-40%" width="180%" height="180%"><feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#18213f" flood-opacity=".18"/></filter>
+      <pattern id="cm-dots" width="14" height="14" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r=".9" fill="#18213f" opacity=".06"/></pattern>
     </defs>
     <rect width="1000" height="290" fill="url(#cm-sky)"/>
     <rect width="1000" height="150" fill="url(#cm-dots)"/>
@@ -852,28 +860,28 @@ function courseMap(current) {
     ${grass}${flowers}
     ${tree(200, 132)}${tree(220, 138, .8)}${tree(420, 120, .9)}${tree(640, 100)}${tree(662, 106, .75)}${tree(964, 214, .9)}${tree(30, 174, .8)}${tree(984, 220, .7)}
     ${bush(300, 216, .8)}${bush(600, 206, .7)}${bush(880, 196, .9)}${bush(130, 222, .7)}
-    <path d="${road}" stroke="#14293a" stroke-opacity=".07" stroke-width="22" fill="none" stroke-linecap="round" transform="translate(0 4)"/>
+    <path d="${road}" stroke="#18213f" stroke-opacity=".07" stroke-width="22" fill="none" stroke-linecap="round" transform="translate(0 4)"/>
     <path d="${road}" stroke="#eadfc8" stroke-width="19" fill="none" stroke-linecap="round"/>
     <path d="${road}" stroke="#fffdf5" stroke-width="16" fill="none" stroke-linecap="round"/>
-    <path d="${road}" stroke="#14293a" stroke-opacity=".35" stroke-width="2.4" stroke-dasharray="2 9" fill="none" stroke-linecap="round"/>
+    <path d="${road}" stroke="#18213f" stroke-opacity=".35" stroke-width="2.4" stroke-dasharray="2 9" fill="none" stroke-linecap="round"/>
     <g transform="translate(74 152)"><rect x="-1.5" y="-26" width="3" height="30" rx="1" fill="#8a6f4e"/><rect x="-2" y="-34" width="30" height="13" rx="3" fill="#fffdf5" stroke="#c9bfae" stroke-width="1.2"/><path d="M28 -34l5 6.5-5 6.5" fill="#fffdf5" stroke="#c9bfae" stroke-width="1.2"/><text x="12" y="-24.5" text-anchor="middle" font-size="7.5" font-weight="800" font-family="Manrope, sans-serif" fill="#8b969e" letter-spacing=".06em">START</text></g>
-    ${course.map.map((w, i) => { const [x, y] = pts[i] || pts[pts.length - 1], st = w.n < current ? 'past' : w.n === current ? 'now' : 'next', last = i === course.map.length - 1;
-      const has = course.weeks.some(cw => cw.n === w.n);
-      return `<g class="cm-stop cm-${st}${has ? ' cm-link' : ''}" transform="translate(${x} ${y})"${has ? ` data-week-tab="${w.n}" role="button" tabindex="0" aria-label="Show Week ${w.n} lessons"` : ''}>
-        ${st === 'now' ? `<circle r="30" fill="#e3a843" opacity=".22"/><g transform="translate(${last ? -66 : 0} ${last ? -40 : -52})"><rect x="-50" y="-15" width="100" height="26" rx="13" fill="#14293a"/>${last ? '' : '<path d="M-6 11h12l-6 8z" fill="#14293a"/>'}<text y="3" text-anchor="middle" fill="#fff" font-size="12" font-weight="700" font-family="Manrope, sans-serif">You are here</text></g>` : ''}
-        ${last ? '<path d="M2 -18V-60" stroke="#14293a" stroke-opacity=".12" stroke-width="3" stroke-linecap="round"/><path d="M0 -20V-62" stroke="#14293a" stroke-width="3" stroke-linecap="round"/><path d="M0 -62h30l-7 9 7 9H0z" fill="#e64626"/><path d="M0 -62h30l-7 9H0z" fill="#fff" opacity=".18"/>' : ''}
-        <ellipse cy="22" rx="16" ry="3.5" fill="#14293a" opacity=".1"/>
-        <circle r="19" fill="${st === 'past' ? '#14293a' : st === 'now' ? '#e3a843' : '#fffdf5'}" stroke="${st === 'next' ? '#c9bfae' : '#fffdf5'}" stroke-width="3" filter="url(#cm-sh)"/>
+    ${stops.map((w, i) => { const [x, y] = pts[i] || pts[pts.length - 1], st = w.st || (w.n < current ? 'past' : w.n === current ? 'now' : 'next'), last = i === stops.length - 1;
+      const has = !w.st && course.weeks.some(cw => cw.n === w.n);
+      return `<g class="cm-stop cm-${st}${has || w.go ? ' cm-link' : ''}" transform="translate(${x} ${y})"${w.go ? ` data-go="${esc(w.go)}" role="link" tabindex="0" aria-label="${esc(w.aria || w.label)}"` : has ? ` data-week-tab="${w.n}" role="button" tabindex="0" aria-label="Show ${esc(unitName(w.n))} lessons"` : ''}>
+        ${st === 'now' ? `<circle r="30" fill="#e3a843" opacity=".22"/><g transform="translate(${last ? -66 : 0} ${last ? -40 : -52})"><rect x="-50" y="-15" width="100" height="26" rx="13" fill="#18213f"/>${last ? '' : '<path d="M-6 11h12l-6 8z" fill="#18213f"/>'}<text y="3" text-anchor="middle" fill="#fff" font-size="12" font-weight="700" font-family="Manrope, sans-serif">${esc(opt.nowText || 'You are here')}</text></g>` : ''}
+        ${last ? '<path d="M2 -18V-60" stroke="#18213f" stroke-opacity=".12" stroke-width="3" stroke-linecap="round"/><path d="M0 -20V-62" stroke="#18213f" stroke-width="3" stroke-linecap="round"/><path d="M0 -62h30l-7 9 7 9H0z" fill="#d6283c"/><path d="M0 -62h30l-7 9H0z" fill="#fff" opacity=".18"/>' : ''}
+        <ellipse cy="22" rx="16" ry="3.5" fill="#18213f" opacity=".1"/>
+        <circle r="19" fill="${st === 'past' ? '#18213f' : st === 'now' ? '#e3a843' : '#fffdf5'}" stroke="${st === 'next' ? '#c9bfae' : '#fffdf5'}" stroke-width="3" filter="url(#cm-sh)"/>
         ${st === 'now' ? '<path d="M-12 -6a13 13 0 0 1 10-10" stroke="#fff" stroke-opacity=".55" stroke-width="2.5" fill="none" stroke-linecap="round"/>' : ''}
-        ${st === 'past' ? '<path d="m-7 0 5 5 9-10" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>' : `<text y="5" text-anchor="middle" font-size="15" font-weight="700" font-family="Manrope, sans-serif" fill="${st === 'now' ? '#14293a' : '#8b969e'}">${w.n}</text>`}
-        ${many ? `<text y="${i % 2 ? 54 : 40}" text-anchor="middle" font-size="11.5" font-weight="700" font-family="Manrope, sans-serif" fill="#14293a">${esc(w.label)}</text>`
-          : `<text y="42" text-anchor="middle" font-size="13" font-weight="700" font-family="Manrope, sans-serif" fill="#14293a">Week ${w.n} · ${esc(w.label)}</text>
+        ${st === 'past' ? '<path d="m-7 0 5 5 9-10" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>' : `<text y="5" text-anchor="middle" font-size="15" font-weight="700" font-family="Manrope, sans-serif" fill="${st === 'now' ? '#18213f' : '#8b969e'}">${w.n}</text>`}
+        ${many ? `<text y="${i % 2 ? 54 : 40}" text-anchor="middle" font-size="11.5" font-weight="700" font-family="Manrope, sans-serif" fill="#18213f">${esc(w.label)}</text>`
+          : `<text y="42" text-anchor="middle" font-size="13" font-weight="700" font-family="Manrope, sans-serif" fill="#18213f">${UNITS ? '' : `Week ${w.n} · `}${esc(w.label)}</text>
         <text y="60" text-anchor="middle" font-size="12" font-family="Manrope, sans-serif" fill="#6b7882">${esc(w.sub)}</text>`}
       </g>`; }).join('')}
   </svg>`;
 }
 /* DEC10: the lesson the course calendar says is on today (class days only), so the course map can point to it */
-const classToday = (() => { const G = window.DEC15_GUIDE; if (course.id !== 'ielts' || !G?.weeks) return null;
+const classToday = (() => { const G = window.DEC15_GUIDE; if (course.id !== 'ielts' || !G?.weeks || UNITS) return null;   // a course by skill has no class day
   const t = new Date(), today = new Date(t.getFullYear(), t.getMonth(), t.getDate()), parse = x => { const [y, m, d] = x.split('-').map(Number); return new Date(y, m - 1, d); };
   for (const w of G.weeks) { if (w.brk || !w.start) continue; const i = Math.round((today - parse(w.start)) / 864e5);
     if (i >= 0 && i < 5) { if (w.days?.[i]?.off) return null; const id = `${window.DEC15_COURSE.idPrefix || ''}w${w.n}d${i + 1}`, wk = course.weeks.find(x => x.n === w.n), d = wk?.days.find(x => x.id === id);
@@ -881,7 +889,7 @@ const classToday = (() => { const G = window.DEC15_GUIDE; if (course.id !== 'iel
   return null; })();
 const GREET = () => { const h = new Date().getHours(); return h < 5 ? 'Working late' : h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening'; };
 const DAY_TINT = ['#1f8a7a', '#c2562f', '#7a4a8c', '#2f6db5', '#b07d12'], WEEKDAY = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
-const dayHead = d => `<em class="day-n"><i class="day-n-num" aria-hidden="true">${d.day}</i><i class="day-n-txt">Day ${d.day}<small>${WEEKDAY[d.day - 1] || ''}</small></i></em>`;
+const dayHead = d => `<em class="day-n"><i class="day-n-num" aria-hidden="true">${d.day}</i><i class="day-n-txt">${DW} ${d.day}<small>${UNITS ? esc(d.sub || '') : WEEKDAY[d.day - 1] || ''}</small></i></em>`;
 function dayCard(d) {
   const sum = summaries()[d.id] || {}, here = d.id === lesson.id;
   const done = here ? coreActivities.filter(a => state.done[a.id]).length : sum.done || 0, total = here ? coreActivities.length : sum.total || 0;
@@ -904,17 +912,101 @@ function dayCard(d) {
 }
 /* One week at a time on the course map: with 5 weeks × 5 days the page would be very long.
    The open week is remembered for this visit; the "You are here" week opens first. */
-let homeWeek = null;
+let homeWeek = null, skillRoute = null;
+/* The skills in the side panel (course.units), under the course map: one link each, in course.js order. */
+/* Each part's icon: two-tone (a tinted body + a line drawing in the part's colour), clearly different from the others. */
+const SKILL_IC = {
+  listening: '<path d="M4 15v-3a8 8 0 0 1 16 0v3" /><rect x="2.8" y="13.5" width="5" height="7" rx="2" fill="currentColor" fill-opacity=".22"/><rect x="16.2" y="13.5" width="5" height="7" rx="2" fill="currentColor" fill-opacity=".22"/><path d="M10 15.5v2M12 14v5M14 15.5v2"/>',
+  reading: '<path d="M2.8 5.2c3.2-1.1 6.4-.6 9.2 1.6v13c-2.8-2.2-6-2.7-9.2-1.6z" fill="currentColor" fill-opacity=".22"/><path d="M21.2 5.2c-3.2-1.1-6.4-.6-9.2 1.6v13c2.8-2.2 6-2.7 9.2-1.6z"/><path d="M14.5 9.5c1.6-.7 3.2-.8 4.6-.4M14.5 12.5c1.6-.7 3.2-.8 4.6-.4"/>',
+  chart: '<rect x="3" y="3" width="18" height="18" rx="3" fill="currentColor" fill-opacity=".14"/><path d="M7 17v-4M11 17V9M15 17v-6M19 17V7" stroke-width="2.2"/><path d="m5.5 11.5 4-4 3.5 2.5 6-5" stroke-width="1.5"/>',
+  essay: '<path d="M6 2.8h8.5L19 7.3V20a1.2 1.2 0 0 1-1.2 1.2H6A1.2 1.2 0 0 1 4.8 20V4A1.2 1.2 0 0 1 6 2.8z" fill="currentColor" fill-opacity=".16"/><path d="M14.5 2.8V7.3H19"/><path d="M8 10.5h7.5M8 13.5h7.5M8 16.5h4.5"/>',
+  discussion: '<path d="M3.5 4.5h11a2 2 0 0 1 2 2v5.5a2 2 0 0 1-2 2H9l-3.8 3v-3H3.5a2 2 0 0 1-2-2V6.5a2 2 0 0 1 2-2z" fill="currentColor" fill-opacity=".22"/><path d="M19 9h1.5a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H20v3l-3.2-3H12a2 2 0 0 1-2-2v-.5"/><circle cx="6" cy="9.3" r=".9" fill="currentColor"/><circle cx="9" cy="9.3" r=".9" fill="currentColor"/><circle cx="12" cy="9.3" r=".9" fill="currentColor"/>',
+  research: '<rect x="6.5" y="2.5" width="14" height="16" rx="2.5" fill="currentColor" fill-opacity=".12" transform="rotate(8 13.5 10.5)"/><rect x="3.5" y="5" width="14" height="16" rx="2.5" fill="currentColor" fill-opacity=".2"/><path d="m6.8 16.5 2.7-7.5h.6l2.7 7.5M7.8 14h4"/><path d="M14.8 12.2a1.6 1.6 0 1 1 0 3.2 1.6 1.6 0 0 1 0-3.2zM16.4 11.6v4.9"/>',
+  critical: '<path d="M4 8h4a2.2 2.2 0 1 1 4.4 0H16v4a2.2 2.2 0 1 1 0 4.4V20H4v-4a2.2 2.2 0 1 0 0-4.4z" fill="currentColor" fill-opacity=".22"/><path d="M16 8h4v4M20 16v4h-4"/>'
+};
+const partIcon = (w, cls = '') => `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${SKILL_IC[w.art] || SKILL_IC.reading}</svg>`;
+const partColor = w => w.color || (TONES[w.tone] || TONES.blue)[0];
+const partStyle = w => `--accent:${partColor(w)};--accent-bg:color-mix(in srgb, ${partColor(w)} 9%, #fff)`;
+/* Menus the teacher can hide from students (side panel → Settings → "Side panel for students").
+   The choice is a class-wide setting (class_settings 'menu_hidden', read live by every student, also signed out);
+   course.menusHidden in course.js is the default before the teacher has chosen. A hidden page cannot be opened by students. */
+const MENUS = [['calendar', 'side-calendar', 'Course calendar'], ['assessments', 'side-assess', 'Assessments'], ['band', 'side-band', 'Band calculator'], ['board', 'side-board', 'Class board'],
+  ['chats', 'side-chats', 'Chats'], ['shared', 'side-shared', 'Shared with me'], ['picker', 'side-pick', 'Name wheel']];
+const menusHidden = () => { const v = klass?.setting?.('menu_hidden'); return Array.isArray(v) ? v : course.menusHidden || []; };
+const menuOff = route => !isTeacher() && menusHidden().includes(route);
+/* Side panel groups fold open and shut (click the group's heading); remembered on this device. */
+const sideFolds = () => { try { return JSON.parse(localStorage.getItem(CLS.id + '-side-folds')) || {}; } catch (e) { return {}; } };
+function toggleFold(id) { const f = sideFolds(); f[id] = !f[id]; try { localStorage.setItem(CLS.id + '-side-folds', JSON.stringify(f)); } catch (e) { /* ignore */ } paintMenus(); }
+document.addEventListener('click', e => { const g = e.target.closest?.('#sidebar .side-group[data-fold]'); if (g) toggleFold(g.dataset.fold); });
+document.addEventListener('keydown', e => { const g = e.target.closest?.('#sidebar .side-group[data-fold]'); if (g && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); toggleFold(g.dataset.fold); } });
+function paintMenus() {
+  const off = menusHidden(), t = isTeacher();
+  MENUS.forEach(([k, id]) => { const el = $('#' + id); if (!el) return; const h = off.includes(k); el.classList.toggle('menu-off', h && !t); el.classList.toggle('menu-off-teacher', h && t); el.title = h && t ? 'Hidden from students' : el.title === 'Hidden from students' ? '' : el.title; });
+  const groups = [...document.querySelectorAll('#sidebar .side-group')];   // a group label with nothing left under it is hidden too
+  const folds = sideFolds();
+  groups.forEach(g => { const shut = !!(g.dataset.fold && folds[g.dataset.fold]); let n = g.nextElementSibling, any = false;
+    while (n && !n.classList.contains('side-group')) { if ((n.matches('.side-link') && !n.hidden && !n.classList.contains('menu-off')) || n.querySelector?.('.side-link')) any = true;
+      n.classList.toggle('fold-off', shut && !n.classList.contains('active')); n = n.nextElementSibling; }   // a folded group still shows the page you are on
+    g.classList.toggle('menu-off', !any); g.classList.toggle('is-folded', shut);
+    if (g.dataset.fold) { g.setAttribute('role', 'button'); g.tabIndex = 0; g.setAttribute('aria-expanded', String(!shut)); g.title = shut ? 'Show this group' : 'Fold this group'; } });
+  let box = $('#side-menus'); const menu = $('#side-menu');
+  if (!t) { box?.remove(); return; }
+  if (!box && menu) { box = menu.appendChild(document.createElement('div')); box.id = 'side-menus'; box.className = 'side-menus'; }
+  if (!box) return;
+  const avail = MENUS.filter(([, id]) => { const el = $('#' + id); return el && !el.hidden; });
+  box.innerHTML = `<span class="sc-label">Side panel for students</span>${avail.map(([k, , label]) => { const on = !off.includes(k);
+    return `<button type="button" class="teacher-toggle" data-menu-toggle="${k}" aria-pressed="${on}"><span class="tt-switch" aria-hidden="true"><i></i></span>${esc(label)} <span class="tt-state">${on ? 'Shown' : 'Hidden'}</span></button>`; }).join('')}<small class="side-menus-note">Applies to every student, straight away.</small>`;
+}
+document.addEventListener('click', async e => { const b = e.target.closest?.('[data-menu-toggle]'); if (!b) return;
+  const k = b.dataset.menuToggle, off = menusHidden(), next = off.includes(k) ? off.filter(x => x !== k) : [...off, k];
+  if (await klass?.saveSetting?.('menu_hidden', next)) toast(`${MENUS.find(m => m[0] === k)[2]} is now ${next.includes(k) ? 'hidden from' : 'shown to'} students.`); });
+const partGroups = () => { const gs = course.groups?.length ? course.groups : [{ id: 'all', title: UW + 's' }];
+  return gs.map(g => ({ ...g, parts: course.weeks.filter(w => (w.group || gs[0].id) === g.id) })).filter(g => g.parts.length); };
+function paintSkillNav(route) {
+  if (!UNITS) return;
+  let box = $('#side-skills');
+  if (!box) { $('#side-home')?.insertAdjacentHTML('afterend', `<div id="side-skills" class="side-skills"></div><p class="nav-label side-group" data-fold="course">Course</p>`); box = $('#side-skills'); }
+  if (!box) return;
+  const cur = route === 'skill' ? skillRoute : route !== 'home' && !labHere && lesson.week ? lesson.week : null;
+  const link = w => { const on = cur === w.n;
+    return `<a class="side-link side-skill${on ? ' active' : ''}" id="side-skill-${w.n}" href="#/skill/${w.n}" style="--tc:${partColor(w)}" title="${esc(w.theme)}"${on ? ' aria-current="page"' : ''}><span class="side-ic">${partIcon(w)}</span><span class="side-tx">${esc(w.theme)}</span></a>`; };
+  box.innerHTML = partGroups().map(g => `<p class="nav-label side-group" data-fold="${esc(g.id)}">${esc(g.title)}</p>${g.parts.map(link).join('')}`).join('');
+}
+const pickHomeWeek = () => { const ws = course.weeks; if (!ws.some(w => w.n === homeWeek)) homeWeek = (ws.find(w => w.n === lesson.week) || ws[0]).n; };
+/* By skill (course.units): the skills have no order, so the home page shows them as cards side by side (not on a road);
+   the road map is drawn inside each skill, with its lessons as the stops. */
+function skillGrid() {
+  pickHomeWeek();
+  const card = w => { const ready = w.days.filter(d => d.status === 'ready'), done = ready.filter(d => { const [a, b] = dayProgress(d); return b && a === b; }).length;
+    const meta = !w.days.length ? 'To plan' : !ready.length ? `${w.days.length} planned` : done ? `${done} of ${ready.length} done` : `${ready.length} lesson${ready.length === 1 ? '' : 's'}`;
+    return `<a class="skill-card" href="#/skill/${w.n}" style="${partStyle(w)};--p:${ready.length ? (done / ready.length).toFixed(3) : 0}">
+      <span class="skill-card-art">${partIcon(w, 'skill-card-ic')}</span>
+      <span class="skill-card-tx"><b>${esc(w.theme)}</b>${w.tag ? `<small>${esc(w.tag)}</small>` : ''}</span>
+      <span class="skill-card-meta"><span>${meta}</span><i aria-hidden="true"><i></i></i></span></a>`; };
+  return partGroups().map(g => `<section class="skill-group" aria-labelledby="sg-${esc(g.id)}"><header class="skill-group-head"><h2 id="sg-${esc(g.id)}">${esc(g.title)}</h2>${g.blurb ? `<p>${esc(g.blurb)}</p>` : ''}</header>
+    <div class="skill-grid${g.parts.length < 3 ? ' is-few' : ''}">${g.parts.map(card).join('')}</div></section>`).join('');
+}
+/* The road map of one skill: its lessons in order. Done lessons are ticked, the first unfinished one is "Up next". */
+function skillMap(w) {
+  if (!w.days.length) return '';
+  let next = false;
+  const short = t => t.length > 26 ? t.slice(0, 24).trim() + '…' : t;
+  const stops = w.days.map(d => { const [a, b] = dayProgress(d), ready = d.status === 'ready', done = ready && b && a === b;
+    const st = done ? 'past' : ready && !next ? (next = true, 'now') : 'next';
+    return { n: d.day, label: short(d.title), sub: ready ? (done ? 'Done' : a ? 'In progress' : 'Open') : 'Coming soon', st, go: ready ? '#/' + d.id : '', aria: `Open ${DW} ${d.day}: ${d.title}` }; });
+  return `<section class="course-map skill-map" aria-label="${esc(w.theme)}: map of the lessons">${courseMap(0, stops, { nowText: 'Up next', aria: `${w.theme}: ${w.days.length} lessons in order` })}</section>`;
+}
 function weekTabs() {
   const ws = course.weeks;
-  if (!ws.some(w => w.n === homeWeek)) homeWeek = (ws.find(w => w.n === lesson.week) || ws[ws.length - 1]).n;
+  pickHomeWeek();
   const w = ws.find(x => x.n === homeWeek);
-  const tabs = ws.length > 1 ? `<div class="week-tabs" role="tablist" aria-label="Weeks">${ws.map(x => { const st = x.days.filter(d => d.status === 'ready').length, done = x.days.filter(d => { const [a, b] = dayProgress(d); return b && a === b; }).length;
-    return `<button type="button" role="tab" id="tab-week-${x.n}" aria-controls="panel-week" aria-selected="${x.n === homeWeek}" tabindex="${x.n === homeWeek ? 0 : -1}" class="week-tab${classToday?.week === x.n ? ' has-today' : ''}" data-week-tab="${x.n}" style="--p:${st ? Math.round(100 * done / st) : 0}%"><span class="week-tab-num">${x.n}</span><span class="week-tab-text"><b>Week ${x.n}</b><small>${esc(x.theme)}</small></span><span class="week-tab-meta">${done ? `${done}/${st} done` : `${st} lesson${st === 1 ? '' : 's'}`}</span></button>`; }).join('')}</div>` : '';
-  return `<section class="week" aria-label="Lessons by week">${tabs}
-    <div class="week-panel" id="panel-week" role="tabpanel" aria-labelledby="tab-week-${w.n}">
-      <header class="week-head"><span class="week-num"><small>Week</small>${w.n}</span><div><h2>${esc(w.theme)}</h2><p>${esc(w.summary || '')}</p></div></header>
-      <ol class="day-grid${w.days.length > 3 ? ' many' : ''}">${w.days.map(dayCard).join('')}</ol>
+  const tabs = UNITS ? '' : ws.length > 1 ? `<div class="week-tabs" role="tablist" aria-label="${UNITS ? UW + 's' : 'Weeks'}">${ws.map(x => { const st = x.days.filter(d => d.status === 'ready').length, done = x.days.filter(d => { const [a, b] = dayProgress(d); return b && a === b; }).length;
+    return `<button type="button" role="tab" id="tab-week-${x.n}" aria-controls="panel-week" aria-selected="${x.n === homeWeek}" tabindex="${x.n === homeWeek ? 0 : -1}" class="week-tab${classToday?.week === x.n ? ' has-today' : ''}" data-week-tab="${x.n}" style="--p:${st ? Math.round(100 * done / st) : 0}%"><span class="week-tab-num">${x.n}</span><span class="week-tab-text"><b>${esc(unitName(x.n))}</b><small>${esc(UNITS ? x.tag || '' : x.theme)}</small></span><span class="week-tab-meta">${done ? `${done}/${st} done` : st || !UNITS ? `${st} lesson${st === 1 ? '' : 's'}` : x.days.length ? `${x.days.length} planned` : 'To plan'}</span></button>`; }).join('')}</div>` : '';
+  return `<section class="week" aria-label="Lessons by ${UNITS ? UW.toLowerCase() : 'week'}">${tabs}
+    <div class="week-panel" id="panel-week" ${UNITS ? `role="region" aria-label="${esc(w.theme)}"` : `role="tabpanel" aria-labelledby="tab-week-${w.n}"`}>
+      <header class="week-head">${UNITS ? `<span class="week-art" style="${partStyle(w)}">${partIcon(w)}</span>` : `<span class="week-num"><small>${UW}</small>${w.n}</span>`}<div>${UNITS ? `<span class="eyebrow">${esc(course.code)} · ${esc((partGroups().find(g => g.parts.includes(w)) || {}).title || UW)}</span><h1>${esc(w.theme)}</h1>` : `<h2>${esc(w.theme)}</h2>`}<p>${esc(w.summary || '')}</p></div></header>
+      ${UNITS ? skillMap(w) : ''}
+      ${w.days.length ? `<ol class="day-grid${w.days.length > 3 ? ' many' : ''}">${w.days.map(dayCard).join('')}</ol>` : `<p class="week-empty" style="margin:0 0 2rem;color:#5b6b78">The lessons for ${esc(unitName(w.n))} are on the way.</p>`}
     </div></section>`;
 }
 function courseHome() {
@@ -926,8 +1018,8 @@ function courseHome() {
       ${classToday ? (() => { const { d, week, day } = classToday, ready = d.status === 'ready', inner = `<span class="ht-dot" aria-hidden="true"></span><span class="ht-hi">${GREET()}</span><span class="ht-txt">Today in class · ${WEEKDAY[day - 1]}, Week ${week}</span><b>${esc(d.title)}</b>${ready ? icon('arrow') : '<small>Coming soon</small>'}`;
         return ready ? `<a class="home-today" href="#/${d.id}">${inner}</a>` : `<span class="home-today is-soon">${inner}</span>`; })() : ''}
     </header>
-    <section class="course-map" aria-label="Course map">${courseMap(lesson.week)}</section>
-    <section class="resume" style="${tone(n ? n.s : lesson.sections[lesson.sections.length - 1])}">
+    ${UNITS ? skillGrid() : `<section class="course-map" aria-label="Course map">${courseMap(lesson.week)}</section>`}
+    ${lesson.week ? `<section class="resume" style="${tone(n ? n.s : lesson.sections[lesson.sections.length - 1])}">
       <img class="resume-art" src="${artSrc(n ? n.s.art : 'writing')}" alt="" width="220" height="170">
       <div class="resume-copy">
         <span class="eyebrow">${done ? 'Continue where you left off' : 'Start here'} · ${esc(whereLong(', '))}</span>
@@ -936,8 +1028,8 @@ function courseHome() {
         <div class="resume-bar"><span class="resume-meter"><i style="width:${pct}%"></i></span><span>${done} of ${coreActivities.length} activities</span></div>
       </div>
       <div class="resume-actions">${continueButton(true)}<a class="btn-quiet" href="${L('overview')}">Lesson overview</a></div>
-    </section>
-    ${weekTabs()}`;
+    </section>` : ''}
+    ${UNITS ? '' : weekTabs()}`;
 }
 /* page header with a small vector picture on the right (Source library, Extra activities) */
 const pageHero = (eyebrow, title, text, art, extra = '') => `<header class="page-head page-hero"><div><span class="eyebrow">${eyebrow}</span><h1>${title}</h1><p>${text}</p>${extra}</div><img class="page-hero-art" src="assets/art/${art}.svg" alt="" width="440" height="340"></header>`;
@@ -998,7 +1090,7 @@ function rlPage() {
       const r = list ? list.filter(s => !['listening', 'discussion'].includes(L.kindOf(s))).length : 0, li = list ? list.length - r : 0;
       return `<section class="rl-week${open ? ' open' : ''}${w.n === lesson.week ? ' is-now' : ''}" style="--wc:${col};--i:${k}">
         <button type="button" class="rl-week-head" data-lib-week="${w.n}" aria-expanded="${open}" aria-controls="lib-w${w.n}">
-          <span class="rl-wn"><small>Week</small><b>${w.n}</b></span>
+          <span class="rl-wn"><small>${UW}</small><b>${w.n}</b></span>
           <span class="rl-wt"><b>${esc(w.theme)}</b><small>${list ? `${list.length} text${list.length === 1 ? '' : 's'}` : 'Loading…'}</small></span>
           ${list ? `<span class="rl-wk-kinds">${r ? `<span class="k-reading">${L.ICON.reading}${r} reading${r === 1 ? '' : 's'}</span>` : ''}${li ? `<span class="k-listening">${L.ICON.listening}${li} listening</span>` : ''}</span>` : ''}
           ${w.n === lesson.week ? `<em class="rl-now">${icon('flag')}This week</em>` : ''}
@@ -1017,8 +1109,8 @@ function sourcesPage() {
     const count = list ? `${list.length} text${list.length === 1 ? '' : 's'}` : '';
     return `<section class="lib-week${open ? ' open' : ''}">
       <button type="button" class="lib-week-head" data-lib-week="${w.n}" aria-expanded="${open}" aria-controls="lib-w${w.n}">
-        <span class="lib-week-num"><small>Week</small>${w.n}</span>
-        <span class="lib-week-text"><b>Week ${w.n}</b><small>${esc(w.theme)}${count ? ' · ' + count : ''}</small></span>
+        <span class="lib-week-num"><small>${UW}</small>${w.n}</span>
+        <span class="lib-week-text"><b>${esc(unitName(w.n))}</b><small>${esc(UNITS ? w.tag || '' : w.theme)}${count ? ' · ' + count : ''}</small></span>
         ${w.n === lesson.week ? `<em class="lib-week-now">${icon('flag')}This week</em>` : ''}
         <span class="nav-chev" aria-hidden="true"></span></button>
       <div class="lib-week-body" id="lib-w${w.n}"${open ? '' : ' hidden'}>${open ? (list ? `<div class="library">${list.map((s, i) => libCard(s, i, w.n)).join('')}</div>` : '<p class="lib-loading">Loading the texts…</p>') : ''}</div>
@@ -1039,8 +1131,8 @@ function notebook() {
 }
 /* My workspace → Notebook: one notebook per lesson; the picker opens another lesson's notebook */
 function wsNotebook() {
-  const opt = d => `<option value="${d.id}"${d.id === lesson.id ? ' selected' : ''}>${esc(d.lab ? d.title : `Week ${d.week}, Day ${d.day} · ${d.title}`)}</option>`;
-  const weeks = course.weeks.map(w => { const ready = w.days.filter(d => d.status === 'ready'); return ready.length ? `<optgroup label="Week ${w.n}">${ready.map(d => opt({ ...d, week: w.n })).join('')}</optgroup>` : ''; }).join('');
+  const opt = d => `<option value="${d.id}"${d.id === lesson.id ? ' selected' : ''}>${esc(d.lab ? d.title : `${dayWhere(d.week, d.day)} · ${d.title}`)}</option>`;
+  const weeks = course.weeks.map(w => { const ready = w.days.filter(d => d.status === 'ready'); return ready.length ? `<optgroup label="${esc(unitName(w.n))}">${ready.map(d => opt({ ...d, week: w.n })).join('')}</optgroup>` : ''; }).join('');
   const lab = (LAB?.strands || []).map(st => { const ready = st.lessons.filter(l => l.status === 'ready'); return ready.length ? `<optgroup label="${LABT} · ${esc(st.short)}">${ready.map(l => opt({ ...l, lab: st.id })).join('')}</optgroup>` : ''; }).join('');
   return `<div class="ws-nb-bar"><label><span>${icon('book')}Notebook for</span><select data-ws-lesson aria-label="Choose a lesson">${weeks}${lab}</select></label><small>Each lesson keeps its own answers and highlights.</small></div>${notebook()}`;
 }
@@ -1232,6 +1324,7 @@ function dayPlaybook() {
   </section>`;
 }
 /* open the stage on the right activity when a moment is clicked in the day plan */
+document.addEventListener('click', e => { const g = e.target.closest?.('.cm-stop[data-go]'); if (g) location.hash = g.dataset.go; });   // a lesson on a skill's map
 document.addEventListener('click', e => { const g = e.target.closest?.('[data-pb-go]'); if (!g) return;
   state.active[g.dataset.pbStage] = g.dataset.pbGo; save(false); });
 function downloadsPage() {
@@ -1247,7 +1340,7 @@ function downloadsPage() {
     return `<article class="dlx-item tone-${esc(d.tone || 'blue')}" id="dl-${esc(d.id)}" style="--dc:${c};--dbg:${bg};--i:${n}">
     <div class="dlx-desk${th.length === 1 ? ' is-one' : ''}">
       ${th.map((t, i) => `<a class="dlx-thumb" href="${esc(d.file)}" target="_blank" rel="noopener" aria-label="Open page ${i + 1} of the ${esc(d.title)}" style="--k:${i};--n:${th.length}">${i === 0 ? '<svg class="dlx-clip" viewBox="0 0 20 52" aria-hidden="true"><path d="M6 46V10a6 6 0 0 1 12 0v32a9 9 0 0 1-18 0V14" fill="none" stroke="#8a97a2" stroke-width="2.4" stroke-linecap="round"/></svg>' : ''}<img src="${esc(t)}" alt="" loading="lazy" width="210" height="297"><span aria-hidden="true">Page ${i + 1}</span></a>`).join('')}
-      <svg class="dlx-pen" viewBox="0 0 120 20" aria-hidden="true"><rect x="16" y="4" width="96" height="12" rx="6" fill="${c}"/><rect x="16" y="4" width="96" height="4" rx="2" fill="#fff" opacity=".3"/><rect x="88" y="3" width="8" height="14" rx="2" fill="#e3a843"/><path d="M16 4 2 10l14 6z" fill="#e8d9bd"/><path d="M6 8.3 2 10l4 1.7z" fill="#14293a"/></svg>
+      <svg class="dlx-pen" viewBox="0 0 120 20" aria-hidden="true"><rect x="16" y="4" width="96" height="12" rx="6" fill="${c}"/><rect x="16" y="4" width="96" height="4" rx="2" fill="#fff" opacity=".3"/><rect x="88" y="3" width="8" height="14" rx="2" fill="#e3a843"/><path d="M16 4 2 10l14 6z" fill="#e8d9bd"/><path d="M6 8.3 2 10l4 1.7z" fill="#18213f"/></svg>
       <span class="dlx-file-badge"><b>PDF</b>${d.pages} page${d.pages === 1 ? '' : 's'} · ${esc(d.size)}</span>
     </div>
     <div class="dlx-info">
@@ -1320,7 +1413,7 @@ function dayProgress(d) {
 function dayContents(d, route) {
   const here = d.id === lesson.id, cur = r => here && route === r ? ' active" aria-current="page' : '';
   let i = 0; const stagger = () => ` style="--i:${i++}"`;
-  const start = `<li${stagger()}><a href="${here ? L('overview') : '#/' + d.id}" class="nav-part nav-start${cur('overview')}"><span class="nav-pnum">${icon('map')}</span><span class="nav-ptext">${here ? 'Overview' : 'Open Day ' + d.day}<small>${here ? 'Start of the day' : 'Start of the day'}</small></span></a></li>`;
+  const start = `<li${stagger()}><a href="${here ? L('overview') : '#/' + d.id}" class="nav-part nav-start${cur('overview')}"><span class="nav-pnum">${icon('map')}</span><span class="nav-ptext">${here ? 'Overview' : `Open ${DW} ${d.day}`}<small>${UNITS ? 'Start of the lesson' : 'Start of the day'}</small></span></a></li>`;
   const stages = here
     ? lesson.sections.map(s => { const dn = s.activities.filter(a => state.done[a.id]).length, all = dn === s.activities.length;
         return `<li${stagger()}><a href="${L(s.id)}" class="nav-part is-stage${all ? ' complete' : ''}${cur(s.id)}" style="${tone(s)}"><span class="nav-pnum">${all ? icon('check') : esc(navCode(code(s)))}</span><span class="nav-ptext"><span class="nav-pname" title="${esc(s.title)}">${esc(s.title)}</span><small>${s.minutes} min<i class="nav-bar" style="--p:${dn / s.activities.length}" aria-label="${dn} of ${s.activities.length} done"></i></small></span></a></li>`; }).join('')
@@ -1355,8 +1448,9 @@ let navLessonWeek = null;
 function paintNav(route = navRoute) {
   navRoute = route;
   if (route !== 'home' && lesson.week !== navLessonWeek) { navLessonWeek = lesson.week; navWeekOpen = null; }   // a lesson in another week opens its own week
-  [['side-lesson', 'overview'], ['side-readings', 'sources'], ['side-board', 'board'], ['side-chats', 'chats'], ['side-shared', 'shared'], ['side-calendar', 'calendar'], ['side-assess', 'assessments'], ['side-studio', 'studio'], ['side-lab', 'lab'], ['side-downloads', 'downloads'], ['side-print', 'print'], ['side-pick', 'picker']].forEach(([id, r]) => { const el = $('#' + id); if (!el) return; el.classList.toggle('active', route === r); if (route === r) el.setAttribute('aria-current', 'page'); else el.removeAttribute('aria-current'); });
+  [['side-lesson', 'overview'], ['side-readings', 'sources'], ['side-board', 'board'], ['side-chats', 'chats'], ['side-shared', 'shared'], ['side-calendar', 'calendar'], ['side-assess', 'assessments'], ['side-band', 'band'], ['side-studio', 'studio'], ['side-lab', 'lab'], ['side-downloads', 'downloads'], ['side-print', 'print'], ['side-pick', 'picker']].forEach(([id, r]) => { const el = $('#' + id); if (!el) return; el.classList.toggle('active', route === r); if (route === r) el.setAttribute('aria-current', 'page'); else el.removeAttribute('aria-current'); });
   paintLessonNav(route);
+  paintSkillNav(route); paintMenus();
   $('#side-home').classList.toggle('active', route === 'home');
   const ws = route === 'planner' || route === 'notebook';   // My workspace: planner + notebook
   $('#side-planner')?.classList.toggle('active', ws);
@@ -1371,12 +1465,12 @@ const WB_TONES = ['#e9a23b', '#e0674b', '#2a8a7d', '#4a6fd0', '#8a5cb8', '#5f935
 let wbOpen = null, wbDay = null, wbT = 0, wbHoverAt = 0;
 function paintWeekbar(route = navRoute) {
   const bar = $('#weekbar'); if (!bar) return;
-  if (!bar.querySelector('#wb-panel')) bar.innerHTML = '<div class="wb-row" role="menubar" aria-label="Weeks"></div><div class="wb-panel" id="wb-panel" role="region" hidden></div>';
+  if (!bar.querySelector('#wb-panel')) bar.innerHTML = `<div class="wb-row" role="menubar" aria-label="${UNITS ? UW + 's' : 'Weeks'}"></div><div class="wb-panel" id="wb-panel" role="region" hidden></div>`;
   const cur = route === 'home' ? null : lesson.week;
   bar.querySelector('.wb-row').innerHTML = `${course.map.map((m, i) => {
       const w = course.weeks.find(x => x.n === m.n), n = w ? w.days.filter(d => d.status === 'ready').length : 0, wp = weekProgress(w);
-      return `<button type="button" class="wb-item${wp ? ' has-prog' : ''}${cur === m.n ? ' is-current' : ''}${wbOpen === m.n ? ' open' : ''}${n ? '' : ' is-soon'}" data-wb-week="${m.n}" aria-haspopup="true" aria-expanded="${wbOpen === m.n}" style="--wk:${WB_TONES[i % WB_TONES.length]}" title="Week ${m.n} · ${esc(m.label)}">
-        <span class="wb-num" style="--p:${wp.toFixed(3)}">${m.n}</span><span class="wb-tx">Week ${m.n}</span><span class="wb-chev" aria-hidden="true"></span></button>`; }).join('')}
+      return `<button type="button" class="wb-item${wp ? ' has-prog' : ''}${cur === m.n ? ' is-current' : ''}${wbOpen === m.n ? ' open' : ''}${n ? '' : ' is-soon'}" data-wb-week="${m.n}" aria-haspopup="true" aria-expanded="${wbOpen === m.n}" style="--wk:${WB_TONES[i % WB_TONES.length]}" title="${UNITS ? '' : `Week ${m.n} · `}${esc(m.label)}">
+        <span class="wb-num" style="--p:${wp.toFixed(3)}">${m.n}</span><span class="wb-tx">${UNITS ? esc(m.label) : `Week ${m.n}`}</span><span class="wb-chev" aria-hidden="true"></span></button>`; }).join('')}
       ${route !== 'home' ? `<a class="wb-go" href="${L('overview')}" title="Back to ${esc(whereLong(', '))}: ${esc(lesson.title)}"><span class="wb-go-dot" aria-hidden="true"></span><span>${esc(labHere ? `${labHere.st.short} ${labHere.n}` : whereLong())}</span></a>` : ''}`;
 }
 /* ───────── tabs, carousels and table column widths ───────── */
@@ -1447,7 +1541,7 @@ function paintPanel(mode) {
       panel.querySelectorAll('.wb-day').forEach(b => { const on = b.dataset.wbDay === wbDay; b.classList.toggle('sel', on); b.setAttribute('aria-pressed', String(on)); }); return; }
   }
   const was = panel.dataset.week ? +panel.dataset.week : 0;
-  panel.innerHTML = `<div class="wb-sheet-bar"><b>Week ${wbOpen}</b><button type="button" class="wb-close" data-wb-close aria-label="Close the week menu">Close</button></div>` + weekPanel(wbOpen, navRoute); panel.dataset.week = wbOpen;   // .wb-sheet-bar shows on phones only (css/precision.css §17)
+  panel.innerHTML = `<div class="wb-sheet-bar"><b>${esc(unitName(wbOpen))}</b><button type="button" class="wb-close" data-wb-close aria-label="Close the week menu">Close</button></div>` + weekPanel(wbOpen, navRoute); panel.dataset.week = wbOpen;   // .wb-sheet-bar shows on phones only (css/precision.css §17)
   if (panel.hidden || mode === 'open') { panel.hidden = false; panel.classList.remove('in'); void panel.offsetWidth; panel.classList.add('in'); }
   else { panel.classList.remove('in'); const g = panel.querySelector('.wb-grid'); g.style.setProperty('--dir', wbOpen > was ? '1' : '-1'); g.classList.add('swap'); }
   glideDay(panel, true); notch(panel);
@@ -1462,19 +1556,19 @@ function weekPanel(n, route) {
   const started = w ? w.days.filter(d => dayProgress(d)[0]).length : 0, ready = w ? w.days.filter(d => d.status === 'ready') : [];
   const intro = `<div class="wb-intro" style="--wk:${col}">
     <figure class="wb-pic">${w?.image ? `<img src="${esc(w.image)}" alt="" width="300" height="200" loading="lazy">` : `<span class="wb-pic-num" aria-hidden="true">${n}</span>`}</figure>
-    <div class="wb-intro-tx"><p class="wb-eyebrow">Week ${n}</p><h2>${esc(w?.theme || m.label)}</h2><p class="wb-sum">${esc(w?.summary || m.sub || '')}</p>
+    <div class="wb-intro-tx"><p class="wb-eyebrow">${UNITS ? `${UW} ${n}` : `Week ${n}`}</p><h2>${esc(w?.theme || m.label)}</h2><p class="wb-sum">${esc(w?.summary || m.sub || '')}</p>
     ${w && w.days.length ? `<div class="wb-prog"><ol class="wb-route" aria-hidden="true">${w.days.map(d => { const [a, b] = dayProgress(d); return `<li class="${d.status !== 'ready' ? 'soon' : b && a === b ? 'done' : a ? 'some' : ''}${d.id === lesson.id && route !== 'home' ? ' here' : ''}" style="--p:${b ? (a / b).toFixed(3) : 0}"><i></i></li>`; }).join('')}</ol><small>${started ? `${started} of ${ready.length} lessons started` : `${ready.length} lessons`}</small></div>` : ''}</div></div>`;
-  if (!w || !w.days.length) return `<div class="wb-grid is-empty">${intro}<div class="wb-soon"><img src="${artSrc('reading')}" alt="" width="120" height="120"><b>Coming soon</b><p>The lessons for Week ${n} will appear here.</p></div></div>`;
+  if (!w || !w.days.length) return `<div class="wb-grid is-empty">${intro}<div class="wb-soon"><img src="${artSrc('reading')}" alt="" width="120" height="120"><b>Coming soon</b><p>The lessons for ${esc(unitName(n))} will appear here.</p></div></div>`;
   let sel = w.days.find(d => d.id === wbDay) || w.days.find(d => d.id === lesson.id) || ready[0] || w.days[0]; wbDay = sel.id;
   const days = `<ol class="wb-days"><li class="wb-dhl" aria-hidden="true"></li>${w.days.map(d => {
     const [dn, tot] = dayProgress(d), p = tot ? dn / tot : 0, soon = d.status !== 'ready', here = d.id === lesson.id && route !== 'home';
     const [dn2, tot2] = dayProgress(d);
     return `<li class="wb-dli${tot2 && dn2 === tot2 ? ' is-done' : ''}"><button type="button" class="wb-day${d.id === sel.id ? ' sel' : ''}${soon ? ' is-soon' : ''}${here ? ' is-here' : ''}" data-wb-day="${d.id}" aria-pressed="${d.id === sel.id}">${ring(p, d.day, tot && p === 1)}
-      <span class="wb-dtx"><b>${esc(d.title)}</b><small>${here ? '<em>You are here</em>' : soon ? 'Coming soon' : `Day ${d.day}`}${!soon && dn ? ` · ${dn} of ${tot} done` : ''}</small></span></button></li>`; }).join('')}</ol>`;
+      <span class="wb-dtx"><b>${esc(d.title)}</b><small>${here ? '<em>You are here</em>' : soon ? 'Coming soon' : `${DW} ${d.day}`}${!soon && dn ? ` · ${dn} of ${tot} done` : ''}</small></span></button></li>`; }).join('')}</ol>`;
   return `<div class="wb-grid">${intro}<div class="wb-col"><p class="wb-h">Lessons</p>${days}</div><div class="wb-col wb-parts-col">${dayParts(w, sel, route)}</div></div>`;
 }
 function dayParts(w, d, route) {
-  const head = `<header class="wb-dhead"><img class="wb-dart" src="${esc(dayArt(w, d))}" data-fallback="${esc(artSrc(d.art || 'reading'))}" alt="" width="96" height="64" loading="lazy" onerror="if(this.dataset.fallback){this.src=this.dataset.fallback;delete this.dataset.fallback}"><div><p class="wb-h">Day ${d.day}</p><h3>${esc(d.title)}</h3></div></header>`;
+  const head = `<header class="wb-dhead"><img class="wb-dart" src="${esc(dayArt(w, d))}" data-fallback="${esc(artSrc(d.art || 'reading'))}" alt="" width="96" height="64" loading="lazy" onerror="if(this.dataset.fallback){this.src=this.dataset.fallback;delete this.dataset.fallback}"><div><p class="wb-h">${DW} ${d.day}</p><h3>${esc(d.title)}</h3></div></header>`;
   if (d.status !== 'ready') return head + `<p class="wb-empty">This lesson is coming soon.</p>`;
   const here = d.id === lesson.id, cur = r => here && route === r ? ' is-cur" aria-current="page' : '';
   const open = `<li><a class="wb-part wb-open${cur('overview')}" href="${here ? L('overview') : '#/' + d.id}"><span class="wb-pcode">${icon('map')}</span><b>${here ? 'Overview' : 'Open the lesson'}</b></a></li>`;
@@ -1536,7 +1630,7 @@ function searchIndex() {
   if (searchCache) return searchCache;
   const items = [];
   for (const w of course.weeks) for (const d of w.days) {
-    const where = `Week ${w.n} · Day ${d.day}`, href = d.status === 'ready' ? '#/' + d.id : '';
+    const where = dayWhere(w.n, d.day, ' · '), href = d.status === 'ready' ? '#/' + d.id : '';
     items.push({ kind: 'Lesson', ic: 'map', title: d.title, sub: where + (href ? '' : ' · coming soon'), href, text: d.title });
     if (d.id !== lesson.id) (d.parts || []).forEach(pt => items.push({ kind: 'Part', ic: 'list', title: pt, sub: where + ' · ' + d.title, href, text: pt }));
   }
@@ -1585,6 +1679,8 @@ function parseRoute() {
   if (!h || h === '/' || h === '/home') return { home: true };
   if (h === '/planner' || h.startsWith('/planner/') || h === '/workspace') return { page: 'planner' };   // My workspace
   if (h === '/board') return { page: 'board' };
+  if (bandCalc && h === '/band') return { page: 'band' };
+  const sk = UNITS && h.match(/^\/skill\/(\d+)$/); if (sk && course.weeks.some(w => w.n === +sk[1])) return { page: 'skill', n: +sk[1] };   // a skill's page
   if (h === '/chats' || h.startsWith('/chats/')) return { page: 'chats' };
   if (h === '/shared' || h.startsWith('/shared/')) return { page: 'shared' };
   if (guide && (h === '/calendar' || h === '/assessments')) return { page: h.slice(1) };
@@ -1605,18 +1701,20 @@ function render() {
   if (r.other) {
     const d = days.find(x => x.id === r.other);
     if (d && d.status === 'ready') { location.reload(); return; }
-    if (d) toast(d.lab ? `“${d.title}” is coming soon.` : `Week ${d.week}, Day ${d.day} is coming soon.`);
+    if (d) toast(d.lab ? `“${d.title}” is coming soon.` : `${dayWhere(d.week, d.day)} is coming soon.`);
     history.replaceState(null, '', '#/'); return render();
   }
   if (r.home && labHere) { location.reload(); return; }   // the course map shows the weekly lesson, so leave the lab lesson
   const route = r.home ? 'home' : r.page;
+  if (menuOff(route)) { toast('This page is not open right now.'); history.replaceState(null, '', '#/'); return render(); }
+  if (route === 'skill') skillRoute = r.n;
   document.body.classList.toggle('is-lab', !!labHere && !['studio', 'planner', 'notebook', 'lab', 'downloads', 'print', 'picker', 'calendar', 'assessments', 'board', 'chats', 'shared'].includes(route));   // a ${LABT} lesson page
   if (!r.home && !labHere && r.page !== 'lab' && r.page !== 'downloads' && r.page !== 'print' && r.page !== 'picker') try { localStorage.setItem(CLS.id + '-last-lesson', lesson.id); } catch (e) { /* ignore */ }   // the course map keeps the weekly lesson, not a lab lesson
   const done = coreActivities.filter(a => state.done[a.id]).length;
   paintNav(route);
   $('#progress').value = done; $('#progress').max = coreActivities.length;
   $('#progress-label').innerHTML = `<b>${done}</b> of ${coreActivities.length} activities finished`;
-  $('#side-readings').href = L('sources');
+  const sr = $('#side-readings'); if (sr) sr.href = L('sources');
   paintSideRing(done, coreActivities.length);
   const s = lesson.sections.find(x => x.id === route);
   if (route === 'planner' || route === 'notebook') {   // My workspace = the planner (Notes, Calendar, To-dos) + this lesson's Notebook; kept open across re-renders
@@ -1723,6 +1821,30 @@ function render() {
     if (changed) window.scrollTo(0, 0);
     $('#teacher-toggle').hidden = !isTeacher(); $('#present-toggle').hidden = !isTeacher(); document.body.classList.toggle('is-teacher', isTeacher());
     paintNav(route); studio.afterRender(route);
+    return;
+  }
+  if (route === 'band') {   // Band score calculator (js/band.js)
+    document.body.dataset.page = 'band'; document.body.style.removeProperty('--accent'); document.body.style.removeProperty('--accent-bg');
+    $('#crumb').innerHTML = `<a href="#/" aria-label="${esc(course.code)} course map" title="Course map">${icon('home')}</a><i>/</i><b>Band calculator</b>`;
+    document.title = `${course.code} · Band calculator`; paintStatus();
+    const main = $('#main'), changed = main.dataset.route !== route; main.dataset.route = route;
+    if (changed || !main.querySelector('.bc-page')) { main.innerHTML = bandCalc.html(); window.scrollTo(0, 0); }
+    bandCalc.mount(main.querySelector('.bc-page'));
+    $('#teacher-toggle').hidden = !isTeacher(); $('#present-toggle').hidden = !isTeacher(); document.body.classList.toggle('is-teacher', isTeacher());
+    klass?.setWhere('band', 'Band calculator');
+    return;
+  }
+  if (route === 'skill') {   // a skill's page: its map and its lessons (course.units)
+    const w = course.weeks.find(x => x.n === skillRoute); homeWeek = w.n;
+    document.body.dataset.page = 'skill'; document.body.style.setProperty('--accent', partColor(w)); document.body.style.setProperty('--accent-bg', `color-mix(in srgb, ${partColor(w)} 9%, #fff)`);
+    $('#crumb').innerHTML = `<a href="#/" aria-label="${esc(course.code)} course map" title="Course map">${icon('home')}</a><i>/</i><b>${esc(w.theme)}</b>`;
+    document.title = `${course.code} · ${w.theme}`; paintStatus();
+    const main = $('#main'), changed = main.dataset.route !== route + w.n; main.dataset.route = route + w.n;
+    main.innerHTML = `<div class="skill-page">${weekTabs()}</div>`;
+    if (changed && !matchMedia('(prefers-reduced-motion: reduce)').matches) { main.classList.remove('route-in'); void main.offsetWidth; main.classList.add('route-in'); }
+    if (changed) window.scrollTo(0, 0);
+    $('#teacher-toggle').hidden = !isTeacher(); $('#present-toggle').hidden = !isTeacher(); document.body.classList.toggle('is-teacher', isTeacher());
+    klass?.setWhere('skill:' + w.n, w.theme);
     return;
   }
   if (route === 'calendar' || route === 'assessments') {   // DEC10 course guide (js/guide.js)
@@ -2276,13 +2398,14 @@ document.addEventListener('keydown', e => {
 });
 $('#teacher-toggle').onclick = () => { if (!isTeacher()) { toast('Teacher view is only for your teacher.'); return; } state.teacher = !state.teacher; save(); rerender(); toast(state.teacher ? 'Teacher view: answers and teacher notes are shown.' : 'Student view: answers open after students try.'); };
 $('#glossary-open').onclick = () => glossary();
+$('#glossary-open').hidden = !lesson.glossary.length;   // "Word meanings" is the lesson's own glossary: shown only when the lesson has one (the dictionary is the book button)
 $('#source-open').onclick = () => openSource();
 $('#dialog-close').onclick = () => { reader.closeWord(); $('#resource-dialog').close(); };
 $('#text-toggle').onclick = e => { const on = document.body.classList.toggle('large-text'); e.currentTarget.setAttribute('aria-pressed', String(on)); };
 /* The course card under the logo (DEC10): the course code as a chip, then its name. */
 if (course.sideCard) {
   /* DEC10: a ten-week strip under the course name shows where the term is up to (weeks done, this week, to come). */
-  const strip = (() => { const G = window.DEC15_GUIDE; if (!G?.weeks) return '';
+  const strip = (() => { const G = window.DEC15_GUIDE; if (!G?.weeks || UNITS) return '';
     const t = new Date(), today = new Date(t.getFullYear(), t.getMonth(), t.getDate()), parse = x => { const [y, m, d] = x.split('-').map(Number); return new Date(y, m - 1, d); };
     const ws = G.weeks.filter(w => !w.brk); let now = 0;
     ws.forEach((w, i) => { const a = parse(w.start), b = new Date(a.getFullYear(), a.getMonth(), a.getDate() + 6); if (today >= a) now = today <= b ? i : i + 1; });

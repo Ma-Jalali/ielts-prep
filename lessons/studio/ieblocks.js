@@ -1,6 +1,6 @@
-/* IELTS · Week 1 Day 2 — BLOCK GALLERY. Every block the app can draw, built from the Studio catalogue
+/* IELTS · Studio — BLOCK GALLERY. Every block the app can draw, built from the Studio catalogue
    (js/studio-blocks.js), one stage per group. Use it as a reference when you design a page, or open it in Studio
-   and copy blocks from here. Students do not need this page: hide it by setting its status to 'soon' in course.js. */
+   and copy blocks from here. It is not on the course map (course.js → pages); Studio links to it, so students do not see it. */
 (() => {
   const C = window.STUDIO_BLOCKS || [];
   const GROUPS = [['IELTS', 'ielts', 'IELTS question types', 'Presets for the test’s question types', 'teal', 'assessment'],
@@ -11,7 +11,7 @@
     ['Layout', 'layout', 'Layout', 'Tabs, folds, slides and cards', 'plum', 'research'],
     ['Class games', 'games', 'Class games', 'Whole-class activities', 'green', 'group']];
   window.DEC15_LESSON = {
-    id: 'iew1d2', week: 1, day: 2,
+    id: 'ieblocks', week: null, day: null, where: 'Studio',
     title: 'Block gallery',
     duration: 'Reference',
     journey: 'Every element you can build a page with. Open a stage to see each block working; switch on Edit in Studio to change or copy them.',

@@ -163,6 +163,6 @@ window.createDEC15Announce = function ({ getDb, me, isTeacher, esc, toast, getPe
   const SV = p => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;
   const I = { mega: SV('<path d="M3 10v4a1 1 0 0 0 1 1h2l5 4V5L6 9H4a1 1 0 0 0-1 1z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/>'),
     check: SV('<path d="m5 12.5 4.5 4.5L19 7.5"/>'), reply: SV('<path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 6 6v4"/>'), send: SV('<path d="M4 12 20 4l-6 16-3-7z"/><path d="m11 13 9-9"/>') };
-  const ART = `<svg viewBox="0 0 120 90"><circle cx="60" cy="45" r="40" fill="#fdf2dc"/><path d="M32 40v12a3 3 0 0 0 3 3h7l18 13V24L42 37h-7a3 3 0 0 0-3 3z" fill="#14293a"/><path d="M70 36c4 3 4 15 0 18M77 29c8 6 8 26 0 32" fill="none" stroke="#e9a23b" stroke-width="4" stroke-linecap="round"/><circle cx="93" cy="20" r="4" fill="#2a8a7d"/><circle cx="24" cy="70" r="3" fill="#e0674b"/></svg>`;
+  const ART = `<svg viewBox="0 0 120 90"><circle cx="60" cy="45" r="40" fill="#fdf2dc"/><path d="M32 40v12a3 3 0 0 0 3 3h7l18 13V24L42 37h-7a3 3 0 0 0-3 3z" fill="#18213f"/><path d="M70 36c4 3 4 15 0 18M77 29c8 6 8 26 0 32" fill="none" stroke="#e9a23b" stroke-width="4" stroke-linecap="round"/><circle cx="93" cy="20" r="4" fill="#2a8a7d"/><circle cx="24" cy="70" r="3" fill="#e0674b"/></svg>`;
   return { connect, disconnect, paint };
 };

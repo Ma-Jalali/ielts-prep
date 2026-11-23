@@ -92,7 +92,7 @@ window.DEC15Collab = (() => {
     comment: '<path d="M4 5.5h16v10.5H10l-4.5 3.5V16H4z"/><path d="M8.5 9.5h7M8.5 12.5h4.5"/>',
     check: '<path d="m5 12.5 4.2 4.2L19 7"/>', trash: '<path d="M5 7h14M10 7V4.5h4V7M7 7l1 13h8l1-13"/>', edit: '<path d="m15 4 5 5L9 20H4v-5z"/>', chev: '<path d="m7 10 5 5 5-5"/>',
   };
-  const TEXT_COLORS = [['', 'Default', '#14293a'], ['#b0322b', 'Red', '#b0322b'], ['#c26412', 'Orange', '#c26412'], ['#2f7a52', 'Green', '#2f7a52'], ['#1f6f8b', 'Teal', '#1f6f8b'], ['#2f55b0', 'Blue', '#2f55b0'], ['#7a4a8c', 'Purple', '#7a4a8c'], ['#6b7680', 'Grey', '#6b7680']];
+  const TEXT_COLORS = [['', 'Default', '#18213f'], ['#b0322b', 'Red', '#b0322b'], ['#c26412', 'Orange', '#c26412'], ['#2f7a52', 'Green', '#2f7a52'], ['#1f6f8b', 'Teal', '#1f6f8b'], ['#2f55b0', 'Blue', '#2f55b0'], ['#7a4a8c', 'Purple', '#7a4a8c'], ['#6b7680', 'Grey', '#6b7680']];
   const MARKS = [['', 'None'], ['#fff1a8', 'Yellow'], ['#c9f0d4', 'Green'], ['#cde6fb', 'Blue'], ['#f9d3e2', 'Pink'], ['#ffe0c2', 'Orange'], ['#e6dcf7', 'Lilac']];
   const STYLES = [['p', 'Normal text'], ['h2', 'Heading'], ['h3', 'Subheading']];
   const QUICK = ['Good point!', 'Add an example or evidence.', 'Cite the source here.', 'Check the grammar in this sentence.', 'Can you make this clearer?', 'Use a more academic word.'];
@@ -174,7 +174,7 @@ window.DEC15Collab = (() => {
       const on = { bold: editor.isActive('bold'), italic: editor.isActive('italic'), underline: editor.isActive('underline'), strike: editor.isActive('strike'), bullets: editor.isActive('bulletList'), numbers: editor.isActive('orderedList'), tasks: editor.isActive('taskList'), quote: editor.isActive('blockquote'), link: editor.isActive('link') };
       wrap.querySelectorAll('[data-cw]').forEach(b => { if (b.dataset.cw in on) b.setAttribute('aria-pressed', String(!!on[b.dataset.cw])); });
       const st = editor.isActive('heading', { level: 2 }) ? 'h2' : editor.isActive('heading', { level: 3 }) ? 'h3' : 'p'; const sel = $('[data-cw-style]'); if (sel && sel.value !== st) sel.value = st;
-      $('[data-cw-colorbar]').style.background = editor.getAttributes('textStyle').color || '#14293a';
+      $('[data-cw-colorbar]').style.background = editor.getAttributes('textStyle').color || '#18213f';
       const hl = editor.getAttributes('highlight'); $('[data-cw-markbar]').style.background = editor.isActive('highlight') ? (hl.color || '#fff1a8') : 'transparent';
       const al = ['center', 'right'].find(a => editor.isActive({ textAlign: a })) || 'left'; $('[data-cw-pop="align"]').innerHTML = svg(I[al]);
       paintSel(); };

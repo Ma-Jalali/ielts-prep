@@ -1,7 +1,7 @@
 /* DEC15 · forms, sharing and the quiz board (v2.33) — js/forms.js. Flat colours only. */
 
 /* ───────── feedback / reflection form ───────── */
-.fform { padding: 0; overflow: hidden; border-radius: 22px; background: #fff; border: 1px solid var(--line-2); box-shadow: 0 14px 34px -26px rgba(20, 41, 58, .5); }
+.fform { padding: 0; overflow: hidden; border-radius: 22px; background: #fff; border: 1px solid var(--line-2); box-shadow: 0 14px 34px -26px rgba(24, 33, 63, .5); }
 .ff-head { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 18px 22px; background: var(--accent-bg, #eef1f3); border-bottom: 1px solid var(--line); position: relative; }
 .ff-head::after { content: ''; position: absolute; left: 0; right: 0; bottom: -1px; height: 3px; background: repeating-linear-gradient(90deg, var(--accent, var(--ink)) 0 18px, transparent 18px 26px); opacity: .55; }
 .ff-ico { width: 42px; height: 42px; border-radius: 13px; display: grid; place-items: center; background: var(--accent, var(--ink)); color: #fff; box-shadow: 0 6px 14px -8px var(--accent, var(--ink)); }
@@ -114,7 +114,7 @@
 .sh-list { position: sticky; top: 76px; padding: 10px; border-radius: 22px; background: var(--glass, #fff); border: 1px solid var(--line); }
 .sh-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; padding: 3px; border-radius: 13px; background: var(--paper-2); margin-bottom: 8px; }
 .sh-tabs button { padding: 8px 6px; border: 0; border-radius: 10px; background: transparent; font: 700 .85rem/1 var(--sans); color: var(--ink-2); cursor: pointer; }
-.sh-tabs button[aria-selected="true"] { background: #fff; color: var(--ink); box-shadow: 0 2px 8px -4px rgba(20, 41, 58, .4); }
+.sh-tabs button[aria-selected="true"] { background: #fff; color: var(--ink); box-shadow: 0 2px 8px -4px rgba(24, 33, 63, .4); }
 .sh-tabs i { display: inline-grid; place-items: center; min-width: 18px; height: 18px; padding: 0 5px; margin-left: 4px; border-radius: 99px; background: var(--brand); color: #fff; font: 800 .66rem/1 var(--sans); font-style: normal; }
 .sh-list ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; max-height: calc(100vh - 220px); overflow: auto; }
 .sh-card { display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-rows: auto auto; gap: 2px 10px; padding: 10px 12px; border-radius: 15px; text-decoration: none; color: var(--ink); position: relative; transition: background .15s; }
@@ -128,7 +128,7 @@
 .sh-card time { grid-column: 2; font-size: .72rem; color: var(--faint); }
 .sh-card.unread::after { content: ''; position: absolute; right: 12px; top: 14px; width: 9px; height: 9px; border-radius: 50%; background: var(--brand); }
 .sh-card.unread b { font-weight: 800; }
-.sh-detail { padding: 26px 28px; border-radius: 24px; background: #fff; border: 1px solid var(--line); box-shadow: 0 20px 44px -34px rgba(20, 41, 58, .6); }
+.sh-detail { padding: 26px 28px; border-radius: 24px; background: #fff; border: 1px solid var(--line); box-shadow: 0 20px 44px -34px rgba(24, 33, 63, .6); }
 .sh-dh h2 { margin: 4px 0 10px; font: 600 1.6rem/1.2 var(--serif); }
 .sh-from { display: flex; align-items: center; gap: 10px; margin: 0; color: var(--ink-2); }
 .sh-from .avatar { width: 34px; height: 34px; }
@@ -158,7 +158,7 @@
 .fs-statement { margin: 0 0 22px; padding: 14px 16px; border-left: 4px solid var(--accent, var(--ink)); border-radius: 0 14px 14px 0; background: var(--accent-bg, #eef1f3); font: 400 1.05rem/1.55 var(--serif); }
 .fs-track { position: relative; padding: 18px 0 6px; }
 .fs-track input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 14px; border-radius: 99px; margin: 0; background: #b0512a; background: linear-gradient(90deg, #b0512a 0 33%, #985c0e 33% 66%, #2f7a52 66% 100%); cursor: pointer; }
-.fs-track input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 30px; height: 30px; border-radius: 50%; background: #fff; border: 4px solid var(--ink); box-shadow: 0 6px 14px -4px rgba(20, 41, 58, .45); }
+.fs-track input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 30px; height: 30px; border-radius: 50%; background: #fff; border: 4px solid var(--ink); box-shadow: 0 6px 14px -4px rgba(24, 33, 63, .45); }
 .fs-track input[type=range]::-moz-range-thumb { width: 24px; height: 24px; border-radius: 50%; background: #fff; border: 4px solid var(--ink); }
 .fs-track input[type=range]:not(.is-set)::-webkit-slider-thumb { border-style: dashed; opacity: .8; }
 .fs-ends { display: flex; justify-content: space-between; gap: 8px; margin-top: 10px; font: 700 .8rem/1.2 var(--sans); color: var(--ink-2); }
@@ -232,9 +232,9 @@
 /* ───────── Shared table (v6.8): bar, switch and meta in the lesson; chip in Shared with me ───────── */
 .lt-bar { background: linear-gradient(135deg, #eef7f3, #f4f0fb); border-color: #d5e8df; color: #24564b; }
 .lt-bar .sb-tx small b { color: inherit; }
-.lt-switch { display: inline-flex; flex-wrap: wrap; gap: 4px; padding: 4px; margin: 6px 0 10px; border-radius: 99px; background: var(--paper, #f5f1e9); border: 1px solid var(--line, rgba(20,41,58,.09)); }
+.lt-switch { display: inline-flex; flex-wrap: wrap; gap: 4px; padding: 4px; margin: 6px 0 10px; border-radius: 99px; background: var(--paper, #f4f6fb); border: 1px solid var(--line, rgba(24, 33, 63,.09)); }
 .lt-switch button { display: inline-flex; align-items: center; gap: 7px; font: inherit; font-size: .84rem; font-weight: 700; color: var(--ink-2, #3d505e); background: transparent; border: 0; border-radius: 99px; padding: 6px 14px; cursor: pointer; }
-.lt-switch button[aria-selected="true"] { background: #fff; color: var(--ink, #14293a); box-shadow: 0 1px 3px rgba(20,41,58,.16); }
+.lt-switch button[aria-selected="true"] { background: #fff; color: var(--ink, #18213f); box-shadow: 0 1px 3px rgba(24, 33, 63,.16); }
 .lt-dot { width: 8px; height: 8px; border-radius: 50%; background: #2fae6b; }
 .lt-block .lt-slot { margin-top: 6px; }
 .lt-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px; margin-top: 10px; font-size: .85rem; color: var(--muted, #5d6a74); }

@@ -1,0 +1,49 @@
+/* IELTS · a course by skill (course.units): the skills as cards on the home page (no order between them),
+   and each skill's own road map of its lessons above the lesson cards. */
+.skill-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 210px), 1fr)); gap: 14px; margin: 6px 0 34px; }
+.skill-card { position: relative; display: grid; grid-template-rows: auto 1fr auto; gap: 10px; text-align: left; padding: 14px 16px 14px; border-radius: var(--r-lg, 18px);
+  border: 1px solid var(--line); background: #ffffff; box-shadow: var(--shadow); color: var(--ink); font: inherit; cursor: pointer;
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
+.skill-card::before { content: ""; position: absolute; inset: 0 0 auto; height: 4px; border-radius: inherit; border-bottom-left-radius: 0; border-bottom-right-radius: 0; background: var(--accent); opacity: .75; }
+.skill-card:hover { transform: translateY(-2px); border-color: color-mix(in srgb, var(--accent) 35%, transparent); }
+.skill-card:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.skill-card.is-on { border-color: var(--accent); background: var(--accent-bg); box-shadow: 0 0 0 1px var(--accent), var(--shadow); }
+.skill-card-art { display: grid; place-items: center; height: 74px; border-radius: 12px; background: var(--accent-bg); }
+.skill-card.is-on .skill-card-art { background: #ffffff; }
+.skill-card-art img { width: 96px; height: 74px; object-fit: contain; }
+.skill-card-tx b { display: block; font-family: var(--serif, Georgia, serif); font-size: 1.12rem; line-height: 1.25; font-weight: 600; }
+.skill-card-tx small { display: block; margin-top: 3px; color: var(--muted); font-size: .84rem; line-height: 1.35; }
+.skill-card-meta { display: grid; gap: 6px; font-size: .78rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--accent); }
+.skill-card-meta > i { display: block; height: 4px; border-radius: 4px; background: var(--line); overflow: hidden; }
+.skill-card-meta > i > i { display: block; height: 100%; width: calc(var(--p, 0) * 100%); background: var(--accent); }
+.week-art { width: 64px; height: 50px; object-fit: contain; flex: none; }
+.skill-map { margin: 0 0 22px; }
+.cm-stop[data-go] { cursor: pointer; }
+.cm-stop[data-go]:focus-visible { outline: none; }
+.cm-stop[data-go]:focus-visible circle:first-of-type { stroke: var(--ink); stroke-width: 3; }
+@media (prefers-reduced-motion: reduce) { .skill-card { transition: none; } .skill-card:hover { transform: none; } }
+/* the narrow week bar labels its row; by skill it says "Skill" */
+@media (max-width: 1359px) { [data-course="ielts"] .weekbar .wb-row::before { content: "Part"; } }
+/* phones: compact cards, two to a row, picture beside nothing (small) */
+@media (max-width: 640px) {
+  .skill-grid { grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 26px; }
+  .skill-card { padding: 10px 11px 11px; gap: 7px; }
+  .skill-card-art { height: 52px; }
+  .skill-card-art img { width: 66px; height: 52px; }
+  .skill-card-tx b { font-size: .98rem; }
+  .skill-card-tx small { font-size: .74rem; }
+  .skill-card-meta { font-size: .68rem; }
+}
+/* skill cards are links to the skill's page */
+a.skill-card { text-decoration: none; }
+.skill-page .week { margin-top: 8px; }
+.skill-page .week-head h1 { margin: 2px 0 4px; font-size: clamp(1.8rem, 3.2vw, 2.4rem); }
+.skill-page .week-head .eyebrow { display: block; }
+/* menus the teacher hid: gone for students; the teacher still sees them, dimmed */
+.menu-off { display: none !important; }
+.side-link.menu-off-teacher { opacity: .5; }
+.side-link.menu-off-teacher .side-tx::after { content: "hidden"; margin-left: 6px; padding: 1px 6px; border-radius: 8px; background: rgba(24, 33, 63, .08); font-size: .66rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; vertical-align: 1px; }
+.side-menus { display: grid; gap: 2px; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--line); }
+.side-menus .sc-label { font-size: .84rem; font-weight: 600; color: #3a4d5d; padding: 2px 4px 4px; }
+.side-menus .tt-state { margin-left: auto; }
+.side-menus-note { padding: 4px 4px 0; color: var(--muted); font-size: .74rem; }

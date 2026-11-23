@@ -3,10 +3,10 @@
    shadow plus a soft ambient one); icon tiles are glossy, like app icons; buttons can be pressed. */
 [data-course="ielts"] {
   --d-hi: inset 0 1px 0 rgba(255, 255, 255, .9);
-  --d-rim: 0 0 0 1px rgba(20, 41, 58, .06);
-  --d-1: 0 1px 2px rgba(20, 41, 58, .06), 0 4px 10px -6px rgba(20, 41, 58, .18);
-  --d-2: 0 1px 2px rgba(20, 41, 58, .05), 0 10px 24px -14px rgba(20, 41, 58, .28), 0 30px 60px -44px rgba(20, 41, 58, .35);
-  --d-3: 0 2px 4px rgba(20, 41, 58, .06), 0 18px 36px -18px rgba(20, 41, 58, .34), 0 44px 80px -50px rgba(20, 41, 58, .4);
+  --d-rim: 0 0 0 1px rgba(24, 33, 63, .06);
+  --d-1: 0 1px 2px rgba(24, 33, 63, .06), 0 4px 10px -6px rgba(24, 33, 63, .18);
+  --d-2: 0 1px 2px rgba(24, 33, 63, .05), 0 10px 24px -14px rgba(24, 33, 63, .28), 0 30px 60px -44px rgba(24, 33, 63, .35);
+  --d-3: 0 2px 4px rgba(24, 33, 63, .06), 0 18px 36px -18px rgba(24, 33, 63, .34), 0 44px 80px -50px rgba(24, 33, 63, .4);
 }
 
 /* (the side panel keeps its own design: css/courses.css) */
@@ -18,26 +18,26 @@
 [data-course="ielts"] :is(.page-hero, .stage-head, .course-map) { box-shadow: var(--d-hi), var(--d-rim), var(--d-3) !important; }
 
 /* numbered steps: glossy coins */
-[data-course="ielts"] .do-n { background: radial-gradient(circle at 34% 28%, rgba(255, 255, 255, .45), transparent 48%), linear-gradient(160deg, color-mix(in srgb, var(--accent, #1f8a7a) 75%, #fff), var(--accent, #1f8a7a) 60%, color-mix(in srgb, var(--accent, #1f8a7a) 80%, #14293a)) !important;
+[data-course="ielts"] .do-n { background: radial-gradient(circle at 34% 28%, rgba(255, 255, 255, .45), transparent 48%), linear-gradient(160deg, color-mix(in srgb, var(--accent, #1f8a7a) 75%, #fff), var(--accent, #1f8a7a) 60%, color-mix(in srgb, var(--accent, #1f8a7a) 80%, #18213f)) !important;
   box-shadow: inset 0 -2px 0 rgba(0, 0, 0, .16), 0 0 0 3px #fff, 0 6px 12px -4px color-mix(in srgb, var(--accent, #1f8a7a) 70%, transparent) !important; text-shadow: 0 1px 1px rgba(0, 0, 0, .25); }
 
 /* buttons you can press */
-[data-course="ielts"] .btn { background: linear-gradient(180deg, #2c4c68, #14293a) !important; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .25), inset 0 -2px 0 rgba(0, 0, 0, .25), 0 1px 2px rgba(20, 41, 58, .25), 0 10px 20px -10px rgba(20, 41, 58, .7) !important; transition: transform .15s, box-shadow .15s, filter .15s; }
+[data-course="ielts"] .btn { background: linear-gradient(180deg, #2c4c68, #18213f) !important; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .25), inset 0 -2px 0 rgba(0, 0, 0, .25), 0 1px 2px rgba(24, 33, 63, .25), 0 10px 20px -10px rgba(24, 33, 63, .7) !important; transition: transform .15s, box-shadow .15s, filter .15s; }
 [data-course="ielts"] .btn:hover { filter: brightness(1.12); transform: translateY(-1px); }
-[data-course="ielts"] .btn:active { transform: translateY(1px); box-shadow: inset 0 2px 4px rgba(0, 0, 0, .3), 0 1px 2px rgba(20, 41, 58, .2) !important; }
-[data-course="ielts"] .btn-quiet { box-shadow: var(--d-hi), 0 0 0 1px rgba(20, 41, 58, .1), 0 1px 2px rgba(20, 41, 58, .08), 0 6px 12px -8px rgba(20, 41, 58, .35) !important; transition: transform .15s, box-shadow .15s; }
+[data-course="ielts"] .btn:active { transform: translateY(1px); box-shadow: inset 0 2px 4px rgba(0, 0, 0, .3), 0 1px 2px rgba(24, 33, 63, .2) !important; }
+[data-course="ielts"] .btn-quiet { box-shadow: var(--d-hi), 0 0 0 1px rgba(24, 33, 63, .1), 0 1px 2px rgba(24, 33, 63, .08), 0 6px 12px -8px rgba(24, 33, 63, .35) !important; transition: transform .15s, box-shadow .15s; }
 [data-course="ielts"] .btn-quiet:hover { transform: translateY(-1px); }
-[data-course="ielts"] .btn-quiet:active { transform: translateY(1px); box-shadow: inset 0 2px 3px rgba(20, 41, 58, .12), 0 0 0 1px rgba(20, 41, 58, .1) !important; }
+[data-course="ielts"] .btn-quiet:active { transform: translateY(1px); box-shadow: inset 0 2px 3px rgba(24, 33, 63, .12), 0 0 0 1px rgba(24, 33, 63, .1) !important; }
 
 /* the week bar: the current week's number is a glossy gold coin */
 [data-course="ielts"] .wb-item.is-current .wb-num, [data-course="ielts"] .wb-item.open .wb-num {
-  background: radial-gradient(circle at 32% 26%, rgba(255, 255, 255, .5), transparent 46%), linear-gradient(160deg, #f6a58c, #e64626 60%, #b8331a) !important; color: #fff !important;
+  background: radial-gradient(circle at 32% 26%, rgba(255, 255, 255, .5), transparent 46%), linear-gradient(160deg, #f6a58c, #d6283c 60%, #b8331a) !important; color: #fff !important;
   box-shadow: inset 0 -2px 0 rgba(0, 0, 0, .18), 0 4px 10px -4px rgba(230, 70, 38, .7) !important; text-shadow: 0 1px 1px rgba(0, 0, 0, .2);
 }
-[data-course="ielts"] .topbar, [data-course="ielts"] .masthead { box-shadow: 0 1px 0 rgba(255, 255, 255, .8) inset, 0 10px 24px -20px rgba(20, 41, 58, .4); }
+[data-course="ielts"] .topbar, [data-course="ielts"] .masthead { box-shadow: 0 1px 0 rgba(255, 255, 255, .8) inset, 0 10px 24px -20px rgba(24, 33, 63, .4); }
 
 /* small labels like LANGUAGE BANK: a slight emboss */
-[data-course="ielts"] .block-label { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .25), 0 3px 8px -4px rgba(20, 41, 58, .45); }
+[data-course="ielts"] .block-label { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .25), 0 3px 8px -4px rgba(24, 33, 63, .45); }
 
 @media (prefers-reduced-motion: reduce) {
   [data-course="ielts"] .btn, [data-course="ielts"] .btn-quiet { transition: none !important; }
@@ -64,8 +64,8 @@
 
 /* the course map knows today: a greeting chip under the title, a tag on today's day card, a dot on its week tab */
 [data-course="ielts"] .home-today { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 16px; padding: 9px 16px 9px 12px; border-radius: 999px; text-decoration: none; color: var(--ink);
-  background: rgba(255, 255, 255, .88); box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(19, 136, 122, .18), 0 10px 22px -16px rgba(20, 41, 58, .55); font-size: .9rem; transition: transform .2s, box-shadow .2s; }
-[data-course="ielts"] a.home-today:hover { transform: translateY(-1px); box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(19, 136, 122, .35), 0 14px 26px -16px rgba(20, 41, 58, .6); }
+  background: rgba(255, 255, 255, .88); box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(19, 136, 122, .18), 0 10px 22px -16px rgba(24, 33, 63, .55); font-size: .9rem; transition: transform .2s, box-shadow .2s; }
+[data-course="ielts"] a.home-today:hover { transform: translateY(-1px); box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(19, 136, 122, .35), 0 14px 26px -16px rgba(24, 33, 63, .6); }
 [data-course="ielts"] .home-today .ht-dot { position: relative; width: 10px; height: 10px; border-radius: 50%; background: #13887a; }
 [data-course="ielts"] .home-today .ht-dot::after { content: ""; position: absolute; inset: -4px; border-radius: 50%; border: 2px solid #13887a; opacity: 0; animation: htPing 2s ease-out infinite; }
 @keyframes htPing { 0% { transform: scale(.5); opacity: .8; } 100% { transform: scale(1.6); opacity: 0; } }

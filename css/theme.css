@@ -1,0 +1,91 @@
+/* IELTS Prep · theme (loaded last). A fresh, friendly-but-professional look for this course, in its own colours:
+   IELTS-style red as the brand, a deep indigo-navy for text, cool clean paper, a rounded geometric type for headings
+   (Outfit) with Manrope for reading. Each part (Listening, Reading, …) has its own colour in lessons/course.js.
+   Change the look here: the tokens below are used everywhere. */
+:root[data-course="ielts"] {
+  --ink: #18213f; --ink-2: #39436a; --muted: #5a6382; --faint: #98a0b8;
+  --paper: #f4f6fb; --paper-2: #e9edf5; --surface: #ffffff; --surface-2: #f9fafd; --cream: #fbfcff;
+  --line: rgba(24, 33, 63, .09); --line-2: rgba(24, 33, 63, .15); --line-3: rgba(24, 33, 63, .24);
+  --brand: #d6283c; --brand-soft: #fde8ea; --gold: #f4a52e; --gold-soft: #fde3b3; --sky: #2b67d1;
+  --serif: 'Outfit', 'Manrope', system-ui, sans-serif;
+  --px-ochre: #d6283c; --px-ink: #18213f;
+}
+/* page ground: cool paper with a soft red and blue glow */
+[data-course="ielts"] body {
+  background-color: #f4f6fb;
+  background-image:
+    radial-gradient(48% 38% at 96% 0%, rgba(214, 40, 60, .07), transparent 72%),
+    radial-gradient(44% 36% at 28% 0%, rgba(43, 103, 209, .07), transparent 72%),
+    radial-gradient(40% 36% at 4% 100%, rgba(244, 165, 46, .08), transparent 72%);
+  background-attachment: fixed;
+}
+/* headings: Outfit, a touch heavier and tighter */
+[data-course="ielts"] :is(h1, h2, h3, .week-head h1, .skill-card-tx b, .day-title, .resume h2, .home-head h1) { font-family: var(--serif); font-weight: 650; letter-spacing: -.012em; }
+[data-course="ielts"] .home-head h1, [data-course="ielts"] .skill-page .week-head h1 { font-weight: 700; letter-spacing: -.02em; }
+[data-course="ielts"] .eyebrow { color: var(--brand); }
+[data-course="ielts"] ::selection { background: #ffd9de; color: var(--ink); }
+/* the home page: a group heading over each set of cards */
+.skill-group { margin: 8px 0 26px; }
+.skill-group-head { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; margin: 0 0 12px; }
+.skill-group-head h2 { margin: 0; font-size: 1.3rem; }
+.skill-group-head h2::before { content: ""; display: inline-block; width: 10px; height: 10px; margin-right: 10px; border-radius: 3px; background: var(--brand); vertical-align: 2px; }
+.skill-group + .skill-group .skill-group-head h2::before { background: var(--sky); }
+.skill-group-head p { margin: 0; color: var(--muted); font-size: .95rem; }
+.skill-group .skill-grid { margin: 0; }
+@media (min-width: 1180px) { .skill-group .skill-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); } }   /* the five skills on one row; the language cards the same size */
+/* skill cards: white, a coloured icon tile, the part's colour on the top edge */
+.skill-card { background: #fff; }
+.skill-card-art { justify-content: start; height: auto; background: none; }
+.skill-card.is-on .skill-card-art { background: none; }
+.skill-card-ic { width: 58px; height: 58px; padding: 12px; border-radius: 16px; color: var(--accent); background: var(--accent-bg); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 14%, transparent); }
+.skill-card:hover .skill-card-ic { transform: rotate(-4deg) scale(1.04); }
+.skill-card-ic { transition: transform .25s var(--ease, ease); }
+.week-art { display: grid; place-items: center; width: 60px; height: 60px; padding: 12px; border-radius: 16px; color: var(--accent); background: var(--accent-bg); }
+.week-art svg { width: 100%; height: 100%; }
+@media (max-width: 640px) { .skill-card-ic { width: 44px; height: 44px; padding: 9px; border-radius: 12px; } }
+/* side panel: folding group headings */
+#sidebar .side-group[data-fold] { cursor: pointer; user-select: none; display: flex; align-items: center; gap: 8px; }
+[data-course="ielts"] #sidebar .sidebar-x, #sidebar .side-group[data-fold]::before, [data-course="ielts"]:is(:not([data-side]), [data-side="light"]) #sidebar .side-group[data-fold]::before { content: ""; order: 3; background: none; box-shadow: none; border-radius: 0; position: static; flex: none; width: 7px; height: 7px; margin-left: 2px; border-right: 1.6px solid currentColor; border-bottom: 1.6px solid currentColor; transform: rotate(45deg) translate(-2px, -1px); opacity: .7; transition: transform .2s ease; }
+#sidebar .side-group.is-folded[data-fold]::before, [data-course="ielts"]:is(:not([data-side]), [data-side="light"]) #sidebar .side-group.is-folded[data-fold]::before { transform: rotate(-45deg); }
+#sidebar .side-group[data-fold]:hover { color: var(--ink); }
+.fold-off { display: none !important; }
+/* more side panel colours (Settings → Side panel colour) */
+[data-course="ielts"][data-side="ielts"] { --side-bg: #a3182c; --side-top: #b31d32; --side-end: #8d1426; }
+[data-course="ielts"][data-side="indigo"] { --side-bg: #252b6b; --side-top: #2d3479; --side-end: #1f245c; }
+[data-course="ielts"][data-side="midnight"] { --side-bg: #18213f; --side-top: #1f2a4d; --side-end: #131a33; }
+[data-course="ielts"][data-side="plum"] { --side-bg: #4b2a68; --side-top: #563176; --side-end: #40235a; }
+[data-course="ielts"][data-side="teal"] { --side-bg: #0f5c63; --side-top: #136870; --side-end: #0c4f55; }
+[data-course="ielts"][data-side="forest"] { --side-bg: #23553c; --side-top: #296146; --side-end: #1d4932; }
+[data-course="ielts"][data-side="slate"] { --side-bg: #364152; --side-top: #3e4a5d; --side-end: #2e3846; }
+[data-course="ielts"][data-side="cocoa"] { --side-bg: #5a3e32; --side-top: #664739; --side-end: #4d352b; }
+.side-colours .sc-row { flex-wrap: wrap; }
+/* Band score calculator (#/band) */
+.bc-page { max-width: 980px; }
+.bc-head h1 { margin: 4px 0 6px; font-size: clamp(2rem, 4vw, 2.8rem); }
+.bc-head p { margin: 0 0 22px; color: var(--muted); max-width: 62ch; }
+.bc-grid { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+.bc-card { background: #fff; border-radius: 20px; padding: 18px; box-shadow: 0 0 0 1px var(--line), 0 12px 30px -18px rgba(24, 33, 63, .3); }
+.bc-row { display: grid; grid-template-columns: 1fr 120px 74px; gap: 12px; align-items: center; padding: 12px 4px; border-bottom: 1px solid var(--line); }
+.bc-row:last-of-type { border-bottom: 0; }
+.bc-row label b { display: flex; align-items: center; gap: 8px; font-family: var(--serif); font-size: 1.08rem; }
+.bc-row label b::before { content: ""; width: 10px; height: 10px; border-radius: 3px; background: var(--c); }
+.bc-row label small { display: block; color: var(--muted); font-size: .82rem; margin-left: 18px; }
+.bc-row :is(input, select) { width: 100%; font: 600 1rem var(--sans); padding: 9px 12px; border-radius: 12px; border: 1px solid var(--line-2); background: var(--surface-2); color: var(--ink); }
+.bc-band { text-align: center; }
+.bc-band small { display: block; font-size: .68rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 700; }
+.bc-band b { font: 700 1.5rem/1.1 var(--serif); color: var(--c); }
+.bc-clear { margin-top: 10px; }
+.bc-out { position: sticky; top: 110px; display: grid; gap: 8px; text-align: center; padding: 26px 20px; background: linear-gradient(160deg, #fff 0%, #fff 55%, #fdeef0 100%); }
+.bc-o-label { font-size: .78rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--brand); }
+.bc-o-num { font: 700 clamp(3.6rem, 8vw, 5rem)/1 var(--serif); color: var(--ink); }
+.bc-o-num.is-empty { color: var(--faint); }
+.bc-o-note { color: var(--muted); }
+.bc-o-note.is-ok { color: #1f8a4c; font-weight: 600; }
+.bc-o-bar { position: relative; display: block; height: 10px; margin-top: 6px; border-radius: 10px; background: var(--paper-2); }
+.bc-o-bar i { position: absolute; inset: 0 auto 0 0; width: calc(var(--p) * 100%); border-radius: inherit; background: linear-gradient(90deg, var(--gold), var(--brand)); transition: width .4s var(--ease, ease); }
+.bc-o-bar em { position: absolute; top: -4px; bottom: -4px; left: calc(var(--t) * 100%); width: 2px; background: var(--ink); border-radius: 2px; }
+.bc-how { margin-top: 18px; padding: 14px 18px; border-radius: 16px; background: #fff; box-shadow: 0 0 0 1px var(--line); }
+.bc-how summary { cursor: pointer; font-weight: 700; }
+.bc-how p { color: var(--ink-2); margin: 10px 0 0; }
+@media (max-width: 760px) { .bc-grid { grid-template-columns: 1fr; } .bc-out { position: static; order: -1; } .bc-row { grid-template-columns: 1fr 96px 56px; } }
+[data-course="ielts"] .sidebar .side-link.t-band { --tc: #d6283c; }

@@ -23,7 +23,7 @@
 [data-course="ielts"] .stage-numeral { text-shadow: 0 1px 0 #fff; }
 
 /* ── 3. Activity card: a perforated ticket edge under the header, a hairline double rule inside the goal box ── */
-[data-course="ielts"] .act-head { background-image: radial-gradient(circle, rgba(20, 41, 58, .16) 1.1px, transparent 1.5px), linear-gradient(180deg, var(--surface-2), var(--surface)) !important;
+[data-course="ielts"] .act-head { background-image: radial-gradient(circle, rgba(24, 33, 63, .16) 1.1px, transparent 1.5px), linear-gradient(180deg, var(--surface-2), var(--surface)) !important;
   background-size: 9px 9px, 100% 100%; background-position: 10px 100%, 0 0; background-repeat: repeat-x, no-repeat; padding-bottom: 32px; }
 [data-course="ielts"] .act-head.has-art { background-size: 9px 9px, 100% 100%; }
 [data-course="ielts"] .act-count { display: inline-flex; align-items: center; gap: 7px; padding: 5px 10px 5px 8px; border-radius: 999px; background: color-mix(in srgb, var(--accent, #2b776e) 9%, #fff); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent, #2b776e) 22%, transparent); }
@@ -31,14 +31,14 @@
 [data-course="ielts"] .act-goal { position: relative; padding: 14px 18px 14px 20px; border-radius: 14px; background: color-mix(in srgb, var(--accent, #2b776e) 6%, #fff); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent, #2b776e) 18%, transparent); }
 [data-course="ielts"] .act-goal::after { content: ""; position: absolute; inset: 4px; border-radius: 11px; border: 1px solid color-mix(in srgb, var(--accent, #2b776e) 14%, transparent); pointer-events: none; }
 [data-course="ielts"] .act-goal .icon { width: 20px; height: 20px; }
-[data-course="ielts"] .timer-btn { background: linear-gradient(180deg, #fff, #f6f4ee); box-shadow: inset 0 1px 0 #fff, 0 2px 6px -4px rgba(20, 41, 58, .4); }
+[data-course="ielts"] .timer-btn { background: linear-gradient(180deg, #fff, #f6f4ee); box-shadow: inset 0 1px 0 #fff, 0 2px 6px -4px rgba(24, 33, 63, .4); }
 
 /* ── 4. What to do: step numbers get a halo ring; the connector ends in a small arrowhead ── */
 [data-course="ielts"] .steps li::before { box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent, #2b776e) 14%, transparent), 0 4px 10px -5px color-mix(in srgb, var(--accent, #2b776e) 70%, transparent) !important; }
 [data-course="ielts"] .steps li:not(:last-child)::after { background: repeating-linear-gradient(180deg, color-mix(in srgb, var(--accent, #2b776e) 45%, transparent) 0 5px, transparent 5px 9px) !important; }
 [data-course="ielts"] .steps li p { position: relative; }
-[data-course="ielts"] .steps li p::before { content: ""; position: absolute; left: -7px; top: 14px; width: 10px; height: 10px; background: rgba(255, 255, 255, .85); transform: rotate(45deg); box-shadow: -1px 1px 0 rgba(20, 41, 58, .06); }
-[data-course="ielts"] .do-step { box-shadow: inset 0 1px 0 #fff, 0 6px 16px -14px rgba(20, 41, 58, .5); }
+[data-course="ielts"] .steps li p::before { content: ""; position: absolute; left: -7px; top: 14px; width: 10px; height: 10px; background: rgba(255, 255, 255, .85); transform: rotate(45deg); box-shadow: -1px 1px 0 rgba(24, 33, 63, .06); }
+[data-course="ielts"] .do-step { box-shadow: inset 0 1px 0 #fff, 0 6px 16px -14px rgba(24, 33, 63, .5); }
 [data-course="ielts"] .do-n { box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent, #2b776e) 14%, transparent), 0 4px 10px -5px color-mix(in srgb, var(--accent, #2b776e) 70%, transparent); }
 
 /* ── 5. Quiz options: lettered A · B · C · D badges instead of a plain radio dot ── */
@@ -53,19 +53,19 @@
 [data-course="ielts"] .quiz-item.is-wrong .option.selected::before { background: #d9763f !important; color: #fff; box-shadow: 0 0 0 3px rgba(217, 118, 63, .2); }
 [data-course="ielts"] .quiz-q::before { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent, #2b776e) 25%, transparent); }
 /* the confidence bet keeps its own A · B letters in the text; give its options the same card edge */
-[data-course="ielts"] .bet .option { box-shadow: inset 0 1px 0 #fff, 0 2px 6px -4px rgba(20, 41, 58, .35); }
+[data-course="ielts"] .bet .option { box-shadow: inset 0 1px 0 #fff, 0 2px 6px -4px rgba(24, 33, 63, .35); }
 
 /* ── 6. Checklist: a drawn tick, a colour tab that slides in when ticked, a pressed feel ── */
 [data-course="ielts"] .check { position: relative; overflow: hidden; }
 [data-course="ielts"] .check::before { content: ""; position: absolute; left: 0; top: 10px; bottom: 10px; width: 4px; border-radius: 0 4px 4px 0; background: #2f9a63; transform: translateX(-6px); transition: transform .25s var(--ease); }
 [data-course="ielts"] .check:has(input:checked)::before { transform: translateX(0); }
-[data-course="ielts"] .check input { border-radius: 8px; box-shadow: inset 0 1px 2px rgba(20, 41, 58, .08); }
+[data-course="ielts"] .check input { border-radius: 8px; box-shadow: inset 0 1px 2px rgba(24, 33, 63, .08); }
 [data-course="ielts"] .check input:checked { background: #2f9a63; border-color: #2f9a63; box-shadow: 0 0 0 4px rgba(47, 154, 99, .16); }
 [data-course="ielts"] .check input::after { width: 11px; height: 6px; transition: opacity .15s, transform .25s var(--ease); transform: rotate(-45deg) translate(1px, -1px) scale(.4); }
 [data-course="ielts"] .check input:checked::after { transform: rotate(-45deg) translate(1px, -1px) scale(1); }
-[data-course="ielts"] .check:hover { box-shadow: inset 0 0 0 1px rgba(20, 41, 58, .12), 0 6px 16px -12px rgba(20, 41, 58, .5) !important; }
+[data-course="ielts"] .check:hover { box-shadow: inset 0 0 0 1px rgba(24, 33, 63, .12), 0 6px 16px -12px rgba(24, 33, 63, .5) !important; }
 [data-course="ielts"] .check:active { transform: scale(.995); }
-[data-course="ielts"] .check-meter span { box-shadow: inset 0 1px 2px rgba(20, 41, 58, .12); }
+[data-course="ielts"] .check-meter span { box-shadow: inset 0 1px 2px rgba(24, 33, 63, .12); }
 
 /* ── 7. Buttons: a light sweep across the dark button on hover, a brighter rim; quiet buttons get a hairline ── */
 [data-course="ielts"] .btn { position: relative; overflow: hidden; isolation: isolate; }
@@ -86,7 +86,7 @@
 
 /* ── 10. Pictures: a thin mat and a hairline inner frame, like a mounted print; captions as small caps ── */
 [data-course="ielts"] .hotspot .hs-stage { --in: 7px; }
-[data-course="ielts"] .figure img, [data-course="ielts"] .hotspot img { padding: 6px; background: #fff; border: 1px solid rgba(20, 41, 58, .1) !important; box-shadow: inset 0 0 0 1px #fff, 0 10px 24px -18px rgba(20, 41, 58, .55); }
+[data-course="ielts"] .figure img, [data-course="ielts"] .hotspot img { padding: 6px; background: #fff; border: 1px solid rgba(24, 33, 63, .1) !important; box-shadow: inset 0 0 0 1px #fff, 0 10px 24px -18px rgba(24, 33, 63, .55); }
 
 /* ── 11. Key point, model, tip: tiny finishing touches ── */
 [data-course="ielts"] .block.key .key-title, [data-course="ielts"] .block.key h3 { text-shadow: 0 1px 0 rgba(255, 255, 255, .6); }
@@ -96,19 +96,19 @@
 [data-course="ielts"] .tip .icon { width: 22px; height: 22px; padding: 3px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 1px rgba(227, 168, 67, .5); margin-top: 0; }
 
 /* ── 12. Activity foot: the "finished" box and the Next button sit on a soft ledge ── */
-[data-course="ielts"] .act-foot { background-image: linear-gradient(180deg, rgba(20, 41, 58, .035), transparent 14px) !important; }
+[data-course="ielts"] .act-foot { background-image: linear-gradient(180deg, rgba(24, 33, 63, .035), transparent 14px) !important; }
 
 /* ── 13. Lesson tabs (the numbered row): a soft inner ring and a tiny tick mark under the current one ── */
-[data-course="ielts"] .tab-num { box-shadow: 0 0 0 5px var(--paper), inset 0 1px 0 #fff, 0 2px 4px -2px rgba(20, 41, 58, .35) !important; }
+[data-course="ielts"] .tab-num { box-shadow: 0 0 0 5px var(--paper), inset 0 1px 0 #fff, 0 2px 4px -2px rgba(24, 33, 63, .35) !important; }
 [data-course="ielts"] .act-tabs button.current::after { content: ""; width: 18px; height: 3px; border-radius: 3px; background: var(--accent, #2b776e); margin-top: -2px; }
 
 /* ── 14. Course map day cards: a ticket-stub perforation between picture and text, a stamp-style day label ── */
 [data-course="ielts"] .day-card { overflow: hidden; }
-[data-course="ielts"] .day-art { position: relative; background-image: radial-gradient(circle at 1px 1px, rgba(20, 41, 58, .07) 1px, transparent 1.6px), linear-gradient(180deg, #fbf3e4, #f7ecd8) !important; background-size: 12px 12px, 100% 100%; border-bottom: 0 !important; }
-[data-course="ielts"] .day-art::after { content: ""; position: absolute; left: 14px; right: 14px; bottom: -1px; height: 2px; background: repeating-linear-gradient(90deg, rgba(20, 41, 58, .22) 0 4px, transparent 4px 9px); }
+[data-course="ielts"] .day-art { position: relative; background-image: radial-gradient(circle at 1px 1px, rgba(24, 33, 63, .07) 1px, transparent 1.6px), linear-gradient(180deg, #fbf3e4, #f7ecd8) !important; background-size: 12px 12px, 100% 100%; border-bottom: 0 !important; }
+[data-course="ielts"] .day-art::after { content: ""; position: absolute; left: 14px; right: 14px; bottom: -1px; height: 2px; background: repeating-linear-gradient(90deg, rgba(24, 33, 63, .22) 0 4px, transparent 4px 9px); }
 [data-course="ielts"] .day-art::before { content: ""; position: absolute; left: -9px; bottom: -9px; width: 16px; height: 16px; border-radius: 50%; background: var(--paper); box-shadow: calc(100% + 2px) 0 0 0 var(--paper); z-index: 2; }
 [data-course="ielts"] .day-card .day-art::before { box-shadow: none; }
-[data-course="ielts"] .day-label .day-open { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .25), 0 3px 8px -4px rgba(20, 41, 58, .6); }
+[data-course="ielts"] .day-label .day-open { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .25), 0 3px 8px -4px rgba(24, 33, 63, .6); }
 [data-course="ielts"] .day-title { position: relative; }
 [data-course="ielts"] .day-card:hover .day-art img { transform: translateY(-3px) scale(1.03); }
 [data-course="ielts"] .day-art img { transition: transform .35s var(--ease); }
@@ -117,12 +117,12 @@
 [data-course="ielts"] .table-scroll, [data-course="ielts"] .tbl-wrap, [data-course="ielts"] .nb-table-scroll, [data-course="ielts"] .act-tabs { scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--accent, #2b776e) 45%, transparent) transparent; }
 
 /* ── 16. Match / flip / sort cards: a soft inner highlight and a press ── */
-[data-course="ielts"] .mt-card, [data-course="ielts"] .sort-card, [data-course="ielts"] .flip-face { box-shadow: inset 0 1px 0 #fff, 0 2px 6px -4px rgba(20, 41, 58, .35); }
+[data-course="ielts"] .mt-card, [data-course="ielts"] .sort-card, [data-course="ielts"] .flip-face { box-shadow: inset 0 1px 0 #fff, 0 2px 6px -4px rgba(24, 33, 63, .35); }
 [data-course="ielts"] .mt-card:active { transform: scale(.985); }
 
 /* ── 17. The lesson overview "at a glance" rail and stage cards: corner dots and a hairline inner frame ── */
 [data-course="ielts"] .journey-card { position: relative; }
-[data-course="ielts"] .journey-card::after { content: ""; position: absolute; inset: 5px; border-radius: inherit; border: 1px solid rgba(20, 41, 58, .05); pointer-events: none; }
+[data-course="ielts"] .journey-card::after { content: ""; position: absolute; inset: 5px; border-radius: inherit; border: 1px solid rgba(24, 33, 63, .05); pointer-events: none; }
 
 @media (prefers-reduced-motion: reduce) {
   [data-course="ielts"] .btn::after, [data-course="ielts"] .day-art img, [data-course="ielts"] .check::before, [data-course="ielts"] .check input::after { transition: none; }

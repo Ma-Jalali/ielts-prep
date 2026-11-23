@@ -26,6 +26,11 @@ window.createStudio = function ({ lesson, course, days, esc, icon, toast, L, rer
   const typeName = t => (CAT.find(c => c.type === t && c.cat !== 'IELTS') || CAT.find(c => c.type === t) || { name: t }).name;
   const clone = o => JSON.parse(JSON.stringify(o));
   const PREFIX = course.idPrefix || '';
+  /* A course by skill (course.units) keeps the weeks/days shape: week = unit (skill), day = lesson in it. */
+  const UNITS = course.units || null, UW = UNITS?.unit || 'Week', DW = UNITS?.lesson || 'Day';
+  const unitOf = n => course.weeks.find(w => w.n === n);
+  const whereOf = (w, d) => UNITS ? `${unitOf(w)?.theme || UW + ' ' + w} · ${DW} ${d}` : `Week ${w} Day ${d}`;
+  const folderOf = n => unitOf(n)?.folder || `lessons/week${n}`;
   let editing = !!ls.get(K_EDIT, false);
   const isDraft = () => !!(ls.get(K_DRAFTS, {}).lessons || {})[lesson.id];
   const draftOnly = () => !!days.find(d => d.id === lesson.id)?.draft;
@@ -366,15 +371,15 @@ window.createStudio = function ({ lesson, course, days, esc, icon, toast, L, rer
   /* ───────── export, drafts ───────── */
   const download = (name, text, type = 'text/javascript') => { const u = URL.createObjectURL(new Blob([text], { type })); const a = Object.assign(document.createElement('a'), { href: u, download: name }); document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(u), 2000); };
   function lessonFile(l) {
-    const where = l.week ? `Week ${l.week} Day ${l.day}` : 'Skills Lab';
+    const where = l.week ? whereOf(l.week, l.day) : 'Skills Lab';
     return `/* ${course.code} · ${where} — ${String(l.title).replace(/\*\//g, '')}. Made in Studio on ${new Date().toISOString().slice(0, 10)}.\n   Ids (lesson, activities, fields) are the keys of students' saved work: never rename them after students start. */\nwindow.DEC15_LESSON = ${JSON.stringify(l, null, 2)};\n`;
   }
-  const courseEntry = l => { const i = dayInfo(l); return `{ id: '${l.id}', day: ${l.day}, status: 'ready', title: ${JSON.stringify(i.title)}, art: '${i.art}',\n  parts: ${JSON.stringify(i.parts)},\n  stages: ${JSON.stringify(i.stages)}, tones: ${JSON.stringify(i.tones)},\n  scripts: ['lessons/week${l.week}/${l.id}.js'] }`; };
+  const courseEntry = l => { const i = dayInfo(l); return `{ id: '${l.id}', day: ${l.day}, status: 'ready', title: ${JSON.stringify(i.title)}, art: '${i.art}',\n  parts: ${JSON.stringify(i.parts)},\n  stages: ${JSON.stringify(i.stages)}, tones: ${JSON.stringify(i.tones)},\n  scripts: ['${folderOf(l.week)}/${l.id}.js'] }`; };
   function exportLesson(id) {
     const d = ls.get(K_DRAFTS, {}), l = d.lessons?.[id] || (id === lesson.id ? lesson : null);
     if (!l) { toast('Open that page first, or it has no draft.'); return; }
     download(`${id}.js`, lessonFile(l));
-    toast(`Downloaded ${id}.js — put it in lessons/week${l.week}/.`);
+    toast(`Downloaded ${id}.js — put it in ${folderOf(l.week)}/.`);
   }
   function discard(id) {
     const d = ls.get(K_DRAFTS, {}), only = (d.days || []).some(x => x.id === id);
@@ -402,9 +407,9 @@ window.createStudio = function ({ lesson, course, days, esc, icon, toast, L, rer
   };
   function createPage(f) {
     const week = Number(f.week.value), day = Number(f.day.value), title = f.title.value.trim() || 'New page';
-    if (!(week >= 1 && day >= 1)) { toast('Choose a week and a day.'); return; }
+    if (!(week >= 1 && day >= 1)) { toast(UNITS ? `Choose a ${UW.toLowerCase()} and a ${DW.toLowerCase()} number.` : 'Choose a week and a day.'); return; }
     const id = `${PREFIX}w${week}d${day}`;
-    if (days.some(d => d.id === id)) { toast(`Week ${week}, Day ${day} already exists — open it and switch on Edit.`); return; }
+    if (days.some(d => d.id === id)) { toast(`${whereOf(week, day)} already exists — open it and switch on Edit.`); return; }
     const from = f.from.value;
     let sections;
     if (from.startsWith('copy:')) { const src = ls.get(K_DRAFTS, {}).lessons?.[from.slice(5)] || (from.slice(5) === lesson.id ? lesson : null);
@@ -423,30 +428,30 @@ window.createStudio = function ({ lesson, course, days, esc, icon, toast, L, rer
     const d = ls.get(K_DRAFTS, {}), ids = Object.keys(d.lessons || {}), only = new Set((d.days || []).map(x => x.id));
     const ago = t => { if (!t) return ''; const m = Math.round((Date.now() - t) / 6e4); return m < 1 ? 'just now' : m < 60 ? `${m} min ago` : m < 1440 ? `${Math.round(m / 60)} h ago` : new Date(t).toLocaleDateString(); };
     const weekly = days.filter(x => x.week && x.status === 'ready');
-    const nextFree = (() => { for (let w = 1; w < 60; w++) for (let dd = 1; dd <= 5; dd++) if (!days.some(x => x.id === `${PREFIX}w${w}d${dd}`)) return [w, dd]; return [1, 1]; })();
+    const nextFree = (() => { for (let w = 1; w < 60; w++) for (let dd = 1; dd <= (UNITS ? 40 : 5); dd++) if (!days.some(x => x.id === `${PREFIX}w${w}d${dd}`)) return [w, dd]; return [1, 1]; })();
     return `<div class="sx-page">
       <header class="sx-hero"><div><span class="eyebrow">${esc(course.code)} · Studio</span><h1>Design with the blocks</h1>
         <p>Edit any page in place, or build a new one from the course’s own elements. Your work is saved as a <b>draft on this device</b> until you publish it.</p></div>
         <label class="sx-switch-big"><input type="checkbox" data-sx-edit-toggle${editing ? ' checked' : ''}><span class="sx-sw" aria-hidden="true"><i></i></span><span><b>Edit mode</b><small>${editing ? 'On — toolbars show on every block' : 'Off — pages look as students see them'}</small></span></label></header>
       <section class="sx-card"><h2>${I.plus}New page</h2>
         <form class="sx-new" data-sx-new>
-          <label>Week<input name="week" type="number" min="1" value="${nextFree[0]}" required></label>
-          <label>Day<input name="day" type="number" min="1" value="${nextFree[1]}" required></label>
+          ${UNITS ? `<label>${UW}<select name="week">${course.weeks.map(w => `<option value="${w.n}"${w.n === nextFree[0] ? ' selected' : ''}>${esc(w.theme)}</option>`).join('')}</select></label>` : `<label>Week<input name="week" type="number" min="1" value="${nextFree[0]}" required></label>`}
+          <label>${DW}<input name="day" type="number" min="1" value="${nextFree[1]}" required></label>
           <label class="sx-grow">Title<input name="title" type="text" placeholder="e.g. Reading: matching headings" required></label>
           <label class="sx-grow">Start from<select name="from">${Object.entries(STARTS).map(([k, v]) => `<option value="${k}">${esc(v.name)}</option>`).join('')}
-            <optgroup label="A copy of …">${weekly.map(x => `<option value="copy:${x.id}">Week ${x.week} Day ${x.day} · ${esc(x.title)}</option>`).join('')}</optgroup></select></label>
+            <optgroup label="A copy of …">${weekly.map(x => `<option value="copy:${x.id}">${esc(whereOf(x.week, x.day))} · ${esc(x.title)}</option>`).join('')}</optgroup></select></label>
           <button class="sx-btn" type="submit">${I.plus}Create</button></form>
-        <p class="sx-hint">The page gets the id <code>${esc(PREFIX)}w&lt;week&gt;d&lt;day&gt;</code> and appears on the course map at once (on this device).</p></section>
+        <p class="sx-hint">The page gets the id <code>${esc(PREFIX)}w&lt;${UNITS ? UW.toLowerCase() : 'week'}&gt;d&lt;${UNITS ? DW.toLowerCase() : 'day'}&gt;</code>${UNITS ? ` (${course.weeks.map(w => `${w.n} = ${esc(w.theme)}`).join(', ')})` : ''} and appears on the course map at once (on this device).</p></section>
       <section class="sx-card"><h2>${I.edit}Drafts on this device <em>${ids.length}</em></h2>
         ${ids.length ? `<ul class="sx-drafts">${ids.map(id => { const l = d.lessons[id]; return `<li><span class="sx-d-tag${only.has(id) ? ' is-new' : ''}">${only.has(id) ? 'New' : 'Edited'}</span>
-          <a href="#/${esc(id)}"><b>${esc(l.week ? `Week ${l.week} Day ${l.day}` : id)} · ${esc(l.title)}</b><small>${esc(id)} · saved ${ago(d.saved?.[id])}</small></a>
+          <a href="#/${esc(id)}"><b>${esc(l.week ? whereOf(l.week, l.day) : id)} · ${esc(l.title)}</b><small>${esc(id)} · saved ${ago(d.saved?.[id])}</small></a>
           <span class="sx-d-acts"><button type="button" class="sx-btn-q" data-sx-export="${esc(id)}">${I.out}Lesson file</button><button type="button" class="sx-btn-q" data-sx-entry="${esc(id)}">course.js entry</button><button type="button" class="sx-btn-q is-danger" data-sx-discard="${esc(id)}">${I.del}</button></span></li>`; }).join('')}</ul>
           <div class="sx-row"><button type="button" class="sx-btn" data-sx-all>${I.out}Download all drafts</button><label class="sx-btn-q sx-file">Import drafts<input type="file" accept=".json,application/json" data-sx-import hidden></label></div>`
           : `<p class="sx-empty">No drafts yet. Switch on <b>Edit mode</b> and open any page, or create a new one above.</p><label class="sx-btn-q sx-file">Import drafts<input type="file" accept=".json,application/json" data-sx-import hidden></label>`}</section>
       <section class="sx-card sx-how"><h2>${I.studio}How it works</h2><ol>
         <li><b>Edit.</b> With Edit mode on, hover a block for its toolbar: move, duplicate, copy, delete, <b>Edit</b> (all its fields) and <b>+</b> (add a block below). <b>Double-click any text</b> to type over it. Activities and stages have their own bars.</li>
-        <li><b>Build.</b> “Add a block” opens the catalogue: IELTS question types (True/False/Not Given, completion, matching, cue cards …) and every element of the design. The <a href="#/${PREFIX}w1d2">Block gallery</a> shows each one working; copy any block there and paste it on your page.</li>
-        <li><b>Publish.</b> Download the lesson file and put it in <code>lessons/week&lt;n&gt;/</code> with its course.js entry — or <b>Download all drafts</b> and give the file to Claude to publish. Then discard the draft.</li>
+        <li><b>Build.</b> “Add a block” opens the catalogue: IELTS question types (True/False/Not Given, completion, matching, cue cards …) and every element of the design. The <a href="#/${course.galleryLesson || PREFIX + 'w1d2'}">Block gallery</a> shows each one working; copy any block there and paste it on your page.</li>
+        <li><b>Publish.</b> Download the lesson file and put it in ${UNITS ? 'its skill’s folder (<code>lessons/b2/&lt;skill&gt;/</code>)' : '<code>lessons/week&lt;n&gt;/</code>'} with its course.js entry — or <b>Download all drafts</b> and give the file to Claude to publish. Then discard the draft.</li>
         <li><b>Undo</b> with the dock button or <kbd>Ctrl</kbd>/<kbd>⌘</kbd> + <kbd>Z</kbd> (outside a text box).</li></ol>
         <button type="button" class="sx-btn-q" data-sx-off>Turn Studio off on this device</button></section>
     </div>`;

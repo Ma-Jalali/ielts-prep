@@ -4,7 +4,8 @@
    Everything here is placeholder structure — replace it with your course's dates and details.
    Week:   { n, theme, sub, start: 'YYYY-MM-DD' (a Monday), dates: '5–9 Jan', days: [Mon … Fri] }  ·  brk: true = a break week
    Day:    { class: [[code, title]], hw: [[code, title]], events: [{ type, title, time?, where?, note?, counts? }], off?: true }
-           A code like 'W1 D1' links to that lesson (iew1d1) when it is ready.
+           A code like 'W2 D3' links to that lesson when it is ready. The course is by skill (course.js), so W = skill and
+           D = lesson: 'W2 D3' = Reading · Lesson 3 (ieb2w2d3).
    Event types: the keys of eventTypes ([label, colour]). type 'assess' feeds the "Next assessment" countdown. */
 window.DEC15_GUIDE = {
   calendarEyebrow: 'IELTS Preparation',
@@ -21,8 +22,8 @@ window.DEC15_GUIDE = {
   },
   weeks: [
     { n: 1, theme: 'Getting started', sub: '', start: '2027-01-04', dates: '4–8 Jan', days: [
-      { class: [['W1 D1', 'Starter page']], events: [{ type: 'info', title: 'Welcome and course overview' }] },
-      { class: [['W1 D2', 'Block gallery']] }, {}, {},
+      { events: [{ type: 'info', title: 'Welcome and course overview' }] },
+      {}, {}, {},
       { events: [{ type: 'assess', title: 'Diagnostic mock test', note: 'Shows your starting band' }] }
     ] },
     { n: 2, theme: 'Week 2', start: '2027-01-11', dates: '11–15 Jan', days: [{}, {}, {}, {}, {}] },

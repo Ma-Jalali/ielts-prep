@@ -24,7 +24,7 @@ window.DEC15Picker = (() => {
     const slices = list.map((name, i) => {
       const mid = (i + .5) / n * 360, col = colorAt(i, n), light = LIGHT.has(col);
       const label = name.length > 20 ? name.slice(0, 19) + '…' : name;
-      return `<g class="pk-seg" data-i="${i}">${seg(i, n, col)}<text transform="rotate(${mid} ${C} ${C})" x="${C + R - 30}" y="${C}" dy=".35em" text-anchor="end" font-size="${fs}" fill="${light ? '#14293a' : '#fff'}" stroke="${light ? 'rgba(255,255,255,.35)' : 'rgba(10,20,30,.28)'}" stroke-width="${light ? 2 : 3}" class="pk-name">${esc(label)}</text></g>`;
+      return `<g class="pk-seg" data-i="${i}">${seg(i, n, col)}<text transform="rotate(${mid} ${C} ${C})" x="${C + R - 30}" y="${C}" dy=".35em" text-anchor="end" font-size="${fs}" fill="${light ? '#18213f' : '#fff'}" stroke="${light ? 'rgba(255,255,255,.35)' : 'rgba(10,20,30,.28)'}" stroke-width="${light ? 2 : 3}" class="pk-name">${esc(label)}</text></g>`;
     }).join('');
     const lines = n > 1 ? Array.from({ length: n }, (_, i) => { const [x, y] = pt(R, i / n * 360); return `<path d="M${C} ${C}L${x.toFixed(1)} ${y.toFixed(1)}" stroke="url(#pk-gold)" stroke-width="2.2" stroke-opacity=".85"/>`; }).join('') : '';
     const pegs = Array.from({ length: n > 1 ? n : 0 }, (_, i) => { const [x, y] = pt(R - 9, i / n * 360); return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="5.2" fill="url(#pk-peg)" stroke="#8a5a12" stroke-width=".8"/>`; }).join('');
@@ -39,12 +39,12 @@ window.DEC15Picker = (() => {
   const WHEEL_DEFS = `<defs>
       <radialGradient id="pk-depth" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#000" stop-opacity=".22"/><stop offset=".3" stop-color="#000" stop-opacity="0"/><stop offset=".78" stop-color="#fff" stop-opacity=".06"/><stop offset=".94" stop-color="#000" stop-opacity=".05"/><stop offset="1" stop-color="#000" stop-opacity=".3"/></radialGradient>
       <linearGradient id="pk-gloss" x1="0" y1="0" x2=".55" y2=".9"><stop offset="0" stop-color="#fff" stop-opacity=".38"/><stop offset=".45" stop-color="#fff" stop-opacity=".06"/><stop offset=".46" stop-color="#fff" stop-opacity="0"/></linearGradient>
-      <linearGradient id="pk-rim" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2b4d68"/><stop offset=".5" stop-color="#14293a"/><stop offset="1" stop-color="#0a1824"/></linearGradient>
+      <linearGradient id="pk-rim" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2b4d68"/><stop offset=".5" stop-color="#18213f"/><stop offset="1" stop-color="#0a1824"/></linearGradient>
       <linearGradient id="pk-gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff1c2"/><stop offset=".35" stop-color="#f0c35a"/><stop offset=".7" stop-color="#c88a1e"/><stop offset="1" stop-color="#f6d27a"/></linearGradient>
       <radialGradient id="pk-peg" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#fff7d6"/><stop offset=".5" stop-color="#f0c35a"/><stop offset="1" stop-color="#a86f14"/></radialGradient>
       <filter id="pk-soft" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="16"/></filter>
       <filter id="pk-tight" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="3.5"/></filter>
-      <radialGradient id="pk-floor" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#14293a" stop-opacity=".34"/><stop offset=".6" stop-color="#14293a" stop-opacity=".12"/><stop offset="1" stop-color="#14293a" stop-opacity="0"/></radialGradient>
+      <radialGradient id="pk-floor" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#18213f" stop-opacity=".34"/><stop offset=".6" stop-color="#18213f" stop-opacity=".12"/><stop offset="1" stop-color="#18213f" stop-opacity="0"/></radialGradient>
       <linearGradient id="pk-post" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#0c1c29"/><stop offset=".35" stop-color="#2c4d68"/><stop offset=".55" stop-color="#1b3549"/><stop offset="1" stop-color="#0a1824"/></linearGradient>
       <linearGradient id="pk-base" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2b4d68"/><stop offset="1" stop-color="#0d1f2d"/></linearGradient>
       <linearGradient id="pk-spec" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/></linearGradient>
@@ -94,10 +94,10 @@ window.DEC15Picker = (() => {
               <path d="M${C - R + 8} ${C}A${R - 8} ${R - 8} 0 0 1 ${C + R - 8} ${C}C${C + R * .55} ${C - R * .18} ${C - R * .55} ${C - R * .05} ${C - R + 8} ${C}z" fill="url(#pk-gloss)" pointer-events="none"/>
             </svg>
             <div class="pk-pointer" aria-hidden="true"><svg viewBox="0 0 74 60"><defs><linearGradient id="pk-pg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f7d47e"/><stop offset=".55" stop-color="#e3a843"/><stop offset="1" stop-color="#b9781a"/></linearGradient></defs>
-              <path d="M3 30 50 8c8-3.6 16 2 16 10.5v23c0 8.5-8 14-16 10.5z" fill="#14293a"/>
+              <path d="M3 30 50 8c8-3.6 16 2 16 10.5v23c0 8.5-8 14-16 10.5z" fill="#18213f"/>
               <path d="M9 30 49 12.5c5.5-2.4 11 1.5 11 7.3v20.4c0 5.8-5.5 9.7-11 7.3z" fill="url(#pk-pg)"/>
               <path d="M9 30 49 12.5c5.5-2.4 11 1.5 11 7.3V27z" fill="#fff" opacity=".28"/>
-              <circle cx="51" cy="30" r="6" fill="#14293a"/><circle cx="51" cy="30" r="2.6" fill="#f7d47e"/></svg></div>
+              <circle cx="51" cy="30" r="6" fill="#18213f"/><circle cx="51" cy="30" r="2.6" fill="#f7d47e"/></svg></div>
             <button type="button" class="pk-hub" data-pk="spin"${list.length < 2 ? ' disabled' : ''} aria-label="Spin the wheel"><span class="pk-hub-ring"></span><b>SPIN</b><small>${list.length} ${S.tab === 'groups' ? (list.length === 1 ? 'group' : 'groups') : (list.length === 1 ? 'name' : 'names')}</small></button>
             <div class="pk-win" hidden role="status" aria-live="assertive"></div>
           </div>
