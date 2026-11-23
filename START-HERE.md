@@ -35,7 +35,12 @@ Site (after GitHub Pages is switched on): `https://ma-jalali.github.io/ielts-pre
 - **Theme:** `css/theme.css` holds the colours and type: IELTS-style red, a deep indigo-navy, cool paper, and Outfit for headings. Change the look there.
 - **Side panel colour:** Settings (gear) → Side panel colour offers 13 colours, chosen on each device.
 - **Top bar:** "Word game" is removed. "Word meanings" (the lesson's own glossary) appears only on lessons that have one. The dictionary is the book button at the bottom right.
-- **Band score calculator** (`#/band`, `js/band.js`): students enter Listening and Reading correct answers and Writing and Speaking bands. It shows each band and the overall band with the official rounding, compared with the course target of 6.5–7. Results are saved on the device only.
+- **Band score calculator** (`#/band`, `js/band.js`): students choose their results from menus, and each band appears at once.
+  - Listening and Reading: correct answers out of 40. Reading has a switch for Academic or General Training, which are marked differently.
+  - Writing: Task 1 and Task 2. Task 2 counts twice as much, so the Writing band is (Task 1 + 2 × Task 2) ÷ 3, rounded to the nearest half band.
+  - Speaking: the band.
+  - Overall: the average of the four, with the official rounding, compared with the course target of 6.5–7.
+  - Results are saved on the device only.
 
 ## IELTS question types you can add (Studio → Add block)
 
