@@ -17,6 +17,7 @@ window.createIELTSBand = function ({ esc, target = [6.5, 7] }) {
   const half = x => Math.round(x * 2) / 2;   // Writing: to the nearest half band
   const overall = b => { const avg = b.reduce((a, x) => a + x, 0) / b.length, f = avg - Math.floor(avg); return Math.floor(avg) + (f < .25 ? 0 : f < .75 ? .5 : 1); };
   const KEY = 'ielts-band-calc-v2';
+  let mod = null;   // Reading module in memory (storage can be blocked)
   const load = () => { try { return { mod: 'ac', ...(JSON.parse(localStorage.getItem(KEY)) || {}) }; } catch (e) { return { mod: 'ac' }; } };
   const keep = v => { try { localStorage.setItem(KEY, JSON.stringify(v)); } catch (e) { /* ignore */ } };
   const fmt = x => (x % 1 ? x.toFixed(1) : x + '.0');
@@ -32,7 +33,7 @@ window.createIELTSBand = function ({ esc, target = [6.5, 7] }) {
   }
   const sel = (id, list, v, label, fmtOpt = x => x) => `<select id="bc-${id}" data-band="${id}" aria-label="${esc(label)}"><option value="">Choose…</option>${list.map(x => `<option value="${x}"${has(v) && Number(v) === x ? ' selected' : ''}>${fmtOpt(x)}</option>`).join('')}</select>`;
   function html() {
-    const v = load();
+    const v = load(); mod = mod || v.mod;
     const row = (k, name, sub, field, out) => `<div class="bc-row" style="--c:${C[k]}"><div class="bc-lab"><b>${name}</b><small>${sub}</small></div>${field}<span class="bc-band"><small>Band</small><b data-band-of="${out}">–</b></span></div>`;
     return `<div class="bc-page"><header class="bc-head"><span class="eyebrow">IELTS · Tool</span><h1>Band score calculator</h1>
       <p>Choose your practice-test results. Each band appears as soon as you choose, and the overall band is rounded the way IELTS rounds it.</p></header>
@@ -45,7 +46,7 @@ window.createIELTSBand = function ({ esc, target = [6.5, 7] }) {
           <div class="bc-tasks"><label><span>Task 1 <i>⅓</i></span>${sel('w1', halves, v.w1, 'Writing Task 1 band', fmt)}</label><label><span>Task 2 <i>⅔</i></span>${sel('w2', halves, v.w2, 'Writing Task 2 band', fmt)}</label></div>
           <span class="bc-band"><small>Band</small><b data-band-of="wri">–</b></span></div>
         ${row('spe', 'Speaking', 'Your band (0–9)', sel('spe', halves, v.spe, 'Speaking band', fmt), 'spe')}
-        <button type="button" class="btn-quiet bc-clear" data-band-clear>Clear</button></section>
+        <div class="bc-actions"><button type="button" class="btn bc-go" data-band-go>Calculate my band</button><button type="button" class="btn-quiet bc-clear" data-band-clear>Clear</button></div></section>
       <section class="bc-card bc-out" data-band-out aria-live="polite"></section></div>
       <details class="bc-how"><summary>How the bands are worked out</summary>
         <p><b>Listening and Reading:</b> your number of correct answers out of 40 is converted to a band. Academic and General Training Reading use different tables: General Training needs more correct answers for the same band (for example, 30 correct is about 7.0 in Academic and 6.0 in General Training).</p>
@@ -53,8 +54,10 @@ window.createIELTSBand = function ({ esc, target = [6.5, 7] }) {
         <p><b>Overall:</b> the four bands are averaged. An average ending in .25 rounds up to the half band, and one ending in .75 rounds up to the next whole band: 6.25 → 6.5, 6.75 → 7.0, 6.1 → 6.0.</p>
         <p>These are the commonly published conversions. The official tables can change by a mark from one test to another, so treat the result as an estimate.</p></details></div>`;
   }
+  /* the results come from the menus on the page (not from storage, which Safari's private browsing blocks) */
+  function readPage(root) { const v = { mod: mod || load().mod }; root.querySelectorAll('[data-band]').forEach(x => { v[x.dataset.band] = x.value; }); return v; }
   function paintOut(root) {
-    if (!root) return; const v = load(), r = result(v), out = root.querySelector('[data-band-out]');
+    if (!root) return; const v = readPage(root), r = result(v), out = root.querySelector('[data-band-out]');
     const put = (k, x) => { const el = root.querySelector(`[data-band-of="${k}"]`); if (el) el.textContent = x === null ? '–' : fmt(x); };
     put('lis', r.L); put('rea', r.R); put('wri', r.W); put('spe', r.S);
     root.querySelectorAll('[data-bc-mod]').forEach(b => b.setAttribute('aria-checked', String((v.mod === 'gt') === (b.dataset.bcMod === 'gt'))));
@@ -64,14 +67,19 @@ window.createIELTSBand = function ({ esc, target = [6.5, 7] }) {
       <span class="bc-o-note ${r.o >= lo ? 'is-ok' : ''}">${r.o >= hi ? `Above the course target (${fmt(lo)}–${fmt(hi)}). Excellent!` : r.o >= lo ? `Inside the course target (${fmt(lo)}–${fmt(hi)}). Keep it steady.` : `${fmt(lo - r.o)} below the course target of ${fmt(lo)}.`}</span>
       <span class="bc-o-bar" style="--p:${(r.o / 9).toFixed(3)};--t:${(lo / 9).toFixed(3)}"><i></i><em title="Target ${fmt(lo)}"></em></span>
       <ul class="bc-o-parts">${[['Listening', r.L, C.lis], ['Reading', r.R, C.rea], ['Writing', r.W, C.wri], ['Speaking', r.S, C.spe]].map(([n, x, c]) => `<li style="--c:${c}"><small>${n}</small><b>${fmt(x)}</b></li>`).join('')}</ul>`
-      : `<span class="bc-o-label">Overall band</span><b class="bc-o-num is-empty">–</b><span class="bc-o-note">Choose a result for all four skills to see your overall band.</span>`;
+      : (() => { const got = [['Listening', r.L, C.lis], ['Reading', r.R, C.rea], ['Writing', r.W, C.wri], ['Speaking', r.S, C.spe]], have = got.filter(g => g[1] !== null), miss = got.filter(g => g[1] === null).map(g => g[0]);
+          if (!have.length) return `<span class="bc-o-label">Your bands</span><b class="bc-o-num is-empty">–</b><span class="bc-o-note">Choose a result for any skill to see its band. Choose all four to see your overall band.</span>`;
+          return `<span class="bc-o-label">${have.length === 1 ? `Your ${have[0][0]} band` : 'Your bands so far'}</span>${have.length === 1 ? `<b class="bc-o-num" style="color:${have[0][2]}">${fmt(have[0][1])}</b>` : ''}
+            <ul class="bc-o-parts">${got.map(([n, x, c]) => `<li style="--c:${c}"${x === null ? ' class="is-empty"' : ''}><small>${n}</small><b>${x === null ? '–' : fmt(x)}</b></li>`).join('')}</ul>
+            <span class="bc-o-note">For the overall band, also choose ${miss.join(miss.length === 2 ? ' and ' : ', ').replace(/, ([^,]*)$/, ' and $1')}.</span>`; })();
   }
-  const onPick = e => { const t = e.target.closest?.('[data-band]'); if (!t) return; const v = load(); v[t.dataset.band] = t.value; keep(v); paintOut(t.closest('.bc-page')); };
+  const onPick = e => { const t = e.target.closest?.('[data-band]'); if (!t) return; const root = t.closest('.bc-page'); keep(readPage(root)); paintOut(root); };
   document.addEventListener('input', onPick);
   document.addEventListener('change', onPick);   // Safari and phones report a menu choice as "change"
   document.addEventListener('click', e => {
-    const m = e.target.closest?.('[data-bc-mod]'); if (m) { const v = load(); v.mod = m.dataset.bcMod; keep(v); paintOut(m.closest('.bc-page')); return; }
-    if (!e.target.closest?.('[data-band-clear]')) return; const p = e.target.closest('.bc-page'), mod = load().mod; keep({ mod });
+    const m = e.target.closest?.('[data-bc-mod]'); if (m) { mod = m.dataset.bcMod; const root = m.closest('.bc-page'); keep(readPage(root)); paintOut(root); return; }
+    const go = e.target.closest?.('[data-band-go]'); if (go) { const root = go.closest('.bc-page'); paintOut(root); const out = root.querySelector('[data-band-out]'); out?.classList.remove('is-flash'); void out?.offsetWidth; out?.classList.add('is-flash'); out?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); return; }
+    if (!e.target.closest?.('[data-band-clear]')) return; const p = e.target.closest('.bc-page'); keep({ mod: mod || load().mod });
     p.querySelectorAll('[data-band]').forEach(x => { x.value = ''; }); paintOut(p); });
   return { html, mount: root => paintOut(root) };
 };

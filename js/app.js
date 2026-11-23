@@ -43,9 +43,14 @@ const labHere = labOf(lesson.id);
 const UNITS = course.units || null, UW = UNITS?.unit || 'Week', DW = UNITS?.lesson || 'Day';
 const unitName = n => UNITS ? (course.weeks.find(w => w.n === n)?.theme || `${UW} ${n}`) : `Week ${n}`;
 const unitShort = n => UNITS ? (course.weeks.find(w => w.n === n)?.short || unitName(n)) : `W${n}`;
-const dayWhere = (w, d, sep = ', ') => `${unitName(w)}${sep}${DW} ${d}`;
+/* A part can be organised in sections (course.js → sections: Learn · Practise · Test). Each group of a section owns a block
+   of lesson numbers (base + 1 … base + 99), so a lesson's number says where it belongs: 207 = Practise · Part 2 · Exercise 7. */
+const secOf = w => (w?.sections?.length ? w.sections : null);
+function place(wn, day) { const w = course.weeks.find(x => x.n === wn); for (const sec of secOf(w) || []) for (const g of sec.groups) if (day > g.base && day < g.base + 100) { const n = day - g.base; return { w, s: sec, g, n, name: g.slots?.[n - 1] || (g.test ? `Practice test ${n}` : `Exercise ${n}`) }; } return null; }
+const placeWhere = (pl, sep) => [unitName(pl.w.n), pl.g.slots || pl.g.test ? null : pl.g.title, pl.name].filter(Boolean).join(sep);
+const dayWhere = (w, d, sep = ', ') => { const pl = UNITS && place(w, d); return pl ? placeWhere(pl, sep === ', ' ? ' · ' : sep) : `${unitName(w)}${sep}${DW} ${d}`; };
 const whereLong = (sep = ' · ') => labHere ? `${LABT} · ${labHere.st.short} ${labHere.n}` : !lesson.week ? lesson.where || lesson.title : dayWhere(lesson.week, lesson.day, sep);
-const whereShort = () => labHere ? `Lab · ${labHere.st.short} ${labHere.n}` : !lesson.week ? lesson.where || lesson.title : UNITS ? `${unitShort(lesson.week)} ${lesson.day}` : `W${lesson.week} D${lesson.day}`;   // a name ('reading') or a picture's path ('assets/ui/week1/….svg')
+const whereShort = () => labHere ? `Lab · ${labHere.st.short} ${labHere.n}` : !lesson.week ? lesson.where || lesson.title : UNITS && place(lesson.week, lesson.day) ? place(lesson.week, lesson.day).name : UNITS ? `${unitShort(lesson.week)} ${lesson.day}` : `W${lesson.week} D${lesson.day}`;   // a name ('reading') or a picture's path ('assets/ui/week1/….svg')
 /* Addresses inside this lesson: L('ai') → #/w2d5/ai */
 const L = p => '#/' + lesson.id + (p && p !== 'overview' ? '/' + p : '');
 const coreActivities = lesson.sections.flatMap(s => s.activities);
@@ -572,7 +577,9 @@ function activity(a, i, list, section) {
   </article>`;
 }
 /* The next lesson in the course, if it is ready. */
-function nextLesson() { const i = days.findIndex(d => d.id === lesson.id), nx = days[i + 1]; return nx && nx.status === 'ready' && (nx.lab || null) === (days[i]?.lab || null) && !days[i]?.page && (!UNITS || nx.week === days[i]?.week) ? nx : null; }   // a lab lesson leads to the next lab lesson only; by skill, the next lesson of the same skill
+function nextLesson() { const here = UNITS && lesson.week && place(lesson.week, lesson.day);
+  if (here) return days.filter(d => d.week === lesson.week && d.status === 'ready' && d.day > lesson.day && place(d.week, d.day)?.g === here.g).sort((a, b) => a.day - b.day)[0] || null;   // the next exercise of the same set
+  const i = days.findIndex(d => d.id === lesson.id), nx = days[i + 1]; return nx && nx.status === 'ready' && (nx.lab || null) === (days[i]?.lab || null) && !days[i]?.page && (!UNITS || nx.week === days[i]?.week) ? nx : null; }   // a lab lesson leads to the next lab lesson only; by skill, the next lesson of the same skill
 function nextStageLink(section) {
   const n = lesson.sections.indexOf(section), next = lesson.sections[n + 1];
   if (next) return `<a class="btn" href="${L(next.id)}">Next stage: ${esc(next.title)} ${icon('arrow')}</a>`;
@@ -917,7 +924,7 @@ function dayCard(d) {
 }
 /* One week at a time on the course map: with 5 weeks × 5 days the page would be very long.
    The open week is remembered for this visit; the "You are here" week opens first. */
-let homeWeek = null, skillRoute = null;
+let homeWeek = null, skillRoute = null, skillSec = '', skillGrp = '';
 /* The skills in the side panel (course.units), under the course map: one link each, in course.js order. */
 const partSvg = w => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${(window.IELTS_PART_ICONS || {})[w.art] || ''}</svg>`;   // js/part-icons.js
 const partIcon = (w, cls = '') => `<span class="pi-tile ${cls}" style="--tc:${partColor(w)}">${partSvg(w)}</span>`;   // the side panel's icon style, larger
@@ -965,7 +972,9 @@ function paintSkillNav(route) {
   if (!box) return;
   const cur = route === 'skill' ? skillRoute : route !== 'home' && !labHere && lesson.week ? lesson.week : null;
   const link = w => { const on = cur === w.n;
-    return `<a class="side-link side-skill${on ? ' active' : ''}" id="side-skill-${w.n}" href="#/skill/${w.n}" style="--tc:${partColor(w)}" title="${esc(w.theme)}"${on ? ' aria-current="page"' : ''}><span class="side-ic">${partSvg(w)}</span><span class="side-tx">${esc(w.theme)}</span></a>`; };
+    const curSec = on ? (route === 'skill' ? (skillSec || lsGet(CLS.id + '-sec-' + w.n, secOf(w)?.[0]?.id)) : place(lesson.week, lesson.day)?.s.id) : '';
+    const sub = on && secOf(w) ? `<div class="side-sub">${secOf(w).map(x => `<a class="side-sublink${x.id === curSec ? ' is-on' : ''}" href="#/skill/${w.n}/${x.id}" style="--tc:${partColor(w)}"${x.id === curSec ? ' aria-current="page"' : ''}>${esc(x.title)}</a>`).join('')}</div>` : '';
+    return `<a class="side-link side-skill${on ? ' active' : ''}" id="side-skill-${w.n}" href="#/skill/${w.n}" style="--tc:${partColor(w)}" title="${esc(w.theme)}"${on ? ' aria-current="page"' : ''}><span class="side-ic">${partSvg(w)}</span><span class="side-tx">${esc(w.theme)}</span></a>${sub}`; };
   box.innerHTML = partGroups().map(g => `<p class="nav-label side-group" data-fold="${esc(g.id)}">${esc(g.title)}</p>${g.parts.map(link).join('')}`).join('');
 }
 const pickHomeWeek = () => { const ws = course.weeks; if (!ws.some(w => w.n === homeWeek)) homeWeek = (ws.find(w => w.n === lesson.week) || ws[0]).n; };
@@ -986,6 +995,51 @@ function skillGrid() {
   return partGroups().map(g => `<section class="skill-group" aria-labelledby="sg-${esc(g.id)}"><header class="skill-group-head"><h2 id="sg-${esc(g.id)}">${esc(g.title)}</h2>${g.blurb ? `<p>${esc(g.blurb)}</p>` : ''}</header>
     <div class="skill-grid${g.parts.length < 3 ? ' is-few' : ''}">${g.parts.map(card).join('')}</div></section>`).join('');
 }
+/* ───────── a part organised in sections (course.js → sections): Learn · Practise · Test ───────── */
+const lsGet = (k, d) => { try { return localStorage.getItem(k) || d; } catch (e) { return d; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch (e) { /* ignore */ } };
+const isDone = d => { const [a, b] = dayProgress(d); return !!b && a === b; };
+function groupLessons(w, g) { const at = {}; w.days.forEach(d => { if (d.day > g.base && d.day < g.base + 100) at[d.day - g.base] = d; }); return at; }
+function groupStats(w, groups) { let ready = 0, done = 0, total = 0; groups.forEach(g => { const at = groupLessons(w, g); total += g.size; Object.values(at).forEach(d => { if (d.status === 'ready') { ready++; if (isDone(d)) done++; } }); }); return { ready, done, total }; }
+function sectionPage(w, secId, grpId) {
+  const S = secOf(w), remember = CLS.id + '-sec-' + w.n;
+  const sec = S.find(x => x.id === secId) || S.find(x => x.id === lsGet(remember, '')) || S[0]; lsSet(remember, sec.id);
+  const head = `<header class="week-head">${partIcon(w, 'is-on week-art')}<div><span class="eyebrow">${esc(course.code)} · ${esc((partGroups().find(g => g.parts.includes(w)) || {}).title || UW)}</span><h1>${esc(w.theme)}</h1>${w.summary ? `<p>${esc(w.summary)}</p>` : ''}</div></header>`;
+  const tabs = `<nav class="sec-tabs" aria-label="${esc(w.theme)}: sections">${S.map((x, i) => { const st = groupStats(w, x.groups), on = x.id === sec.id;
+    const what = x.groups.length === 1 ? `${x.groups[0].size} ${x.groups[0].test ? 'tests' : x.groups[0].slots ? 'lessons' : 'exercises'}` : `${[...new Set(x.groups.map(g => g.by).filter(Boolean))].length > 1 ? 'By part · by question type' : `${x.groups.length} sets`}`;
+    return `<a class="sec-tab${on ? ' is-on' : ''}" href="#/skill/${w.n}/${x.id}" style="${partStyle(w)}"${on ? ' aria-current="page"' : ''}><span class="sec-n">${i + 1}</span><span class="sec-ic">${icon(x.icon || 'book')}</span><span class="sec-tx"><b>${esc(x.title)}</b><small>${esc(what)}</small></span>
+      <span class="sec-prog"><i style="width:${st.total ? Math.round(100 * st.done / st.total) : 0}%"></i></span><span class="sec-meta">${st.ready ? `${st.done} of ${st.ready} done` : 'Coming soon'}</span></a>`; }).join('')}</nav>`;
+  let body = `<p class="sec-blurb">${esc(sec.blurb || '')}</p>`;
+  if (sec.groups.length === 1 && sec.groups[0].map) {   // Learn: in order, on the road map
+    const g = sec.groups[0], at = groupLessons(w, g); let next = false;
+    const stops = [...Array(g.size)].map((_, i) => { const n = i + 1, d = at[n], ready = d?.status === 'ready', done = ready && isDone(d), name = g.slots?.[i] || `Lesson ${n}`;
+      const st = done ? 'past' : ready && !next ? (next = true, 'now') : 'next';
+      return { n, label: name.length > 24 ? name.slice(0, 22).trim() + '…' : name, sub: '', st, go: ready ? '#/' + d.id : '', aria: `${name}${ready ? '' : ' (coming soon)'}` }; });
+    body += `<section class="course-map skill-map" aria-label="${esc(g.title)} in order">${courseMapRich(0, stops, { nowText: 'Up next' })}</section>
+      <ol class="day-grid many">${[...Array(g.size)].map((_, i) => { const n = i + 1, d = at[n]; return dayCard(d ? { ...d, day: n, parts: d.parts } : { id: '', day: n, status: 'soon', title: g.slots?.[i] || `Lesson ${n}` }); }).join('')}</ol>`;
+  } else if (sec.groups.some(g => g.test)) {   // Test: one card per practice test
+    const g = sec.groups[0], at = groupLessons(w, g);
+    body += `<ol class="test-grid">${[...Array(g.size)].map((_, i) => { const n = i + 1, d = at[n], ready = d?.status === 'ready', [a, b] = d ? dayProgress(d) : [0, 0], done = ready && b && a === b;
+      const inner = `<span class="tc-n"><small>Test</small>${n}</span><span class="tc-tx"><b>${esc(d?.title || `Practice test ${n}`)}</b><small>4 parts · 40 questions · about 30 minutes</small></span>
+        <span class="tc-parts">${[1, 2, 3, 4].map(k => `<i>Part ${k}</i>`).join('')}</span><span class="tc-st${done ? ' is-done' : a ? ' is-on' : ''}">${!ready ? 'Coming soon' : done ? `${icon('check')}Done` : a ? 'Continue' : `Start ${icon('arrow')}`}</span>`;
+      return `<li>${ready ? `<a class="test-card" href="#/${d.id}" style="${partStyle(w)}">${inner}</a>` : `<div class="test-card is-soon" style="${partStyle(w)}">${inner}</div>`}</li>`; }).join('')}</ol>`;
+  } else {   // Practise: choose a set (by part, by question type), then its numbered exercises
+    const g = sec.groups.find(x => x.id === grpId) || sec.groups.find(x => x.id === lsGet(remember + '-grp', '')) || sec.groups[0]; lsSet(remember + '-grp', g.id);
+    const rows = [...new Set(sec.groups.map(x => x.by || ''))];
+    body += `<div class="set-pick">${rows.map(by => `<div class="set-row">${by ? `<span class="set-by">${esc(by)}</span>` : ''}<div class="set-chips">${sec.groups.filter(x => (x.by || '') === by).map(x => { const st = groupStats(w, [x]);
+      return `<a class="set-chip${x.id === g.id ? ' is-on' : ''}" href="#/skill/${w.n}/${sec.id}/${x.id}"${x.id === g.id ? ' aria-current="page"' : ''}><b>${esc(x.title)}</b><small>${st.ready ? `${st.done}/${st.ready}` : x.size}</small></a>`; }).join('')}</div></div>`).join('')}</div>`;
+    const at = groupLessons(w, g), st = groupStats(w, [g]);
+    body += `<section class="set-panel" style="${partStyle(w)}"><header><div><h2>${esc(g.title)}</h2>${g.sub ? `<p>${esc(g.sub)}</p>` : ''}</div><span class="set-count">${st.ready ? `<b>${st.done}</b> of ${st.ready} done` : `${g.size} exercises · coming soon`}</span></header>
+      <ol class="ex-grid">${[...Array(g.size)].map((_, i) => { const n = i + 1, d = at[n], ready = d?.status === 'ready', [a, b] = d ? dayProgress(d) : [0, 0], done = ready && b && a === b;
+        const inner = `<span class="ex-n">${done ? icon('check') : n}</span><span class="ex-t">${esc(ready ? d.title : 'Coming soon')}</span>${ready && a && !done ? `<span class="ex-bar"><i style="width:${Math.round(100 * a / b)}%"></i></span>` : ''}`;
+        return `<li>${ready ? `<a class="ex-tile${done ? ' is-done' : a ? ' is-on' : ''}" href="#/${d.id}" aria-label="Exercise ${n}: ${esc(d.title)}${done ? ', done' : ''}">${inner}</a>` : `<div class="ex-tile is-soon" aria-label="Exercise ${n}: coming soon">${inner}</div>`}</li>`; }).join('')}</ol></section>`;
+  }
+  return `<section class="week sec-page" aria-label="${esc(w.theme)}">${head}${tabs}${body}</section>`;
+}
+/* the crumb of a lesson page: Course map / Listening / Part 2 / Exercise 7 */
+function lessonTrail() { if (!UNITS || !lesson.week || labHere) return ''; const w = course.weeks.find(x => x.n === lesson.week), pl = place(lesson.week, lesson.day);
+  return `<a href="#/skill/${lesson.week}">${esc(w?.theme || unitName(lesson.week))}</a><i>/</i>${pl && !pl.g.slots && !pl.g.test ? `<a href="#/skill/${lesson.week}/${pl.s.id}/${pl.g.id}">${esc(pl.g.title)}</a><i>/</i>` : pl ? `<a href="#/skill/${lesson.week}/${pl.s.id}">${esc(pl.s.title)}</a><i>/</i>` : ''}`; }
+const crumbName = () => { if (!UNITS || !lesson.week) return whereLong(); const pl = place(lesson.week, lesson.day); return pl ? pl.name : `${DW} ${lesson.day}`; };
 /* The road map of one skill: its lessons in order. Done lessons are ticked, the first unfinished one is "Up next". */
 function skillMap(w) {
   if (!w.days.length) return `<section class="course-map skill-map is-empty" aria-label="${esc(w.theme)}: lessons on the way">${courseMapRich(0, [{ n: '', label: 'Lessons on the way', sub: '', st: 'next' }], { single: 'end', aria: `${w.theme}: the lessons are on the way` })}</section>`;
@@ -1680,7 +1734,7 @@ function parseRoute() {
   if (h === '/planner' || h.startsWith('/planner/') || h === '/workspace') return { page: 'planner' };   // My workspace
   if (h === '/board') return { page: 'board' };
   if (bandCalc && h === '/band') return { page: 'band' };
-  const sk = UNITS && h.match(/^\/skill\/(\d+)$/); if (sk && course.weeks.some(w => w.n === +sk[1])) return { page: 'skill', n: +sk[1] };   // a skill's page
+  const sk = UNITS && h.match(/^\/skill\/(\d+)(?:\/([\w-]+))?(?:\/([\w-]+))?$/); if (sk && course.weeks.some(w => w.n === +sk[1])) return { page: 'skill', n: +sk[1], sec: sk[2] || '', grp: sk[3] || '' };   // a part's page (and its section, group)
   if (h === '/chats' || h.startsWith('/chats/')) return { page: 'chats' };
   if (h === '/shared' || h.startsWith('/shared/')) return { page: 'shared' };
   if (guide && (h === '/calendar' || h === '/assessments')) return { page: h.slice(1) };
@@ -1707,7 +1761,7 @@ function render() {
   if (r.home && labHere) { location.reload(); return; }   // the course map shows the weekly lesson, so leave the lab lesson
   const route = r.home ? 'home' : r.page;
   if (menuOff(route)) { toast('This page is not open right now.'); history.replaceState(null, '', '#/'); return render(); }
-  if (route === 'skill') skillRoute = r.n;
+  if (route === 'skill') { skillRoute = r.n; skillSec = r.sec; skillGrp = r.grp; }
   document.body.classList.toggle('is-lab', !!labHere && !['studio', 'planner', 'notebook', 'lab', 'downloads', 'print', 'picker', 'calendar', 'assessments', 'board', 'chats', 'shared'].includes(route));   // a ${LABT} lesson page
   if (!r.home && !labHere && r.page !== 'lab' && r.page !== 'downloads' && r.page !== 'print' && r.page !== 'picker') try { localStorage.setItem(CLS.id + '-last-lesson', lesson.id); } catch (e) { /* ignore */ }   // the course map keeps the weekly lesson, not a lab lesson
   const done = coreActivities.filter(a => state.done[a.id]).length;
@@ -1839,8 +1893,8 @@ function render() {
     document.body.dataset.page = 'skill'; document.body.style.setProperty('--accent', partColor(w)); document.body.style.setProperty('--accent-bg', `color-mix(in srgb, ${partColor(w)} 9%, #fff)`);
     $('#crumb').innerHTML = `<a href="#/" aria-label="${esc(course.code)} course map" title="Course map">${icon('home')}</a><i>/</i><b>${esc(w.theme)}</b>`;
     document.title = `${course.code} · ${w.theme}`; paintStatus();
-    const main = $('#main'), changed = main.dataset.route !== route + w.n; main.dataset.route = route + w.n;
-    main.innerHTML = `<div class="skill-page">${weekTabs()}</div>`;
+    const key = route + w.n + (secOf(w) ? '/' + (skillSec || '') : ''), main = $('#main'), changed = main.dataset.route !== key; main.dataset.route = key;
+    main.innerHTML = `<div class="skill-page">${secOf(w) ? sectionPage(w, skillSec, skillGrp) : weekTabs()}</div>`;
     if (changed && !matchMedia('(prefers-reduced-motion: reduce)').matches) { main.classList.remove('route-in'); void main.offsetWidth; main.classList.add('route-in'); }
     if (changed) window.scrollTo(0, 0);
     $('#teacher-toggle').hidden = !isTeacher(); $('#present-toggle').hidden = !isTeacher(); document.body.classList.toggle('is-teacher', isTeacher());
@@ -1869,7 +1923,7 @@ function render() {
   const pageName = route === 'home' ? '' : s ? s.title : pageNames[route];
   $('#crumb').innerHTML = route === 'home' ? `<a href="#/" aria-label="${esc(course.code)} course map" title="Course map">${icon('home')}</a><i>/</i><b>Course map</b>`
     : labHere && s ? `<a href="#/" aria-label="${esc(course.code)} course map" title="Course map">${icon('home')}</a><i>/</i><a href="#/lab">${LABT}</a><i>/</i><b>${esc(lesson.title)}</b>`
-    : `<a href="#/" aria-label="${esc(course.code)} course map" title="Course map">${icon('home')}</a><i>/</i>${labHere ? `<a href="#/lab">${LABT}</a><i>/</i>` : ''}${route === 'overview' ? `<b>${esc(labHere ? lesson.title : whereLong())}</b>` : `<a href="${L('overview')}">${esc(labHere ? lesson.title : whereLong())}</a><i>/</i><b>${esc(pageName)}</b>`}`;
+    : `<a href="#/" aria-label="${esc(course.code)} course map" title="Course map">${icon('home')}</a><i>/</i>${labHere ? `<a href="#/lab">${LABT}</a><i>/</i>` : ''}${lessonTrail()}${route === 'overview' ? `<b>${esc(labHere ? lesson.title : crumbName())}</b>` : `<a href="${L('overview')}">${esc(labHere ? lesson.title : crumbName())}</a><i>/</i><b>${esc(pageName)}</b>`}`;
   document.title = `${course.code} · ${route === 'home' ? 'Course map' : labHere ? LABT + ' · ' + lesson.title : `${whereLong(', ')}${route === 'overview' ? '' : ' · ' + pageName}`}`;
   if (!isTeacher() && state.teacher) state.teacher = false;
   $('#teacher-toggle').hidden = !isTeacher(); $('#present-toggle').hidden = !isTeacher();

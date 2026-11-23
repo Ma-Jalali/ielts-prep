@@ -130,3 +130,9 @@
 /* the coloured edge on top of each part's card follows the card's rounded corners (clipped by the card itself) */
 .skill-card { overflow: hidden; isolation: isolate; }
 .skill-card::before { inset: 0 0 auto; height: 5px; border-radius: 0; opacity: .9; }
+.bc-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+.bc-actions .bc-clear { margin-top: 0; }
+.bc-o-parts li.is-empty b { color: var(--faint); }
+.bc-out.is-flash { animation: bcFlash .7s ease; }
+@keyframes bcFlash { 30% { transform: scale(1.02); box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand) 35%, transparent), 0 24px 40px -24px rgba(24, 33, 63, .4); } }
+@media (prefers-reduced-motion: reduce) { .bc-out.is-flash { animation: none; } }

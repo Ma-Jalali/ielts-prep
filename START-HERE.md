@@ -42,6 +42,30 @@ Site (after GitHub Pages is switched on): `https://ma-jalali.github.io/ielts-pre
   - Overall: the average of the four, with the official rounding, compared with the course target of 6.5–7.
   - Results are saved on the device only.
 
+## Listening: Learn · Practise · Test
+
+Listening is organised in three sections. Rename anything in `lessons/course.js` → Listening → `sections`.
+
+| Section | What is in it | Lesson numbers (id `ieb2w1d<number>`) |
+|---|---|---|
+| **Learn** | 6 strategy lessons, in order: Listening overview, Parts 1–4, Skills and strategies. Shown on the road map. | 1–6 |
+| **Practise · By part** | Part 1, Part 2, Part 3, Part 4: 20 exercises each, shown as a grid of numbered tiles | 101–120, 201–220, 301–320, 401–420 |
+| **Practise · By question type** | Multiple choice, Matching, Note completion, Table completion, Diagram completion, Maps: 10 places each, which you can extend up to 99 | 501…, 601…, 701…, 801…, 901…, 1001… |
+| **Test** | 10 full practice tests: 4 parts, 40 questions, about 30 minutes | 2001–2010 |
+
+**How students find their way:**
+- The Listening page has three tabs, Learn, Practise and Test, each showing progress. The side panel shows the same three under Listening.
+- Every lesson shows where it is, for example "Listening / Part 2 / Exercise 7", and the middle link goes back to the Part 2 grid.
+- **Next** moves only inside the same set (Part 2 Exercise 7 → Exercise 8).
+- Every page has its own address, for example `#/skill/1/practise/part2`.
+
+**Adding an exercise:**
+1. Studio → New page → **Place** (for example "Practise · Part 2").
+2. Enter the **Number** (for example 7) and the title. The page becomes lesson 207 and appears in tile 7 straight away.
+3. To publish it, add `{ id: 'ieb2w1d207', day: 207, status: 'ready', title: '…', scripts: ['lessons/b2/listening/ieb2w1d207.js'] }` to Listening's `days` (Studio's **course.js entry** button writes it for you).
+
+**Changing the plan:** change `size` (how many places are shown) or `slots` (the Learn lesson names). Never change a `base` once students have started, because the number is part of each lesson's id. The same structure can be given to Reading, Writing and the other parts later.
+
 ## IELTS question types you can add (Studio → Add block)
 
 Everything is in `js/ielts.js` (blocks), `css/ielts.css` (look) and `js/studio-blocks.js` (the ready-made blocks). Each block checks answers itself: **Check answers** marks every question, shows the right answers and gives a score. Answers are saved like every other answer, online too.
