@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2=".35" y2="1"><stop offset="0" stop-color="#ff8f63"/><stop offset="1" stop-color="#e2552f"/></linearGradient>
+<linearGradient id="gl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".38"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+<linearGradient id="pg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#eef2f8"/></linearGradient>
+<filter id="sh" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="1.6" stdDeviation="1.4" flood-color="#9c2f12" flood-opacity=".45"/></filter>
+
+</defs>
+<rect x="3" y="4.5" width="58" height="58" rx="15" fill="#9c2f12" opacity=".28"/>
+<rect x="3" y="3" width="58" height="58" rx="15" fill="url(#bg)"/>
+<path d="M18 3h28a15 15 0 0 1 15 15v6C46 30 18 30 3 24v-6A15 15 0 0 1 18 3z" fill="url(#gl)"/>
+<circle cx="50" cy="13" r="9" fill="#fff" opacity=".07"/>
+<rect x="3.5" y="3.5" width="57" height="57" rx="14.5" fill="none" stroke="#fff" stroke-opacity=".28"/>
+<g filter="url(#sh)">
+<rect x="11" y="13" width="42" height="38" rx="5.5" fill="url(#pg)"/>
+<rect x="15" y="17.2" width="13" height="2.4" rx="1.2" fill="#9c2f12" opacity=".75"/>
+<circle cx="41.5" cy="18.4" r="1.6" fill="#e2552f"/><rect x="44" y="17.6" width="5.5" height="1.6" rx=".8" fill="#9c2f12" opacity=".35"/>
+<path d="M16 45.5h33" stroke="#9c2f12" stroke-opacity=".35" stroke-width="1.2" stroke-linecap="round"/>
+<g stroke="#9c2f12" stroke-opacity=".12" stroke-width="1"><path d="M16 39h33M16 32.5h33M16 26h33"/></g>
+<rect x="18" y="35" width="5" height="10.5" rx="1.4" fill="#f6a183"/><rect x="25.6" y="29" width="5" height="16.5" rx="1.4" fill="#ee7448"/><rect x="33.2" y="32.5" width="5" height="13" rx="1.4" fill="#f6a183"/><rect x="40.8" y="24.5" width="5" height="21" rx="1.4" fill="#e2552f"/>
+<path d="M20.5 32 28.1 25.6l7.6 3.6 7.6-8" fill="none" stroke="#1d2547" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+<g fill="#fff" stroke="#1d2547" stroke-width="1.2"><circle cx="20.5" cy="32" r="1.7"/><circle cx="28.1" cy="25.6" r="1.7"/><circle cx="35.7" cy="29.2" r="1.7"/><circle cx="43.3" cy="21.2" r="1.7"/></g></g>
+</svg>
