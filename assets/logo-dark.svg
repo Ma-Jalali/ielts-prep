@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="150" height="57" viewBox="0 0 150 57" role="img" aria-label="IELTS Prep">
+  <g transform="translate(2 8)">
+    <rect x="0" y="0" width="40" height="40" rx="11" fill="#e64626"/>
+    <path d="M11 13h18M11 20h18M11 27h11" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/>
+    <circle cx="29.5" cy="28" r="4" fill="#e3a843"/>
+  </g>
+  <text x="52" y="29" font-family="Fraunces, Georgia, serif" font-size="22" font-weight="700" fill="#14293a" letter-spacing=".5">IELTS</text>
+  <text x="53" y="45" font-family="Manrope, system-ui, sans-serif" font-size="10.5" font-weight="700" fill="#5d6a74" letter-spacing="2.4">PREPARATION</text>
+</svg>

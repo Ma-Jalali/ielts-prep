@@ -1,0 +1,10 @@
+IELTS Prep — design credits
+
+The design system, illustrations and interface come from the DEC15 / DEC10 course app (same author), reused here
+without their course content.
+
+Typography: Fraunces by Undercase Type; Manrope by Mikhail Sharanda and contributors. Bundled for offline use;
+SIL Open Font License texts are in assets/fonts/.
+
+Illustrations (assets/art/, assets/ui/): original code-native SVG artwork made for the DEC courses; decorative only.
+Logo and app icon (assets/logo-*.svg, favicon.svg, icon-*.png): simple placeholder marks — replace them with your own.

@@ -1,0 +1,2322 @@
+/* DEC15 learning app — renders lesson data (lessons/*.js) into pages.
+   Saving: work is written to this device (localStorage) on every change and,
+   when the student is signed in, copied to Supabase (js/cloud.js).
+   IMPORTANT for updates: keep KEY and field ids stable so saved work survives
+   new versions of the app. Never rename an existing id in lessons/*.js. */
+(() => {
+'use strict';
+const lesson = window.DEC15_LESSON, sources = window.DEC15_SOURCES || [], cfg = window.DEC15_CONFIG;
+const course = window.DEC15_COURSE, days = window.DEC15_DAYS || [];
+const KEY = 'dec15-' + lesson.id + '-v2';
+/* Files of this course: DEC15 lives at the top of the site, other courses in their own folder (course.root, e.g. 'dec10/'). */
+const ROOT = course.root || '', CLS = window.DEC15_CLASS;
+lesson.extras = lesson.extras || []; lesson.glossary = lesson.glossary || [];
+/* Colour + illustration for each stage. A lesson can set tone: 'amber' | 'teal' | 'blue' | 'clay' | 'plum' | 'green'
+   and art: 'ai' | 'feedback' | 'critical' | 'writing' | 'reading' | 'listening' | 'discussion' | 'research' | 'assessment' | 'group'. */
+const TONES = { amber: ['#985c0e', '#fbf3e4'], teal: ['#2b776e', '#e9f4f2'], blue: ['#3a58a0', '#edf1fa'], clay: ['#b0512a', '#fbefe8'], plum: ['#7a4a8c', '#f6eff8'], green: ['#3f7a3a', '#eef6ea'] };
+const LEGACY = { ai: 'amber', feedback: 'teal', critical: 'blue', writing: 'clay' };
+lesson.sections.forEach((s, i) => {
+  if (!TONES[s.tone]) s.tone = LEGACY[s.id] || Object.keys(TONES)[i % 6];
+  s.color = TONES[s.tone][0];
+  s.art = s.art || (LEGACY[s.id] ? s.id : 'reading');
+});
+const tone = s => `--accent:${TONES[s.tone][0]};--accent-bg:${TONES[s.tone][1]}`;
+/* The Teacher’s Book lesson number of a stage, shown without the letter (15A → 15). */
+const code = s => (s.code ? navCode(s.code) : pad(Number(s.number)));   // "17A" shows as "17"
+/* In the side panel the badge shows the lesson number only (7A → 7). */
+const navCode = c => String(c).replace(/^(\d+)A$/, '$1');
+const stageName = s => `${s.code ? navCode(s.code) + ' ' : ''}${s.title}`;
+/* A day's part from course.js, e.g. '15A Discussion skills' → { code: '15A', name: 'Discussion skills', tone } */
+const dayPart = (d, k) => { const m = String(d.parts[k]).match(/^(\d+[A-Z])\s+(.*)$/); return { code: m ? navCode(m[1]) : String(k + 1), name: m ? m[2] : d.parts[k], tone: TONES[d.tones?.[k]] ? d.tones[k] : null }; };
+const artSrc = name => /[/.]/.test(name) ? name : `assets/art/stage-${name}.svg`;
+/* Language Lab (DEC10, course.lab): self-study lessons outside the weeks. A lab lesson says where it is as
+   "Language Lab · Grammar 2" instead of "Week 2 · Day 3". */
+const LAB = course.lab || null, LABT = LAB?.title || 'Language Lab';
+const DL = course.downloads?.length ? course.downloads : null;
+const PR = course.printables?.length ? course.printables : null;   // DEC10 photocopiables (teacher only, see course.js)
+const PICK = course.id === 'ielts' && window.DEC15Picker;   // side panel → Name wheel (#/picker), DEC10 only   // side panel → Downloads (#/downloads) and the 'download' lesson block
+const labOf = id => { for (const st of LAB?.strands || []) { const i = st.lessons.findIndex(l => l.id === id); if (i >= 0) return { st, n: i + 1, l: st.lessons[i] }; } return null; };
+const labHere = labOf(lesson.id);
+const whereLong = (sep = ' · ') => labHere ? `${LABT} · ${labHere.st.short} ${labHere.n}` : `Week ${lesson.week}${sep}Day ${lesson.day}`;
+const whereShort = () => labHere ? `Lab · ${labHere.st.short} ${labHere.n}` : `W${lesson.week} D${lesson.day}`;   // a name ('reading') or a picture's path ('assets/ui/week1/….svg')
+/* Addresses inside this lesson: L('ai') → #/w2d5/ai */
+const L = p => '#/' + lesson.id + (p && p !== 'overview' ? '/' + p : '');
+const coreActivities = lesson.sections.flatMap(s => s.activities);
+const allActivities = [...coreActivities, ...lesson.extras];
+
+/* ───────── state ───────── */
+let state = { values: {}, done: {}, revealed: {}, checked: {}, rows: {}, active: {}, teacher: cfg.teacherView === true, marks: {}, markDocuments: {} };
+let storageOK = true;
+try { const old = JSON.parse(localStorage.getItem(KEY)); if (old && old.values) state = { ...state, ...old }; } catch (e) { storageOK = false; }
+function save(touch = true) {
+  if (touch) state.updatedAt = Date.now();
+  try { localStorage.setItem(KEY, JSON.stringify(state)); storageOK = true; } catch (e) { storageOK = false; }
+  remember();
+  paintStatus();
+  if (touch && cloud) cloud.queue();
+}
+let cloud = null, cloudInfo = { status: 'local' };
+function paintStatus() {
+  const el = $('#save-status'); if (!el) return;
+  const map = { local: ['ok', 'Saved on this device'], 'signed-out': ['warn', 'Saved on this device<span class="hide-sm"> only</span>'], pending: ['busy', 'Saving online…'], syncing: ['busy', 'Saving online…'], saved: ['ok', 'Saved online'], offline: ['warn', 'Offline — saved on this device'], error: ['bad', 'Online save failed — retrying'] };
+  const [tone, label] = !storageOK && cloudInfo.status !== 'saved' ? ['bad', 'Not saved — download your notebook'] : map[cloudInfo.status] || map.local;
+  const off = navigator.onLine === false;
+  el.dataset.tone = off ? 'warn' : tone; el.innerHTML = off ? '<span>Offline · saved on this device</span>' : `<span>${label}</span>`;
+  el.title = el.textContent; el.dataset.off = off ? '1' : '';
+  const btn = $('#account-btn'); if (!btn) return;
+  btn.hidden = !cloud?.enabled;
+  const name = cloudInfo.profile?.full_name || cloudInfo.user?.email || '';
+  btn.innerHTML = cloudInfo.user ? `${avatarHTML(cloudInfo.profile || {}, cloudInfo.user?.email)}<span class="acct-name">${esc(name.split(' ')[0] || 'Account')}</span>` : '<span>Sign in<span class="hide-sm"> to save online</span></span>';
+  btn.classList.toggle('signed-in', !!cloudInfo.user);
+}
+
+/* A small summary of every lesson's progress, used on the course home page. */
+function summaries() { try { return JSON.parse(localStorage.getItem('dec15-summary')) || {}; } catch (e) { return {}; } }
+function remember() {
+  try {
+    const all = summaries();
+    all[lesson.id] = { done: coreActivities.filter(a => state.done[a.id]).length, total: coreActivities.length, updatedAt: state.updatedAt || 0 };
+    localStorage.setItem('dec15-summary', JSON.stringify(all));
+  } catch (e) { /* storage blocked: the home page simply shows no progress */ }
+}
+
+/* ───────── helpers ───────── */
+const $ = s => document.querySelector(s);
+const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const strip = h => String(h ?? '').replace(/<[^>]+>/g, '');
+const val = k => state.values[k] ?? '';
+const pad = n => String(n).padStart(2, '0');
+function toast(t) { const el = $('#toast'); el.textContent = t; el.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove('show'), 3800); }
+const reader = window.createDEC15Reader({ getState: () => state, save, esc, lesson, sources, toast });
+const readNotes = window.createDEC15Notes ? window.createDEC15Notes({ getState: () => state, save, esc, toast, reader }) : null;
+/* Class wall under each activity (needs online saving). Turn it off for a lesson with wall: false,
+   or for one activity with wall: false. */
+const wall = window.createDEC15Wall ? window.createDEC15Wall({ getCloud: () => cloud, lessonId: lesson.id, esc, toast, icon: (n, c) => icon(n, c), signIn: () => accountDialog('signin'), getClass: () => klass }) : null;
+const klass = window.createDEC15Class ? window.createDEC15Class({ getCloud: () => cloud, lesson, esc, icon: (n, c) => icon(n, c), toast, avatarHTML: (p, e, c) => avatarHTML(p, e, c), signIn: () => accountDialog('signin'), rerender: () => rerender() }) : null;
+const isTeacher = () => !!klass?.isTeacher();
+/* "Write together": on pair and group activities where students write; the teacher can open it on any activity */
+const WRITING = new Set(['fields', 'question', 'plan', 'promptbuilder', 'contract']);
+const cowriteOn = a => !!(klass && a && a.cowrite !== false && (isTeacher() || a.cowrite || (!/^(alone|homework)$/i.test(a.grouping || '') && (a.blocks || []).some(b => WRITING.has(b.type)))));
+const locked = () => !!klass?.answersLocked();
+const LOCKED_MSG = 'Your teacher has closed the answers for now. Keep working — they will open them soon.';
+const wallOn = a => !!(wall && wall.enabled && lesson.wall !== false && a && a.wall !== false);
+
+const ICON = {
+  tap: '<path d="M9 11V5.5a1.5 1.5 0 0 1 3 0V11m0-2.5a1.5 1.5 0 0 1 3 0V11m0-1a1.5 1.5 0 0 1 3 0v5.5a5 5 0 0 1-5 5h-1.5a5 5 0 0 1-4.2-2.3L4 13.6a1.4 1.4 0 0 1 2.2-1.7L9 14.5"/>',
+  book: '<path d="M3 4c4-1 7 0 9 2 2-2 5-3 9-2v15c-4-1-7 0-9 2-2-2-5-3-9-2zM12 6v15"/>',
+  arrow: '<path d="M4 12h15m-6-6 6 6-6 6"/>',
+  search: '<circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/>',
+  up: '<path d="M12 19V5m-6 6 6-6 6 6"/>',
+  left: '<path d="M20 12H5m6-6-6 6 6 6"/>',
+  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  key: '<circle cx="8" cy="15" r="4"/><path d="m11 12 9-9m-3 3 3 3m-6 0 2 2"/>',
+  chat: '<path d="M4 5h11v8H9l-5 4z"/><path d="M18 9h2v10l-4-3h-5v-2"/>',
+  phrase: '<path d="M4 6h16M4 12h10M4 18h7"/>',
+  model: '<path d="M5 3h10l4 4v14H5z"/><path d="M14 3v5h5M8 13h8M8 17h5"/>',
+  target: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>',
+  check: '<path d="m5 12 4 4L19 6"/>',
+  bulb: '<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.6.6 1 1.4 1 2.5h6c0-1.1.4-1.9 1-2.5A6 6 0 0 0 12 3z"/>',
+  teacher: '<path d="M3 5h18v11H3z"/><path d="M8 21l4-5 4 5"/>',
+  list: '<path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/>',
+  alert: '<path d="M12 3 2 20h20z"/><path d="M12 10v4m0 3h.01"/>',
+  play: '<path d="M7 4v16l13-8z"/>',
+  download: '<path d="M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4"/>',
+  open: '<path d="M14 4h6v6M20 4l-9 9M18 14v6H4V6h6"/>',
+  pen: '<path d="m15 4 5 5L9 20H4v-5z"/><path d="m13 6 5 5"/>',
+  home: '<path d="M4 11 12 4l8 7"/><path d="M6 10v10h12V10M10 20v-5h4v5"/>',
+  map: '<path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14m6-12v14"/>',
+  flag: '<path d="M5 21V4m0 1h11l-2 4 2 4H5"/>',
+  quote: '<path d="M4.5 11.5c0-3 1.6-5 4.5-5.8M4.5 11.5h3.8v5.8H4.5zM13.5 11.5c0-3 1.6-5 4.5-5.8M13.5 11.5h3.8v5.8h-3.8z"/>',
+  lock: '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+  sprout: '<path d="M12 20v-8m0 0c0-4-3-6-7-6 0 4 3 6 7 6zm0-2c0-4 3-6 7-6 0 4-3 6-7 6z"/>',
+  smile: '<circle cx="12" cy="12" r="9"/><path d="M8.5 14.5c1 1.3 2.2 2 3.5 2s2.5-.7 3.5-2M9 9.5h.01M15 9.5h.01"/>',
+  share: '<path d="M12 15V4m-4 4 4-4 4 4M5 13v6h14v-6"/>',
+  grip: '<circle cx="9" cy="6" r="1.3"/><circle cx="15" cy="6" r="1.3"/><circle cx="9" cy="12" r="1.3"/><circle cx="15" cy="12" r="1.3"/><circle cx="9" cy="18" r="1.3"/><circle cx="15" cy="18" r="1.3"/>',
+  undo: '<path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/>',
+  users: '<circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.5 2.7-6 6-6s6 2.5 6 6"/><circle cx="17" cy="9" r="2.6"/><path d="M16 14.2c2.8.3 5 2.6 5 5.8"/>',
+  briefcase: '<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5h6v2M3 13h18"/>',
+  layers: '<path d="m12 3 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5"/>',
+  link: '<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>'
+};
+const icon = (n, c = '') => `<svg class="icon ${c}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[n] || ICON.book}</svg>`;
+
+/* People icons for interaction patterns */
+const WHO = {
+  alone: { label: 'Alone', dots: 1 }, pair: { label: 'Pair', dots: 2 },
+  group: { label: 'Group', dots: 3 }, class: { label: 'Whole class', dots: 4 }
+};
+function whoBadge(w) {
+  const d = WHO[w] || WHO.alone;
+  const people = Array.from({ length: Math.min(d.dots, 3) }, (_, i) => `<circle cx="${6 + i * 6}" cy="7" r="2.4"/><path d="M${2 + i * 6} 17c0-3 2-5 4-5s4 2 4 5"/>`).join('');
+  return `<span class="who who-${w}"><svg viewBox="0 0 ${Math.min(d.dots, 3) * 6 + 6} 19" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6">${people}</svg>${d.label}</span>`;
+}
+
+const findBlock = id => allActivities.flatMap(a => a.blocks).find(x => x.id === id);
+const play = window.createDEC15Play ? window.createDEC15Play({ getState: () => state, save, rerender: () => rerender(), esc, strip, icon, toast, findBlock }) : null;
+const guide = window.createDEC15Guide ? window.createDEC15Guide({ esc, icon, days, toast }) : null;   // DEC10: Course calendar + Assessments pages
+if (guide) ['side-calendar', 'side-assess'].forEach(id => { const el = document.getElementById(id); if (el) el.hidden = false; });
+if (LAB) { const el = document.getElementById('side-lab'); if (el) el.hidden = false; }
+if (DL) { const el = document.getElementById('side-downloads'); if (el) el.hidden = false; }
+if (PR) { const el = document.getElementById('side-print'); if (el) el.hidden = false; }   // shown by CSS only for teacher accounts (body.is-teacher)
+if (PICK) { const el = document.getElementById('side-pick'); if (el) el.hidden = false; }
+const kit = window.createDEC10Kit ? window.createDEC10Kit({ getState: () => state, save, rerender: () => rerender(), esc, strip, icon, toast, findBlock, confetti: el => play?.confetti(el) }) : null;
+/* feedback forms, stance scale, quiz board and "Share with classmates" (js/forms.js) */
+/* Chats: the WhatsApp-style page for the class (js/chats.js) */
+const chats = window.createDEC15Chats ? window.createDEC15Chats({ getCloud: () => cloud, getClass: () => klass, esc, icon: (n, c) => icon(n, c), toast, avatarHTML: (p, e, c) => avatarHTML(p, e, c), signIn: () => accountDialog('signin') }) : null;
+const forms = window.createDEC15Forms ? window.createDEC15Forms({ getState: () => state, save, rerender: () => rerender(), esc, strip, icon, toast, lesson, tableRows: b => tableRows(b), findBlock, getCloud: () => cloud, getClass: () => klass, signIn: () => accountDialog('signin'), avatarHTML: (p, e, c) => avatarHTML(p, e, c), locked: () => locked(), loadCollab: () => loadCollab() }) : null;
+
+/* Studio (js/studio.js): edit any page in place and build new pages from the blocks — only on devices where it is switched on */
+const studio = window.createStudio ? window.createStudio({ lesson, course, days, esc, icon, toast, L, rerender: () => rerender(), getState: () => state, B: () => B }) : null;
+const STUDIO = () => !!studio?.editing();
+/* ───────── label registry (for notebook + export) ───────── */
+const labels = {}, owner = {};
+const planParts = [
+  ['Introduction', [['topic', 'Topic / problem'], ['issue', 'Issue'], ['thesis', 'Thesis statement (my position)'], ['preview1', 'Preview point 1'], ['preview2', 'Preview point 2']]],
+  ['Body paragraph 1', [['b1topic', 'Topic sentence (reason 1)'], ['b1ev1', 'Explanation / evidence / examples'], ['b1ev2', 'Explanation / evidence / examples'], ['b1close', 'Concluding statement']]],
+  ['Body paragraph 2', [['b2topic', 'Topic sentence (reason 2)'], ['b2ev1', 'Explanation / evidence / examples'], ['b2ev2', 'Explanation / evidence / examples'], ['b2close', 'Concluding statement']]],
+  ['Conclusion', [['restate', 'Restatement of thesis'], ['summary', 'Summarise main points'], ['implication', 'Implication / recommendation']]]
+];
+function register(a) {
+  const reg = (k, l) => { labels[k] = l; owner[k] = a.id; };
+  for (const b of a.blocks) {
+    play?.register(b, reg);
+    kit?.register(b, reg);
+    forms?.register(b, reg);
+    if (b.type === 'fields') b.fields.forEach(f => reg(f.id, strip(f.label)));
+    if (b.type === 'quiz') b.items.forEach((q, i) => reg(b.id + '-' + i, strip(q.q)));
+    if (b.type === 'choose') reg(b.id, b.title);
+    if (b.type === 'cards' && b.pick) reg(b.pick, strip(b.title || 'My choice'));
+    if (b.type === 'checklist') b.items.forEach((c, i) => reg(b.id + '-' + i, c));
+    if (b.type === 'plan') planParts.forEach(([p, fs]) => fs.forEach(([k, l]) => reg('plan-' + k, p + ' · ' + l)));
+    if (b.type === 'table') { a._tables = a._tables || []; a._tables.push(b); }
+    if (b.type === 'order') reg(b.id, b.title || 'Put in order');
+    if (b.type === 'grid') b.rows.forEach((r, ri) => b.columns.forEach((c, ci) => reg(`${b.id}-${ri}-${ci}`, `${strip(r)} · ${strip(c)}`)));
+  }
+}
+allActivities.forEach(register);
+function tableRows(b) { return b.fixed ? b.fixed.length + (state.rows[b.id] || 0) : (b.rows || 3) + (state.rows[b.id] || 0); }
+function tableLabel(b, r, c) { return `${b.title || 'Table'} · ${b.fixed?.[r] ? strip(b.fixed[r]) : 'Row ' + (r + 1)} · ${b.columns[c]}`; }
+
+/* ───────── blocks ───────── */
+const B = {};
+/* a key point: a warm note card with a ribbon tab, a folded corner and a small drawing; "warn" is the coral "Remember" card */
+const KEY_ART = {
+  key: '<circle cx="60" cy="52" r="36" fill="currentColor" fill-opacity=".09" stroke="none"/><path d="M60 8v8M22 24l6 6M98 24l-6 6M10 52h8M102 52h8"/><path d="M46 70c-6-5-10-12-10-20a24 24 0 0 1 48 0c0 8-4 15-10 20-3 3-4 6-4 9H50c0-3-1-6-4-9z" fill="#fff" fill-opacity=".75"/><path d="M50 86h20M52 93h16M56 100h8"/><path d="M60 79V63m-7-6 7 6 7-6"/>',
+  warn: '<circle cx="60" cy="58" r="36" fill="currentColor" fill-opacity=".09" stroke="none"/><path d="M60 8v8M24 22l6 6M96 22l-6 6"/><path d="M60 26 98 92H22z" fill="#fff" fill-opacity=".75"/><path d="M60 50v20M60 80v.5"/>'
+};
+B.key = b => { const warn = b.tone === 'warn';
+  return `<div role="note" class="block key${warn ? ' key-warn' : ''}" data-help>
+  <span class="key-fold" aria-hidden="true"></span>
+  <svg class="key-art" viewBox="0 0 120 112" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${KEY_ART[warn ? 'warn' : 'key']}</svg>
+  <div class="key-ribbon"><span class="key-badge" aria-hidden="true">${icon(warn ? 'alert' : 'key')}</span>${warn ? 'Remember' : 'Key point'}</div>
+  <h3 class="key-title">${b.title}</h3>
+  ${b.compare ? `<div class="compare">${b.compare.map(c => `<div><span class="compare-label">${c.label}</span><p>${c.text}</p>${c.eg ? `<p class="compare-eg">e.g. ${c.eg}</p>` : ''}</div>`).join('')}</div>` : ''}
+  ${b.points ? `<${b.numbered ? 'ol' : 'ul'} class="key-points">${b.points.map(p => `<li>${p}</li>`).join('')}</${b.numbered ? 'ol' : 'ul'}>` : ''}
+  ${b.policy ? `<p class="key-source">Source: <a href="${esc(cfg.policyUrl)}" target="_blank" rel="noopener">University of Sydney — responsible AI use ${icon('open')}</a></p>` : ''}
+</div>`; };
+B.steps = b => `<section class="block steps-block" data-help>
+  <h3 class="block-heading">${icon('list')}${b.title || 'What to do'}</h3>
+  <ol class="steps">${b.items.map(s => `<li><span class="step-who">${whoBadge(s.who)}</span><p>${s.text}</p></li>`).join('')}</ol>
+</section>`;
+/* do: ONE instruction, placed right above the task it belongs to (the next instruction comes after the task).
+   { type: 'do', n?: 2, who: 'alone' | 'pair' | 'group' | 'class', text } */
+B.do = b => `<div class="block do-step">${b.n ? `<span class="do-n">${b.n}</span>` : ''}<span class="step-who">${whoBadge(b.who)}</span><p>${b.text}</p></div>`;
+B.talk = b => `<section class="block talk" data-help>
+  <div class="block-label">${icon('chat')}Speak</div>
+  <h3>${b.title || 'Talk together'}</h3>
+  <ul class="talk-prompts">${b.prompts.map(p => `<li>${p}</li>`).join('')}</ul>
+</section>`;
+/* Long banks (4+ groups) become tabs: one group at a time, so the page stays calm. */
+let langSeq = 0;
+/* escape, but keep simple <b> <i> <u> so a phrase can show the key word in bold */
+const escFmt = s => esc(s).replace(/&lt;(\/?)(b|i|u)&gt;/g, '<$1$2>');
+B.language = b => { const tabs = b.groups.length >= 4 && b.tabs !== false, uid = 'lg' + (++langSeq);
+  return `<section class="block language${tabs ? ' lang-tabbed' : ''}">
+  <div class="block-label">${icon('phrase')}Language bank</div>
+  ${b.title ? `<h3>${b.title}</h3>` : ''}
+  ${tabs ? `<div class="lang-tabs" role="tablist" aria-label="${esc(strip(b.title || 'Language bank'))}">${b.groups.map((g, i) => `<button type="button" role="tab" id="${uid}-t${i}" aria-controls="${uid}-p${i}" aria-selected="${!i}" tabindex="${i ? -1 : 0}" data-lang-tab="${uid}" data-i="${i}">${strip(g.label)}</button>`).join('')}</div>` : ''}
+  <div class="lang-grid">${b.groups.map((g, i) => `<div class="lang-group"${tabs ? ` role="tabpanel" id="${uid}-p${i}" aria-labelledby="${uid}-t${i}"${i ? ' hidden' : ''}` : ''}>${tabs ? '' : `<h4>${g.label}</h4>`}<ul>${g.phrases.map(p => `<li>${escFmt(p)}</li>`).join('')}</ul></div>`).join('')}</div>
+</section>`; };
+/* text: a plain document (no label, no colour) — e.g. an earlier draft brought into a later tab inside a fold.
+   { type: 'text', title?, before?, text?, list?: [..] }  Uses the full width of the page. A list item that is all bold is a subheading (not numbered). */
+B.text = b => `<section class="block doc-text" data-help>
+  ${b.title ? `<h4 class="doc-title">${b.title}</h4>` : ''}
+  ${b.before ? `<p class="doc-before">${b.before}</p>` : ''}
+  ${b.text ? `<p class="doc-p">${b.text}</p>` : ''}
+  ${b.list ? (n => `<ol class="doc-list">${b.list.map(x => /^<b>.*<\/b>$/.test(x) ? `<li class="doc-sub">${x}</li>` : `<li value="${++n}">${x}</li>`).join('')}</ol>`)(0) : ''}
+</section>`;
+B.model = b => `<section class="block model" data-help>
+  <div class="block-label">${icon('model')}Model</div>
+  <h3>${b.title || 'Example'}</h3>
+  ${b.before ? `<p class="model-before"><span>${b.rows ? 'Claim' : 'Weak'}</span>${b.before}</p>` : ''}
+  ${b.text ? `<p class="model-text">${b.before && !b.rows ? '<span>Stronger</span>' : ''}${b.text}</p>` : ''}
+  ${b.rows ? `<dl class="model-rows">${b.rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl>` : ''}
+  ${b.list ? `<ol class="model-list">${b.list.map(x => `<li>${x}</li>`).join('')}</ol>` : ''}
+  ${b.note ? `<p class="model-note">${b.note}</p>` : ''}
+</section>`;
+/* cards: { items: [{ label?, text, icon? }], pick?: 'id' } — with pick, students choose one card (saved) */
+B.cards = b => `<section class="block cards-block${b.pick ? ' cards-pick' : ''}" data-help>
+  ${b.title ? `<h3 class="block-heading">${b.title}</h3>` : ''}
+  <div class="cards${b.items.length === 4 ? ' cards-4' : ''}"${b.pick ? ` role="radiogroup" aria-label="${esc(strip(b.title || 'Choose one'))}"` : ''}>${b.items.map((c, i) => { const inner = `${c.icon ? `<span class="card-ico">${icon(c.icon)}</span>` : ''}${b.numbered ? `<span class="card-num">${i + 1}</span>` : ''}${c.label ? `<span class="card-label">${c.label}</span>` : ''}<p>${c.text}</p>`;
+    if (!b.pick) return `<div class="card">${inner}</div>`;
+    const opt = strip(c.label || c.text), on = val(b.pick) === opt;
+    return `<button type="button" role="radio" aria-checked="${on}" class="card${on ? ' selected' : ''}" data-choose="${b.pick}" data-opt="${esc(opt)}"><span class="card-pick-mark">${icon('check')}</span>${inner}</button>`; }).join('')}</div>
+</section>`;
+/* games and interactive blocks (js/play.js): flash, sort, flip, spinner, chat, promptbuilder, contract */
+if (play) Object.assign(B, play.B);
+if (kit) Object.assign(B, kit.B);
+B.tip = b => `<p class="block tip" data-help>${icon('bulb')}<span>${b.text}</span></p>`;
+/* rule: one grammar or referencing rule, explained the way a teacher presents it (Language Lab "Learn" tab)
+   { type: 'rule', n, title, explain, form?: 'pattern (HTML)', examples?: [['ok' | 'no', 'sentence (HTML)', 'why / fix (HTML)?']], note?, check?: { q, a } }
+   pairs?: [['not academic (HTML)', 'academic (HTML)', 'source note?']] shows a calm two-column table (Not academic | Academic) instead of examples.
+   cols?: ['Spoken', 'Written'] renames the two columns; compare: true shows two good versions side by side (no ✗/✓, no red/green). */
+/* group: a section heading for a group of rule cards, bigger than a rule title and not numbered — { type: 'group', title, label?: 'Rules 1–5', goal?, tone?: 'blue' | 'plum' | 'teal' }
+   rule and group share tone: each group of rules gets one colour (heading, rule chip, card stripe, pattern and check boxes). */
+B.group = b => `<div class="block rule-group${b.tone ? ' tone-' + b.tone : ''}">${b.label ? `<span class="rg-label">${esc(b.label)}</span>` : ''}<h3 class="rg-title">${esc(b.title)}</h3>${b.goal ? `<p class="rg-goal">${esc(b.goal)}</p>` : ''}</div>`;
+B.rule = b => `<section class="block rule-card${b.pairs ? ' has-pairs' : ''}${b.tone ? ' tone-' + b.tone : ''}">
+  <header class="rule-head">${b.n != null ? `<span class="rule-n">Rule ${esc(String(b.n))}</span>` : ''}<h3>${b.title}</h3></header>
+  ${b.explain ? `<p class="rule-explain">${b.explain}</p>` : ''}
+  ${b.form ? `<div class="rule-form"><span>Form</span><p>${b.form}</p></div>` : ''}
+  ${b.pairs?.length ? `<div class="rule-pairs${b.compare ? ' is-compare' : ''}" role="table" aria-label="Examples: ${esc((b.cols || ['Not academic', 'Academic']).join(' and '))}"><div class="rp-head" role="row"><span role="columnheader">${(b.cols || ['Not academic'])[0]}</span><span role="columnheader">${(b.cols || [0, 'Academic'])[1]}</span></div>${b.pairs.map(([x, v, n]) => `<div class="rp-row" role="row"><p class="rp-x" role="cell">${b.compare ? '' : '<i aria-label="not academic">✗</i>'}<span>${x}${n ? `<small>${n}</small>` : ''}</span></p><p class="rp-v" role="cell">${b.compare ? '' : '<i aria-label="academic">✓</i>'}<span>${v}</span></p></div>`).join('')}</div>` : ''}
+  ${b.examples?.length ? `<ul class="rule-eg">${b.examples.map(([k, t, w]) => `<li class="is-${k}"><i aria-label="${k === 'ok' ? 'correct' : 'wrong'}">${k === 'ok' ? '✓' : '✗'}</i><span>${t}${w ? `<small>${w}</small>` : ''}</span></li>`).join('')}</ul>` : ''}
+  ${b.note ? `<p class="rule-note">${icon('bulb')}<span>${b.note}</span></p>` : ''}
+  ${b.check ? `<details class="rule-check"><summary><b>Check yourself</b><span>${b.check.q}</span></summary><p>${b.check.a}</p></details>` : ''}
+</section>`;
+/* part: a numbered sub-heading inside one tab of a Language Lab lesson — { type: 'part', n, title, goal? } */
+B.part = b => `<div class="block lab-part"><span class="lab-part-n">${esc(String(b.n))}</span><div><h3>${esc(b.title)}</h3>${b.goal ? `<p>${esc(b.goal)}</p>` : ''}</div></div>`;
+B.teacher = b => { if (!state.teacher) return ''; const body = b.ref ? klass?.note(b.ref) : b.text; if (body === '') return '';
+  return `<div role="note" aria-label="Teacher note" class="block teacher"><div class="block-label">${icon('teacher')}Teacher note</div>${body == null ? '<p class="tn-loading">Loading the teacher note…</p>' : `<p>${body}</p>`}</div>`; };
+B.sources = b => `<div class="block source-buttons">${b.ids.map(id => { const s = sources.find(x => x.id === id); return `<button class="source-btn" data-source="${id}">${icon('book')}<span><b>${esc(s.cite)}</b><small>${esc(s.title)}</small></span></button>`; }).join('')}</div>`;
+B.question = (b, a) => `<section class="block essay-q">
+  <span class="essay-q-label">${esc(b.label || (lesson.questionKind ? lesson.questionKind : 'The essay question'))}${lesson.wordTarget ? ' · ' + esc(lesson.wordTarget) : ''}</span>
+  <blockquote>${reader.text('q-' + a.id, b.text || lesson.question, 'Essay question')}</blockquote>
+  ${reader.toolbar('activity')}
+</section>`;
+/* The highlighter shows text exactly as written (HTML is escaped), so line breaks become real new lines and other tags are dropped. */
+const plainPassage = t => String(t ?? '').replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ');
+B.passage = b => `<section class="block passage">
+  <h3 class="block-heading">${b.title}</h3>
+  ${reader.toolbar('activity')}
+  <blockquote class="passage-text" data-help>${reader.text('c-' + b.id, plainPassage(b.text), b.title)}</blockquote>
+</section>`;
+/* One "Share with class" button per writing block: it shares every box the student has filled in, with its label. */
+B.fields = (b, a) => { const sharable = b.fields.filter(f => f.share !== false);
+  return `<section class="block fields">${b.title ? `<h3 class="block-heading">${b.title}</h3>` : ''}${b.fields.map(f => `<div class="field"><label for="f-${f.id}"><span>${escFmt(f.label)}</span></label><textarea id="f-${f.id}" data-save="${f.id}" rows="${f.rows || 3}" placeholder="${esc(f.placeholder || '')}">${esc(val(f.id))}</textarea></div>`).join('')}${wallOn(a) && b.share !== false && sharable.length ? `<button type="button" class="share-btn" data-wall-share="${sharable.map(f => f.id).join(',')}" data-thread="${a.id}" data-label="${esc(b.title ? String(b.title).replace(/<[^>]+>/g, '') : sharable.length === 1 ? strip(sharable[0].label) : '')}">${icon('share')}Share ${sharable.length > 1 ? 'my answers' : 'with class'}</button>` : ''}</section>`; };
+B.quiz = b => {
+  const checked = state.checked[b.id];
+  return `<section class="block quiz" id="quiz-${b.id}">
+  ${b.title ? `<h3 class="block-heading">${b.title}</h3>` : ''}
+  <ol class="quiz-items">${b.items.map((q, i) => {
+    const opts = q.options || b.shared, chosen = val(b.id + '-' + i), ok = chosen === q.answer, long = opts.some(o => o.length > 60);
+    const compact = !long && opts.every(o => o.length <= 14) && opts.length <= 3;
+    return `<li class="quiz-item${compact ? ' compact' : ''}${checked ? (ok ? ' is-right' : ' is-wrong') : ''}">
+      <p class="quiz-q${/^\s*\d+[.)]\s/.test(strip(q.q)) ? ' has-num' : ''}" data-help>${q.q}</p>
+      <div class="options${long ? ' options-long' : ''}" role="radiogroup" aria-label="${esc(strip(q.q))}">${opts.map(o => `<button type="button" role="radio" class="option${chosen === o ? ' selected' : ''}${checked && o === q.answer ? ' correct' : ''}" aria-checked="${chosen === o}" data-quiz="${b.id}" data-i="${i}" data-opt="${esc(o)}">${esc(o)}</button>`).join('')}</div>
+      ${checked ? `<p class="quiz-why">${ok ? icon('check') + '<b>Correct.</b> ' : `<b>Answer: ${esc(q.answer)}.</b> `}${esc(q.why || '')}</p>` : ''}
+    </li>`; }).join('')}</ol>
+  <div class="quiz-bar">${checked ? `<span class="quiz-score">${b.items.filter((q, i) => val(b.id + '-' + i) === q.answer).length} / ${b.items.length} correct</span><button class="btn-quiet" data-quiz-reset="${b.id}">Try again</button>` : `<button class="btn" data-quiz-check="${b.id}">Check my answers ${icon('arrow')}</button>`}</div>
+</section>`;
+};
+B.choose = b => `<section class="block choose">
+  <h3 class="block-heading">${b.title}</h3>
+  <div class="choose-options" role="radiogroup" aria-label="${esc(b.title)}">${b.options.map((o, i) => `<button type="button" role="radio" class="choose-option${val(b.id) === o ? ' selected' : ''}" aria-checked="${val(b.id) === o}" data-choose="${b.id}" data-opt="${esc(o)}"><span class="choose-letter">${'ABCDEFGH'[i]}</span>${esc(o)}</button>`).join('')}</div>
+</section>`;
+const colW = id => { try { const w = JSON.parse(localStorage.getItem('dec15-colw') || '{}')[id]; return Array.isArray(w) ? w : null; } catch (e) { return null; } };
+const setColW = (id, w) => { try { const all = JSON.parse(localStorage.getItem('dec15-colw') || '{}'); if (w) all[id] = w; else delete all[id]; localStorage.setItem('dec15-colw', JSON.stringify(all)); } catch (e) { /* private mode */ } };
+B.table = b => {
+  const n = tableRows(b);
+  let rows = '';
+  for (let r = 0; r < n; r++) {
+    rows += '<tr>' + b.columns.map((c, ci) => {
+      if (ci === 0 && b.fixed?.[r]) { const [head, ...rest] = String(b.fixed[r]).split(/<br\s*\/?>/); return `<th scope="row"><span class="th-title">${head}</span>${rest.length ? '<br>' + rest.join('<br>') : ''}</th>`; }
+      const k = `${b.id}-${r}-${ci}`; labels[k] = tableLabel(b, r, ci);
+      return `<td><textarea data-save="${k}" aria-label="${esc(labels[k])}" rows="3">${esc(val(k))}</textarea></td>`;
+    }).join('') + '</tr>';
+  }
+  return `<section class="block table-block">${b.title ? `<h3 class="block-heading">${b.title}</h3>` : ''}
+  <div class="table-scroll" tabindex="0" role="region" aria-label="${esc(b.title || 'Table')}"><table class="work-table cols-${b.columns.length}${colW(b.id) ? ' has-widths' : ''}" data-colw="${b.id}">${colW(b.id) ? `<colgroup>${colW(b.id).map(w => `<col style="width:${w}%">`).join('')}</colgroup>` : ''}<thead><tr>${b.columns.map((c, ci) => `<th scope="col">${esc(c)}${ci < b.columns.length - 1 ? `<span class="col-grip" data-col-grip="${ci}" title="Drag to change the column width (double-click to reset)" aria-hidden="true"></span>` : ''}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div>
+  ${b.extraRows || !b.fixed ? `<button class="btn-quiet" data-add-row="${b.id}">+ Add a row</button>` : ''}</section>`;
+};
+/* ───────── layout blocks (v2.56): tabs, a fold that opens, and a carousel of slides ─────────
+   { type: 'tabs', title?, tabs: [{ label, blocks: [...] }] }
+   { type: 'toggle', title, hint?, open?: true, blocks: [...] }
+   { type: 'carousel', title?, slides: [{ title?, text?, image?, alt?, blocks? }] } */
+let lgSeq = 0;
+const inner = (blocks, a) => blocksHTML({ ...a, blocks: blocks || [] });
+B.tabs = (b, a) => { const uid = 'tb' + (++lgSeq);
+  return `<section class="block lg-tabs-block">${b.title ? `<h3 class="block-heading">${b.title}</h3>` : ''}
+    <div class="lg-seg" role="tablist" style="--n:${b.tabs.length}"><i class="lg-lens" aria-hidden="true"></i>${b.tabs.map((t, i) => `<button type="button" role="tab" id="${uid}-t${i}" aria-controls="${uid}-p${i}" aria-selected="${!i}" tabindex="${i ? -1 : 0}" data-lg-tab="${i}">${t.label}</button>`).join('')}</div>
+    ${b.tabs.map((t, i) => `<div class="lg-tabpanel" role="tabpanel" id="${uid}-p${i}" aria-labelledby="${uid}-t${i}"${i ? ' hidden' : ''}>${inner(t.blocks, a)}</div>`).join('')}</section>`; };
+B.toggle = (b, a) => `<details class="block lg-fold${b.ref ? ' ref' : ''}"${b.open ? ' open' : ''}><summary>${b.ref ? `<span class="lg-fold-ico">${icon('model')}</span>` : ''}<span class="lg-fold-t"><b>${b.title}</b>${b.hint ? `<small>${b.hint}</small>` : ''}</span><i class="lg-fold-chev" aria-hidden="true"></i></summary><div class="lg-fold-body">${inner(b.blocks, a)}</div></details>`;
+B.carousel = (b, a) => `<section class="block lg-carousel-block${b.single ? ' lg-single' : ''}">${b.title ? `<h3 class="block-heading">${b.title}</h3>` : ''}<div class="lg-carousel" data-carousel>
+    <div class="lg-track lg-slides">${b.slides.map((sl, i) => `<article class="lg-slide" aria-roledescription="slide" aria-label="${i + 1} of ${b.slides.length}">${sl.image ? (b.single ? `<a href="${esc(sl.image)}" target="_blank" rel="noopener" aria-label="Open the picture full size"><img src="${esc(sl.image)}" alt="${esc(sl.alt || '')}" loading="lazy"></a>` : `<img src="${esc(sl.image)}" alt="${esc(sl.alt || '')}" loading="lazy">`) : ''}<div class="lg-slide-tx">${sl.title ? `<h4>${sl.title}</h4>` : ''}${sl.text ? `<p>${sl.text}</p>` : ''}${sl.blocks ? inner(sl.blocks, a) : ''}</div></article>`).join('')}</div>
+    <div class="lg-car-nav"><button type="button" class="lg-car-btn" data-car="-1" aria-label="Previous slide">${icon('left')}</button><span class="lg-dots" aria-hidden="true">${b.slides.map((_, i) => `<i${i ? '' : ' class="on"'}></i>`).join('')}</span><button type="button" class="lg-car-btn" data-car="1" aria-label="Next slide">${icon('arrow')}</button></div></div></section>`;
+B.plan = () => `<section class="block plan">
+  <h3 class="block-heading">Essay outline</h3>
+  <div class="plan-question"><b>Question:</b> ${esc(lesson.question)}</div>
+  ${planParts.map(([p, fs], i) => `<div class="plan-part plan-${i}"><h4><span>${pad(i + 1)}</span>${p}</h4>${fs.map(([k, l]) => `<div class="field"><label for="f-plan-${k}">${l}</label><textarea id="f-plan-${k}" data-save="plan-${k}" rows="2" placeholder="Notes, not full sentences">${esc(val('plan-' + k))}</textarea></div>`).join('')}</div>`).join('')}
+</section>`;
+B.checklist = b => `<section class="block checklist"><h3 class="block-heading">${b.title}</h3>${b.meter ? (() => { const n = b.items.filter((_, i) => val(b.id + '-' + i)).length; return `<div class="check-meter" style="--p:${n / b.items.length}"><span><i></i></span>${n === b.items.length ? esc(b.meter[1] || 'Ready!') : `${n} of ${b.items.length} ${esc(b.meter[0] || 'ticked')}`}</div>`; })() : ''}${b.items.map((c, i) => `<label class="check"><input type="checkbox" data-save="${b.id}-${i}"${val(b.id + '-' + i) ? ' checked' : ''}><span>${esc(c)}</span></label>`).join('')}</section>`;
+/* order: put items in the right order (ranking, sequencing). items are listed in the CORRECT order;
+   students see them mixed. { type: 'order', id, title, items: [..], ends?: ['Best', 'Worst'], why? } */
+const gcd = (a, b) => b ? gcd(b, a % b) : a;
+function orderOf(b) {
+  const n = b.items.length, v = val(b.id);
+  if (v) { const o = v.split(',').map(Number); if (o.length === n && new Set(o).size === n && o.every(x => x >= 0 && x < n)) return o; }
+  if (b.start) return b.start.slice();
+  let k = 2; while (n > 2 && gcd(k, n) !== 1) k++;
+  return Array.from({ length: n }, (_, i) => n < 3 ? n - 1 - i : (i * k + 1) % n);   // a fixed mix, never the answer
+}
+B.order = b => {
+  const o = orderOf(b), n = o.length, checked = state.checked[b.id], right = o.filter((x, i) => x === i).length, perfect = checked && right === n;
+  const label = strip(b.title || 'Put in order');
+  return `<section class="block order${checked ? ' is-checked' : ''}${perfect ? ' is-perfect' : ''}" id="order-${b.id}">
+  ${b.title ? `<h3 class="block-heading">${icon('list')}${b.title}</h3>` : ''}
+  <p class="order-hint">${icon('grip')}<span><b>Drag</b> a card up or down<span class="order-touch"> by its dotted grip</span> to change the order. You can also use the arrows<span class="order-kbd">, or select a card and press <kbd>Space</kbd> then <kbd>↑</kbd> <kbd>↓</kbd></span>.</span></p>
+  ${b.ends ? `<p class="order-end order-top">${icon('arrow')}${esc(b.ends[0])}</p>` : ''}
+  <ol class="order-list" data-order-list="${b.id}" aria-label="${esc(label)}">${o.map((x, i) => `<li class="order-item${checked ? (x === i ? ' is-right' : ' is-wrong') : ''}" data-x="${x}" style="--i:${i}" tabindex="0" aria-roledescription="movable card" aria-label="Position ${i + 1} of ${n}: ${esc(strip(b.items[x]))}${checked ? (x === i ? '. Correct.' : `. Should be position ${x + 1}.`) : ''}">
+    <span class="order-grip" aria-hidden="true">${icon('grip')}</span>
+    <span class="order-pos">${checked && x === i ? icon('check') : i + 1}</span>
+    <span class="order-text">${b.items[x]}${checked && x !== i ? `<small class="order-should">Belongs in position ${x + 1}</small>` : ''}</span>
+    <span class="order-move"><button type="button" data-order="${b.id}" data-from="${i}" data-dir="-1" aria-label="Move up" tabindex="-1"${i ? '' : ' disabled'}>${icon('arrow')}</button><button type="button" data-order="${b.id}" data-from="${i}" data-dir="1" aria-label="Move down" tabindex="-1"${i < n - 1 ? '' : ' disabled'}>${icon('arrow')}</button></span>
+  </li>`).join('')}</ol>
+  ${b.ends ? `<p class="order-end order-bottom">${icon('arrow')}${esc(b.ends[1])}</p>` : ''}
+  <div class="quiz-bar">${checked
+    ? `<span class="quiz-score${perfect ? ' is-perfect' : ''}">${perfect ? `${icon('check')}Perfect order!` : `${right} of ${n} in the right place`}</span>${perfect ? '' : `<button class="btn-quiet" data-order-reset="${b.id}">${icon('undo')}Try again</button><button class="btn-quiet" data-order-solve="${b.id}">Show the correct order</button>`}`
+    : `<button class="btn" data-order-check="${b.id}">Check my order ${icon('arrow')}</button>`}</div>
+  <p class="sr-only" aria-live="polite" data-order-live="${b.id}"></p>
+  ${checked && b.why ? `<p class="quiz-why">${b.why}</p>` : ''}
+</section>`;
+};
+/* Moving cards: drag (mouse, pen, or the grip on touch screens), arrow buttons, or the keyboard.
+   Every move animates: the other cards slide out of the way, and button/keyboard moves glide (FLIP). */
+const orderBlock = id => allActivities.flatMap(a => a.blocks).find(x => x.id === id);
+const reduceMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+function orderCards(id) { return [...document.querySelectorAll(`[data-order-list="${CSS.escape(id)}"] > .order-item`)]; }
+function commitOrder(id, from, to, opts = {}) {
+  const b = orderBlock(id), o = orderOf(b); if (from === to || to < 0 || to >= o.length) return;
+  const before = new Map(orderCards(id).map(el => [el.dataset.x, el.getBoundingClientRect().top]));
+  const [x] = o.splice(from, 1); o.splice(to, 0, x);
+  state.values[id] = o.join(','); delete state.checked[id]; save(); rerender();
+  if (!opts.noFlip && !reduceMotion()) orderCards(id).forEach(el => { const t = before.get(el.dataset.x); const dy = t - el.getBoundingClientRect().top;
+    if (dy) el.animate([{ transform: `translateY(${dy}px)` }, { transform: 'none' }], { duration: 280, easing: 'cubic-bezier(.2,.7,.2,1)' }); });
+  const moved = orderCards(id).find(el => el.dataset.x === String(x));
+  if (opts.focus) { moved?.focus({ preventScroll: true }); if (opts.grabbed) moved?.classList.add('is-grabbed'); }
+  moved?.classList.add('just-moved'); setTimeout(() => moved?.classList.remove('just-moved'), 700);
+  const live = document.querySelector(`[data-order-live="${CSS.escape(id)}"]`); if (live) live.textContent = `${strip(b.items[x])} — now in position ${to + 1} of ${o.length}.`;
+}
+let drag = null;
+document.addEventListener('pointerdown', e => {
+  const item = e.target.closest('.order-item'); if (!item || e.button > 0 || e.target.closest('button')) return;
+  if (e.pointerType === 'touch' && !e.target.closest('.order-grip')) return;   // on phones, drag by the grip so the page still scrolls
+  const list = item.parentElement, cards = [...list.children], rects = cards.map(el => el.getBoundingClientRect());
+  drag = { id: list.dataset.orderList, list, item, cards, rects, from: cards.indexOf(item), to: cards.indexOf(item), y0: e.clientY, s0: window.scrollY, moved: false, pid: e.pointerId };
+  item.setPointerCapture?.(e.pointerId);
+});
+function dragMove(clientY) {
+  const g = drag, dy = clientY - g.y0 + (window.scrollY - g.s0);
+  if (!g.moved) { if (Math.abs(dy) < 5) return; g.moved = true; g.list.classList.add('is-sorting'); g.item.classList.add('is-dragging'); document.body.classList.add('is-dragging-card'); }
+  const top = g.rects[0].top, bottom = g.rects[g.rects.length - 1].bottom, r = g.rects[g.from];
+  const clamped = Math.max(top - r.top - 12, Math.min(bottom - r.bottom + 12, dy));
+  g.item.style.transform = `translateY(${clamped}px) scale(1.02)`;
+  const mid = r.top + r.height / 2 + clamped;
+  let to = g.from;
+  g.rects.forEach((q, k) => { if (k < g.from && mid < q.top + q.height / 2) to = Math.min(to, k); if (k > g.from && mid > q.top + q.height / 2) to = Math.max(to, k); });
+  g.to = to;
+  const gap = g.rects.length > 1 ? g.rects[1].top - g.rects[0].bottom : 8, h = r.height + gap;
+  g.cards.forEach((el, k) => { if (k === g.from) return; const shift = g.from < to && k > g.from && k <= to ? -h : g.from > to && k < g.from && k >= to ? h : 0; el.style.transform = shift ? `translateY(${shift}px)` : ''; });
+}
+document.addEventListener('pointermove', e => {
+  if (!drag || e.pointerId !== drag.pid) return;
+  dragMove(e.clientY);
+  if (drag.moved) { e.preventDefault(); const edge = 70; if (e.clientY < edge) window.scrollBy(0, -12); else if (e.clientY > innerHeight - edge) window.scrollBy(0, 12); }
+});
+function endDrag(cancel) {
+  const g = drag; drag = null; if (!g) return;
+  document.body.classList.remove('is-dragging-card');
+  if (!g.moved) return;
+  const finish = () => { g.cards.forEach(el => { el.style.transform = ''; }); g.list.classList.remove('is-sorting'); g.item.classList.remove('is-dragging'); };
+  if (cancel || g.to === g.from) { g.item.classList.add('settling'); finish(); setTimeout(() => g.item.classList.remove('settling'), 260); return; }
+  const r = g.rects, slot = g.to > g.from ? r[g.to].bottom - r[g.from].bottom : r[g.to].top - r[g.from].top;
+  g.item.classList.add('settling'); g.item.style.transform = `translateY(${slot}px)`;
+  setTimeout(() => { finish(); commitOrder(g.id, g.from, g.to, { noFlip: true }); }, reduceMotion() ? 0 : 200);
+}
+document.addEventListener('pointerup', e => { if (drag && e.pointerId === drag.pid) endDrag(false); });
+document.addEventListener('pointercancel', () => endDrag(true));
+document.addEventListener('keydown', e => {
+  const item = e.target.closest?.('.order-item'); if (!item || e.target !== item) return;
+  const id = item.parentElement.dataset.orderList, from = orderCards(id).indexOf(item);
+  if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); const on = !item.classList.contains('is-grabbed'); item.classList.toggle('is-grabbed', on);
+    const live = document.querySelector(`[data-order-live="${CSS.escape(id)}"]`); if (live) live.textContent = on ? 'Card picked up. Use the up and down arrows to move it, then press Space to drop it.' : 'Card dropped.'; return; }
+  if (e.key === 'Escape') { item.classList.remove('is-grabbed'); return; }
+  if ((e.key === 'ArrowUp' || e.key === 'ArrowDown') && (item.classList.contains('is-grabbed') || e.altKey)) {
+    e.preventDefault(); commitOrder(id, from, from + (e.key === 'ArrowUp' ? -1 : 1), { focus: true, grabbed: item.classList.contains('is-grabbed') }); }
+});
+document.addEventListener('focusout', e => { if (e.target.classList?.contains('order-item')) e.target.classList.remove('is-grabbed'); });
+
+/* grid: a table of choices, e.g. Does the text agree? { type: 'grid', id, title, rows: [..], columns: [..], options: [..], answers?: [[row1 answers], ...], given?: { 'r-c': value } } */
+B.grid = b => {
+  const checked = state.checked[b.id];
+  const cell = (r, c) => { const k = `${b.id}-${r}-${c}`, given = b.given?.[`${r}-${c}`], ans = b.answers?.[r]?.[c], v = given ?? val(k);
+    if (given) return `<td class="grid-given"><span class="tag tag-${esc(String(given).toLowerCase().replace(/[^a-z]+/g, '-'))}">${esc(given)}</span></td>`;
+    const ok = checked && ans !== undefined ? (v === ans ? ' is-right' : ' is-wrong') : '';
+    return `<td class="grid-cell${ok}"><select data-save="${k}" aria-label="${esc(strip(b.rows[r]) + ' — ' + strip(b.columns[c]))}"><option value="">Choose…</option>${b.options.map(o => `<option${v === o ? ' selected' : ''}>${esc(o)}</option>`).join('')}</select>${ok === ' is-wrong' ? `<small>${esc(ans)}</small>` : ''}</td>`; };
+  const score = checked && b.answers ? b.rows.reduce((n, _, r) => n + b.columns.filter((_, c) => !b.given?.[`${r}-${c}`] && val(`${b.id}-${r}-${c}`) === b.answers[r][c]).length, 0) : 0;
+  const total = b.rows.length * b.columns.length - Object.keys(b.given || {}).length;
+  return `<section class="block grid-block">${b.title ? `<h3 class="block-heading">${b.title}</h3>` : ''}
+  <div class="table-scroll" tabindex="0" role="region" aria-label="${esc(b.title || 'Table')}"><table class="work-table grid-table grid-cols-${b.columns.length}"><thead><tr><th scope="col"><span class="sr-only">Statement</span></th>${b.columns.map(c => `<th scope="col">${c}</th>`).join('')}</tr></thead>
+  <tbody>${b.rows.map((r, ri) => `<tr><th scope="row">${r}</th>${b.columns.map((_, ci) => cell(ri, ci)).join('')}</tr>`).join('')}</tbody></table></div>
+  ${b.answers ? `<div class="quiz-bar">${checked ? `<span class="quiz-score">${score} / ${total} correct</span><button class="btn-quiet" data-grid-reset="${b.id}">Try again</button>` : `<button class="btn" data-grid-check="${b.id}">Check my answers ${icon('arrow')}</button>`}</div>` : ''}
+</section>`;
+};
+/* figure: a picture or diagram. { type: 'figure', src, alt, caption?, credit?, size?: 'small' | 'wide' } */
+B.figure = b => `<figure class="block figure${b.size ? ' figure-' + b.size : ''}"><img src="${esc(b.src)}" alt="${esc(b.alt || '')}" loading="lazy">${b.caption || b.credit ? `<figcaption>${b.caption ? `<b>${b.caption}</b>` : ''}${b.credit ? ` <span>${esc(b.credit)}</span>` : ''}</figcaption>` : ''}</figure>`;
+
+/* listening: by default the Week 2 video. A new lesson can set
+   { type: 'listening', source, title, videoId, start, clip, transcripts: [[sourceId, label], ...], audio } */
+B.listening = b => {
+  const vid = b.videoId ?? cfg.supplementalVideoId, title = b.title || 'Listening';
+  const tr = b.transcripts || [];
+  const audio = b.audio ?? cfg.coreAudioUrl;
+  return `<section class="block media">
+  <div class="block-label">${icon('play')}Listening${b.source ? ' · ' + esc(b.source) : ''}</div>
+  ${vid ? `<div class="video-wrap"><button class="video-cover" data-video="${esc(vid)}" data-start="${b.start ?? 0}" data-title="${esc(title)}" aria-label="Play the video">${icon('play', 'play-big')}<span><b>${esc(title)}</b><small>YouTube · ${esc(b.clip || 'play')} · internet needed</small></span></button></div>` : ''}
+  <div class="media-links">${b.url ? `<a class="btn" href="${esc(b.url)}" target="_blank" rel="noopener">${icon('play')}${esc(b.urlLabel || 'Watch the video')}</a>` : ''}${tr.filter(([id]) => sources.some(x => x.id === id)).map(([id, l]) => `<button class="btn-quiet" data-source="${id}">${icon('book')}${esc(l)}</button>`).join('')}${b.mode === 'video' || !vid ? '' : `<a class="btn-quiet" href="https://www.youtube.com/watch?v=${esc(vid)}" target="_blank" rel="noopener">${icon('open')}Open on YouTube</a>`}</div>
+  ${audio ? `<audio controls preload="none" src="${esc(audio)}"></audio>` : ''}
+  <p class="media-note">Listen first, take notes, <b>then</b> read the transcript to check.</p>
+</section>`;
+};
+
+/* ───────── activity ───────── */
+function hasAttempt(a) { registerTables(); return Object.keys(state.values).some(k => owner[k] === a.id && state.values[k]); }
+/* forms.js blocks; tables and writing boxes with send: true get "Share with classmates" + PDF */
+if (forms) {
+  Object.assign(B, forms.B);
+  const baseTable = B.table, baseFields = B.fields;
+  B.table = (b, a) => b.live && b.id && forms.liveTable ? forms.liveTable(b, a, baseTable(b, a)) : baseTable(b, a) + (b.send && b.id ? forms.sendBar(b, a) : '');
+  B.fields = (b, a) => baseFields(b, a) + (b.send && b.id ? forms.sendBar(b, a) : '');
+}
+function answersPanel(a) {
+  if (!a.answers) return '';
+  const open = state.teacher || (state.revealed[a.id] && !locked());
+  return `<section class="answers${open ? ' open' : ''}" id="ans-${a.id}">
+    <div class="answers-head"><div class="block-label">${icon('check')}${esc(a.answers.title || 'Suggested answers')}</div>
+    ${open ? (state.teacher ? '<span class="answers-hint">Shown in Teacher view</span>' : `<button class="btn-quiet" data-hide-answers="${a.id}">Hide</button>`) : (locked() ? `<span class="answers-lock-note">${icon('lock')}Your teacher will open the answers</span>` : `<button class="btn" data-reveal="${a.id}">Show suggested answers</button>`)}</div>
+    ${open ? `<dl data-help>${a.answers.items.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl><p class="answers-hint">Other answers can be correct. Compare the reasons, then improve your own work.</p>` : '<p class="answers-hint">Try the activity first. Then compare your work with the suggested answers.</p>'}
+  </section>`;
+}
+function groupIcon(g) {
+  const t = String(g).toLowerCase(), last = t.split('→').pop();
+  const w = /class/.test(last) ? 'class' : /group|research|discussion/.test(last) ? 'group' : /pair/.test(last) ? 'pair' : 'alone';
+  const n = { alone: 1, pair: 2, group: 3, class: 3 }[w];
+  return `<svg class="ppl" viewBox="0 0 ${n * 6 + 6} 19" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6">${Array.from({ length: n }, (_, k) => `<circle cx="${6 + k * 6}" cy="7" r="2.4"/><path d="M${2 + k * 6} 17c0-3 2-5 4-5s4 2 4 5"/>`).join('')}</svg>`;
+}
+/* A block with gate: 'text' (e.g. a sample essay) stays hidden — with everything after it in the
+   activity — until the student confirms they have done their own attempt. Teacher view shows all. */
+function blocksHTML(a) {
+  let out = '';
+  const ed = STUDIO();
+  for (const b of a.blocks) {
+    if (b.gate && !state.teacher && !ed && !state.revealed['gate-' + b.id]) {
+      out += `<section class="block gate"><span class="gate-icon">${icon('lock')}</span><div><h3>${esc(b.title || 'Sample')}</h3><p>${b.gate}</p></div><button class="btn" data-unlock="${b.id}">I have written mine — show it ${icon('arrow')}</button></section>`;
+      break;
+    }
+    const html = (B[b.type] || (() => ed ? `<section class="block"><p>Unknown block type “${esc(b.type)}”</p></section>` : ''))(b, a);
+    out += ed ? studio.wrap(a.blocks, b, html) : html;
+  }
+  return ed ? out + studio.addHere(a.blocks) : out;
+}
+/* Group writing activities show a clear "Write together" card at the top (the footer button stays for everything else). */
+const groupWriting = a => !!(a && a.cowrite !== false && (a.cowrite || (!/^(alone|homework)$/i.test(a.grouping || '') && (a.blocks || []).some(b => WRITING.has(b.type) || (b.type === 'table' && !b.send)))));
+function cowriteCard(a) {
+  if (!klass || !groupWriting(a)) return '';
+  return `<aside class="cowrite-card" aria-label="Write together"><span class="cwc-ico" aria-hidden="true">${icon('users')}</span>
+    <span class="cwc-tx"><b>Writing with a partner or group?</b><small>Open one shared page for your group. Everyone types at the same time and sees each other’s cursor. Choose the same group number as your partners.</small></span>
+    <button type="button" class="btn btn-sm" data-cowrite="${a.id}">${icon('pen')}Write together</button></aside>`;
+}
+/* A quiet design mark on activities that have a photocopiable (course.printables): a folded paper corner with a gold
+   leaf on the activity card and a small gold leaf on its tab. Everyone sees it as decoration (no text, aria-hidden);
+   the teacher knows it means "there is a paper version of this activity" (side panel → Photocopiables). */
+const hasPaper = id => !!PR && PR.some(p => p.lesson === lesson.id && (p.activity === id || (p.also || []).includes(id)));
+const PAPER_FOLD = `<span class="act-fold" aria-hidden="true"><svg viewBox="0 0 64 64"><defs><linearGradient id="afd-g" x1="1" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff6e3"/><stop offset="1" stop-color="#efd9a8"/></linearGradient><linearGradient id="afd-l" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f3cf72"/><stop offset="1" stop-color="#c98d2c"/></linearGradient></defs><path d="M64 0v64L0 0z" fill="url(#afd-g)"/><path d="M0 0l64 64" stroke="#d9b56a" stroke-width="1.2" opacity=".7"/><path d="M0 0h64v64" fill="none" stroke="#e8cf93" stroke-width="1"/><g transform="translate(43 17) rotate(40)"><path d="M0 9C-6 4-6-4 0-10 6-4 6 4 0 9z" fill="url(#afd-l)"/><path d="M0 9V-8" stroke="#fff7df" stroke-width="1" stroke-linecap="round"/></g><circle cx="52" cy="31" r="1.6" fill="#e3a843"/><circle cx="33" cy="12" r="1.1" fill="#e3a843" opacity=".8"/></svg></span>`;
+const TAB_LEAF = '<i class="tab-leaf" aria-hidden="true"><svg viewBox="0 0 12 12"><path d="M6 11C1.5 8 1.5 3.5 6 1c4.5 2.5 4.5 7 0 10z" fill="currentColor"/><path d="M6 10.5V2.5" stroke="#fff" stroke-width=".9" stroke-linecap="round" opacity=".85"/></svg></i>';
+function activity(a, i, list, section) {
+  return `<article class="activity${hasPaper(a.id) ? ' has-fold' : ''}" id="${a.id}" tabindex="-1" aria-labelledby="h-${a.id}">${STUDIO() ? studio.actBar(a, section) : ''}${hasPaper(a.id) ? PAPER_FOLD : ''}
+    <header class="act-head${a.art ? ' has-art' : ''}">${a.art ? `<img class="act-art" src="${esc(a.art)}" alt="" width="240" height="180" loading="lazy">` : ''}
+      <div class="act-meta"><span class="act-count">${labHere ? esc(a.short) : `Activity ${i + 1}`}<span> / ${labHere ? `step ${i + 1} of ${list.length}` : list.length}</span></span><span class="chip chip-soft">${groupIcon(a.grouping)}${esc(a.grouping)}</span>${a.category ? `<span class="chip chip-soft">${esc(a.category)}</span>` : ''}<button class="timer-btn" data-timer="${a.minutes}" aria-label="Start a ${a.minutes}-minute timer">${icon('clock')}<span>${a.minutes} min</span><small>Start timer</small></button></div>
+      <h2 id="h-${a.id}">${esc(a.title)}</h2>
+      <p class="act-goal">${icon('target')}<span><b>Goal:</b> ${esc(a.goal)}</span></p>
+    </header>
+    ${printCards(a)}${moveCard(a)}${cowriteCard(a)}<div class="act-body">${blocksHTML(a)}</div>
+    ${answersPanel(a)}
+    ${wallOn(a) ? wall.sectionHTML(a) : ''}
+    ${section && !labHere && i === list.length - 1 && list.every(x => state.done[x.id]) ? `<div class="stage-done"><img src="assets/art/complete.svg" alt="" width="120" height="140"><div><b>Stage complete!</b><span>You finished all ${list.length} activities in ${esc(stageName(section))}.</span></div></div>` : ''}
+    <footer class="act-foot">
+      <label class="done-toggle"><input type="checkbox" data-done="${a.id}"${state.done[a.id] ? ' checked' : ''}><span>I have finished this activity</span></label>
+      ${klass ? `<div class="act-class"><span class="class-done" data-class-count="${a.id}" hidden></span>${cowriteOn(a) ? `<button type="button" class="btn-quiet btn-sm cowrite-btn" data-cowrite="${a.id}">${icon('users')}Write together</button>` : ''}</div>` : ''}
+      ${section ? `<div class="pager">${i ? `<button class="btn-quiet" data-jump="${list[i - 1].id}">${icon('left')}Previous</button>` : ''}${i < list.length - 1 ? `<button class="btn" data-jump="${list[i + 1].id}">Next: ${esc(list[i + 1].short)} ${icon('arrow')}</button>` : nextStageLink(section)}</div>` : ''}
+    </footer>
+  </article>`;
+}
+/* The next lesson in the course, if it is ready. */
+function nextLesson() { const i = days.findIndex(d => d.id === lesson.id), nx = days[i + 1]; return nx && nx.status === 'ready' && (nx.lab || null) === (days[i]?.lab || null) ? nx : null; }   // a lab lesson leads to the next lab lesson only
+function nextStageLink(section) {
+  const n = lesson.sections.indexOf(section), next = lesson.sections[n + 1];
+  if (next) return `<a class="btn" href="${L(next.id)}">Next stage: ${esc(next.title)} ${icon('arrow')}</a>`;
+  const nx = nextLesson();
+  return nx ? `<a class="btn-quiet" href="${L('notebook')}">Review my notebook</a><a class="btn" href="#/${nx.id}">Next lesson: Week ${nx.week}, Day ${nx.day} ${icon('arrow')}</a>` : `<a class="btn" href="${L('notebook')}">Review my notebook ${icon('arrow')}</a>`;
+}
+
+/* ───────── pages ───────── */
+function stagePage(s) {
+  if (labHere) return labLessonPage(s);
+  const activeId = state.active[s.id] && s.activities.some(a => a.id === state.active[s.id]) ? state.active[s.id] : s.activities[0].id;
+  const idx = s.activities.findIndex(a => a.id === activeId);
+  const doneCount = s.activities.filter(a => state.done[a.id]).length;
+  const complete = doneCount === s.activities.length;
+  const back = course.id === 'ielts' ? `<div class="stage-nav"><a class="stage-back" href="${L('overview')}">${icon('left')}${esc(whereLong())}<small>Back to the day</small></a>
+    <nav class="stage-dots" aria-label="Stages of this day">${lesson.sections.map((x, i) => { const dn = x.activities.filter(a => state.done[a.id]).length, all = dn === x.activities.length; return `<a href="${L(x.id)}" class="${x.id === s.id ? 'is-cur' : ''}${all ? ' is-done' : ''}" style="${tone(x)}" title="${esc(code(x))} · ${esc(x.title)}" aria-label="Stage ${i + 1}: ${esc(x.title)}${x.id === s.id ? ' (this stage)' : ''}${all ? ', complete' : ''}"><i>${all ? icon('check') : esc(code(x))}</i></a>`; }).join('')}</nav></div>` : '';
+  return `${back}<header class="stage-head${complete ? ' is-complete' : ''}">
+      <span class="stage-numeral${code(s).length > 2 ? ' is-code' : ''}" aria-hidden="true">${esc(code(s))}</span>
+      <div class="stage-copy">
+        <span class="eyebrow">${s.code ? `Lesson ${esc(navCode(s.code))}<span class="sep"></span>` : ''}Stage ${Number(s.number)} of ${lesson.sections.length}<span class="sep"></span>${esc(s.subtitle)}</span>
+        <h1>${esc(s.title)}</h1>
+        <p class="stage-outcome" data-help>${esc(s.outcome)}</p>
+        <div class="stage-meta">
+          <span class="chip">${icon('clock')}${s.minutes} min</span>
+          <span class="chip">${icon('list')}${s.activities.length} ${s.activities.length === 1 ? 'activity' : 'activities'}</span>
+                    ${complete ? `<span class="chip chip-done">${icon('check')}Stage complete</span>` : ''}
+        </div>
+      </div>
+      <div class="stage-art-wrap"><img class="stage-art" src="${artSrc(s.art)}" alt="" width="220" height="170">${complete ? '<img class="stage-medal" src="assets/art/complete.svg" alt="" width="60" height="70">' : ''}</div>
+    </header>
+    ${STUDIO() ? studio.stageBar(s) : ''}${stageGuide(s)}<nav class="act-tabs" aria-label="Activities in this stage" style="--done:${doneCount / s.activities.length};--n:${s.activities.length}">${s.activities.map((a, i) => `<button data-jump="${a.id}" class="${a.id === activeId ? 'current' : ''}${state.done[a.id] ? ' is-done' : ''}" aria-current="${a.id === activeId ? 'step' : 'false'}"><span class="tab-num">${state.done[a.id] ? icon('check') : i + 1}</span><span class="tab-text">${esc(a.short)}<small>${a.minutes} min</small></span>${hasPaper(a.id) ? TAB_LEAF : ''}</button>`).join('')}</nav>
+    ${activity(s.activities[idx], idx, s.activities, s)}${upNext(s, idx)}`;
+}
+/* A Language Lab lesson: one page, four tabs (Warm-up · Learn · Practise · Use it) */
+function labLessonPage(s) {
+  const activeId = state.active[s.id] && s.activities.some(a => a.id === state.active[s.id]) ? state.active[s.id] : s.activities[0].id;
+  const idx = s.activities.findIndex(a => a.id === activeId), doneCount = s.activities.filter(a => state.done[a.id]).length, complete = doneCount === s.activities.length;
+  const nx = nextLesson();
+  return `<header class="lab-head${complete ? ' is-complete' : ''}">
+      <div class="lab-head-copy"><a class="lab-back" href="#/lab">${icon('left')}${LABT}</a>
+        <span class="eyebrow">${esc(labHere.st.title)} · Lesson ${labHere.n} · ${esc(lesson.duration || 'About 45 minutes')}</span>
+        <h1>${esc(lesson.title)}</h1>
+        <p class="lab-head-can"><b>${esc(lesson.questionLabel || 'By the end you can')}</b> ${esc(lesson.question)}</p></div>
+      <div class="lab-head-prog" style="--p:${doneCount / s.activities.length}"><b>${doneCount}<small>/${s.activities.length}</small></b><span>${complete ? 'Complete' : 'steps done'}</span></div>
+    </header>
+    <nav class="act-tabs lab-tabs" aria-label="Steps in this lesson" style="--done:${doneCount / s.activities.length};--n:${s.activities.length}">${s.activities.map((a, i) => `<button data-jump="${a.id}" class="${a.id === activeId ? 'current' : ''}${state.done[a.id] ? ' is-done' : ''}" aria-current="${a.id === activeId ? 'step' : 'false'}"><span class="tab-num">${state.done[a.id] ? icon('check') : i + 1}</span><span class="tab-text">${esc(a.short)}<small>${a.minutes} min</small></span></button>`).join('')}</nav>
+    ${activity(s.activities[idx], idx, s.activities, s)}
+    ${idx === s.activities.length - 1 ? `<aside class="upnext lab-end" aria-label="Lesson finished?">
+      <div class="upnext-art"><img src="assets/art/complete.svg" alt="" width="96" height="112" loading="lazy"></div>
+      <div class="upnext-copy"><span class="eyebrow">${complete ? 'Lesson complete' : 'Last step'}</span><h2>${complete ? 'Well done!' : 'Finished this step?'}</h2><p>${nx ? `Next in ${esc(labHere.st.title)}: <b>${esc(nx.title)}</b>.` : `That was the last ${esc(labHere.st.title)} lesson for now.`} Your answers are in your notebook (My workspace).</p></div>
+      <div class="lab-end-actions"><a class="btn-quiet" href="#/lab">${icon('left')}${LABT}</a>${nx ? `<a class="btn" href="#/${nx.id}">Next lesson ${icon('arrow')}</a>` : ''}</div></aside>` : ''}`;
+}
+/* At the last activity of a stage: a card for what comes next (the next stage, or the end of the day). */
+function upNext(s, idx) {
+  if (idx !== s.activities.length - 1) return '';
+  const next = lesson.sections[lesson.sections.indexOf(s) + 1];
+  if (next) return `<aside class="upnext" style="${tone(next)}" aria-label="Up next">
+      <div class="upnext-art"><img src="${artSrc(next.art)}" alt="" width="150" height="116" loading="lazy"></div>
+      <div class="upnext-copy"><span class="eyebrow">Up next · Stage ${esc(code(next))}</span><h2>${esc(next.title)}</h2><p>${esc(next.outcome)}</p>
+        <span class="chip">${icon('clock')}${next.minutes} min · ${next.activities.length} activities</span></div>
+      <a class="btn" href="${L(next.id)}">Start ${esc(code(next))} ${icon('arrow')}</a></aside>`;
+  const nx = nextLesson();
+  return `<aside class="upnext is-end" aria-label="End of the day">
+      <div class="upnext-art"><img src="assets/art/complete.svg" alt="" width="96" height="112" loading="lazy"></div>
+      <div class="upnext-copy"><span class="eyebrow">Last stage of the day</span><h2>You reached the end of today</h2><p>Look back over your notebook${nx ? `, then go on to Week ${nx.week}, Day ${nx.day}` : ''}.</p></div>
+      <a class="btn" href="${nx ? '#/' + nx.id : L('notebook')}">${nx ? 'Next lesson' : 'Open my notebook'} ${icon('arrow')}</a></aside>`;
+}
+/* The first activity not yet finished (for "Continue" buttons). */
+function nextUp() {
+  for (const s of lesson.sections) for (const a of s.activities) if (!state.done[a.id]) return { s, a };
+  return null;
+}
+function continueButton(big) {
+  const n = nextUp(), started = coreActivities.some(a => state.done[a.id]) || Object.keys(state.values).length;
+  if (!n) return `<a class="btn${big ? ' btn-big' : ''}" href="${L('notebook')}">${icon('check')}Review my notebook</a>`;
+  const label = started ? `Continue: ${esc(n.a.short)}` : `Start ${esc(stageName(n.s))}`;
+  return `<a class="btn${big ? ' btn-big' : ''}" href="${L(n.s.id)}" data-go="${n.a.id}">${label} ${icon('arrow')}</a>`;
+}
+function overview() {
+  const n = nextUp(), done = coreActivities.filter(a => state.done[a.id]).length;
+  return `${STUDIO() ? studio.lessonBar() : ''}<section class="hero">
+    <div class="hero-copy">
+      <span class="eyebrow">${esc(whereLong())} · ${esc(lesson.duration || 'About 4 hours')}</span>
+      <h1>${esc(lesson.title)}</h1>
+      <p class="hero-lead">${esc(lesson.journey)}</p>
+      <div class="hero-actions">${continueButton(true)}${done && n ? `<span class="hero-progress">${course.id === 'ielts' ? (() => { const pct = Math.round(100 * done / coreActivities.length); return `<span class="hero-ring" aria-hidden="true"><svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15.5"/><circle cx="18" cy="18" r="15.5" pathLength="100" style="stroke-dasharray:${pct} 100"/></svg><b>${pct}<small>%</small></b></span>`; })() : ''}<span><b>${done} of ${coreActivities.length}</b> activities finished · next: ${esc(stageName(n.s))}</span></span>` : ''}</div>
+    </div>
+    ${(() => { const wk = course.weeks.find(w => w.n === lesson.week) || {}; return `<figure class="hero-img"><img src="${esc(lesson.image || wk.image || course.heroImage || 'assets/ui/library/hero.svg')}" width="1400" height="933" alt="${esc(lesson.imageAlt || wk.imageAlt || course.heroAlt || '')}"></figure>`; })()}
+  </section>
+  ${lesson.question ? `<section class="essay-q essay-q-hero">
+    <span class="essay-q-label">${esc(lesson.questionLabel || 'Focus question')}</span>
+    <blockquote>${esc(lesson.question)}</blockquote>
+  </section>` : ''}
+  <h2 class="section-title">${labHere ? 'Your lesson at a glance' : 'Your day at a glance'}</h2>
+  <p class="section-sub">${lesson.sections.length === 1 ? 'One stage' : `${['Two', 'Three', 'Four', 'Five', 'Six'][lesson.sections.length - 2] || lesson.sections.length} stages`}${lesson.duration ? '' : ', about four hours'}. ${lesson.goalShort ? `Each one prepares you for ${esc(lesson.goalShort)}.` : lesson.sections.length === 1 ? '' : 'Each stage builds on the one before.'}</p>
+  <div class="dayline" role="group" aria-label="${lesson.sections.map(s => `${stageName(s)}, ${s.minutes} minutes`).join('; ')}; then: ${esc(lesson.finish?.title || 'Next')}.">
+    ${lesson.sections.map(s => { const d = s.activities.filter(a => state.done[a.id]).length; return `<a class="dayline-seg${d === s.activities.length ? ' complete' : ''}" style="${tone(s)};flex:${s.minutes}" href="${L(s.id)}"><span class="dayline-bar"><i style="width:${Math.round(100 * d / s.activities.length)}%"></i></span><span class="dayline-num">${esc(code(s))}</span><span class="dayline-title">${esc(s.title)}</span><span class="dayline-min">${s.minutes} min</span></a>`; }).join('')}
+    ${(() => { const nx = nextLesson(), inner = `<span class="dayline-bar"></span><span class="dayline-num">${icon(nx ? 'arrow' : 'pen')}</span><span class="dayline-title">${esc(lesson.finish?.title || 'Next')}</span><span class="dayline-min">${esc(lesson.finish?.text || '')}</span>`;
+      return nx ? `<a class="dayline-flag" href="#/${nx.id}" title="${nx.lab ? `Open the next lesson: ${esc(nx.title)}` : `Open Week ${nx.week}, Day ${nx.day}`}">${inner}</a>` : `<div class="dayline-flag">${inner}</div>`; })()}
+  </div>
+  ${dayPlaybook()}
+  <ol class="journey">${lesson.sections.map(s => { const d = s.activities.filter(a => state.done[a.id]).length; return `<li><a class="journey-card${d === s.activities.length ? ' complete' : ''}" style="${tone(s)}" href="${L(s.id)}">
+      <span class="journey-art-wrap"><img class="journey-art" src="${artSrc(s.art)}" alt="" width="220" height="170" loading="lazy"></span>
+      <span class="journey-body">
+        <span class="journey-top"><span class="journey-num">${esc(code(s))}</span><span class="journey-sub">${esc(s.subtitle || '')}</span></span>
+        <b class="journey-title">${esc(s.title)}</b>
+        <span class="journey-text">${esc(s.outcome)}</span>
+        <span class="journey-foot"><span class="journey-time">${icon('clock')}${s.minutes} min · ${s.activities.length} ${s.activities.length === 1 ? 'activity' : 'activities'}</span>${d === s.activities.length ? `<span class="journey-done">${icon('check')}Complete</span>` : d ? `<span class="journey-part">${d}/${s.activities.length} done</span>` : ''}<span class="journey-go">${icon('arrow')}</span></span>
+        <span class="journey-meter" aria-hidden="true"><i style="width:${Math.round(100 * d / s.activities.length)}%"></i></span>
+      </span></a></li>`; }).join('')}</ol>
+  <details class="legend-wrap"${done ? '' : ' open'}>
+    <summary><span><b>How to read each page</b><small>Each kind of information always looks the same. The gold note card is the most important.</small></span>${icon('arrow')}</summary>
+    <div class="legend">
+      <div class="legend-item"><span class="sw sw-key">${icon('key')}</span><b>Key point</b><span>The idea to learn and remember.</span></div>
+      <div class="legend-item"><span class="sw sw-steps">${icon('list')}</span><b>What to do</b><span>Steps. The badge shows alone / pair / group.</span></div>
+      <div class="legend-item"><span class="sw sw-talk">${icon('chat')}</span><b>Speak</b><span>Questions to discuss out loud.</span></div>
+      <div class="legend-item"><span class="sw sw-lang">${icon('phrase')}</span><b>Language bank</b><span>Phrases to use when you speak or write.</span></div>
+      <div class="legend-item"><span class="sw sw-model">${icon('model')}</span><b>Model</b><span>An example to study and copy the structure of.</span></div>
+      <div class="legend-item"><span class="sw sw-ans">${icon('check')}</span><b>Suggested answers</b><span>Open them after you try.</span></div>
+    </div>
+  </details>`;
+}
+
+/* ───────── course home: all weeks ───────── */
+/* DEC10's ten-week map: a road climbing through a detailed (but quiet) landscape — far mountains, a ridge with
+   pines and turning wind turbines, a river under a little bridge into a lake, fields with sheep, a campus at the
+   finish. Everything decorative sits behind the road or in the foreground, away from the stops and their labels. */
+function courseMapRich(current) {
+  const N = course.map.length, H = 300;
+  const pts = course.map.map((_, i) => { const k = N > 1 ? i / (N - 1) : 0; return [Math.round(150 + 760 * k), Math.round(160 - 84 * k + (i % 2 ? -10 : 8))]; });
+  const road = `M-10 196C40 192 ${pts[0][0] - 40} ${pts[0][1]} ${pts[0][0]} ${pts[0][1]}` + pts.slice(1).map(([x, y], i) => `S${x - Math.round((x - pts[i][0]) / 2)} ${y} ${x} ${y}`).join('');
+  const T = (x, y, k, s) => `<g transform="translate(${x} ${y})${k && k !== 1 ? ` scale(${k})` : ''}">${s}</g>`;
+  const tree = (x, y, k = 1, c = ['#8fb47a', '#6f9d5c', '#a9c995']) => T(x, y, k, `<ellipse cy="9" rx="12" ry="2.6" fill="#14293a" opacity=".08"/><path d="M-1.8 9V-4h3.6V9z" fill="#8a6f4e"/><path d="M0 0 4-5M0 2-3-3" stroke="#8a6f4e" stroke-width="1.2" stroke-linecap="round"/><circle cy="-12" r="10.5" fill="${c[0]}"/><circle cx="5.5" cy="-8" r="7.5" fill="${c[1]}"/><circle cx="-5" cy="-7" r="6" fill="${c[1]}" opacity=".55"/><circle cx="-4" cy="-16" r="4.4" fill="${c[2]}"/><circle cx="2" cy="-19" r="2" fill="#fff" opacity=".35"/>`);
+  const pine = (x, y, k = 1, c = '#6f9d5c') => T(x, y, k, `<path d="M-1 0h2v4h-2z" fill="#7c6446"/><path d="M0-22 7-8H3l6 8H-9l6-8h-4z" fill="${c}"/><path d="M0-22-7-8h4l-6 8h9z" fill="#fff" opacity=".12"/>`);
+  const bush = (x, y, k = 1) => T(x, y, k, `<ellipse cy="3.5" rx="13" ry="2.2" fill="#14293a" opacity=".07"/><circle cx="-5" r="5.4" fill="#9cc086"/><circle cx="3" cy="-1.5" r="6.6" fill="#86b170"/><circle cx="9" cy="1" r="4.4" fill="#9cc086"/><circle cx="1" cy="-4" r="2.2" fill="#c2dbb0"/>`);
+  const cloud = (x, y, k = 1, d = 0) => `<g class="cm-cloud" style="animation-delay:${d}s">${T(x, y, k, `<ellipse cx="2" cy="4" rx="26" ry="5" fill="#e9dcc2" opacity=".45"/><path d="M-24 2a9 9 0 0 1 10-10 13 13 0 0 1 24-3 9 9 0 0 1 14 7 7 7 0 0 1 2 6z" fill="#fff"/><path d="M-22 2h50" stroke="#efe4cf" stroke-width="2" stroke-linecap="round"/>`)}</g>`;
+  const bird = (x, y, k = 1, d = 0) => `<g class="cm-bird" style="animation-delay:${d}s">${T(x, y, k, '<path d="M-7 0q3.5-4 7 0q3.5-4 7 0" stroke="#6f7f8b" stroke-width="1.5" fill="none" stroke-linecap="round"/>')}</g>`;
+  const sheep = (x, y, k = 1, f = 1) => T(x, y, k, `<g transform="scale(${f} 1)"><ellipse cy="7" rx="9" ry="1.8" fill="#14293a" opacity=".08"/><path d="M-4 3v4M3 3v4" stroke="#3d4a52" stroke-width="1.6" stroke-linecap="round"/><circle cx="-5" cy="-1" r="3.6" fill="#fffdf8"/><circle cx="0" cy="-2.4" r="4.4" fill="#fffdf8"/><circle cx="4.6" cy="-.6" r="3.6" fill="#fffdf8"/><circle cx="-1" cy="1.6" r="3.6" fill="#f5efe2"/><ellipse cx="8.6" cy="-2.4" rx="2.6" ry="2.2" fill="#3d4a52"/><circle cx="9.4" cy="-3" r=".5" fill="#fff"/></g>`);
+  const flower = (x, y, c) => T(x, y, 1, `<path d="M0 0v-7" stroke="#7fa36a" stroke-width="1.2"/><path d="M0-3 3-5" stroke="#7fa36a" stroke-width="1"/><circle cy="-8" r="2.4" fill="${c}"/><circle cy="-8" r=".9" fill="#fff8d6"/>`);
+  const grass = (x, y) => `<path d="M${x} ${y}c-1-4-3-7-3-9m3 9c1-4 1-8 2-10m-2 10c2-3 4-5 6-6" stroke="#9fbf8a" stroke-width="1.3" fill="none" stroke-linecap="round"/>`;
+  const turbine = (x, y, h, d) => `<g><path d="M${x - 1.4} ${y}l.8-${h}h1.2l.8 ${h}z" fill="#fbfaf6" stroke="#cfd6d8" stroke-width=".6"/>
+    <g class="cm-rotor" style="transform-origin:${x}px ${y - h}px;animation-delay:${d}s">${[0, 120, 240].map(a => `<path d="M${x} ${y - h}c1.6-3 1.4-14 .2-19-1.6 4-2 15-.2 19z" fill="#fbfaf6" stroke="#cfd6d8" stroke-width=".5" transform="rotate(${a} ${x} ${y - h})"/>`).join('')}</g>
+    <circle cx="${x}" cy="${y - h}" r="1.8" fill="#dfe5e7" stroke="#b9c3c6" stroke-width=".6"/></g>`;
+  /* the bridge: where the river crosses the road, between the middle two stops */
+  const m = Math.max(0, Math.floor((N - 1) / 2)), [bx, by] = pts[m + 1] ? [(pts[m][0] + pts[m + 1][0]) / 2, (pts[m][1] + pts[m + 1][1]) / 2] : [530, 117];
+  const ang = pts[m + 1] ? Math.atan2(pts[m + 1][1] - pts[m][1], pts[m + 1][0] - pts[m][0]) * 180 / Math.PI : 0;
+  const river = `M${bx + 26} ${by - 52}C${bx + 12} ${by - 30} ${bx + 4} ${by - 12} ${bx} ${by}S${bx + 30} ${by + 56} ${bx + 70} ${by + 76}S${bx + 110} ${by + 94} ${bx + 128} ${by + 100}`;
+  const rail = s => `<path d="M-18 ${s}H18" stroke="#8a6f4e" stroke-width="1.8" stroke-linecap="round"/>${[-16, -8, 0, 8, 16].map(px => `<path d="M${px} ${s}v${s < 0 ? 4 : -4}" stroke="#8a6f4e" stroke-width="1.4"/>`).join('')}`;
+  /* labels alternate below / above the road so neighbours never collide; the "You are here" bubble then sits higher */
+  const up = i => i % 2 === 1 && i < N - 1;   // the finish keeps its label below, clear of the flag
+  /* the week you are in: its own label becomes the navy "You are here · …" pill, so no second bubble can sit on a neighbour's label */
+  const lab = (w, i) => { const y = pts[i][1], now = w.n === current, txt = now ? 'You are here · ' + w.label : w.label, t = esc(txt), wd = Math.round(txt.length * (now ? 6.3 : 6.5) + (now ? 34 : 20)), ty = y + (up(i) ? -33 : 42);
+    const x = Math.max(wd / 2 + 8, Math.min(1000 - wd / 2 - 8, pts[i][0] + (i === N - 1 && N > 1 ? 22 : 0)));
+    return now
+      ? `<g class="cm-label cm-label-now"><rect x="${x - wd / 2}" y="${ty - 14.5}" width="${wd}" height="22" rx="11" fill="#14293a"/><circle cx="${x - wd / 2 + 12}" cy="${ty - 3.5}" r="3" fill="#e3a843"/><text x="${x + 7}" y="${ty}" text-anchor="middle" font-size="11.5" font-weight="700" font-family="Manrope, sans-serif" fill="#fff">${t}</text></g>`
+      : `<g class="cm-label"><rect x="${x - wd / 2}" y="${ty - 13}" width="${wd}" height="19" rx="9.5" fill="#fffdf6" fill-opacity=".9" stroke="#14293a" stroke-opacity=".08"/><text x="${x}" y="${ty}" text-anchor="middle" font-size="11.5" font-weight="700" font-family="Manrope, sans-serif" fill="#14293a">${t}</text></g>`; };
+  const walker = `<g transform="translate(-34 -2)"><g class="cm-walker"><ellipse cy="13" rx="7" ry="1.8" fill="#14293a" opacity=".14"/><path d="M-2 4-4 12M2 4l3 8" stroke="#2c3e50" stroke-width="2.4" stroke-linecap="round"/><rect x="-4.5" y="-7" width="9" height="12" rx="3.5" fill="#2f6db5"/><rect x="-8" y="-6" width="5" height="9" rx="2" fill="#e3a843"/><path d="M4-4l3 5" stroke="#f0c9a0" stroke-width="2.2" stroke-linecap="round"/><circle cy="-11" r="4.2" fill="#f0c9a0"/><path d="M-4.2-11.5a4.2 4.2 0 0 1 8.4-1c-2 .6-5 .6-8.4 1z" fill="#3b2a20"/></g></g>`;
+  const peaks = [[60, 92], [150, 70], [240, 82], [360, 66], [470, 74], [585, 56], [700, 70], [820, 58], [940, 66]];
+  return `<svg class="course-map-svg cm-rich" viewBox="0 0 1000 ${H}" role="group" aria-label="Course map: ${course.map.map(w => `Week ${w.n}, ${w.label}`).join('; ')}. You are in Week ${current}.">
+    <defs>
+      <linearGradient id="cm-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fbf6ec"/><stop offset=".55" stop-color="#f8eedb"/><stop offset="1" stop-color="#f3e3c4"/></linearGradient>
+      <radialGradient id="cm-sun" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fbd98a" stop-opacity=".95"/><stop offset=".5" stop-color="#f7dfa9" stop-opacity=".4"/><stop offset="1" stop-color="#f7dfa9" stop-opacity="0"/></radialGradient>
+      <linearGradient id="cm-mtn" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c3cfd4"/><stop offset="1" stop-color="#dfe3dc"/></linearGradient>
+      <linearGradient id="cm-mtn2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#dfe5e6"/><stop offset="1" stop-color="#ece9df"/></linearGradient>
+      <linearGradient id="cm-far" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f1e7d2"/><stop offset="1" stop-color="#e9ddc4"/></linearGradient>
+      <linearGradient id="cm-near" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e3edd6"/><stop offset="1" stop-color="#cfdfbd"/></linearGradient>
+      <linearGradient id="cm-lake" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a9d0d8"/><stop offset="1" stop-color="#cfe6e8"/></linearGradient>
+      <linearGradient id="cm-past" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2b4d68"/><stop offset="1" stop-color="#14293a"/></linearGradient>
+      <linearGradient id="cm-now" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f5c862"/><stop offset="1" stop-color="#d9952a"/></linearGradient>
+      <linearGradient id="cm-next" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fffdf8"/><stop offset="1" stop-color="#f2e9d7"/></linearGradient>
+      <filter id="cm-sh" x="-40%" y="-40%" width="180%" height="180%"><feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#14293a" flood-opacity=".2"/></filter>
+      <pattern id="cm-dots" width="14" height="14" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r=".9" fill="#14293a" opacity=".05"/></pattern>
+      <pattern id="cm-rows" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(-8)"><path d="M0 4h8" stroke="#b9cf9f" stroke-width="1.4"/></pattern>
+      <pattern id="cm-rows2" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(12)"><path d="M0 3.5h7" stroke="#e2cf96" stroke-width="1.6"/></pattern>
+    </defs>
+    <rect width="1000" height="${H}" fill="url(#cm-sky)"/>
+    <rect width="1000" height="150" fill="url(#cm-dots)"/>
+    <g transform="translate(0 12)">
+    <!-- sun with slow rays -->
+    <circle cx="610" cy="40" r="76" fill="url(#cm-sun)"/>
+    <g class="cm-rays" style="transform-origin:610px 40px">${Array.from({ length: 12 }, (_, i) => `<path d="M610 2v-14" stroke="#f3c96d" stroke-width="2.4" stroke-linecap="round" opacity=".35" transform="rotate(${i * 30} 610 40)"/>`).join('')}</g>
+    <circle cx="610" cy="40" r="25" fill="#f7d98e"/><circle cx="610" cy="40" r="25" fill="none" stroke="#fff" stroke-opacity=".5" stroke-width="2"/><circle cx="602" cy="32" r="8" fill="#fff" opacity=".38"/>
+    ${cloud(118, 44, 1, 0)}${cloud(484, 26, .78, -9)}${cloud(846, 24, .66, -18)}${cloud(40, 96, .5, -5)}
+    ${bird(178, 30, 1, 0)}${bird(196, 40, .7, -.4)}${bird(706, 22, .8, -.8)}${bird(724, 30, .6, -.2)}
+    <!-- hot-air balloon -->
+    <g class="cm-balloon">${T(388, 30, .9, `<path d="M0-26c-15 0-24 10-24 22 0 10 8 17 14 23l3 5h14l3-5c6-6 14-13 14-23 0-12-9-22-24-22z" fill="#e64626"/>
+      <path d="M0-26c-7 0-11 10-11 22 0 10 4 17 6 23l2 5h6l2-5c2-6 6-13 6-23 0-12-4-22-11-22z" fill="#f2b54f"/>
+      <path d="M0-26c-2 0-3.4 10-3.4 22 0 10 1.4 17 2 23l.5 5h1.8l.5-5c.6-6 2-13 2-23 0-12-1.4-22-3.4-22z" fill="#fffdf5"/>
+      <path d="M-24-4h48" stroke="#14293a" stroke-opacity=".12"/><path d="M-14-20a17 17 0 0 1 8-5" stroke="#fff" stroke-opacity=".55" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+      <path d="M-7 24l2 8M7 24l-2 8" stroke="#8a6f4e" stroke-width=".9"/><rect x="-5.5" y="31" width="11" height="8" rx="1.6" fill="#a7774a"/><path d="M-5.5 34h11" stroke="#8a5f3a" stroke-width=".8"/>`)}</g>
+    <!-- far mountains, two ranges with snow -->
+    <path d="M0 120L50 98 110 108 190 78 270 102 330 88 420 104 520 80 600 96 680 74 760 92 850 70 930 86 1000 74V170H0Z" fill="url(#cm-mtn2)"/>
+    <path d="M0 132${peaks.map(([x, y], i) => `L${x} ${y}L${x + 48} ${y + 26 + (i % 3) * 6}`).join('')}L1000 100V170H0Z" fill="url(#cm-mtn)"/>
+    ${peaks.map(([x, y]) => `<path d="M${x - 9} ${y + 5}L${x} ${y}l9 5-3 2.5-3-2-3 3-3-2.5-3 1.5z" fill="#fbfcfb"/><path d="M${x} ${y}l-11 24" stroke="#fff" stroke-opacity=".35" stroke-width="1.2"/>`).join('')}
+    <!-- the ridge behind the road, with pines and wind turbines -->
+    <path d="M0 146C120 104 230 128 340 114S560 70 700 90 880 50 1000 64V${H}H0Z" fill="url(#cm-far)"/>
+    <path d="M0 146C120 104 230 128 340 114S560 70 700 90 880 50 1000 64" stroke="#fff" stroke-opacity=".65" stroke-width="1.6" fill="none"/>
+    ${turbine(704, 90, 44, 0)}${turbine(786, 78, 52, -2)}${turbine(868, 64, 40, -4)}
+    ${[[34, 136, .8], [48, 133, 1], [62, 130, .7], [276, 121, .8], [290, 119, 1], [304, 118, .75], [446, 98, .85], [460, 95, 1], [474, 93, .7], [620, 85, .8], [634, 87, .65]].map(([x, y, k]) => pine(x, y, k, k > .9 ? '#6a9a58' : '#7fab69')).join('')}
+    <!-- the river runs down under the bridge to the lake -->
+    <path d="${river}" stroke="#a9d0d8" stroke-width="9" fill="none" stroke-linecap="round"/>
+    <path d="${river}" stroke="#d8eef0" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-dasharray="6 10" class="cm-flow"/>
+    <!-- foreground meadow, fields, farm -->
+    <path d="M0 206C150 184 300 214 470 194S760 164 1000 178V${H}H0Z" fill="url(#cm-near)"/>
+    <path d="M0 206C150 184 300 214 470 194S760 164 1000 178" stroke="#fff" stroke-opacity=".75" stroke-width="1.6" fill="none"/>
+    <path d="M150 236l130-14 40 34-150 18z" fill="#d9e8c6"/><path d="M150 236l130-14 40 34-150 18z" fill="url(#cm-rows)"/>
+    <path d="M330 232l120-10 30 30-128 12z" fill="#f2e6c2"/><path d="M330 232l120-10 30 30-128 12z" fill="url(#cm-rows2)"/>
+    <path d="M10 262l120-8 18 26-140 6z" fill="#e1edd2"/><path d="M10 262l120-8 18 26-140 6z" fill="url(#cm-rows)" opacity=".7"/>
+    <path d="M150 236l130-14M330 232l120-10" stroke="#fff" stroke-opacity=".6" stroke-width="1.2"/>
+    ${T(70, 228, 1, `<ellipse cy="14" rx="28" ry="3" fill="#14293a" opacity=".08"/><path d="M-18 0h28v14h-28z" fill="#fbf4e4"/><path d="M-22 1l16-13 16 13z" fill="#c2562f"/><path d="M-22 1l16-13 4 3.3" fill="#fff" opacity=".18"/><rect x="-10" y="4" width="6" height="10" rx="1" fill="#8a5f3a"/><rect x="0" y="3" width="6" height="5" rx="1" fill="#a9d0d8"/><path d="M3 3v5M0 5.5h6" stroke="#fff" stroke-width=".7"/><path d="M10 14V2h12v12z" fill="#e6d3ae"/><path d="M8 3l8-7 8 7z" fill="#a74a2a"/><path d="M14 8h4v6h-4z" fill="#8a5f3a"/>`)}
+    <path d="M110 244h170M118 238v10M150 236v10M182 234v10M214 233v10M246 232v10M278 231v10" stroke="#b49a76" stroke-width="1.4" stroke-linecap="round"/>
+    ${sheep(214, 262, 1, 1)}${sheep(240, 270, .9, -1)}${sheep(190, 274, .85, 1)}
+    <!-- the lake with a little boat -->
+    <path d="M${bx + 100} ${by + 104}c26-14 96-16 150-8s56 30 14 40-128 12-160 0-30-22-4-32z" fill="url(#cm-lake)"/>
+    <path d="M${bx + 100} ${by + 104}c26-14 96-16 150-8" stroke="#fff" stroke-opacity=".7" stroke-width="1.4" fill="none"/>
+    <g class="cm-shimmer"><path d="M${bx + 126} ${by + 118}h22M${bx + 168} ${by + 126}h30M${bx + 212} ${by + 114}h18M${bx + 150} ${by + 134}h16" stroke="#fff" stroke-width="1.6" stroke-linecap="round" opacity=".8"/></g>
+    <g class="cm-boat">${T(bx + 196, by + 118, 1, '<path d="M-10 0h20l-4 5h-12z" fill="#8a5f3a"/><path d="M0-1v-16" stroke="#6b5438" stroke-width="1.2"/><path d="M1-16l9 14H1z" fill="#fffdf5"/><path d="M-1-13l-7 11h7z" fill="#e3a843"/><path d="M-12 7h24" stroke="#fff" stroke-opacity=".6" stroke-linecap="round"/>')}</g>
+    ${[[bx + 98, by + 112], [bx + 104, by + 116], [bx + 262, by + 104]].map(([x, y]) => `<path d="M${x} ${y}v-10M${x + 3} ${y}v-8M${x - 3} ${y}v-7" stroke="#7fa36a" stroke-width="1.2" stroke-linecap="round"/><rect x="${x - .9}" y="${y - 13}" width="1.8" height="5" rx=".9" fill="#8a6f4e"/>`).join('')}
+    <!-- the campus at the finish -->
+    ${T(930, 200, 1, `<ellipse cy="2" rx="62" ry="4" fill="#14293a" opacity=".08"/>
+      <path d="M-56 0v-26h112V0z" fill="#ead2a4"/><path d="M-60-26h120l-6-8H-54z" fill="#b7744a"/><path d="M-56-20h112" stroke="#d9bb85" stroke-width="1"/>
+      ${[-46, -32, -18, 18, 32, 46].map(x => `<path d="M${x - 4}-6v-11a4 4 0 0 1 8 0V-6z" fill="#7d93a3"/><path d="M${x}-17v11" stroke="#ead2a4" stroke-width=".8"/>`).join('')}
+      <path d="M-10 0V-50h20V0z" fill="#e3c792"/><path d="M-13-50h26l-13-16z" fill="#a8663f"/><path d="M0-66v-8" stroke="#6b5438" stroke-width="1.2"/><path d="M0-74h7l-2 2.5 2 2.5H0z" fill="#2f6db5"/>
+      <circle cy="-38" r="5.5" fill="#fffdf5" stroke="#b49a76"/><path d="M0-38v-3.6M0-38h2.6" stroke="#14293a" stroke-width=".9" stroke-linecap="round"/>
+      <path d="M-5 0v-14a5 5 0 0 1 10 0V0z" fill="#8a5f3a"/><path d="M-26 0h52" stroke="#d9bb85" stroke-width="2"/>`)}
+    ${tree(862, 206, .9)}${tree(1000, 204, .85)}${pine(880, 200, .8)}
+    ${tree(196, 132, .95)}${tree(214, 138, .75)}${tree(414, 118, .8)}${tree(28, 176, .8)}${tree(560, 198, .9)}${tree(500, 266, 1.05)}${tree(976, 270, .95)}${tree(10, 282, .8)}
+    ${bush(300, 222, .8)}${bush(470, 214, .7)}${bush(620, 270, .9)}${bush(128, 226, .7)}${bush(840, 268, .8)}${bush(390, 278, .75)}
+    ${[[22, 248], [300, 256], [424, 268], [470, 286], [560, 236], [780, 282], [880, 248], [930, 284], [700, 284], [128, 278]].map(([x, y], i) => flower(x, y, ['#e9a23b', '#e0674b', '#fff', '#c27bc9', '#e9a23b'][i % 5])).join('')}
+    ${[[200, 284], [256, 232], [340, 284], [520, 240], [664, 280], [742, 270], [952, 238], [590, 250]].map(([x, y]) => grass(x, y)).join('')}
+    <!-- the road, with a kerb and a dashed centre line -->
+    <path d="${road}" stroke="#14293a" stroke-opacity=".08" stroke-width="24" fill="none" stroke-linecap="round" transform="translate(0 5)"/>
+    <path d="${road}" stroke="#e2d4b7" stroke-width="21" fill="none" stroke-linecap="round"/>
+    <path d="${road}" stroke="#fffdf5" stroke-width="16.5" fill="none" stroke-linecap="round"/>
+    <path d="${road}" stroke="#14293a" stroke-opacity=".32" stroke-width="2.4" stroke-dasharray="2 9" fill="none" stroke-linecap="round"/>
+    <g transform="translate(${bx} ${by}) rotate(${ang})">${rail(-11.5)}${rail(11.5)}</g>
+    <g transform="translate(74 158)"><rect x="-1.5" y="-26" width="3" height="30" rx="1" fill="#8a6f4e"/><rect x="-2" y="-35" width="32" height="14" rx="3" fill="#fffdf5" stroke="#c9bfae" stroke-width="1.2"/><path d="M30-35l5 7-5 7" fill="#fffdf5" stroke="#c9bfae" stroke-width="1.2"/><text x="13" y="-25" text-anchor="middle" font-size="7.5" font-weight="800" font-family="Manrope, sans-serif" fill="#8b969e" letter-spacing=".06em">START</text></g>
+    ${course.map.map((w, i) => { const [x, y] = pts[i], st = w.n < current ? 'past' : w.n === current ? 'now' : 'next', last = i === N - 1;
+      const has = course.weeks.some(cw => cw.n === w.n);
+      return `<g class="cm-stop cm-${st}${has ? ' cm-link' : ''}" transform="translate(${x} ${y})"${has ? ` data-week-tab="${w.n}" role="button" tabindex="0" aria-label="Show Week ${w.n} lessons"` : ''}>
+        ${st === 'now' ? '<circle r="31" fill="#e3a843" opacity=".24"/><circle r="26" fill="none" stroke="#e3a843" stroke-opacity=".55" stroke-width="1.4" stroke-dasharray="3 5" class="cm-spin"/>' : ''}
+        <title>Week ${w.n}: ${esc(w.label)} — ${esc(w.sub)}</title>
+        ${last ? `<path d="M2-18V-62" stroke="#14293a" stroke-opacity=".12" stroke-width="3" stroke-linecap="round"/><path d="M0-20V-64" stroke="#14293a" stroke-width="3" stroke-linecap="round"/><circle cy="-65" r="2.6" fill="#e3a843"/>
+          <g class="cm-flag"><path d="M1.5-63h30l-7 9 7 9h-30z" fill="#e64626"/><path d="M1.5-63h30l-7 9h-23z" fill="#fff" opacity=".18"/></g>
+          ${[[-16, -50, '#e3a843'], [40, -64, '#2f6db5'], [44, -40, '#13887a'], [-12, -72, '#e64626']].map(([cx, cy, c], k) => `<path class="cm-twinkle" style="animation-delay:${-k * .7}s" d="M${cx} ${cy - 4}l1.2 2.8 2.8 1.2-2.8 1.2-1.2 2.8-1.2-2.8-2.8-1.2 2.8-1.2z" fill="${c}"/>`).join('')}` : ''}
+        <ellipse cy="23" rx="17" ry="4" fill="#14293a" opacity=".12"/>
+        <circle r="22" fill="#fffdf6" filter="url(#cm-sh)"/>
+        <circle class="cm-disc" r="18" fill="url(#cm-${st})" stroke="${st === 'next' ? '#d9cdb6' : 'none'}" stroke-width="1.2"/>
+        <path d="M-12-7a14 14 0 0 1 11-10" stroke="#fff" stroke-opacity="${st === 'next' ? '.9' : '.45'}" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+        ${st === 'past' ? '<path d="m-7 0 5 5 9-10" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>' : `<text y="5.5" text-anchor="middle" font-size="16" font-weight="800" font-family="Manrope, sans-serif" fill="${st === 'now' ? '#14293a' : '#7d8992'}">${w.n}</text>`}
+        ${st === 'now' ? walker : ''}
+      </g>`; }).join('')}
+    ${course.map.map((w, i) => lab(w, i)).join('')}
+    </g>
+  </svg>`;
+}
+function courseMap(current) {
+  if (course.map.length > 6) return courseMapRich(current);
+  /* five stops for DEC15; a longer course (DEC10) spreads its stops along a road that climbs gently to the flag */
+  const N = course.map.length, many = N > 6;
+  const pts = N === 5 ? [[120, 168], [320, 116], [530, 136], [740, 96], [900, 76]]
+    : course.map.map((_, i) => { const k = N > 1 ? i / (N - 1) : 0; return [Math.round(150 + 760 * k), Math.round(160 - 84 * k + (i % 2 ? -10 : 8))]; });
+  const road = N === 5 ? 'M-10 190C60 186 80 168 120 168S250 116 320 116 470 138 530 136 670 96 740 96 850 78 900 76'
+    : `M-10 190C40 186 ${pts[0][0] - 40} ${pts[0][1]} ${pts[0][0]} ${pts[0][1]}` + pts.slice(1).map(([x, y], i) => `S${x - Math.round((x - pts[i][0]) / 2)} ${y} ${x} ${y}`).join('');
+  const tree = (x, y, k = 1) => `<g transform="translate(${x} ${y}) scale(${k})"><ellipse cy="9" rx="11" ry="2.4" fill="#14293a" opacity=".07"/><rect x="-1.6" y="-4" width="3.2" height="12" rx="1" fill="#8a6f4e"/><path d="M-.4 -2v9" stroke="#6b5438" stroke-width=".8"/><circle cy="-12" r="10" fill="#8fb47a"/><circle cx="5" cy="-8" r="7" fill="#6f9d5c"/><circle cx="-4" cy="-15" r="4" fill="#a7c791" opacity=".9"/></g>`;
+  const bush = (x, y, k = 1) => `<g transform="translate(${x} ${y}) scale(${k})"><ellipse cy="3" rx="12" ry="2" fill="#14293a" opacity=".06"/><circle cx="-5" r="5" fill="#9cc086"/><circle cx="3" cy="-1" r="6" fill="#86b170"/><circle cx="8" cy="1" r="4" fill="#9cc086"/></g>`;
+  const cloud = (x, y, k = 1) => `<g transform="translate(${x} ${y}) scale(${k})" fill="#fff" opacity=".85"><ellipse cx="0" cy="0" rx="22" ry="8"/><circle cx="-6" cy="-5" r="8"/><circle cx="6" cy="-7" r="10"/><circle cx="16" cy="-3" r="7"/></g>`;
+  const flowers = [[22, 244], [196, 250], [380, 236], [455, 250], [560, 230], [790, 240], [860, 228], [700, 254]].map(([x, y], i) => `<g transform="translate(${x} ${y})"><path d="M0 0v-6" stroke="#7fa36a" stroke-width="1.2"/><circle cy="-7" r="2.2" fill="${['#e9a23b', '#e0674b', '#fff', '#e9a23b'][i % 4]}"/></g>`).join('');
+  const grass = [[200, 258], [250, 226], [330, 250], [500, 238], [640, 226], [730, 246], [940, 236]].map(([x, y]) => `<path d="M${x} ${y}c-1-4-3-7-3-9m3 9c1-4 1-8 2-10m-2 10c2-3 4-5 6-6" stroke="#9fbf8a" stroke-width="1.3" fill="none" stroke-linecap="round"/>`).join('');
+  return `<svg class="course-map-svg" viewBox="0 0 1000 262" role="group" aria-label="Course map: ${course.map.map(w => `Week ${w.n}, ${w.label}`).join('; ')}. You are in Week ${current}.">
+    <defs>
+      <linearGradient id="cm-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fbf7ec"/><stop offset="1" stop-color="#f6efdf"/></linearGradient>
+      <radialGradient id="cm-sun" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#f9d98f" stop-opacity=".9"/><stop offset=".55" stop-color="#f6dfae" stop-opacity=".35"/><stop offset="1" stop-color="#f6dfae" stop-opacity="0"/></radialGradient>
+      <linearGradient id="cm-far" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f1e9d7"/><stop offset="1" stop-color="#ebe2cd"/></linearGradient>
+      <linearGradient id="cm-near" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e6eedb"/><stop offset="1" stop-color="#d9e5c9"/></linearGradient>
+      <filter id="cm-sh" x="-40%" y="-40%" width="180%" height="180%"><feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#14293a" flood-opacity=".18"/></filter>
+      <pattern id="cm-dots" width="14" height="14" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r=".9" fill="#14293a" opacity=".06"/></pattern>
+    </defs>
+    <rect width="1000" height="290" fill="url(#cm-sky)"/>
+    <rect width="1000" height="150" fill="url(#cm-dots)"/>
+    <circle cx="620" cy="52" r="70" fill="url(#cm-sun)"/><circle cx="620" cy="52" r="26" fill="#f6dfae"/><circle cx="612" cy="44" r="8" fill="#fff" opacity=".35"/>
+    ${cloud(150, 50, .9)}${cloud(470, 34, .7)}${cloud(840, 44, 1)}
+    <path d="M120 52q6-6 12 0q6-6 12 0M168 74q4-4 8 0q4-4 8 0M560 40q5-5 10 0q5-5 10 0" stroke="#7d8b95" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+    <path d="M0 130C140 100 260 124 380 104S600 60 720 84 880 44 1000 56V290H0Z" fill="#f3ecdb" opacity=".8"/>
+    <path d="M0 150C120 108 230 130 340 116S560 72 700 92 880 52 1000 66V290H0Z" fill="url(#cm-far)"/>
+    <path d="M0 150C120 108 230 130 340 116S560 72 700 92 880 52 1000 66" stroke="#fff" stroke-opacity=".6" stroke-width="1.5" fill="none"/>
+    <path d="M0 200C150 176 300 208 470 188S760 158 1000 172V290H0Z" fill="url(#cm-near)"/>
+    <path d="M0 200C150 176 300 208 470 188S760 158 1000 172" stroke="#fff" stroke-opacity=".7" stroke-width="1.5" fill="none"/>
+    <path d="M40 262c90-10 190-6 300-14m140 22c120-12 260-18 420-30M600 252c90-6 180-14 300-18M20 236c70-8 140-6 210-10" stroke="#cfdcc2" stroke-width="2" fill="none" stroke-linecap="round"/>
+    ${grass}${flowers}
+    ${tree(200, 132)}${tree(220, 138, .8)}${tree(420, 120, .9)}${tree(640, 100)}${tree(662, 106, .75)}${tree(964, 214, .9)}${tree(30, 174, .8)}${tree(984, 220, .7)}
+    ${bush(300, 216, .8)}${bush(600, 206, .7)}${bush(880, 196, .9)}${bush(130, 222, .7)}
+    <path d="${road}" stroke="#14293a" stroke-opacity=".07" stroke-width="22" fill="none" stroke-linecap="round" transform="translate(0 4)"/>
+    <path d="${road}" stroke="#eadfc8" stroke-width="19" fill="none" stroke-linecap="round"/>
+    <path d="${road}" stroke="#fffdf5" stroke-width="16" fill="none" stroke-linecap="round"/>
+    <path d="${road}" stroke="#14293a" stroke-opacity=".35" stroke-width="2.4" stroke-dasharray="2 9" fill="none" stroke-linecap="round"/>
+    <g transform="translate(74 152)"><rect x="-1.5" y="-26" width="3" height="30" rx="1" fill="#8a6f4e"/><rect x="-2" y="-34" width="30" height="13" rx="3" fill="#fffdf5" stroke="#c9bfae" stroke-width="1.2"/><path d="M28 -34l5 6.5-5 6.5" fill="#fffdf5" stroke="#c9bfae" stroke-width="1.2"/><text x="12" y="-24.5" text-anchor="middle" font-size="7.5" font-weight="800" font-family="Manrope, sans-serif" fill="#8b969e" letter-spacing=".06em">START</text></g>
+    ${course.map.map((w, i) => { const [x, y] = pts[i] || pts[pts.length - 1], st = w.n < current ? 'past' : w.n === current ? 'now' : 'next', last = i === course.map.length - 1;
+      const has = course.weeks.some(cw => cw.n === w.n);
+      return `<g class="cm-stop cm-${st}${has ? ' cm-link' : ''}" transform="translate(${x} ${y})"${has ? ` data-week-tab="${w.n}" role="button" tabindex="0" aria-label="Show Week ${w.n} lessons"` : ''}>
+        ${st === 'now' ? `<circle r="30" fill="#e3a843" opacity=".22"/><g transform="translate(${last ? -66 : 0} ${last ? -40 : -52})"><rect x="-50" y="-15" width="100" height="26" rx="13" fill="#14293a"/>${last ? '' : '<path d="M-6 11h12l-6 8z" fill="#14293a"/>'}<text y="3" text-anchor="middle" fill="#fff" font-size="12" font-weight="700" font-family="Manrope, sans-serif">You are here</text></g>` : ''}
+        ${last ? '<path d="M2 -18V-60" stroke="#14293a" stroke-opacity=".12" stroke-width="3" stroke-linecap="round"/><path d="M0 -20V-62" stroke="#14293a" stroke-width="3" stroke-linecap="round"/><path d="M0 -62h30l-7 9 7 9H0z" fill="#e64626"/><path d="M0 -62h30l-7 9H0z" fill="#fff" opacity=".18"/>' : ''}
+        <ellipse cy="22" rx="16" ry="3.5" fill="#14293a" opacity=".1"/>
+        <circle r="19" fill="${st === 'past' ? '#14293a' : st === 'now' ? '#e3a843' : '#fffdf5'}" stroke="${st === 'next' ? '#c9bfae' : '#fffdf5'}" stroke-width="3" filter="url(#cm-sh)"/>
+        ${st === 'now' ? '<path d="M-12 -6a13 13 0 0 1 10-10" stroke="#fff" stroke-opacity=".55" stroke-width="2.5" fill="none" stroke-linecap="round"/>' : ''}
+        ${st === 'past' ? '<path d="m-7 0 5 5 9-10" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>' : `<text y="5" text-anchor="middle" font-size="15" font-weight="700" font-family="Manrope, sans-serif" fill="${st === 'now' ? '#14293a' : '#8b969e'}">${w.n}</text>`}
+        ${many ? `<text y="${i % 2 ? 54 : 40}" text-anchor="middle" font-size="11.5" font-weight="700" font-family="Manrope, sans-serif" fill="#14293a">${esc(w.label)}</text>`
+          : `<text y="42" text-anchor="middle" font-size="13" font-weight="700" font-family="Manrope, sans-serif" fill="#14293a">Week ${w.n} · ${esc(w.label)}</text>
+        <text y="60" text-anchor="middle" font-size="12" font-family="Manrope, sans-serif" fill="#6b7882">${esc(w.sub)}</text>`}
+      </g>`; }).join('')}
+  </svg>`;
+}
+/* DEC10: the lesson the course calendar says is on today (class days only), so the course map can point to it */
+const classToday = (() => { const G = window.DEC15_GUIDE; if (course.id !== 'ielts' || !G?.weeks) return null;
+  const t = new Date(), today = new Date(t.getFullYear(), t.getMonth(), t.getDate()), parse = x => { const [y, m, d] = x.split('-').map(Number); return new Date(y, m - 1, d); };
+  for (const w of G.weeks) { if (w.brk || !w.start) continue; const i = Math.round((today - parse(w.start)) / 864e5);
+    if (i >= 0 && i < 5) { if (w.days?.[i]?.off) return null; const id = `${window.DEC15_COURSE.idPrefix || ''}w${w.n}d${i + 1}`, wk = course.weeks.find(x => x.n === w.n), d = wk?.days.find(x => x.id === id);
+      return d ? { id, week: w.n, day: i + 1, d } : null; } }
+  return null; })();
+const GREET = () => { const h = new Date().getHours(); return h < 5 ? 'Working late' : h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening'; };
+const DAY_TINT = ['#1f8a7a', '#c2562f', '#7a4a8c', '#2f6db5', '#b07d12'], WEEKDAY = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+const dayHead = d => `<em class="day-n"><i class="day-n-num" aria-hidden="true">${d.day}</i><i class="day-n-txt">Day ${d.day}<small>${WEEKDAY[d.day - 1] || ''}</small></i></em>`;
+function dayCard(d) {
+  const sum = summaries()[d.id] || {}, here = d.id === lesson.id;
+  const done = here ? coreActivities.filter(a => state.done[a.id]).length : sum.done || 0, total = here ? coreActivities.length : sum.total || 0;
+  const dc = ` style="--dc:${DAY_TINT[(d.day - 1) % 5]}"`, isT = classToday?.id === d.id, tTag = isT ? '<span class="day-today"><i aria-hidden="true"></i>Today in class</span>' : '';
+  if (d.status !== 'ready') return `<li class="day-card is-soon${isT ? ' is-today' : ''}"${dc}>${tTag}
+      <span class="day-art day-art-soon"><img src="assets/art/soon.svg" alt="" width="120" height="100" loading="lazy"></span>
+      <span class="day-label">${dayHead(d)}<span class="day-soon">${icon('sprout')}Coming soon</span></span>
+      <b class="day-title">${esc(d.title)}</b>
+      ${d.parts ? `<ul class="day-parts">${d.parts.map((_, k) => { const p = dayPart(d, k); return `<li${p.tone ? ` class="has-code" style="${tone(p)}"` : ''}>${p.tone ? `<span class="part-code">${esc(p.code)}</span>` : ''}${esc(p.tone ? p.name : d.parts[k])}</li>`; }).join('')}</ul>` : ''}
+    </li>`;
+  const pct = total ? Math.round(100 * done / total) : 0;
+  return `<li class="day-card is-ready${pct === 100 ? ' complete' : ''}${isT ? ' is-today' : ''}"${dc}>${tTag}<a href="#/${d.id}"${isT ? ' aria-label="Today in class: ' + esc(d.title) + '"' : ''}>
+      <span class="day-art"><img src="${artSrc(d.art || 'writing')}" alt="" width="220" height="170" loading="lazy"></span>
+      <span class="day-label">${dayHead(d)}${pct === 100 ? `<span class="day-done">${icon('check')}Complete</span>` : done ? `<span class="day-now">In progress</span>` : '<span class="day-open">Open</span>'}</span>
+      <b class="day-title">${esc(d.title)}</b>
+      ${d.parts ? `<ul class="day-parts">${d.parts.map((_, k) => { const p = dayPart(d, k); return `<li${p.tone ? ` class="has-code" style="${tone(p)}"` : ''}>${p.tone ? `<span class="part-code">${esc(p.code)}</span>` : ''}${esc(p.tone ? p.name : d.parts[k])}</li>`; }).join('')}</ul>` : ''}
+      <span class="day-meter" aria-label="${done} of ${total} activities finished"><i style="width:${pct}%"></i></span>
+      <span class="day-foot"><span>${total ? `${done} / ${total} activities` : 'Not started'}</span><span class="day-go">${done && pct < 100 ? 'Continue' : pct === 100 ? 'Review' : 'Start'} ${icon('arrow')}</span></span>
+    </a></li>`;
+}
+/* One week at a time on the course map: with 5 weeks × 5 days the page would be very long.
+   The open week is remembered for this visit; the "You are here" week opens first. */
+let homeWeek = null;
+function weekTabs() {
+  const ws = course.weeks;
+  if (!ws.some(w => w.n === homeWeek)) homeWeek = (ws.find(w => w.n === lesson.week) || ws[ws.length - 1]).n;
+  const w = ws.find(x => x.n === homeWeek);
+  const tabs = ws.length > 1 ? `<div class="week-tabs" role="tablist" aria-label="Weeks">${ws.map(x => { const st = x.days.filter(d => d.status === 'ready').length, done = x.days.filter(d => { const [a, b] = dayProgress(d); return b && a === b; }).length;
+    return `<button type="button" role="tab" id="tab-week-${x.n}" aria-controls="panel-week" aria-selected="${x.n === homeWeek}" tabindex="${x.n === homeWeek ? 0 : -1}" class="week-tab${classToday?.week === x.n ? ' has-today' : ''}" data-week-tab="${x.n}" style="--p:${st ? Math.round(100 * done / st) : 0}%"><span class="week-tab-num">${x.n}</span><span class="week-tab-text"><b>Week ${x.n}</b><small>${esc(x.theme)}</small></span><span class="week-tab-meta">${done ? `${done}/${st} done` : `${st} lesson${st === 1 ? '' : 's'}`}</span></button>`; }).join('')}</div>` : '';
+  return `<section class="week" aria-label="Lessons by week">${tabs}
+    <div class="week-panel" id="panel-week" role="tabpanel" aria-labelledby="tab-week-${w.n}">
+      <header class="week-head"><span class="week-num"><small>Week</small>${w.n}</span><div><h2>${esc(w.theme)}</h2><p>${esc(w.summary || '')}</p></div></header>
+      <ol class="day-grid${w.days.length > 3 ? ' many' : ''}">${w.days.map(dayCard).join('')}</ol>
+    </div></section>`;
+}
+function courseHome() {
+  const n = nextUp(), done = coreActivities.filter(a => state.done[a.id]).length, pct = Math.round(100 * done / coreActivities.length);
+  return `<header class="home-head">
+      <span class="eyebrow">${esc(course.code)} · ${esc(course.topic)}</span>
+      <h1>Your course map</h1>
+      ${course.intro === '' ? '' : `<p>${esc(course.intro || 'Pick up where you left off, or open any lesson below.')}</p>`}
+      ${classToday ? (() => { const { d, week, day } = classToday, ready = d.status === 'ready', inner = `<span class="ht-dot" aria-hidden="true"></span><span class="ht-hi">${GREET()}</span><span class="ht-txt">Today in class · ${WEEKDAY[day - 1]}, Week ${week}</span><b>${esc(d.title)}</b>${ready ? icon('arrow') : '<small>Coming soon</small>'}`;
+        return ready ? `<a class="home-today" href="#/${d.id}">${inner}</a>` : `<span class="home-today is-soon">${inner}</span>`; })() : ''}
+    </header>
+    <section class="course-map" aria-label="Course map">${courseMap(lesson.week)}</section>
+    <section class="resume" style="${tone(n ? n.s : lesson.sections[lesson.sections.length - 1])}">
+      <img class="resume-art" src="${artSrc(n ? n.s.art : 'writing')}" alt="" width="220" height="170">
+      <div class="resume-copy">
+        <span class="eyebrow">${done ? 'Continue where you left off' : 'Start here'} · ${esc(whereLong(', '))}</span>
+        <h2>${esc(lesson.title)}</h2>
+        <p>${n ? `Next: <b>${esc(stageName(n.s))}</b> — ${esc(n.a.title)}` : 'You finished every activity. Review your notebook before you write.'}</p>
+        <div class="resume-bar"><span class="resume-meter"><i style="width:${pct}%"></i></span><span>${done} of ${coreActivities.length} activities</span></div>
+      </div>
+      <div class="resume-actions">${continueButton(true)}<a class="btn-quiet" href="${L('overview')}">Lesson overview</a></div>
+    </section>
+    ${weekTabs()}`;
+}
+/* page header with a small vector picture on the right (Source library, Extra activities) */
+const pageHero = (eyebrow, title, text, art, extra = '') => `<header class="page-head page-hero"><div><span class="eyebrow">${eyebrow}</span><h1>${title}</h1><p>${text}</p>${extra}</div><img class="page-hero-art" src="assets/art/${art}.svg" alt="" width="440" height="340"></header>`;
+function srcLook(s) {   // the picture, colour and reading time of a course text
+  const k = s.kind.toLowerCase(), words = s.paragraphs.join(' ').split(/\s+/).length;
+  const [art, tone, verb, rate] = k.includes('listening') ? ['listening', 'teal', 'listen', 150] : k.includes('discussion') ? ['discussion', 'plum', 'listen', 150] : ['reading', k.includes('mediation') ? 'blue' : 'amber', 'read', 200];
+  const marks = Object.entries(state.marks || {}).filter(([id, rs]) => id.startsWith('s-' + s.id + '-') && rs?.length).reduce((n, [, rs]) => n + rs.length, 0);
+  return { art, tone, time: `About ${Math.max(1, Math.round(words / rate))} min read`, marks };
+}
+/* Readings: every week's course texts, one fold per week. Each week's text files are read on demand
+   (from the course map) into their own list, so a week shows only its own texts. */
+const libWeeks = course.weeks.map(w => ({ n: w.n, theme: w.theme,
+  files: [...new Set(w.days.filter(d => d.status === 'ready').flatMap(d => d.scripts || []).filter(f => f.startsWith(`${ROOT}lessons/week${w.n}/`) && !/\/(d\d+)?w\d+d\d+\.js$/.test(f)))]
+    .sort((a, b) => (b.endsWith('/sources.js') ? 1 : 0) - (a.endsWith('/sources.js') ? 1 : 0)) })).filter(w => w.files.length);
+const library = {}, libLoading = {};
+let libOpen = null;
+function loadWeekTexts(n) {
+  const w = libWeeks.find(x => x.n === n); if (!w || library[n] || libLoading[n]) return libLoading[n];
+  return libLoading[n] = (async () => {
+    const win = {};
+    for (const f of w.files) new Function('window', await (await fetch(f + '?v=' + cfg.version)).text())(win);
+    library[n] = win.DEC15_SOURCES || [];
+  })().catch(() => { library[n] = []; }).finally(() => { if (navRoute === 'sources') rerender(); });
+}
+const weekTexts = n => library[n] || (n === lesson.week && libWeeks.every(w => w.n !== n) ? sources : null);
+function libCard(s, i, week) {
+  const l = srcLook(s);
+  return `<article class="lib-card" style="${tone({ tone: l.tone })};--i:${i}">
+    <button class="lib-art" data-source="${s.id}" data-src-week="${week}" aria-label="Open ${esc(s.title)}" tabindex="-1"><img src="${artSrc(l.art)}" alt="" width="440" height="340" loading="lazy"></button>
+    <div class="lib-body"><span class="pill">${esc(s.kind)}</span><h2>${esc(s.title)}</h2><p>${esc(s.cite)}</p>
+    <div class="lib-meta"><span>${icon('clock')}${l.time}</span>${l.marks ? `<span class="lib-marks">${icon('pen')}${l.marks} mark${l.marks > 1 ? 's' : ''}</span>` : ''}</div>
+    <button class="btn" data-source="${s.id}" data-src-week="${week}">Open and read ${icon('arrow')}</button></div></article>`;
+}
+/* DEC10: the same page, redrawn (js/library.js, css/library.css): a picture head with counts, colour-coded week
+   rows like the Skills Lab, and a picture of each text drawn from the text itself */
+const RL_WEEK = ['#d0442a', '#2a8a7d', '#3b6fb6', '#7a4fb0', '#c27a14', '#1f7f86', '#b8532a', '#4f9a5b', '#a3416a', '#2f6db5'];
+function rlCard(s, i, week) {
+  const L = window.DEC15Library, k = L.kindOf(s), [c, bg] = L.TONE[k], l = srcLook(s), w = L.words(s);
+  return `<article class="rl-card k-${k}" style="--rc:${c};--rbg:${bg};--i:${i}">
+    <button type="button" class="rl-cover" data-source="${s.id}" data-src-week="${week}" aria-label="Open ${esc(s.title)}" tabindex="-1">${L.art(s)}<span class="rl-kind">${L.ICON[k]}${esc(k === 'report' ? 'Report' : k === 'reading' ? 'Reading' : 'Listening')}</span></button>
+    <div class="rl-body"><span class="rl-pill">${esc(s.kind)}</span><h3>${esc(s.title)}</h3><p class="rl-cite">${icon('quote')}<span>${esc(s.cite)}</span></p>
+      <ul class="rl-meta"><li>${icon('clock')}${l.time.replace(/^About /, '')}</li><li>${icon('list')}${w.toLocaleString('en-AU')} words</li>${l.marks ? `<li class="is-marked">${icon('pen')}${l.marks} mark${l.marks > 1 ? 's' : ''}</li>` : ''}</ul>
+      <button class="rl-open" data-source="${s.id}" data-src-week="${week}"><span>${k === 'listening' || k === 'discussion' ? 'Open the transcript' : 'Open and read'}</span>${icon('arrow')}</button></div></article>`;
+}
+function rlPage() {
+  const L = window.DEC15Library, all = libWeeks.flatMap(w => weekTexts(w.n) || []);
+  const nRead = all.filter(s => L.kindOf(s) !== 'listening' && L.kindOf(s) !== 'discussion').length, nListen = all.length - nRead;
+  const marks = Object.entries(state.marks || {}).filter(([id, rs]) => id.startsWith('s-') && rs?.length).reduce((n, [, rs]) => n + rs.length, 0);
+  return `<div class="rl-page">
+    <header class="rl-top">
+      <div class="rl-top-copy"><span class="eyebrow">${esc(course.code)} · Course texts</span><h1>Readings and listening scripts</h1>
+        <p>All the course texts, week by week. Open a week, then open a text to read it. Highlight, underline and add your own notes as you read.</p>
+        <ul class="rl-stats" aria-label="Your course texts"><li><b>${all.length}</b><span>texts</span></li><li class="k-reading"><i>${L.ICON.reading}</i><b>${nRead}</b><span>readings</span></li><li class="k-listening"><i>${L.ICON.listening}</i><b>${nListen}</b><span>listening scripts</span></li><li class="k-marks"><i>${icon('pen')}</i><b>${marks}</b><span>marks</span></li></ul>
+        <p class="rl-tip">${icon('bulb')}<span>Your highlights and notes are saved, and appear in your <a href="${L_('notebook')}">notebook</a> (My workspace).</span></p></div>
+      <img class="rl-top-art" src="assets/ui/library/hero.svg" alt="" width="540" height="310">
+    </header>
+    <div class="rl-weeks">${libWeeks.map((w, k) => { const list = weekTexts(w.n), open = w.n === libOpen, col = RL_WEEK[(w.n - 1) % RL_WEEK.length];
+      const r = list ? list.filter(s => !['listening', 'discussion'].includes(L.kindOf(s))).length : 0, li = list ? list.length - r : 0;
+      return `<section class="rl-week${open ? ' open' : ''}${w.n === lesson.week ? ' is-now' : ''}" style="--wc:${col};--i:${k}">
+        <button type="button" class="rl-week-head" data-lib-week="${w.n}" aria-expanded="${open}" aria-controls="lib-w${w.n}">
+          <span class="rl-wn"><small>Week</small><b>${w.n}</b></span>
+          <span class="rl-wt"><b>${esc(w.theme)}</b><small>${list ? `${list.length} text${list.length === 1 ? '' : 's'}` : 'Loading…'}</small></span>
+          ${list ? `<span class="rl-wk-kinds">${r ? `<span class="k-reading">${L.ICON.reading}${r} reading${r === 1 ? '' : 's'}</span>` : ''}${li ? `<span class="k-listening">${L.ICON.listening}${li} listening</span>` : ''}</span>` : ''}
+          ${w.n === lesson.week ? `<em class="rl-now">${icon('flag')}This week</em>` : ''}
+          <i class="lg-fold-chev" aria-hidden="true"></i></button>
+        <div class="rl-week-body" id="lib-w${w.n}"${open ? '' : ' hidden'}>${open ? (list ? `<div class="rl-grid">${list.map((s, i) => rlCard(s, i, w.n)).join('')}</div>` : '<p class="lib-loading">Loading the texts…</p>') : ''}</div>
+      </section>`; }).join('')}</div></div>`;
+}
+const L_ = id => L(id);
+function sourcesPage() {
+  if (course.id === 'ielts' && window.DEC15Library) { if (libOpen === null) libOpen = libWeeks.some(w => w.n === lesson.week) ? lesson.week : libWeeks[0]?.n; libWeeks.forEach(w => loadWeekTexts(w.n)); return rlPage(); }
+  if (libOpen === null) libOpen = libWeeks.some(w => w.n === lesson.week) ? lesson.week : libWeeks[0]?.n;
+  libWeeks.forEach(w => loadWeekTexts(w.n));   // small files; loading all of them shows each week's count
+  return `${pageHero('Course texts', 'Readings and listening scripts', 'All the course texts, week by week. Open a week, then open a text to read it. You can highlight and underline the ideas you need.', 'library',
+    `<p class="page-hero-tip">${icon('bulb')}<span>Your highlights are saved and also appear in your <a href="${L('notebook')}">notebook</a> (My workspace).</span></p>`)}
+  <div class="lib-weeks">${libWeeks.map(w => { const list = weekTexts(w.n), open = w.n === libOpen;
+    const count = list ? `${list.length} text${list.length === 1 ? '' : 's'}` : '';
+    return `<section class="lib-week${open ? ' open' : ''}">
+      <button type="button" class="lib-week-head" data-lib-week="${w.n}" aria-expanded="${open}" aria-controls="lib-w${w.n}">
+        <span class="lib-week-num"><small>Week</small>${w.n}</span>
+        <span class="lib-week-text"><b>Week ${w.n}</b><small>${esc(w.theme)}${count ? ' · ' + count : ''}</small></span>
+        ${w.n === lesson.week ? `<em class="lib-week-now">${icon('flag')}This week</em>` : ''}
+        <span class="nav-chev" aria-hidden="true"></span></button>
+      <div class="lib-week-body" id="lib-w${w.n}"${open ? '' : ' hidden'}>${open ? (list ? `<div class="library">${list.map((s, i) => libCard(s, i, w.n)).join('')}</div>` : '<p class="lib-loading">Loading the texts…</p>') : ''}</div>
+    </section>`; }).join('')}</div>`;
+}
+function extrasPage() {
+  const n = lesson.extras.length, mins = lesson.extras.reduce((t, a) => t + (a.minutes || 0), 0), dn = lesson.extras.filter(a => state.done[a.id]).length;
+  return `${pageHero('Optional · independent practice', 'Extra activities', 'Practice at home, at your own pace. These are <b>not</b> part of the four-hour lesson.', 'practice',
+    n ? `<div class="page-hero-stats"><span><b>${n}</b> activit${n > 1 ? 'ies' : 'y'}</span>${mins ? `<span><b>${mins}</b> min in total</span>` : ''}<span><b>${dn}</b> finished</span></div>` : '')}
+  ${n ? `<nav class="extra-jump" aria-label="Extra activities">${lesson.extras.map((a, i) => `<button type="button" data-scroll="${esc(a.id)}" class="${state.done[a.id] ? 'is-done' : ''}"><i>${state.done[a.id] ? icon('check') : i + 1}</i>${esc(a.short || a.title)}</button>`).join('')}</nav>` : ''}
+  ${lesson.extras.map((a, i) => activity(a, i, lesson.extras, null)).join('')}`;
+}
+function registerTables() {
+  allActivities.forEach(a => (a._tables || []).forEach(b => { for (let r = 0; r < tableRows(b); r++) b.columns.forEach((c, ci) => { const k = `${b.id}-${r}-${ci}`; labels[k] = tableLabel(b, r, ci); owner[k] = a.id; }); }));
+}
+function notebook() {
+  return `${nb.pageHTML()}<div class="nb-foot"><button class="btn-quiet danger" data-clear>Clear my work on this device</button></div>`;
+}
+/* My workspace → Notebook: one notebook per lesson; the picker opens another lesson's notebook */
+function wsNotebook() {
+  const opt = d => `<option value="${d.id}"${d.id === lesson.id ? ' selected' : ''}>${esc(d.lab ? d.title : `Week ${d.week}, Day ${d.day} · ${d.title}`)}</option>`;
+  const weeks = course.weeks.map(w => { const ready = w.days.filter(d => d.status === 'ready'); return ready.length ? `<optgroup label="Week ${w.n}">${ready.map(d => opt({ ...d, week: w.n })).join('')}</optgroup>` : ''; }).join('');
+  const lab = (LAB?.strands || []).map(st => { const ready = st.lessons.filter(l => l.status === 'ready'); return ready.length ? `<optgroup label="${LABT} · ${esc(st.short)}">${ready.map(l => opt({ ...l, lab: st.id })).join('')}</optgroup>` : ''; }).join('');
+  return `<div class="ws-nb-bar"><label><span>${icon('book')}Notebook for</span><select data-ws-lesson aria-label="Choose a lesson">${weeks}${lab}</select></label><small>Each lesson keeps its own answers and highlights.</small></div>${notebook()}`;
+}
+const wsNotebookCount = () => coreActivities.filter(a => state.done[a.id]).length;
+
+/* ───────── side panel: the whole course; the open lesson is expanded ─────────
+   One week is open at a time (opening a week folds the others). The search box finds lessons, parts
+   of lessons, and the stages and activities of the open lesson. */
+// one week open at a time: the week number, 0 = all closed, null = follow the current lesson
+let navWeekOpen = (() => { try { const v = JSON.parse(localStorage.getItem(CLS.id + '-nav-week')); return typeof v === 'number' ? v : null; } catch (e) { return null; } })();
+let navRoute = 'home';
+/* ───────── Downloads (#/downloads) and the 'download' lesson block ─────────
+   course.downloads: [{ id, title, sub, kind, pages, size, tone, file, mirror?, thumbs: [page images], what, when: [..], how: [..], action?, howTitle? }]
+   In a lesson: { type: 'download', id: 'feedback-tool', note? } — a card with the page previews and a Download button. */
+const dlFind = id => (DL || []).find(d => d.id === id);
+const dlName = d => d.file.split('/').pop();
+const dlFile = d => `<span class="dl-file"><b>PDF</b><span>${esc(d.kind)}</span><span>${d.pages} page${d.pages === 1 ? '' : 's'}</span><span>${esc(d.size)}</span></span>`;
+const dlStack = (d, small) => `<span class="dl-stack${small ? ' is-small' : ''}" aria-hidden="true">${(d.thumbs || []).slice(0, 2).reverse().map((t, i, a) => `<img src="${esc(t)}" alt="" loading="lazy" width="210" height="297" style="--k:${a.length - 1 - i}">`).join('')}<i class="dl-badge">${icon('download')}</i></span>`;
+const dlButtons = d => `<a class="btn dl-go" href="${esc(d.file)}" download="${esc(dlName(d))}" data-dl="${esc(d.id)}">${icon('download')}${esc(d.action || 'Download the form')}</a>
+  <a class="btn-quiet dl-open" href="${esc(d.file)}" target="_blank" rel="noopener">${icon('open')}Open</a>`;
+B.download = b => { const d = dlFind(b.id); if (!d) return '';
+  return `<section class="block dl-card tone-${esc(d.tone || 'blue')}">
+    ${dlStack(d, true)}
+    <div class="dl-body">
+      <div class="block-label">${icon('download')}Download</div>
+      <h3>${esc(d.title)}</h3><p class="dl-sub">${esc(d.sub)}</p>
+      ${b.note ? `<p class="dl-note">${b.note}</p>` : ''}
+      ${dlFile(d)}
+      <div class="dl-actions">${dlButtons(d)}<a class="dl-more" href="#/downloads">${esc(d.howTitle || 'How to fill it in')} ${icon('arrow')}</a></div>
+    </div>
+  </section>`; };
+/* DEC10: remember which forms were downloaded on this device, and say so on the Downloads page */
+const DL_KEY = CLS.id + '-dl-done', dlDone = () => { try { return JSON.parse(localStorage.getItem(DL_KEY) || '{}') || {}; } catch (e) { return {}; } };
+const dlGot = ts => ts ? `<span class="dlx-got">${icon('check')}Downloaded ${new Date(ts).toLocaleDateString('en-AU', { day: 'numeric', month: 'short' })}</span>` : '';
+if (course.id === 'ielts') document.addEventListener('click', e => { const a = e.target.closest?.('a[data-dl]'); if (!a) return; const m = dlDone(), id = a.dataset.dl; m[id] = Date.now();
+  try { localStorage.setItem(DL_KEY, JSON.stringify(m)); } catch (er) { /* storage blocked */ }
+  const k = document.querySelector(`#dl-${CSS.escape(id)} .dlx-kind`); if (k && !k.nextElementSibling?.classList.contains('dlx-got')) k.insertAdjacentHTML('afterend', dlGot(m[id]));
+  toast('Downloading… Open the PDF in Adobe Acrobat Reader or Preview to fill it in.'); });
+const DLX_TONE = { blue: ['#2f6db5', '#eef4fc'], teal: ['#13887a', '#e8f5f2'], plum: ['#7a4a8c', '#f3edf7'], amber: ['#b07d12', '#fbf3e2'] };
+const DLX_IC = {
+  form: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3.5" width="14" height="17" rx="2"/><path d="M8.5 8h7M8.5 12h7"/><circle cx="9.5" cy="16" r="1.2"/><path d="m12.5 16 1.2 1.2 2.6-2.6"/></svg>',
+  ask: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H10l-5 4v-4H4z"/><path d="M10.2 8.6a2 2 0 1 1 2.8 1.8c-.6.3-1 .8-1 1.4M12 13.6h.01"/></svg>',
+  send: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 12 3 4.5l18 7.5-18 7.5z"/><path d="M4.5 12H12"/></svg>',
+};
+/* ───────── DEC10 Photocopiables (teacher only) ─────────
+   course.printables lists paper versions of class activities (mingles, card sorts, role cards, posters …).
+   - Teacher view ON: a "Photocopiable" card appears at the top of the matching activity (lesson + activity id), with
+     how many copies to print for this class, the preparation steps and a Print button.
+   - Teacher accounts also get Photocopiables in the side panel (#/print): every printable, week by week, with a class-size
+     copy calculator, a "ready" tick per sheet and the day's master pack.
+   - Every printable activity also works on screen, so a broken printer never stops the lesson (noPrinter says how).
+   Students never see these cards or the page. The PDFs are public files on the site (like everything here), only not linked
+   for students. */
+const PR_KEY = CLS.id + '-print', prGet = () => { try { return JSON.parse(localStorage.getItem(PR_KEY) || '{}') || {}; } catch (e) { return {}; } };
+const prSet = m => { try { localStorage.setItem(PR_KEY, JSON.stringify(m)); } catch (e) { /* storage blocked */ } };
+const prSize = () => { const n = Number(prGet().size); return n > 0 && n < 200 ? n : 18; };
+const PR_OPEN = new Set();
+const prOpenAttr = id => PR_OPEN.has(id) ? ' open' : '';
+const prSummary = (p, c, ready, small) => `<summary class="pr-row"><img class="pr-mini" src="${esc(p.thumb)}" alt="" width="34" height="48" loading="lazy"><span class="pr-row-main">${small ? `<span class="pr-row-k">${PR_IC}Photocopiable · teacher only</span>` : ''}<b>${esc(p.title)}</b><span class="pr-row-meta">${p.code ? `<span class="pr-code">${esc(p.code)}</span>` : ''}<span>${esc(p.kind || '')}</span>${p.minutes ? `<span>${p.minutes} min</span>` : ''}<span><b>${c}</b> cop${c === 1 ? 'y' : 'ies'}</span></span></span>${ready ? '<span class="pr-row-ok">✓ Ready</span>' : ''}<i class="pr-row-chev" aria-hidden="true"></i></summary>`;
+const PR_PER = { student: 'per student', pair: 'per pair', group: 'per group', class: 'for the class', teacher: 'for you' };
+function prCopies(p, n = prSize()) {
+  const g = p.groupSize || 4, base = p.per === 'student' ? n : p.per === 'pair' ? Math.ceil(n / 2) : p.per === 'group' ? Math.ceil(n / g) : 1;
+  return base + (p.extra || 0);
+}
+const prSheets = (p, c) => c * (p.duplex ? Math.ceil((p.pages || 1) / 2) : (p.pages || 1));
+const prHow = (p, c) => `<b>${c}</b> cop${c === 1 ? 'y' : 'ies'} <span>· 1 ${PR_PER[p.per] || 'per student'}${p.per === 'group' ? ` of ${p.groupSize || 4}` : ''} · ${p.pages || 1} page${(p.pages || 1) === 1 ? '' : 's'}${p.duplex ? ', double-sided' : ''} · about ${prSheets(p, c)} sheet${prSheets(p, c) === 1 ? '' : 's'}</span>`;
+const PR_IC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 8V3.5h10V8"/><rect x="3.5" y="8" width="17" height="8.5" rx="2"/><path d="M7 13.5h10v7H7z"/><path d="M9.5 16.5h5M9.5 18.5h3"/><circle cx="17.2" cy="10.8" r=".9" fill="currentColor"/></svg>';
+const PR_CUT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="6.5" r="2.6"/><circle cx="6" cy="17.5" r="2.6"/><path d="M8.2 8 20 17M8.2 16 20 7"/></svg>';
+const prButtons = p => `<a class="btn pr-go" href="${esc(p.file)}" target="_blank" rel="noopener">${PR_IC}Open &amp; print</a><a class="btn-quiet" href="${esc(p.file)}" download>${icon('download')}Download PDF</a>`;
+function printCards(a) {
+  if (!PR || !state.teacher) return '';
+  const list = PR.filter(p => p.lesson === lesson.id && (p.activity === a.id || (p.also || []).includes(a.id)));   // also: more activities that use the same sheet if (!list.length) return '';
+  return list.map(p => { const c = prCopies(p), ready = !!prGet()['r-' + p.id];
+    return `<details class="pr-card${ready ? ' is-ready' : ''}" data-pr-id="${esc(p.id)}"${prOpenAttr(p.id)} aria-label="Photocopiable for this activity (teacher only)">${prSummary(p, c, ready, true)}<div class="pr-open">
+    <a class="pr-thumb" href="${esc(p.file)}" target="_blank" rel="noopener" aria-label="Open the PDF"><img src="${esc(p.thumb)}" alt="" width="105" height="148" loading="lazy">${p.pages > 1 ? `<span>${p.pages} pages</span>` : ''}</a>
+    <div class="pr-body">
+      <div class="pr-label">${PR_IC}Photocopiable<span>Teacher only · students don’t see this</span></div>
+      <h3>${esc(p.title)}</h3><p class="pr-use">${esc(p.use)}</p>
+      <p class="pr-copies">${PR_IC}${prHow(p, c)} <a href="#/print" class="pr-size">class of ${prSize()} · change</a></p>
+      ${p.prep?.length ? `<ul class="pr-prep">${p.prep.map(x => `<li>${/cut/i.test(x) ? PR_CUT : icon('check')}<span>${x}</span></li>`).join('')}</ul>` : ''}
+      <div class="pr-actions">${prButtons(p)}<label class="pr-ready"><input type="checkbox" data-pr-ready="${esc(p.id)}"${ready ? ' checked' : ''}><span>Printed and ready</span></label></div>
+      <p class="pr-noprint">${icon('bulb')}<span><b>No printer today?</b> ${p.noPrinter}</span></p>
+    </div></div></details>`; }).join('');
+}
+function printPage() {
+  if (!isTeacher() && !state.teacher) return `<div class="pr-page"><section class="pr-locked">${PR_IC}<h1>Photocopiables</h1><p>This page is for teachers. Sign in with a teacher account to see the printable class activities.</p><a class="btn" href="#/">Back to the course map</a></section></div>`;
+  const m = prGet(), n = prSize(), weeks = [...new Set(PR.map(p => p.week))].sort((x, y) => x - y);
+  const wk = weeks.includes(Number(m.week)) ? Number(m.week) : weeks[0];
+  const items = PR.filter(p => p.week === wk), dayIds = [...new Set(items.map(p => p.lesson))];
+  const ready = items.filter(p => m['r-' + p.id]).length, sheets = items.reduce((t, p) => t + prSheets(p, prCopies(p, n)), 0);
+  const dayOf = id => days.find(d => d.id === id), packs = course.printPacks || {};
+  return `<div class="pr-page">
+  <header class="pr-top">
+    <div><span class="eyebrow">${esc(course.code)} · Teacher only</span><h1>Photocopiables</h1>
+      <p>Paper versions of class activities — mingles, card sorts, role cards and posters — so students get up and work together away from their laptops. Print them before class. Each one is also on the activity page in Teacher view.</p></div>
+    <label class="pr-class">How many students in your class?<span><button type="button" data-pr-size="-1" aria-label="One fewer">−</button><input type="number" min="1" max="99" value="${n}" data-pr-size-input aria-label="Class size"><button type="button" data-pr-size="1" aria-label="One more">+</button></span><small>Copies below are worked out for this number.</small></label>
+  </header>
+  <ol class="pr-how">
+    <li><i>1</i><b>Plan</b><span>Look at tomorrow’s day. Each card says how many copies you need and how to prepare them.</span></li>
+    <li><i>2</i><b>Print</b><span>Open the PDF and print — or print the whole day’s pack once and photocopy it.</span></li>
+    <li><i>3</i><b>Tick it</b><span>Tick “Printed and ready” so you can see at a glance what is still to do.</span></li>
+    <li class="is-plan-b"><i>!</i><b>No printer?</b><span>Every activity also works on screen. Each card says what to do instead.</span></li>
+  </ol>
+  <nav class="pr-weeks" aria-label="Weeks">${weeks.map(w => `<button type="button" data-pr-week="${w}" class="${w === wk ? 'is-on' : ''}" aria-pressed="${w === wk}">Week ${w}<small>${PR.filter(p => p.week === w).length} photocopiable${PR.filter(p => p.week === w).length === 1 ? '' : 's'}</small></button>`).join('')}
+    <span class="pr-sum">${ready} of ${items.length} ready · about ${sheets} sheets of paper for ${n} students</span></nav>
+  ${dayIds.map(id => { const d = dayOf(id), list = items.filter(p => p.lesson === id);
+    return `<section class="pr-day"><header><span class="pr-day-n">Day ${d ? d.day : ''}</span><div><h2>${esc(d ? d.title : id)}</h2><small>${list.length} photocopiable${list.length === 1 ? '' : 's'}</small></div>
+      ${packs[id] ? `<a class="btn-quiet pr-pack" href="${esc(packs[id])}" target="_blank" rel="noopener">${PR_IC}Day pack · one of each</a>` : ''}</header>
+      <div class="pr-grid">${list.map((p, i) => { const c = prCopies(p, n), on = !!m['r-' + p.id];
+        return `<details class="pr-item${on ? ' is-ready' : ''}" style="--i:${i}" data-pr-id="${esc(p.id)}"${prOpenAttr(p.id)}>${prSummary(p, c, on, false)}<div class="pr-open">
+        <a class="pr-thumb" href="${esc(p.file)}" target="_blank" rel="noopener" aria-label="Open ${esc(p.title)}"><img src="${esc(p.thumb)}" alt="" width="140" height="198" loading="lazy">${p.pages > 1 ? `<span>${p.pages} pages</span>` : ''}</a>
+        <div class="pr-info"><div class="pr-chips"><span class="pr-code">${esc(p.code || '')}</span><span>${esc(p.kind)}</span>${p.minutes ? `<span>${icon('clock')}${p.minutes} min</span>` : ''}</div>
+          <h3>${esc(p.title)}</h3><p class="pr-use">${esc(p.use)}</p>
+          <p class="pr-copies">${PR_IC}${prHow(p, c)}</p>
+          ${p.prep?.length ? `<ul class="pr-prep">${p.prep.map(x => `<li>${/cut/i.test(x) ? PR_CUT : icon('check')}<span>${x}</span></li>`).join('')}</ul>` : ''}
+          <div class="pr-actions">${prButtons(p)}<a class="pr-link" href="#/${esc(p.lesson)}/${esc(p.section)}">Go to the activity ${icon('arrow')}</a></div>
+          <label class="pr-ready"><input type="checkbox" data-pr-ready="${esc(p.id)}"${on ? ' checked' : ''}><span>Printed and ready</span></label>
+          <p class="pr-noprint">${icon('bulb')}<span><b>No printer?</b> ${p.noPrinter}</span></p></div></div></details>`; }).join('')}</div></section>`; }).join('')}
+  </div>`;
+}
+if (PR) {
+  document.addEventListener('toggle', e => { const d = e.target; if (d?.matches?.('details[data-pr-id]')) { if (d.open) PR_OPEN.add(d.dataset.prId); else PR_OPEN.delete(d.dataset.prId); } }, true);
+  document.addEventListener('change', e => {
+    const r = e.target.closest?.('[data-pr-ready]'); if (r) { const m = prGet(); if (r.checked) m['r-' + r.dataset.prReady] = Date.now(); else delete m['r-' + r.dataset.prReady]; prSet(m); rerender(); return; }
+    const s = e.target.closest?.('[data-pr-size-input]'); if (s) { const m = prGet(), v = Math.round(Number(s.value)); if (v > 0 && v < 100) { m.size = v; prSet(m); rerender(); } }
+  });
+  document.addEventListener('click', e => {
+    const b = e.target.closest?.('[data-pr-size]'); if (b) { const m = prGet(); m.size = Math.min(99, Math.max(1, prSize() + Number(b.dataset.prSize))); prSet(m); rerender(); return; }
+    const w = e.target.closest?.('[data-pr-week]'); if (w) { const m = prGet(); m.week = Number(w.dataset.prWeek); prSet(m); rerender(); }
+  });
+}
+/* ───────── DEC10 Teacher's playbook (Teacher view only) ─────────
+   Optional ideas for running a day in a more active, creative way. Data: window.DEC10_PLAYBOOK[lessonId], loaded with the
+   day's scripts (dec10/lessons/weekN/playbook.js):
+     moves:  [{ n, section, activity, title, kind, minutes, why, setup: [..], steps: [..], say: [..], materials: [printable ids],
+                planB, stretch? }]  — about four stand-up moments spread across the four hours
+     stages: { sectionId: { tips: [..], creative?: '…', watch?: [..] } }  — a teacher's guide for each stage
+   Shown only in Teacher view, always as folds (closed until opened). Nothing here changes the lesson: if the teacher
+   skips a moment, the activity on screen is complete as it is. (Like everything on this public site, the file itself is
+   not secret — it is just never shown to students.) */
+const PB = () => window.DEC10_PLAYBOOK?.[lesson.id] || null;
+const PB_WALK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="13" cy="4.2" r="2"/><path d="m9.5 21 2.2-6 2.6 2.3V21M7.2 11.5 9.8 8l3.3.6 2.2 3 2.7 1"/><path d="m11.7 15-1.9-7"/></svg>';
+const PB_BOOK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5C6.8 4.5 9.6 4.8 12 6.5c2.4-1.7 5.2-2 8-1v13c-2.8-1-5.6-.7-8 1-2.4-1.7-5.2-2-8-1z"/><path d="M12 6.5v13"/><path d="m15 9 1.2 1.2L18.5 8"/></svg>';
+/* minutes from the start of the day to the start of an activity (day order) */
+function pbStartMin(actId) { let m = 0; for (const s of lesson.sections) for (const a of s.activities) { if (a.id === actId) return m; m += a.minutes || 0; } return null; }
+const pbClock = m => m == null ? '' : `${Math.floor(m / 60)}:${String(m % 60).padStart(2, '0')}`;
+const pbMove = (pb, a) => (pb?.moves || []).filter(m => m.activity === a.id && lesson.sections.some(s => s.id === m.section && s.activities.includes(a)));
+const pbPrintLinks = ids => (ids || []).map(id => (PR || []).find(p => p.id === id)).filter(Boolean)
+  .map(p => `<a class="pb-mat" href="${esc(p.file)}" target="_blank" rel="noopener">${PR_IC}<span><b>${esc(p.title)}</b><small>${esc(p.kind)} · ${prCopies(p)} cop${prCopies(p) === 1 ? 'y' : 'ies'}</small></span></a>`).join('');
+function moveCard(a) {
+  if (!state.teacher) return ''; const pb = PB(); const list = pbMove(pb, a); if (!list.length) return '';
+  const total = pb.moves.length;
+  return list.map(m => `<details class="pb-move">
+    <summary><span class="pb-ic">${PB_WALK}</span><span class="pb-sum"><small>Teacher’s playbook · Stand-up moment ${m.n} of ${total} · optional</small><b>${esc(m.title)}</b>
+      <span class="pb-chips"><i>${esc(m.kind)}</i><i>${icon('clock')}${m.minutes} min</i>${pbStartMin(a.id) != null ? `<i>about ${pbClock(pbStartMin(a.id))} into the day</i>` : ''}</span></span><span class="pb-chev" aria-hidden="true"></span></summary>
+    <div class="pb-body">
+      ${m.why ? `<p class="pb-why">${m.why}</p>` : ''}
+      <div class="pb-cols">
+        ${m.setup?.length ? `<section><h4>Before class</h4><ul>${m.setup.map(x => `<li>${x}</li>`).join('')}</ul></section>` : ''}
+        <section class="pb-steps"><h4>Run it</h4><ol>${(m.steps || []).map(x => `<li>${x}</li>`).join('')}</ol></section>
+      </div>
+      ${m.say?.length ? `<section class="pb-say"><h4>Say it · language to model</h4><ul>${m.say.map(x => `<li>${x}</li>`).join('')}</ul></section>` : ''}
+      ${m.materials?.length ? `<section class="pb-mats"><h4>Materials (Photocopiables)</h4><div>${pbPrintLinks(m.materials)}</div></section>` : ''}
+      ${m.stretch ? `<p class="pb-stretch"><b>Want more?</b> ${m.stretch}</p>` : ''}
+      <p class="pb-planb">${icon('bulb')}<span><b>Prefer not to today?</b> ${m.planB || 'Skip it — the activity on screen is complete as it is.'}</span></p>
+    </div></details>`).join('');
+}
+function stageGuide(s) {
+  if (!state.teacher) return ''; const g = PB()?.stages?.[s.id]; if (!g) return '';
+  return `<details class="pb-guide">
+    <summary><span class="pb-ic">${PB_BOOK}</span><span class="pb-sum"><small>Teacher’s playbook · optional</small><b>Teacher’s guide to ${esc(s.code || code(s))} ${esc(s.title)}</b></span><span class="pb-chev" aria-hidden="true"></span></summary>
+    <div class="pb-body">
+      ${g.tips?.length ? `<section><h4>Make it work</h4><ul>${g.tips.map(x => `<li>${x}</li>`).join('')}</ul></section>` : ''}
+      ${g.creative ? `<section class="pb-creative"><h4>A more creative way</h4><p>${g.creative}</p></section>` : ''}
+      ${g.watch?.length ? `<section class="pb-watch"><h4>Watch out for</h4><ul>${g.watch.map(x => `<li>${x}</li>`).join('')}</ul></section>` : ''}
+    </div></details>`;
+}
+function dayPlaybook() {
+  if (!state.teacher) return ''; const pb = PB(); if (!pb?.moves?.length) return '';
+  const total = lesson.sections.reduce((t, s) => t + s.minutes, 0) || 240;
+  const ms = pb.moves.map(m => ({ m, s: lesson.sections.find(x => x.id === m.section), at: pbStartMin(m.activity) })).filter(x => x.s);
+  return `<section class="pb-day" aria-label="Teacher’s playbook for today (teacher only)">
+    <header><span class="pb-ic">${PB_WALK}</span><div><small>Teacher’s playbook · teacher only · optional</small><h2>Today’s ${ms.length} stand-up moments</h2>
+      <p>Get everyone off their laptops about once an hour. Open a moment for the set-up, steps and language. Skip any of them — every activity also works on screen.</p></div></header>
+    <div class="pb-track" aria-hidden="true">${lesson.sections.map(s => `<span style="${tone(s)};flex:${s.minutes}"><b>${esc(s.code || code(s))}</b></span>`).join('')}
+      ${ms.map(x => `<i style="left:${Math.min(98, Math.max(2, 100 * (x.at ?? 0) / total))}%">${x.m.n}</i>`).join('')}</div>
+    <ol class="pb-list">${ms.map(x => `<li><a href="${L(x.s.id)}" data-pb-go="${esc(x.m.activity)}" data-pb-stage="${esc(x.s.id)}"><span class="pb-n">${x.m.n}</span>
+      <span><b>${esc(x.m.title)}</b><small>${esc(x.s.code || code(x.s))} · ${esc(x.m.kind)} · ${x.m.minutes} min${x.at != null ? ` · about ${pbClock(x.at)} into the day` : ''}</small></span>${icon('arrow')}</a></li>`).join('')}</ol>
+  </section>`;
+}
+/* open the stage on the right activity when a moment is clicked in the day plan */
+document.addEventListener('click', e => { const g = e.target.closest?.('[data-pb-go]'); if (!g) return;
+  state.active[g.dataset.pbStage] = g.dataset.pbGo; save(false); });
+function downloadsPage() {
+  const pages = DL.reduce((n, d) => n + (d.pages || 0), 0), got = dlDone();
+  return `<div class="dlx-page">
+  <header class="dlx-top">
+    <div class="dlx-top-copy"><span class="eyebrow">${esc(course.code)} · Downloads</span><h1>Downloads</h1>
+      <p>Forms you download, fill in on your laptop and keep or share. You also find them in the lessons where you need them.</p>
+      <ul class="dlx-stats" aria-label="Downloads"><li><b>${DL.length}</b><span>forms</span></li><li><b>${pages}</b><span>pages</span></li><li class="is-pdf"><i>PDF</i><span>fill in and save</span></li></ul></div>
+    <img class="dlx-top-art" src="assets/ui/hero-v2.svg" alt="" width="540" height="310">
+  </header>
+  <div class="dlx-list">${DL.map((d, n) => { const [c, bg] = DLX_TONE[d.tone] || DLX_TONE.blue, th = d.thumbs || [];
+    return `<article class="dlx-item tone-${esc(d.tone || 'blue')}" id="dl-${esc(d.id)}" style="--dc:${c};--dbg:${bg};--i:${n}">
+    <div class="dlx-desk${th.length === 1 ? ' is-one' : ''}">
+      ${th.map((t, i) => `<a class="dlx-thumb" href="${esc(d.file)}" target="_blank" rel="noopener" aria-label="Open page ${i + 1} of the ${esc(d.title)}" style="--k:${i};--n:${th.length}">${i === 0 ? '<svg class="dlx-clip" viewBox="0 0 20 52" aria-hidden="true"><path d="M6 46V10a6 6 0 0 1 12 0v32a9 9 0 0 1-18 0V14" fill="none" stroke="#8a97a2" stroke-width="2.4" stroke-linecap="round"/></svg>' : ''}<img src="${esc(t)}" alt="" loading="lazy" width="210" height="297"><span aria-hidden="true">Page ${i + 1}</span></a>`).join('')}
+      <svg class="dlx-pen" viewBox="0 0 120 20" aria-hidden="true"><rect x="16" y="4" width="96" height="12" rx="6" fill="${c}"/><rect x="16" y="4" width="96" height="4" rx="2" fill="#fff" opacity=".3"/><rect x="88" y="3" width="8" height="14" rx="2" fill="#e3a843"/><path d="M16 4 2 10l14 6z" fill="#e8d9bd"/><path d="M6 8.3 2 10l4 1.7z" fill="#14293a"/></svg>
+      <span class="dlx-file-badge"><b>PDF</b>${d.pages} page${d.pages === 1 ? '' : 's'} · ${esc(d.size)}</span>
+    </div>
+    <div class="dlx-info">
+      <div class="dlx-head"><span class="dlx-ic">${d.id === 'ip-questions' ? DLX_IC.ask : DLX_IC.form}</span><div><span class="dlx-kind">${esc(d.kind)}</span>${dlGot(got[d.id])}<h2>${esc(d.title)}</h2><p class="dlx-sub">${esc(d.sub)}</p></div></div>
+      <p class="dlx-what">${esc(d.what)}</p>
+      <div class="dl-actions">${dlButtons(d)}<a class="dlx-chat" href="#/chats" title="Fill it in, then send the filled PDF to classmates in Chats">${DLX_IC.send}Send a filled copy in Chats</a></div>
+      <div class="dlx-cols">
+        <section class="dlx-when"><h3>${icon('clock')}When you use it</h3><ul>${d.when.map(w => `<li>${esc(w)}</li>`).join('')}</ul></section>
+        <section class="dlx-how"><h3>${icon('pen')}${esc(d.howTitle || 'How to fill it in')}</h3><ol>${d.how.map((h, i) => `<li><i>${i + 1}</i><span>${h}</span></li>`).join('')}</ol></section>
+      </div>
+    </div>
+  </article>`; }).join('')}</div></div>`;
+}
+/* ───────── Language Lab page (#/lab): every strand and its lessons, with progress ───────── */
+const LAB_IC = {
+  listening: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 14v-2a8 8 0 0 1 16 0v2"/><rect x="3.5" y="13.5" width="4" height="6.5" rx="1.6"/><rect x="16.5" y="13.5" width="4" height="6.5" rx="1.6"/></svg>',
+  reading: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 5.5c3-1 6-.6 8.5 1.3 2.5-1.9 5.5-2.3 8.5-1.3v13c-3-1-6-.6-8.5 1.3-2.5-1.9-5.5-2.3-8.5-1.3z"/><path d="M12 6.8v13"/></svg>',
+  writing: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l4-1 11-11-3-3L5 16z"/><path d="M14 6l3 3"/></svg>',
+  speaking: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5h12v8.5H9.5L6 17v-3H4z"/><path d="M16 9h4v7h-1.5v3L15 16h-3.5"/></svg>',
+  grammar: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 18 8.5 6 13 18M5.6 14h5.8"/><path d="M15.5 11.2c.6-.8 1.5-1.2 2.5-1.2 1.6 0 2.5.9 2.5 2.4V18m0-3.6c-3 .1-5 .6-5 2.2 0 1 .8 1.6 1.9 1.6 1.6 0 3.1-1.2 3.1-3.3"/></svg>',
+  quote: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 11.5c0-3 1.6-5 4.5-5.8M4.5 11.5h3.8v5.8H4.5zM13.5 11.5c0-3 1.6-5 4.5-5.8M13.5 11.5h3.8v5.8h-3.8z"/></svg>',
+  words: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="7" width="12" height="13" rx="2.2"/><path d="M8 4h10.3a2.2 2.2 0 0 1 2.2 2.2V16.5"/><path d="M7 12h5M7 15.5h3.5"/></svg>'
+};
+function labPage() {
+  let open = {}; try { open = JSON.parse(localStorage.getItem('ielts-lab-open') || '{}'); } catch (e) { /* storage blocked */ }
+  const C = 2 * Math.PI * 15, arc = p => `<svg class="lab-ring" viewBox="0 0 36 36" aria-hidden="true"><circle cx="18" cy="18" r="15"/><circle cx="18" cy="18" r="15" style="stroke-dasharray:${C.toFixed(1)};stroke-dashoffset:${(C * (1 - p)).toFixed(1)}"/></svg>`;
+  const prog = l => { const ready = l.status === 'ready', [a, b] = ready ? dayProgress(l) : [0, 0]; return { ready, a, b, done: !!b && a >= b }; };
+  const row = (l, i) => { const { ready, a, b, done } = prog(l);
+    const inner = `<span class="lab-row-n">${arc(b ? a / b : 0)}<b>${done ? icon('check') : i + 1}</b></span>
+      <span class="lab-row-t"><b>${esc(l.title)}</b><small>${esc(l.sub || '')}</small></span>
+      <span class="lab-row-chips"><span class="lab-chip">${icon('clock')}${l.minutes || 45} min</span>${l.level ? `<span class="lab-chip is-lv">${esc(l.level)}</span>` : ''}</span>
+      <span class="lab-row-st${done ? ' is-done' : a ? ' is-on' : ''}">${!ready ? 'Soon' : done ? `${icon('check')}Done` : a ? `Continue <small>${a}/${b}</small>` : 'Start'}${ready && !done ? icon('arrow') : ''}</span>`;
+    return `<li style="--i:${i}">${ready ? `<a class="lab-row" href="#/${l.id}">${inner}</a>` : `<div class="lab-row is-soon">${inner}</div>`}</li>`; };
+  const all = LAB.strands.flatMap(st => st.lessons.filter(l => l.status === 'ready')), fin = all.filter(l => prog(l).done).length, started = all.filter(l => { const x = prog(l); return x.a && !x.done; }).length;
+  const soonArt = `<svg class="lab-soon-art" viewBox="0 0 120 80" aria-hidden="true"><rect x="8" y="14" width="56" height="40" rx="7" transform="rotate(-8 36 34)" fill="#fff" stroke="currentColor" stroke-opacity=".35"/><rect x="40" y="22" width="56" height="40" rx="7" transform="rotate(5 68 42)" fill="#fff" stroke="currentColor" stroke-opacity=".5"/><text x="68" y="46" text-anchor="middle" transform="rotate(5 68 42)" font-family="Georgia, serif" font-size="13" font-style="italic" fill="currentColor">sustain</text><path d="M20 30h24M20 38h16" transform="rotate(-8 36 34)" stroke="currentColor" stroke-opacity=".3" stroke-width="3" stroke-linecap="round"/><circle cx="104" cy="16" r="3" fill="currentColor" opacity=".5"/><circle cx="12" cy="66" r="2" fill="currentColor" opacity=".4"/></svg>`;
+  return `<div class="lab-page">
+    <header class="lab-top">
+      <div class="lab-top-copy"><span class="eyebrow">${esc(course.code)} · Self-study</span><h1>${esc(LAB.title)}</h1><p>${esc(LAB.intro)}</p>
+        <ul class="lab-stats" aria-label="Your ${LABT}">
+          <li><b>${all.length}</b><span>lessons ready</span></li>
+          <li><b>${started}</b><span>in progress</span></li>
+          <li class="is-done"><b>${fin}</b><span>finished</span></li>
+        </ul></div>
+      <img class="lab-top-art" src="assets/ui/lab/lab-bench.svg" alt="" width="520" height="300">
+    </header>
+    <div class="lab-list">${LAB.strands.map((st, k) => { const [c, bg] = TONES[st.tone] || ['#3d505e', '#f2f4f5'], ready = st.lessons.filter(l => l.status === 'ready');
+      const done = ready.filter(l => prog(l).done).length, p = ready.length ? done / ready.length : 0;
+      return `<details class="lab-acc${ready.length ? '' : ' is-soon'}" data-lab-acc="${st.id}" style="--lc:${c};--lbg:${bg}"${open[st.id] ? ' open' : ''}>
+        <summary><span class="lab-ic">${LAB_IC[st.icon] || LAB_IC.words}<i class="lab-ic-n">${k + 1}</i></span>
+          <span class="lab-acc-t"><b>${esc(st.title)}</b><small>${esc(st.blurb || '')}</small></span>
+          ${ready.length ? `<span class="lab-acc-p" title="${done} of ${ready.length} finished">${arc(p)}<b>${done}<small>/${ready.length}</small></b></span>` : ''}
+          <span class="lab-acc-n">${ready.length ? `${ready.length} lesson${ready.length === 1 ? '' : 's'}` : 'Coming soon'}</span><i class="lg-fold-chev" aria-hidden="true"></i></summary>
+        ${st.lessons.length ? `<ol class="lab-rows">${st.lessons.map(row).join('')}</ol>` : `<div class="lab-soon">${soonArt}<p><b>On the way</b>${esc(st.soon || 'New lessons are on the way.')}</p></div>`}
+      </details>`; }).join('')}</div>
+  </div>`;
+}
+document.addEventListener('toggle', e => { const st = e.target.dataset?.labAcc; if (!st) return;   // the Lab page remembers which topics are open
+  try { const o = JSON.parse(localStorage.getItem('ielts-lab-open') || '{}'); o[st] = e.target.open; localStorage.setItem('ielts-lab-open', JSON.stringify(o)); } catch (e2) { /* ignore */ } }, true);
+/* Progress ring around a day number. */
+function ring(p, n, done) {
+  const c = 2 * Math.PI * 16;
+  return `<span class="nav-ring${done ? ' is-done' : ''}" aria-hidden="true"><svg viewBox="0 0 38 38"><circle cx="19" cy="19" r="16"/><circle cx="19" cy="19" r="16" style="stroke-dasharray:${c.toFixed(1)};stroke-dashoffset:${(c * (1 - p)).toFixed(1)}"/></svg>${done ? icon('check') : `<b>${n}</b>`}</span>`;
+}
+function dayProgress(d) {
+  if (d.id === lesson.id) return [coreActivities.filter(a => state.done[a.id]).length, coreActivities.length];
+  const x = summaries()[d.id] || {}; return [x.done || 0, x.total || 0];
+}
+/* What slides open under a day: its start page, its stages (with progress for the open lesson),
+   and — for the open lesson — Readings, Extra and Notebook. */
+function dayContents(d, route) {
+  const here = d.id === lesson.id, cur = r => here && route === r ? ' active" aria-current="page' : '';
+  let i = 0; const stagger = () => ` style="--i:${i++}"`;
+  const start = `<li${stagger()}><a href="${here ? L('overview') : '#/' + d.id}" class="nav-part nav-start${cur('overview')}"><span class="nav-pnum">${icon('map')}</span><span class="nav-ptext">${here ? 'Overview' : 'Open Day ' + d.day}<small>${here ? 'Start of the day' : 'Start of the day'}</small></span></a></li>`;
+  const stages = here
+    ? lesson.sections.map(s => { const dn = s.activities.filter(a => state.done[a.id]).length, all = dn === s.activities.length;
+        return `<li${stagger()}><a href="${L(s.id)}" class="nav-part is-stage${all ? ' complete' : ''}${cur(s.id)}" style="${tone(s)}"><span class="nav-pnum">${all ? icon('check') : esc(navCode(code(s)))}</span><span class="nav-ptext"><span class="nav-pname" title="${esc(s.title)}">${esc(s.title)}</span><small>${s.minutes} min<i class="nav-bar" style="--p:${dn / s.activities.length}" aria-label="${dn} of ${s.activities.length} done"></i></small></span></a></li>`; }).join('')
+    : (d.parts || []).map((pt, k) => { const p = dayPart(d, k); return `<li${stagger()}><a href="#/${d.id}${d.stages?.[k] ? '/' + d.stages[k] : ''}" class="nav-part${p.tone ? ' is-stage' : ''}"${p.tone ? ` style="${tone(p)}"` : ''}><span class="nav-pnum">${esc(navCode(p.code))}</span><span class="nav-ptext"><span class="nav-pname" title="${esc(p.name)}">${esc(p.name)}</span></span></a></li>`; }).join('');
+  const tools = here && lesson.extras.length ? `<li${stagger()}><a href="${L('extra')}" class="nav-part nav-extra${cur('extra')}"><span class="nav-pnum">${icon('list')}</span><span class="nav-ptext"><span class="nav-pname">Extra practice</span><small>${lesson.extras.length} optional ${lesson.extras.length === 1 ? 'activity' : 'activities'}</small></span></a></li>` : '';   // Readings and Notebook are in the main menu
+  return `<ol class="nav-parts">${here ? '' : start}${stages}${tools}</ol>`;
+}
+document.addEventListener('pointerdown', e => { const m = $('#side-menu'); if (m && !m.hidden && !e.target.closest('#side-menu, #side-settings')) { m.hidden = true; $('#side-settings')?.setAttribute('aria-expanded', 'false'); } });
+document.addEventListener('keydown', e => { const m = $('#side-menu'); if (e.key === 'Escape' && m && !m.hidden) { m.hidden = true; $('#side-settings')?.setAttribute('aria-expanded', 'false'); $('#side-settings')?.focus(); } });
+const navDayOpen = {};   // which days are slid open in this visit (the open lesson starts open)
+const foldAttrs = open => open ? '' : ' inert';
+/* sidebar footer: a small ring for the whole lesson */
+function paintSideRing(done, total) {
+  const el = $('#side-ring'); if (!el) return; const c = 2 * Math.PI * 9, p = total ? done / total : 0;
+  el.innerHTML = `<svg viewBox="0 0 22 22"><circle cx="11" cy="11" r="9"/><circle cx="11" cy="11" r="9" style="stroke-dasharray:${(c * p).toFixed(2)} ${c.toFixed(2)}"/></svg>`;
+  el.classList.toggle('is-done', total > 0 && done === total);
+}
+/* "This lesson": the open day's stages, always in view (one line each) */
+function paintLessonNav(route) {
+  const box = $('#nav-lesson'); if (!box) return;
+  const cur = r => route === r ? ' active" aria-current="page' : '';
+  if (labHere) { const sec = lesson.sections[0], on = route === sec.id ? state.active[sec.id] || sec.activities[0].id : null;   // a lab lesson: its four steps
+    box.innerHTML = `<p class="nav-label">This lesson <span>${esc(`${labHere.st.short} ${labHere.n}`)}</span></p>
+      <ol class="nav-stages">${sec.activities.map((a, i) => `<li><a href="${L(sec.id)}" data-go="${a.id}" class="nav-stage${state.done[a.id] ? ' complete' : ''}${a.id === on ? ' active" aria-current="step' : ''}" style="${tone(sec)};--p:${state.done[a.id] ? 1 : 0}"><span class="nav-scode">${state.done[a.id] ? icon('check') : i + 1}</span><span class="nav-sname">${esc(a.short)}</span></a></li>`).join('')}</ol>`;
+    return; }
+  box.innerHTML = `<p class="nav-label">This lesson <span>${esc(whereLong())}</span></p>
+    <ol class="nav-stages">${lesson.sections.map(s => { const dn = s.activities.filter(a => state.done[a.id]).length, n = s.activities.length, all = dn === n;
+      return `<li><a href="${L(s.id)}" class="nav-stage${all ? ' complete' : ''}${cur(s.id)}" style="${tone(s)};--p:${n ? dn / n : 0}" title="${esc(code(s))} · ${esc(s.title)}"><span class="nav-scode">${all ? icon('check') : esc(navCode(code(s)))}</span><span class="nav-sname">${esc(s.title)}</span><span class="nav-scount" aria-label="${dn} of ${n} done">${dn}/${n}</span></a></li>`; }).join('')}
+      <li><a href="${L('extra')}" class="nav-stage is-extra${cur('extra')}"><span class="nav-scode">${icon('list')}</span><span class="nav-sname">Extra practice</span></a></li></ol>`;
+}
+let navLessonWeek = null;
+function paintNav(route = navRoute) {
+  navRoute = route;
+  if (route !== 'home' && lesson.week !== navLessonWeek) { navLessonWeek = lesson.week; navWeekOpen = null; }   // a lesson in another week opens its own week
+  [['side-lesson', 'overview'], ['side-readings', 'sources'], ['side-board', 'board'], ['side-chats', 'chats'], ['side-shared', 'shared'], ['side-calendar', 'calendar'], ['side-assess', 'assessments'], ['side-studio', 'studio'], ['side-lab', 'lab'], ['side-downloads', 'downloads'], ['side-print', 'print'], ['side-pick', 'picker']].forEach(([id, r]) => { const el = $('#' + id); if (!el) return; el.classList.toggle('active', route === r); if (route === r) el.setAttribute('aria-current', 'page'); else el.removeAttribute('aria-current'); });
+  paintLessonNav(route);
+  $('#side-home').classList.toggle('active', route === 'home');
+  const ws = route === 'planner' || route === 'notebook';   // My workspace: planner + notebook
+  $('#side-planner')?.classList.toggle('active', ws);
+  if (ws) $('#side-planner')?.setAttribute('aria-current', 'page'); else $('#side-planner')?.removeAttribute('aria-current');
+  if (route === 'home') $('#side-home').setAttribute('aria-current', 'page'); else $('#side-home').removeAttribute('aria-current');
+  paintWeekbar(route);
+}
+/* ───────── the week menu bar on top of every page ─────────
+   One button per week (from the course map). Clicking (or hovering with a mouse) opens a panel under the bar:
+   the week's days on the left and, on the right, the parts of the day you point at, each linking to its stage. */
+const WB_TONES = ['#e9a23b', '#e0674b', '#2a8a7d', '#4a6fd0', '#8a5cb8', '#5f9356'];
+let wbOpen = null, wbDay = null, wbT = 0, wbHoverAt = 0;
+function paintWeekbar(route = navRoute) {
+  const bar = $('#weekbar'); if (!bar) return;
+  if (!bar.querySelector('#wb-panel')) bar.innerHTML = '<div class="wb-row" role="menubar" aria-label="Weeks"></div><div class="wb-panel" id="wb-panel" role="region" hidden></div>';
+  const cur = route === 'home' ? null : lesson.week;
+  bar.querySelector('.wb-row').innerHTML = `${course.map.map((m, i) => {
+      const w = course.weeks.find(x => x.n === m.n), n = w ? w.days.filter(d => d.status === 'ready').length : 0, wp = weekProgress(w);
+      return `<button type="button" class="wb-item${wp ? ' has-prog' : ''}${cur === m.n ? ' is-current' : ''}${wbOpen === m.n ? ' open' : ''}${n ? '' : ' is-soon'}" data-wb-week="${m.n}" aria-haspopup="true" aria-expanded="${wbOpen === m.n}" style="--wk:${WB_TONES[i % WB_TONES.length]}" title="Week ${m.n} · ${esc(m.label)}">
+        <span class="wb-num" style="--p:${wp.toFixed(3)}">${m.n}</span><span class="wb-tx">Week ${m.n}</span><span class="wb-chev" aria-hidden="true"></span></button>`; }).join('')}
+      ${route !== 'home' ? `<a class="wb-go" href="${L('overview')}" title="Back to ${esc(whereLong(', '))}: ${esc(lesson.title)}"><span class="wb-go-dot" aria-hidden="true"></span><span>${esc(labHere ? `${labHere.st.short} ${labHere.n}` : whereLong())}</span></a>` : ''}`;
+}
+/* ───────── tabs, carousels and table column widths ───────── */
+function lensTo(seg) { const on = seg.querySelector('[aria-selected="true"]'), lens = seg.querySelector('.lg-lens'); if (!on || !lens) return; lens.style.width = on.offsetWidth + 'px'; lens.style.transform = `translateX(${on.offsetLeft}px)`; }
+document.addEventListener('click', e => {
+  const t = e.target.closest?.('[data-lg-tab]');
+  if (t) { const seg = t.closest('.lg-seg'), box = seg.parentElement, tabs = [...seg.querySelectorAll('[role=tab]')], panels = [...box.querySelectorAll(':scope > .lg-tabpanel')];
+    tabs.forEach((x, i) => { const on = x === t; x.setAttribute('aria-selected', on); x.tabIndex = on ? 0 : -1; if (panels[i]) panels[i].hidden = !on; }); lensTo(seg); return; }
+  const c = e.target.closest?.('[data-car]');
+  if (c) { const tr = c.closest('[data-carousel]').querySelector('.lg-track'), step = (tr.firstElementChild?.offsetWidth || tr.clientWidth) + parseFloat(getComputedStyle(tr).columnGap || 16);
+    tr.scrollBy({ left: +c.dataset.car * step * Math.max(1, Math.floor(tr.clientWidth / step)), behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); }
+});
+document.addEventListener('keydown', e => { const t = e.target.closest?.('[data-lg-tab]'); if (!t || !['ArrowLeft', 'ArrowRight'].includes(e.key)) return; const all = [...t.parentElement.querySelectorAll('[data-lg-tab]')], n = all[(all.indexOf(t) + (e.key === 'ArrowRight' ? 1 : -1) + all.length) % all.length]; n.focus(); n.click(); e.preventDefault(); });
+document.addEventListener('scroll', e => { const tr = e.target; if (!tr.classList?.contains('lg-track')) return; const car = tr.closest('[data-carousel]'), kids = [...tr.children], dots = car.querySelectorAll('.lg-dots i');
+  const x = tr.scrollLeft, w = kids[0]?.offsetWidth || 1, idx = Math.round(x / (w + 16)); dots.forEach((d, i) => d.classList.toggle('on', i === Math.min(idx, kids.length - 1)));
+  car.querySelector('[data-car="-1"]').disabled = x < 4; car.querySelector('[data-car="1"]').disabled = x + tr.clientWidth >= tr.scrollWidth - 4; }, true);
+function paintLayout(root = document) {
+  root.querySelectorAll('.lg-seg').forEach(seg => { const l = seg.querySelector('.lg-lens'); l?.classList.add('no-anim'); lensTo(seg); requestAnimationFrame(() => l?.classList.remove('no-anim')); });
+  root.querySelectorAll('[data-carousel] .lg-track').forEach(tr => tr.dispatchEvent(new Event('scroll')));
+}
+/* drag any line between two columns (in the heading or lower down) to move width from one column to its neighbour;
+   the table keeps its size. Double-click the line to go back to equal columns. */
+const colEdge = e => {
+  const g = e.target.closest?.('[data-col-grip]'); if (g) return { table: g.closest('table'), i: +g.dataset.colGrip };
+  const cell = e.target.closest?.('.work-table[data-colw] th, .work-table[data-colw] td'); if (!cell) return null;
+  const r = cell.getBoundingClientRect(), table = cell.closest('table'), n = table.querySelectorAll('thead th').length, i = cell.cellIndex;
+  if (r.right - e.clientX < 7 && i < n - 1) return { table, i };
+  if (e.clientX - r.left < 7 && i > 0) return { table, i: i - 1 };
+  return null;
+};
+document.addEventListener('pointermove', e => {
+  if (document.body.classList.contains('col-dragging') || e.pointerType === 'touch') return;
+  const t = e.target.closest?.('.work-table[data-colw]'); if (!t) return;
+  t.classList.toggle('col-edge', !!colEdge(e));
+}, { passive: true });
+document.addEventListener('pointerdown', e => {
+  const hit = colEdge(e); if (!hit) return; e.preventDefault();
+  const { table, i } = hit, id = table.dataset.colw, ths = [...table.querySelectorAll('thead th')], total = table.offsetWidth;
+  let w = ths.map(th => th.offsetWidth / total * 100);
+  let cg = table.querySelector('colgroup'); if (!cg) { cg = document.createElement('colgroup'); cg.innerHTML = w.map(x => `<col style="width:${x}%">`).join(''); table.prepend(cg); table.classList.add('has-widths'); }
+  const cols = [...cg.children], x0 = e.clientX, a0 = w[i], b0 = w[i + 1]; document.body.classList.add('col-dragging'); table.classList.add('col-moving');
+  const move = ev => { const d = (ev.clientX - x0) / total * 100, a = Math.max(8, Math.min(a0 + b0 - 8, a0 + d)); w[i] = a; w[i + 1] = a0 + b0 - a; cols[i].style.width = w[i] + '%'; cols[i + 1].style.width = w[i + 1] + '%'; };
+  const up = () => { document.removeEventListener('pointermove', move); document.removeEventListener('pointerup', up); document.removeEventListener('pointercancel', up); document.body.classList.remove('col-dragging'); table.classList.remove('col-moving', 'col-edge'); setColW(id, w.map(x => +x.toFixed(2))); };
+  document.addEventListener('pointermove', move); document.addEventListener('pointerup', up); document.addEventListener('pointercancel', up);
+});
+document.addEventListener('dblclick', e => { const hit = colEdge(e); if (!hit) return; const { table } = hit; setColW(table.dataset.colw, null); table.querySelector('colgroup')?.remove(); table.classList.remove('has-widths'); });
+/* the soft highlight behind the chosen day glides to it; the little notch on the panel points at the open week */
+function glideDay(panel, instant) {
+  const hl = panel.querySelector('.wb-dhl'), b = panel.querySelector('.wb-day.sel'); if (!hl || !b) { if (hl) hl.style.opacity = '0'; return; }
+  const li = b.parentElement; if (instant) { hl.classList.add('no-anim'); requestAnimationFrame(() => hl.classList.remove('no-anim')); }
+  hl.style.opacity = '1'; hl.style.transform = `translateY(${li.offsetTop}px)`; hl.style.height = li.offsetHeight + 'px';
+}
+function notch(panel) {
+  const it = $(`[data-wb-week="${wbOpen}"]`); if (!it || panel.hidden) return;
+  const r = it.getBoundingClientRect(), p = panel.getBoundingClientRect(); panel.style.setProperty('--nx', Math.max(26, Math.min(p.width - 26, r.left - p.left + r.width / 2)) + 'px');
+}
+/* the panel keeps its node, so opening, switching weeks, switching days and closing each get their own motion */
+let wbCloseT = 0;
+function paintPanel(mode) {
+  const panel = $('#wb-panel'); if (!panel) return;
+  clearTimeout(wbCloseT); panel.classList.remove('out');
+  if (!wbOpen) { if (mode === 'close' && !panel.hidden && !matchMedia('(prefers-reduced-motion: reduce)').matches) { panel.classList.add('out'); wbCloseT = setTimeout(() => { panel.hidden = true; panel.innerHTML = ''; panel.classList.remove('out'); }, 190); } else { panel.hidden = true; panel.innerHTML = ''; } return; }
+  const it = $(`[data-wb-week="${wbOpen}"]`); if (it) { const r = it.getBoundingClientRect(), b = panel.parentElement.getBoundingClientRect(); panel.style.setProperty('--ox', Math.round(r.left - b.left + r.width / 2) + 'px'); }
+  if (mode === 'day') {   // only the parts column changes; the chosen day just moves its highlight
+    requestAnimationFrame(() => glideDay(panel));
+    const w = course.weeks.find(x => x.n === wbOpen), d = w?.days.find(x => x.id === wbDay), col = panel.querySelector('.wb-parts-col');
+    if (col && d) { col.innerHTML = dayParts(w, d, navRoute); col.classList.remove('swap'); void col.offsetWidth; col.classList.add('swap');
+      panel.querySelectorAll('.wb-day').forEach(b => { const on = b.dataset.wbDay === wbDay; b.classList.toggle('sel', on); b.setAttribute('aria-pressed', String(on)); }); return; }
+  }
+  const was = panel.dataset.week ? +panel.dataset.week : 0;
+  panel.innerHTML = `<div class="wb-sheet-bar"><b>Week ${wbOpen}</b><button type="button" class="wb-close" data-wb-close aria-label="Close the week menu">Close</button></div>` + weekPanel(wbOpen, navRoute); panel.dataset.week = wbOpen;   // .wb-sheet-bar shows on phones only (css/precision.css §17)
+  if (panel.hidden || mode === 'open') { panel.hidden = false; panel.classList.remove('in'); void panel.offsetWidth; panel.classList.add('in'); }
+  else { panel.classList.remove('in'); const g = panel.querySelector('.wb-grid'); g.style.setProperty('--dir', wbOpen > was ? '1' : '-1'); g.classList.add('swap'); }
+  glideDay(panel, true); notch(panel);
+}
+/* how far through a week's activities this student is (0–1), from the saved summaries */
+function weekProgress(w) { if (!w) return 0; let dn = 0, tot = 0; w.days.forEach(d => { if (d.status !== 'ready') return; const [a, b] = dayProgress(d); dn += a; tot += b; }); return tot ? dn / tot : 0; }
+/* a day's picture: the day's own hero drawing where the week has one, otherwise the stage drawing */
+const dayArt = (w, d) => w.image ? `${ROOT}assets/week${w.n}/hero-${d.id}.svg` : artSrc(d.art || 'reading');
+function weekPanel(n, route) {
+  const m = course.map.find(x => x.n === n) || { n, label: '', sub: '' }, w = course.weeks.find(x => x.n === n), i = course.map.indexOf(m);
+  const col = WB_TONES[(i < 0 ? 0 : i) % WB_TONES.length];
+  const started = w ? w.days.filter(d => dayProgress(d)[0]).length : 0, ready = w ? w.days.filter(d => d.status === 'ready') : [];
+  const intro = `<div class="wb-intro" style="--wk:${col}">
+    <figure class="wb-pic">${w?.image ? `<img src="${esc(w.image)}" alt="" width="300" height="200" loading="lazy">` : `<span class="wb-pic-num" aria-hidden="true">${n}</span>`}</figure>
+    <div class="wb-intro-tx"><p class="wb-eyebrow">Week ${n}</p><h2>${esc(w?.theme || m.label)}</h2><p class="wb-sum">${esc(w?.summary || m.sub || '')}</p>
+    ${w && w.days.length ? `<div class="wb-prog"><ol class="wb-route" aria-hidden="true">${w.days.map(d => { const [a, b] = dayProgress(d); return `<li class="${d.status !== 'ready' ? 'soon' : b && a === b ? 'done' : a ? 'some' : ''}${d.id === lesson.id && route !== 'home' ? ' here' : ''}" style="--p:${b ? (a / b).toFixed(3) : 0}"><i></i></li>`; }).join('')}</ol><small>${started ? `${started} of ${ready.length} lessons started` : `${ready.length} lessons`}</small></div>` : ''}</div></div>`;
+  if (!w || !w.days.length) return `<div class="wb-grid is-empty">${intro}<div class="wb-soon"><img src="${artSrc('reading')}" alt="" width="120" height="120"><b>Coming soon</b><p>The lessons for Week ${n} will appear here.</p></div></div>`;
+  let sel = w.days.find(d => d.id === wbDay) || w.days.find(d => d.id === lesson.id) || ready[0] || w.days[0]; wbDay = sel.id;
+  const days = `<ol class="wb-days"><li class="wb-dhl" aria-hidden="true"></li>${w.days.map(d => {
+    const [dn, tot] = dayProgress(d), p = tot ? dn / tot : 0, soon = d.status !== 'ready', here = d.id === lesson.id && route !== 'home';
+    const [dn2, tot2] = dayProgress(d);
+    return `<li class="wb-dli${tot2 && dn2 === tot2 ? ' is-done' : ''}"><button type="button" class="wb-day${d.id === sel.id ? ' sel' : ''}${soon ? ' is-soon' : ''}${here ? ' is-here' : ''}" data-wb-day="${d.id}" aria-pressed="${d.id === sel.id}">${ring(p, d.day, tot && p === 1)}
+      <span class="wb-dtx"><b>${esc(d.title)}</b><small>${here ? '<em>You are here</em>' : soon ? 'Coming soon' : `Day ${d.day}`}${!soon && dn ? ` · ${dn} of ${tot} done` : ''}</small></span></button></li>`; }).join('')}</ol>`;
+  return `<div class="wb-grid">${intro}<div class="wb-col"><p class="wb-h">Lessons</p>${days}</div><div class="wb-col wb-parts-col">${dayParts(w, sel, route)}</div></div>`;
+}
+function dayParts(w, d, route) {
+  const head = `<header class="wb-dhead"><img class="wb-dart" src="${esc(dayArt(w, d))}" data-fallback="${esc(artSrc(d.art || 'reading'))}" alt="" width="96" height="64" loading="lazy" onerror="if(this.dataset.fallback){this.src=this.dataset.fallback;delete this.dataset.fallback}"><div><p class="wb-h">Day ${d.day}</p><h3>${esc(d.title)}</h3></div></header>`;
+  if (d.status !== 'ready') return head + `<p class="wb-empty">This lesson is coming soon.</p>`;
+  const here = d.id === lesson.id, cur = r => here && route === r ? ' is-cur" aria-current="page' : '';
+  const open = `<li><a class="wb-part wb-open${cur('overview')}" href="${here ? L('overview') : '#/' + d.id}"><span class="wb-pcode">${icon('map')}</span><b>${here ? 'Overview' : 'Open the lesson'}</b></a></li>`;
+  const parts = here
+    ? lesson.sections.map(s => { const dn = s.activities.filter(a => state.done[a.id]).length, n = s.activities.length, all = dn === n;
+        return `<li><a class="wb-part${all ? ' complete' : ''}${cur(s.id)}" href="${L(s.id)}" style="${tone(s)}"><span class="wb-pcode">${all ? icon('check') : esc(navCode(code(s)))}</span><b>${esc(s.title)}</b>${dn && !all ? `<span class="wb-mini" title="${dn} of ${n} activities done"><i style="--p:${(dn / n).toFixed(3)}"></i></span>` : ''}</a></li>`; }).join('')
+      + (lesson.extras.length ? `<li><a class="wb-part wb-extra${cur('extra')}" href="${L('extra')}"><span class="wb-pcode">${icon('list')}</span><b>Extra practice</b><small>${lesson.extras.length}</small></a></li>` : '')
+    : (d.parts || []).map((pt, k) => { const p = dayPart(d, k); return `<li><a class="wb-part" href="#/${d.id}${d.stages?.[k] ? '/' + d.stages[k] : ''}"${p.tone ? ` style="${tone(p)}"` : ''}><span class="wb-pcode">${esc(p.code)}</span><b>${esc(p.name)}</b></a></li>`; }).join('');
+  return head + `<ol class="wb-parts">${open}${parts}</ol>`;
+}
+let wbSkip = 0;   // after closing, the week under the mouse must be left before it can hover-open again
+function wbSet(n) {
+  const was = wbOpen; wbOpen = n; if (!n) { wbDay = null; wbSkip = was; }
+  paintWeekbar(); paintPanel(!n ? 'close' : was ? 'week' : 'open'); document.body.classList.toggle('wb-is-open', !!n);
+}
+function wbPickDay(id) { if (id === wbDay) return; wbDay = id; paintPanel('day'); }
+document.addEventListener('click', e => {
+  const t = e.target.closest?.('[data-wb-week], [data-wb-day], .wb-panel a, #weekbar');
+  if (!t) { if (wbOpen) wbSet(null); return; }
+  /* phone: the sheet's Close button, and a tap on the dimmed page behind the sheet (the week bar's own ::after) */
+  if (wbOpen && (e.target.closest?.('[data-wb-close]') || e.target.id === 'weekbar')) { const n = wbOpen; wbSet(null); $(`[data-wb-week="${n}"]`)?.focus({ preventScroll: true }); return; }
+  if (t.dataset?.wbWeek) { const n = +t.dataset.wbWeek; if (wbOpen === n && Date.now() - wbHoverAt < 600) return; wbDay = null; wbSet(wbOpen === n ? null : n); $(`[data-wb-week="${n}"]`)?.focus(); return; }
+  if (t.dataset?.wbDay) { wbPickDay(t.dataset.wbDay); $(`[data-wb-day="${wbDay}"]`)?.focus(); return; }
+  if (t.matches('.wb-panel a, .wb-go')) wbSet(null);
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && wbOpen) { const n = wbOpen; wbSet(null); $(`[data-wb-week="${n}"]`)?.focus(); }
+  const it = e.target.closest?.('[data-wb-week]');
+  if (it && (e.key === 'ArrowRight' || e.key === 'ArrowLeft')) { const all = [...document.querySelectorAll('[data-wb-week]')], k = all.indexOf(it), nx = all[(k + (e.key === 'ArrowRight' ? 1 : -1) + all.length) % all.length]; nx.focus(); if (wbOpen) { wbDay = null; wbSet(+nx.dataset.wbWeek); nx.focus(); } e.preventDefault(); }
+  if (it && e.key === 'ArrowDown') { e.preventDefault(); if (wbOpen !== +it.dataset.wbWeek) wbSet(+it.dataset.wbWeek); setTimeout(() => $('#wb-panel button, #wb-panel a')?.focus(), 0); }
+});
+/* with a mouse, the menu opens when you rest on a week and closes when you leave the bar and the panel */
+document.addEventListener('pointerover', e => {
+  if (e.pointerType !== 'mouse') return;
+  const it = e.target.closest?.('[data-wb-week]'), inBar = e.target.closest?.('#weekbar'), day = e.target.closest?.('[data-wb-day]');
+  clearTimeout(wbT);
+  if (it) { const n = +it.dataset.wbWeek; if (n === wbSkip) return; wbSkip = 0; if (wbOpen !== n) wbT = setTimeout(() => { wbDay = null; wbSet(n); wbHoverAt = Date.now(); }, wbOpen ? 60 : 180); return; }
+  wbSkip = 0;
+  if (day && day.dataset.wbDay !== wbDay) { wbT = setTimeout(() => wbPickDay(day.dataset.wbDay), 90); return; }
+  if (!inBar && wbOpen) wbT = setTimeout(() => wbSet(null), 320);
+});
+window.addEventListener('hashchange', () => { if (wbOpen) { wbOpen = null; wbDay = null; document.body.classList.remove('wb-is-open'); paintPanel('close'); } });
+/* a stronger shadow under the header once the page has scrolled */
+addEventListener('scroll', () => document.body.classList.toggle('is-scrolled', scrollY > 8), { passive: true });
+/* Slide a fold open or closed (CSS animates the height). */
+function setFold(item, btn, open) {
+  item.classList.toggle('open', open); btn.setAttribute('aria-expanded', String(open));
+  const inner = item.querySelector(':scope > .fold > .fold-inner'); if (open) inner.removeAttribute('inert'); else inner.setAttribute('inert', '');
+}
+/* search */
+const plainCache = new Map();
+function plainText(a) {   // all the words inside an activity, without code, for search
+  if (!plainCache.has(a.id)) { const out = []; const walk = v => { if (typeof v === 'string') out.push(v); else if (Array.isArray(v)) v.forEach(walk); else if (v && typeof v === 'object' && v.type !== 'teacher') Object.entries(v).forEach(([k, x]) => { if (!/^(id|type|tone|icon|src|size|who|answer|answers|back|backTitle|why|art|alt|correct|solution)$/.test(k)) walk(x); }); };
+    walk(a.blocks || []); walk(a.goal || ''); plainCache.set(a.id, out.join(' ').replace(/<[^>]+>/g, '').replace(/\{\{\d+\}\}/g, '…').replace(/\s+/g, ' ')); }
+  return plainCache.get(a.id);
+}
+let searchCache = null;
+function searchIndex() {
+  if (searchCache) return searchCache;
+  const items = [];
+  for (const w of course.weeks) for (const d of w.days) {
+    const where = `Week ${w.n} · Day ${d.day}`, href = d.status === 'ready' ? '#/' + d.id : '';
+    items.push({ kind: 'Lesson', ic: 'map', title: d.title, sub: where + (href ? '' : ' · coming soon'), href, text: d.title });
+    if (d.id !== lesson.id) (d.parts || []).forEach(pt => items.push({ kind: 'Part', ic: 'list', title: pt, sub: where + ' · ' + d.title, href, text: pt }));
+  }
+  for (const st of LAB?.strands || []) st.lessons.forEach((l, i) => { const href = l.status === 'ready' ? '#/' + l.id : '';
+    items.push({ kind: 'Lesson', ic: 'book', title: l.title, sub: `${LABT} · ${st.short} ${i + 1}${href ? '' : ' · coming soon'}`, href, text: `${l.title} ${l.sub || ''} ${st.title} language lab` }); });
+  (DL || []).forEach(d => items.push({ kind: 'Download', ic: 'download', title: d.title, sub: 'Downloads · ' + d.kind, href: '#/downloads', text: `download pdf form ${d.title} ${d.sub} ${d.what}` }));
+  if (LAB) items.push({ kind: 'Page', ic: 'book', title: LABT, sub: (LAB?.strands || []).map(x => x.title).join(', '), href: '#/lab', text: 'language lab grammar apa referencing citation vocabulary self-study' });
+  lesson.sections.forEach(s => {
+    items.push({ kind: 'Stage', ic: 'flag', title: stageName(s), sub: `This lesson · Stage ${code(s)}`, href: L(s.id), text: stageName(s) + ' ' + (s.subtitle || '') });
+    s.activities.forEach(a => items.push({ kind: 'Activity', ic: 'pen', title: a.title, sub: `This lesson · ${s.title}`, href: L(s.id), go: a.id, text: a.title + ' ' + a.short, body: plainText(a) }));
+  });
+  [['sources', 'book', 'Readings and listening scripts (all weeks)'], ['extra', 'list', 'Extra activities'], ['notebook', 'model', 'My workspace · Notebook']].forEach(([id, ic, t]) => items.push({ kind: 'Page', ic, title: t, sub: 'This lesson', href: L(id), text: t }));
+  items.push({ kind: 'Page', ic: 'home', title: 'Course map', sub: 'All weeks', href: '#/', text: 'course map home all weeks' });
+  lesson.glossary.forEach(([w, d]) => items.push({ kind: 'Word meaning', ic: 'book', title: w, sub: d, gloss: w, text: w }));
+  return (searchCache = items);
+}
+const reEsc = w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+function searchResults(q) {
+  const words = q.toLowerCase().split(/\s+/).filter(Boolean), has = t => words.every(w => t.toLowerCase().includes(w));
+  const hits = searchIndex().map(it => ({ it, rank: has(it.title) ? 3 : has(it.text + ' ' + it.sub) ? 2 : it.body && has(it.body) ? 1 : 0 })).filter(h => h.rank)
+    .sort((x, y) => y.rank - x.rank).slice(0, 16);
+  const mark = t => { let h = esc(t); words.forEach(w => { h = h.replace(new RegExp('(' + reEsc(esc(w)) + ')', 'gi'), '<mark>$1</mark>'); }); return h; };
+  const snip = t => { const i = t.toLowerCase().indexOf(words[0]); const a = Math.max(0, i - 34); return (a ? '…' : '') + t.slice(a, i + 70).trim() + '…'; };
+  if (!hits.length) return `<p class="search-none">Nothing matches “${esc(q)}”. Try one word, for example <i>essay</i>, <i>listening</i> or <i>summary</i>.</p>`;
+  return `<ul class="search-list" aria-label="Search results">${hits.map(({ it, rank }, i) => {
+    const sub = rank === 1 ? `<small class="search-snip">${mark(snip(it.body))}</small><small>${esc(it.kind)} · ${esc(it.title)}</small>` : `<small>${esc(it.kind)} · ${esc(it.gloss ? it.sub.slice(0, 70) + (it.sub.length > 70 ? '…' : '') : it.sub)}</small>`;
+    const inner = `<span class="search-ic">${icon(it.ic)}</span><span class="search-text"><b>${mark(rank === 1 ? it.title : it.title)}</b>${sub}</span>`;
+    return `<li>${it.gloss ? `<button type="button" class="search-hit${i ? '' : ' first'}" data-gloss="${esc(it.gloss)}">${inner}</button>` : it.href ? `<a class="search-hit${i ? '' : ' first'}" href="${it.href}"${it.go ? ` data-go="${it.go}"` : ''}>${inner}</a>` : `<span class="search-hit is-soon">${inner}</span>`}</li>`; }).join('')}</ul>`;
+}
+function runSearch() {
+  const q = $('#side-search').value.trim(), box = $('#side-results');
+  box.hidden = !q; $('#side-home').hidden = !!q;
+  box.innerHTML = q ? searchResults(q) : '';
+}
+function setSide(open) {
+  document.body.classList.toggle('side-open', open);
+  $('#menu-btn')?.setAttribute('aria-expanded', String(open));
+  if (open) setTimeout(() => $('#side-search')?.focus({ preventScroll: true }), 220);
+}
+
+/* ───────── render ───────── */
+const routes = ['overview', 'sources', 'extra', 'notebook', ...lesson.sections.map(s => s.id)];
+const pageNames = { overview: 'Overview', sources: 'Readings', extra: 'Extra activities', notebook: 'Notebook' };
+function parseRoute() {
+  const h = location.hash.slice(1);
+  if (!h || h === '/' || h === '/home') return { home: true };
+  if (h === '/planner' || h.startsWith('/planner/') || h === '/workspace') return { page: 'planner' };   // My workspace
+  if (h === '/board') return { page: 'board' };
+  if (h === '/chats' || h.startsWith('/chats/')) return { page: 'chats' };
+  if (h === '/shared' || h.startsWith('/shared/')) return { page: 'shared' };
+  if (guide && (h === '/calendar' || h === '/assessments')) return { page: h.slice(1) };
+  if (studio && h === '/studio') return { page: 'studio' };
+  if (LAB && h === '/lab') return { page: 'lab' };
+  if (DL && h === '/downloads') return { page: 'downloads' };
+  if (PR && h === '/print') return { page: 'print' };
+  if (PICK && h === '/picker') return { page: 'picker' };
+  if (routes.includes(h)) { history.replaceState(null, '', L(h)); return { page: h }; } // old links such as #ai
+  const m = h.match(/^\/([\w-]+)(?:\/([\w-]+))?/);
+  if (!m) return { page: 'overview' };
+  if (m[1] !== lesson.id) return { other: m[1] };
+  if (labHere && (!m[2] || m[2] === 'overview')) { history.replaceState(null, '', L(lesson.sections[0].id)); return { page: lesson.sections[0].id }; }   // a lab lesson is one page: no overview
+  return { page: routes.includes(m[2]) ? m[2] : 'overview' };
+}
+function render() {
+  const r = parseRoute();
+  if (r.other) {
+    const d = days.find(x => x.id === r.other);
+    if (d && d.status === 'ready') { location.reload(); return; }
+    if (d) toast(d.lab ? `“${d.title}” is coming soon.` : `Week ${d.week}, Day ${d.day} is coming soon.`);
+    history.replaceState(null, '', '#/'); return render();
+  }
+  if (r.home && labHere) { location.reload(); return; }   // the course map shows the weekly lesson, so leave the lab lesson
+  const route = r.home ? 'home' : r.page;
+  document.body.classList.toggle('is-lab', !!labHere && !['studio', 'planner', 'notebook', 'lab', 'downloads', 'print', 'picker', 'calendar', 'assessments', 'board', 'chats', 'shared'].includes(route));   // a ${LABT} lesson page
+  if (!r.home && !labHere && r.page !== 'lab' && r.page !== 'downloads' && r.page !== 'print' && r.page !== 'picker') try { localStorage.setItem(CLS.id + '-last-lesson', lesson.id); } catch (e) { /* ignore */ }   // the course map keeps the weekly lesson, not a lab lesson
+  const done = coreActivities.filter(a => state.done[a.id]).length;
+  paintNav(route);
+  $('#progress').value = done; $('#progress').max = coreActivities.length;
+  $('#progress-label').innerHTML = `<b>${done}</b> of ${coreActivities.length} activities finished`;
+  $('#side-readings').href = L('sources');
+  paintSideRing(done, coreActivities.length);
+  const s = lesson.sections.find(x => x.id === route);
+  if (route === 'planner' || route === 'notebook') {   // My workspace = the planner (Notes, Calendar, To-dos) + this lesson's Notebook; kept open across re-renders
+    document.body.dataset.page = 'planner'; document.body.style.removeProperty('--accent'); document.body.style.removeProperty('--accent-bg');
+    const nbTab = route === 'notebook', whereNb = labHere ? lesson.title : whereLong();
+    $('#crumb').innerHTML = `<a href="#/" aria-label="${esc(course.code)} course map" title="Course map">${icon('home')}</a><i>/</i>${nbTab ? `<a href="#/planner">My workspace</a><i>/</i><b>Notebook · ${esc(whereNb)}</b>` : '<b>My workspace</b>'}`;
+    document.title = `${course.code} · My workspace${nbTab ? ' · Notebook' : ''}`; paintStatus();
+    const main = $('#main'), changed = main.dataset.route !== route; main.dataset.route = route;
+    const P = window.DEC15Planner;
+    if (!$('#planner-root')) { main.innerHTML = '<div id="planner-root" class="planner-loading"><p>Opening your workspace…</p></div>';
+      loadPlanner().then(() => { const el = $('#planner-root'), pg = parseRoute().page; if (!el || (pg !== 'planner' && pg !== 'notebook')) return;
+        window.DEC15Planner.mount(el, { esc, icon, toast, getCloud: () => cloud,
+          notebook: { html: wsNotebook, count: wsNotebookCount },
+          onTab: t => { history.replaceState(null, '', t === 'notebook' ? L('notebook') : '#/planner'); render(); } });   // the address and the breadcrumb follow the tab
+        if (pg === 'notebook') window.DEC15Planner.setTab('notebook'); else if (window.DEC15Planner.tab === 'notebook') history.replaceState(null, '', L('notebook')); })
+        .catch(() => { const el = $('#planner-root'); if (el) el.innerHTML = '<p class="planner-error">Your workspace could not open. Check your internet connection and reload the page.</p>'; });
+    } else if (P?.mounted) { if (nbTab && changed) P.setTab('notebook'); else P.refreshNotebook(); }
+    klass?.setWhere(route, nbTab ? 'My workspace · Notebook' : 'My workspace');
+    return;
+  }
+  if (window.DEC15Planner?.mounted) window.DEC15Planner.unmount();
+  if (route === 'board') {   // the class board: the teacher's whiteboard, live
+    document.body.dataset.page = 'board'; document.body.style.removeProperty('--accent'); document.body.style.removeProperty('--accent-bg');
+    $('#crumb').innerHTML = `<a href="#/" aria-label="${esc(course.code)} course map" title="Course map">${icon('home')}</a><i>/</i><b>Class board</b>`;
+    document.title = `${course.code} · Class board`; paintStatus(); $('#main').dataset.route = 'board';
+    $('#teacher-toggle').hidden = !isTeacher(); $('#present-toggle').hidden = !isTeacher(); document.body.classList.toggle('is-teacher', isTeacher());
+    klass?.setWhere('board', 'Class board');
+    if (!$('#board-root')) { $('#main').innerHTML = '<div id="board-root" class="planner-loading"><p>Opening the class board…</p></div>';
+      loadBoard().then(() => { const el = $('#board-root'); if (el && parseRoute().page === 'board') window.DEC15Board.mount(el, { esc, icon, toast, getCloud: () => cloud, signIn: () => accountDialog('signin'), version: cfg.version }); })
+        .catch(() => { const el = $('#board-root'); if (el) el.innerHTML = '<p class="planner-error">The board could not open. Check your internet connection and reload the page.</p>'; }); }
+    return;
+  }
+  if (window.DEC15Board?.mounted) window.DEC15Board.unmount();
+  if (route === 'chats') {   // Chats: class chat, study groups, private chats (js/chats.js); kept open across re-renders
+    document.body.dataset.page = 'chats'; document.body.style.removeProperty('--accent'); document.body.style.removeProperty('--accent-bg');
+    $('#crumb').innerHTML = `<a href="#/" aria-label="${esc(course.code)} course map" title="Course map">${icon('home')}</a><i>/</i><b>Chats</b>`;
+    document.title = `${course.code} · Chats`; paintStatus(); $('#main').dataset.route = 'chats';
+    $('#teacher-toggle').hidden = !isTeacher(); $('#present-toggle').hidden = !isTeacher(); document.body.classList.toggle('is-teacher', isTeacher());
+    klass?.setWhere('chats', 'Chats');
+    if (!$('#chats-root')) { $('#main').innerHTML = '<div id="chats-root"></div>'; chats?.mount($('#chats-root'), location.hash); }
+    return;
+  }
+  if (chats?.mounted) chats.unmount();
+  if (route === 'shared') {   // "Shared with me": forms classmates sent to this student (js/forms.js)
+    document.body.dataset.page = 'shared'; document.body.style.removeProperty('--accent'); document.body.style.removeProperty('--accent-bg');
+    $('#crumb').innerHTML = `<a href="#/" aria-label="${esc(course.code)} course map" title="Course map">${icon('home')}</a><i>/</i><b>Shared with me</b>`;
+    document.title = `${course.code} · Shared with me`; paintStatus();
+    const main = $('#main'), changed = main.dataset.route !== 'shared'; main.dataset.route = 'shared';
+    main.innerHTML = forms ? forms.pageHTML(location.hash.slice(1)) : '';
+    if (changed && !matchMedia('(prefers-reduced-motion: reduce)').matches) { main.classList.remove('route-in'); void main.offsetWidth; main.classList.add('route-in'); }
+    $('#teacher-toggle').hidden = !isTeacher(); $('#present-toggle').hidden = !isTeacher(); document.body.classList.toggle('is-teacher', isTeacher());
+    klass?.setWhere('shared', 'Shared with me'); forms?.paintBadge();
+    return;
+  }
+  if (route === 'picker') {   // Name wheel (js/picker.js): pick a student or a group at random
+    document.body.dataset.page = 'picker'; document.body.style.removeProperty('--accent'); document.body.style.removeProperty('--accent-bg');
+    $('#crumb').innerHTML = `<a href="#/" aria-label="${esc(course.code)} course map" title="Course map">${icon('home')}</a><i>/</i><b>Name wheel</b>`;
+    document.title = `${course.code} · Name wheel`; paintStatus();
+    const main = $('#main'), changed = main.dataset.route !== route; main.dataset.route = route;
+    if (changed) { main.innerHTML = '<div class="pk-root"></div>'; window.DEC15Picker.mount(main.firstChild); window.scrollTo(0, 0); }
+    $('#teacher-toggle').hidden = !isTeacher(); $('#present-toggle').hidden = !isTeacher(); document.body.classList.toggle('is-teacher', isTeacher());
+    klass?.setWhere('picker', 'Name wheel');
+    return;
+  }
+  if (route === 'print') {   // Photocopiables: printable class activities for the teacher (course.printables)
+    document.body.dataset.page = 'print'; document.body.style.removeProperty('--accent'); document.body.style.removeProperty('--accent-bg');
+    $('#crumb').innerHTML = `<a href="#/" aria-label="${esc(course.code)} course map" title="Course map">${icon('home')}</a><i>/</i><b>Photocopiables</b>`;
+    document.title = `${course.code} · Photocopiables`; paintStatus();
+    const main = $('#main'), changed = main.dataset.route !== route; main.dataset.route = route;
+    main.innerHTML = printPage();
+    if (changed) window.scrollTo(0, 0);
+    $('#teacher-toggle').hidden = !isTeacher(); $('#present-toggle').hidden = !isTeacher(); document.body.classList.toggle('is-teacher', isTeacher());
+    klass?.setWhere('print', 'Photocopiables');
+    return;
+  }
+  if (route === 'downloads') {   // Downloads: forms to download and fill in (course.downloads)
+    document.body.dataset.page = 'downloads'; document.body.style.removeProperty('--accent'); document.body.style.removeProperty('--accent-bg');
+    $('#crumb').innerHTML = `<a href="#/" aria-label="${esc(course.code)} course map" title="Course map">${icon('home')}</a><i>/</i><b>Downloads</b>`;
+    document.title = `${course.code} · Downloads`; paintStatus();
+    const main = $('#main'), changed = main.dataset.route !== route; main.dataset.route = route;
+    main.innerHTML = downloadsPage();
+    if (changed) window.scrollTo(0, 0);
+    $('#teacher-toggle').hidden = !isTeacher(); $('#present-toggle').hidden = !isTeacher(); document.body.classList.toggle('is-teacher', isTeacher());
+    klass?.setWhere('downloads', 'Downloads');
+    return;
+  }
+  if (route === 'lab') {   // Skills Lab: the list of self-study lessons (course.lab)
+    document.body.dataset.page = 'lab'; document.body.style.removeProperty('--accent'); document.body.style.removeProperty('--accent-bg');
+    $('#crumb').innerHTML = `<a href="#/" aria-label="${esc(course.code)} course map" title="Course map">${icon('home')}</a><i>/</i><b>${LABT}</b>`;
+    document.title = `${course.code} · ${LABT}`; paintStatus();
+    const main = $('#main'), changed = main.dataset.route !== route; main.dataset.route = route;
+    main.innerHTML = labPage();
+    if (changed) window.scrollTo(0, 0);
+    $('#teacher-toggle').hidden = !isTeacher(); $('#present-toggle').hidden = !isTeacher(); document.body.classList.toggle('is-teacher', isTeacher());
+    klass?.setWhere('lab', LABT);
+    return;
+  }
+  if (route === 'studio') {   // Studio home: drafts, new pages, export (js/studio.js)
+    document.body.dataset.page = 'studio'; document.body.style.removeProperty('--accent'); document.body.style.removeProperty('--accent-bg');
+    $('#crumb').innerHTML = `<a href="#/" aria-label="${esc(course.code)} course map" title="Course map">${icon('home')}</a><i>/</i><b>Studio</b>`;
+    document.title = `${course.code} · Studio`; paintStatus();
+    const main = $('#main'), changed = main.dataset.route !== route; main.dataset.route = route;
+    main.innerHTML = studio.pageHTML();
+    if (changed) window.scrollTo(0, 0);
+    $('#teacher-toggle').hidden = !isTeacher(); $('#present-toggle').hidden = !isTeacher(); document.body.classList.toggle('is-teacher', isTeacher());
+    paintNav(route); studio.afterRender(route);
+    return;
+  }
+  if (route === 'calendar' || route === 'assessments') {   // DEC10 course guide (js/guide.js)
+    const name = route === 'calendar' ? 'Course calendar' : 'Assessments';
+    document.body.dataset.page = 'guide'; document.body.style.removeProperty('--accent'); document.body.style.removeProperty('--accent-bg');
+    $('#crumb').innerHTML = `<a href="#/" aria-label="${esc(course.code)} course map" title="Course map">${icon('home')}</a><i>/</i><b>${name}</b>`;
+    document.title = `${course.code} · ${name}`; paintStatus();
+    const main = $('#main'), changed = main.dataset.route !== route; main.dataset.route = route;
+    main.innerHTML = `<div class="gd-page${changed ? '' : ' no-anim'}">${route === 'calendar' ? guide.calendarHTML() : guide.assessmentsHTML()}</div>`;   // entrance animations only when the page opens
+    if (changed && !matchMedia('(prefers-reduced-motion: reduce)').matches) { main.classList.remove('route-in'); void main.offsetWidth; main.classList.add('route-in'); }
+    if (changed) { window.scrollTo(0, 0); guide.centerNow(); }
+    $('#teacher-toggle').hidden = !isTeacher(); $('#present-toggle').hidden = !isTeacher(); document.body.classList.toggle('is-teacher', isTeacher());
+    klass?.setWhere(route, name);
+    return;
+  }
+  const main = $('#main'), changed = main.dataset.route !== route; main.dataset.route = route;
+  $('#main').innerHTML = route === 'home' ? courseHome() : s ? stagePage(s) : route === 'sources' ? sourcesPage() : route === 'extra' ? extrasPage() : route === 'notebook' ? notebook() : overview();
+  document.body.dataset.page = s ? 'stage' : route;
+  if (changed && !matchMedia('(prefers-reduced-motion: reduce)').matches) { main.classList.remove('route-in'); void main.offsetWidth; main.classList.add('route-in'); clearTimeout(render.t); render.t = setTimeout(() => main.classList.remove('route-in'), 900); }
+  if (s) { document.body.style.setProperty('--accent', TONES[s.tone][0]); document.body.style.setProperty('--accent-bg', TONES[s.tone][1]); }
+  else { document.body.style.removeProperty('--accent'); document.body.style.removeProperty('--accent-bg'); }
+  const pageName = route === 'home' ? '' : s ? s.title : pageNames[route];
+  $('#crumb').innerHTML = route === 'home' ? `<a href="#/" aria-label="${esc(course.code)} course map" title="Course map">${icon('home')}</a><i>/</i><b>Course map</b>`
+    : labHere && s ? `<a href="#/" aria-label="${esc(course.code)} course map" title="Course map">${icon('home')}</a><i>/</i><a href="#/lab">${LABT}</a><i>/</i><b>${esc(lesson.title)}</b>`
+    : `<a href="#/" aria-label="${esc(course.code)} course map" title="Course map">${icon('home')}</a><i>/</i>${labHere ? `<a href="#/lab">${LABT}</a><i>/</i>` : ''}${route === 'overview' ? `<b>${esc(labHere ? lesson.title : whereLong())}</b>` : `<a href="${L('overview')}">${esc(labHere ? lesson.title : whereLong())}</a><i>/</i><b>${esc(pageName)}</b>`}`;
+  document.title = `${course.code} · ${route === 'home' ? 'Course map' : labHere ? LABT + ' · ' + lesson.title : `${whereLong(', ')}${route === 'overview' ? '' : ' · ' + pageName}`}`;
+  if (!isTeacher() && state.teacher) state.teacher = false;
+  $('#teacher-toggle').hidden = !isTeacher(); $('#present-toggle').hidden = !isTeacher();
+  document.body.classList.toggle('is-teacher', isTeacher()); document.body.classList.toggle('answers-locked', locked());
+  const whereLabel = route === 'home' ? 'Course map' : `${whereShort()}${route === 'overview' ? ' · Overview' : ' · ' + (s ? (labHere ? s.title : code(s) + ' ' + s.title) : pageNames[route] || route)}`;
+  klass?.setWhere(route + (s ? ':' + s.id : ''), whereLabel); if (route !== 'home') chats?.notePage(location.hash, whereLabel);
+  setTimeout(() => klass?.paintCounts(), 0);
+  $('#teacher-toggle').setAttribute('aria-pressed', String(state.teacher));
+  $('#teacher-toggle .tt-state').textContent = state.teacher ? 'On' : 'Off';
+  paintStatus();
+  const cm = $('.course-map'), here = $('.cm-now');
+  if (cm && here && cm.scrollWidth > cm.clientWidth) { const r = here.getBoundingClientRect(), c = cm.getBoundingClientRect(); cm.scrollLeft += r.left - c.left - c.width / 2 + r.width / 2; }
+  const tabs = $('.act-tabs'), cur = $('.act-tabs .current'); if (tabs && cur) tabs.scrollLeft = cur.offsetLeft - tabs.offsetLeft - 12;
+  reader.mount();
+  studio?.afterRender(route);
+  requestAnimationFrame(() => { revealBlocks(); paintLayout(); });
+}
+let plannerLoad = null;
+function loadPlanner() {   // the editor is large, so it loads only when the planner is opened
+  const add = (tag, attrs) => new Promise((ok, bad) => { const el = Object.assign(document.createElement(tag), attrs); el.onload = ok; el.onerror = bad; document.head.append(el); });
+  return plannerLoad || (plannerLoad = Promise.all([
+    add('link', { rel: 'stylesheet', href: 'css/planner.css?v=' + cfg.version }),
+    window.Tiptap ? null : add('script', { src: 'js/vendor/tiptap.bundle.js?v=' + cfg.version }),
+  ]).then(() => window.DEC15Blocks || add('script', { src: 'js/planner-blocks.js?v=' + cfg.version }))
+    .then(() => window.DEC15Planner || add('script', { src: 'js/planner.js?v=' + cfg.version })).catch(e => { plannerLoad = null; throw e; }));
+}
+let boardLoad = null;
+function loadBoard() {   // the board uses the same editor as My planner
+  const add = (tag, attrs) => new Promise((ok, bad) => { const el = Object.assign(document.createElement(tag), attrs); el.onload = ok; el.onerror = bad; document.head.append(el); });
+  return boardLoad || (boardLoad = Promise.all([
+    document.querySelector('link[href^="css/planner.css"]') ? null : add('link', { rel: 'stylesheet', href: 'css/planner.css?v=' + cfg.version }),
+    window.Tiptap ? null : add('script', { src: 'js/vendor/tiptap.bundle.js?v=' + cfg.version }),
+  ]).then(() => window.DEC15Blocks || add('script', { src: 'js/planner-blocks.js?v=' + cfg.version }))
+    .then(() => window.DEC15Board || add('script', { src: 'js/board.js?v=' + cfg.version })).catch(e => { boardLoad = null; throw e; }));
+}
+let collabLoad = null;
+function loadCollab() {   // the shared editor loads only when "Write together" is pressed
+  const add = (tag, attrs) => new Promise((ok, bad) => { const el = Object.assign(document.createElement(tag), attrs); el.onload = ok; el.onerror = bad; document.head.append(el); });
+  return collabLoad || (collabLoad = Promise.all([
+    document.querySelector('link[href^="css/cowrite.css"]') ? null : add('link', { rel: 'stylesheet', href: 'css/cowrite.css?v=' + cfg.version }),
+    window.Tiptap ? null : add('script', { src: 'js/vendor/tiptap.bundle.js?v=' + cfg.version }),
+    document.querySelector('link[href^="css/livetable.css"]') ? null : add('link', { rel: 'stylesheet', href: 'css/livetable.css?v=' + cfg.version }),
+  ]).then(() => window.DEC15Collab || add('script', { src: 'js/collab.js?v=' + cfg.version }))
+    .then(() => window.DEC15LiveTable || add('script', { src: 'js/livetable.js?v=' + cfg.version })).catch(e => { collabLoad = null; throw e; }));
+}
+/* Re-render without moving the page. Keep what the student just touched (the nearest element with an id) at the same
+   place on screen — not just the same scrollY — and hold it there while pictures above it finish loading.
+   Browsers without scroll anchoring (Safari) otherwise jump when a re-created <img> is briefly 0 px tall. */
+let lastHit = null, userScrolled = 0;
+document.addEventListener('pointerdown', e => { lastHit = e.target; }, true);
+document.addEventListener('keydown', e => { lastHit = e.target; }, true);
+['wheel', 'touchmove'].forEach(t => addEventListener(t, () => { userScrolled = Date.now(); }, { passive: true }));
+const imgRatio = new Map();   // src → "w / h", so a re-created picture reserves its height at once
+document.addEventListener('load', e => { const i = e.target; if (i.tagName === 'IMG' && i.naturalWidth) imgRatio.set(i.getAttribute('src'), `${i.naturalWidth} / ${i.naturalHeight}`); }, true);
+function rerender() {
+  const y = window.scrollY, hit = lastHit?.isConnected ? lastHit : document.activeElement;
+  const pageTop = el => { let t = 0; for (; el; el = el.offsetParent) t += el.offsetTop; return t; };   // layout position: ignores the fade-up transform
+  const anchor = hit?.closest?.('#main [id]'), id = anchor?.id, top = anchor && pageTop(anchor) - y;
+  render();
+  document.querySelectorAll('#main img').forEach(i => { const r = imgRatio.get(i.getAttribute('src')); if (r && !i.style.aspectRatio && !i.complete) i.style.aspectRatio = r; });
+  let expect = null;   // the scrollY we last set: if anything else scrolls (a tab jump, the student), stop holding
+  const hold = () => { const el = id && document.getElementById(id); if (el) window.scrollTo(0, pageTop(el) - top); expect = window.scrollY; };
+  window.scrollTo(0, y); hold();
+  const since = Date.now(), again = () => { if (userScrolled < since && Date.now() - since < 1500 && Math.abs(window.scrollY - expect) < 2) hold(); };
+  requestAnimationFrame(again);
+  if (id && 'ResizeObserver' in window) {   // pictures (or anything else) above changing height in the next moment
+    const main = document.getElementById('main'), ro = new ResizeObserver(again); ro.observe(main);
+    main.querySelectorAll('img').forEach(i => ro.observe(i)); setTimeout(() => ro.disconnect(), 1500);
+  }
+}
+/* Blocks fade up gently the first time they scroll into view (once per visit; never on re-render). */
+const seenBlocks = new Set();
+const revealIO = 'IntersectionObserver' in window ? new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); seenBlocks.add(e.target.dataset.rk); revealIO.unobserve(e.target); } }), { rootMargin: '0px 0px -40px 0px' }) : null;
+// safety net: a fast jump (End key, a link) can skip blocks without the observer seeing them
+let revealTick = 0;
+addEventListener('scroll', () => { if (revealTick) return; revealTick = requestAnimationFrame(() => { revealTick = 0;
+  document.querySelectorAll('.reveal:not(.in)').forEach(el => { if (el.getBoundingClientRect().top < innerHeight) { el.classList.add('in'); seenBlocks.add(el.dataset.rk); revealIO?.unobserve(el); } }); }); }, { passive: true });
+function revealBlocks() {
+  if (!revealIO || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  document.querySelectorAll('.activity').forEach(act => [...act.querySelectorAll(':scope > .act-body > *, :scope > .answers, :scope > .wall')].forEach((el, i) => {
+    const k = act.id + ':' + i; el.dataset.rk = k; if (seenBlocks.has(k)) return;
+    const r = el.getBoundingClientRect(); if (r.top < innerHeight - 40) { seenBlocks.add(k); return; }
+    el.classList.add('reveal'); revealIO.observe(el); }));
+}
+
+/* ───────── sources dialog / glossary ───────── */
+const srcName = (id, pool = sources) => pool.find(x => x.id === id)?.short || ({ reading1: 'Reading 1', reading2: 'Reading 2', reading3: 'Reading 3', listening: 'Listening transcript', 'video-script': 'Video script' }[id] || id);
+function openSource(id = 'reading1', week = null) {
+  reader.closeWord();
+  const pool = (week && library[week]) || sources, wk = week && library[week] ? ` data-src-week="${week}"` : '';
+  if (!pool.length) { toast('This lesson has no course texts.'); return; }
+  const s = pool.find(x => x.id === id) || pool[0];
+  $('#resource-title').textContent = 'Read and highlight';
+  $('#resource-body').innerHTML = `<div class="source-tabs">${pool.map(x => `<button class="${x.id === s.id ? 'active' : ''}" data-source="${x.id}"${wk}>${srcName(x.id, pool)}</button>`).join('')}</div>
+    ${reader.toolbar('reading')}
+    <div class="rd-layout" data-src="${esc((week ? 'w' + week + '-' : '') + s.id)}"><article class="source-text" data-help><span class="eyebrow">${esc(s.cite)} · ${esc(s.kind)}</span><h3>${esc(s.title)}</h3>${s.note ? `<p class="script-note">${esc(s.note)}</p>` : ''}
+    <p class="source-ref">${esc(s.reference)}</p>
+    ${s.citeAs ? `<p class="source-cite">${esc(s.citeAs)}</p>` : ''}
+    ${s.paragraphs.map((p, i) => p.startsWith('## ') ? `<h4 class="source-h">${esc(p.slice(3))}</h4>` : `<p>${reader.text('s-' + s.id + '-' + i, p, s.cite + ' · ' + (s.id === 'video-script' ? p.slice(0, 10) : /^[A-Z]\. /.test(p) ? 'paragraph ' + p.slice(0, 1) : p.split(':')[0].slice(0, 20)))}</p>`).join('')}
+    ${s.figure ? `<figure><img src="${s.figure}" alt="${esc(s.figureAlt || '')}"><figcaption>Figure 1. ${esc(s.figureCaption || '')} ${esc(s.figureCredit || '')}</figcaption></figure>` : ''}</article><aside class="rd-notes" aria-label="My notes"></aside></div>`;
+  if (!$('#resource-dialog').open) $('#resource-dialog').showModal();
+  $('#resource-body').scrollTop = 0;
+  reader.mount(); readNotes?.mount();
+}
+function filterGlossary(q) {
+  q = String(q || '').trim().toLowerCase(); let n = 0;
+  document.querySelectorAll('.glossary-word').forEach(el => { const on = !q || el.dataset.g.includes(q); el.hidden = !on; n += on; });
+  const none = $('.gloss-none'); if (none) none.hidden = n > 0;
+}
+document.addEventListener('input', e => { if (e.target.matches('[data-gloss-find]')) filterGlossary(e.target.value); });
+function glossary(find = '') {
+  reader.closeWord();
+  $('#resource-title').textContent = 'Word meanings';
+  $('#resource-body').innerHTML = `<div class="glossary-top"><label class="gloss-find">${icon('search')}<input type="search" placeholder="Find a word (${lesson.glossary.length} words)" aria-label="Find a word" data-gloss-find value="${esc(find)}"></label><button class="btn" data-word-game>Play the word game</button></div>
+    <div class="glossary-grid">${[...lesson.glossary].sort((a, b) => a[0].localeCompare(b[0])).map(([w, d, c]) => `<div class="glossary-word" data-g="${esc((w + ' ' + d).toLowerCase())}" data-l="${esc(w.trim().charAt(0).toLowerCase())}"><b>${esc(w)}</b><p>${esc(d)}</p>${c ? `<small>${esc(c)}</small>` : ''}</div>`).join('')}</div>
+    <p class="gloss-none" hidden>No word matches. Try the first letters of the word.</p>`;
+  filterGlossary(find);
+  if (!$('#resource-dialog').open) $('#resource-dialog').showModal();
+}
+
+/* ───────── notebook exports ───────── */
+const nb = window.createDEC15Notebook({ lesson, getState: () => state, planParts, tableRows, reader, esc, strip, toast, person: () => cloudInfo.profile?.full_name || '', extraItems: b => [...(play ? play.notebookItems(b) : []), ...(kit ? kit.notebookItems(b) : []), ...(forms ? forms.notebookItems(b) : [])] });
+async function runExport(kind, btn) {
+  if (kind === 'gdocs') {
+    const copied = await nb.gdocs();
+    const win = copied ? window.open('https://docs.new', '_blank') : null;
+    if (copied) showGdocsHelp(!!win);
+    else { await nb.docx(); toast('Upload the downloaded Word file to Google Drive, then open it with Google Docs.'); }
+    return;
+  }
+  if (kind === 'print') { nb.print(); return; }
+  btn?.classList.add('busy'); btn?.setAttribute('aria-busy', 'true');
+  try { kind === 'pdf' ? await nb.pdf() : (await nb.docx(), toast('Your Word file has been downloaded.')); }
+  catch (e) { toast('Sorry — the file could not be created. Try Print instead.'); console.error(e); }
+  finally { btn?.classList.remove('busy'); btn?.removeAttribute('aria-busy'); }
+}
+function showGdocsHelp(opened) {
+  $('#resource-title').textContent = 'Open in Google Docs';
+  $('#resource-body').innerHTML = `<div class="gdocs-help">
+    <div class="gdocs-steps">
+      <div><span>1</span><p><b>Your notebook is copied.</b> Tables and headings are included.</p></div>
+      <div><span>2</span><p>${opened ? 'A new Google Doc has opened in another tab.' : `<a href="https://docs.new" target="_blank" rel="noopener">Open a new Google Doc</a> (sign in with your Google account).`}</p></div>
+      <div><span>3</span><p>Click inside the document and press <kbd>Ctrl</kbd> + <kbd>V</kbd> &nbsp;(Mac: <kbd>⌘</kbd> + <kbd>V</kbd>).</p></div>
+    </div>
+    <p class="gdocs-alt">Paste not working? <button class="text-link" data-export="docx">Download a Word file</button> and upload it to Google Drive — it opens in Google Docs.</p></div>`;
+  if (!$('#resource-dialog').open) $('#resource-dialog').showModal();
+}
+
+/* ───────── account (Supabase) ───────── */
+/* A round profile picture, or the first letter of the name when there is no picture. */
+function avatarHTML(p = {}, email = '', cls = 'avatar') {
+  const letter = esc(((p.full_name || email || '?').trim()[0] || '?').toUpperCase());
+  return p.avatar_url ? `<span class="${cls} has-photo"><img src="${esc(p.avatar_url)}" alt="" width="96" height="96" loading="lazy" referrerpolicy="no-referrer"></span>` : `<span class="${cls}">${letter}</span>`;
+}
+function accountDialog(mode = cloudInfo.user ? 'account' : 'signin', msg = '', keep = {}) {
+  const val = k => keep[k] ? ` value="${esc(keep[k])}"` : '';
+  $('#resource-title').textContent = mode === 'account' ? 'Your account' : mode === 'link' ? 'Sign in with an email link' : 'Save your work online';
+  const p = cloudInfo.profile || {};
+  const pw = (name, label, auto, hint = '') => `<label>${label}${hint ? ` <small>${hint}</small>` : ''}<span class="pw-wrap"><input name="${name}" type="password" autocomplete="${auto}" minlength="6" required><button type="button" class="pw-show" data-pw-show aria-pressed="false">Show</button></span></label>`;
+  const note = (k) => keep.note?.[0] === k ? `<p class="acct-msg${keep.note[2] ? ' is-ok' : ''}" role="${keep.note[2] ? 'status' : 'alert'}">${keep.note[1]}</p>` : '';
+  if (mode === 'newpw') {
+    $('#resource-title').textContent = 'Choose a new password';
+    $('#resource-body').innerHTML = `<form class="acct-form" data-acct="password" novalidate><p class="acct-intro">You opened a password reset link. Choose a new password for <b>${esc(cloudInfo.user?.email || 'your account')}</b>.</p>
+      ${pw('next', 'New password', 'new-password', '(at least 6 characters)')}${pw('again', 'Type it again', 'new-password')}${note('password')}<button class="btn" type="submit">Save new password</button></form>`;
+    if (mode === 'signin' || mode === 'signup') cloud?.googleEnabled?.().then(on => { const g = $('#resource-body .acct-google'); if (g) g.hidden = !on; });
+  if (!$('#resource-dialog').open) $('#resource-dialog').showModal(); $('#resource-body input')?.focus(); return;
+  }
+  $('#resource-body').innerHTML = mode === 'account' ? `<div class="acct acct-settings">
+      <section class="acct-card acct-hero">
+        <span class="acct-photo">${avatarHTML(p, cloudInfo.user?.email, 'avatar avatar-xl')}</span>
+        <div><b>${esc(p.full_name || 'Student')}</b><span>${esc(cloudInfo.user?.email || '')}${p.student_id ? ' · ' + esc(p.student_id) : ''}</span>
+          <div class="acct-photo-btns"><label class="btn-quiet btn-sm" tabindex="0">${icon('pen')}${p.avatar_url ? 'Change picture' : 'Add a picture'}<input type="file" accept="image/*" data-avatar-file hidden></label>${p.avatar_url ? '<button type="button" class="text-link" data-avatar-remove>Remove</button>' : ''}</div>
+          ${note('photo')}</div>
+      </section>
+      <form class="acct-box" data-acct="profile" novalidate><h3>Your details</h3>
+        <label>Name <small>(shown at the top of the page and on the class wall)</small><input name="name" autocomplete="name" maxlength="80" required value="${esc(p.full_name || '')}"></label>
+        <label>Student ID <small>(optional)</small><input name="sid" inputmode="numeric" autocomplete="off" maxlength="30" value="${esc(p.student_id || '')}"></label>
+        ${note('profile')}<button class="btn" type="submit">Save details</button></form>
+      <form class="acct-box" data-acct="password" novalidate><h3>Change password</h3>
+        ${pw('current', 'Current password', 'current-password')}${pw('next', 'New password', 'new-password', '(at least 6 characters)')}${pw('again', 'Type the new password again', 'new-password')}
+        ${note('password')}<button class="btn" type="submit">Change password</button></form>
+      ${p.role === 'teacher' ? `<p class="acct-note acct-teacher">${icon('teacher')} <b>Teacher account.</b> Teacher view, teacher notes, the answers switch, class progress and the class board tools are on.</p>`
+        : p.teacherClaim === 'needs_email_link' ? `<section class="acct-box acct-teacher-claim"><h3>${icon('teacher')} Turn on your teacher tools</h3><p>This email is on the teacher list. To prove it is your inbox, we email you a sign-in link. Open it on this device and the teacher tools turn on.</p>${note('teacher')}<button type="button" class="btn" data-teacher-link>Email me the link</button></section>` : ''}
+      <p class="acct-note">${icon('check')} Your answers, tables, plan and highlights are saved online. Sign in on any computer to continue where you stopped.</p>
+      <div class="acct-actions"><button class="btn-quiet" data-signout>Sign out</button><button class="btn-quiet" data-signout-all title="Use this if you signed in on a shared or lost computer">Sign out on all devices</button></div></div>`
+    : `<form class="acct-form" data-auth="${mode}" novalidate>
+      ${mode !== 'reset' && mode !== 'link' ? '<img class="acct-art" src="assets/art/sync.svg" alt="" width="360" height="200">' : ''}
+      <p class="acct-intro">${mode === 'signup' ? 'Create an account once. Then your work is saved online and appears on any device where you sign in.' : mode === 'reset' ? 'Enter your email. We will send you a link to choose a new password.' : mode === 'link' ? 'We email you a link. Open it on this device and you are signed in — no password needed. (Teachers: use this once to turn on your teacher tools.)' : 'Sign in so your work is saved online — not only on this device.'}</p>
+      ${mode === 'signup' ? `<label>Full name<input name="name" autocomplete="name" required${val('name')}></label><label>Student ID <small>(optional)</small><input name="sid" inputmode="numeric" autocomplete="off"${val('sid')}></label>` : ''}
+      <label>Email<input name="email" type="email" autocomplete="email" autocapitalize="off" spellcheck="false" required${val('email')}></label>
+      ${mode !== 'reset' && mode !== 'link' ? `<label>Password${mode === 'signup' ? ' <small>(at least 6 characters)</small>' : ''}<span class="pw-wrap"><input name="password" type="password" autocomplete="${mode === 'signup' ? 'new-password' : 'current-password'}" minlength="6" required${val('password')}><button type="button" class="pw-show" data-pw-show aria-pressed="false">Show</button></span></label>` : ''}
+      ${msg ? `<p class="acct-msg" role="alert">${msg}</p>` : ''}
+      <button class="btn" type="submit">${mode === 'signup' ? 'Create account' : mode === 'reset' ? 'Send reset link' : mode === 'link' ? 'Email me a sign-in link' : 'Sign in'}</button>
+      ${mode === 'signin' || mode === 'signup' ? '<div class="acct-google" hidden><span class="acct-or">or</span><button type="button" class="btn-google" data-google><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5a5.6 5.6 0 0 1-2.4 3.6v3h3.9c2.3-2.1 3.5-5.2 3.5-8.8z"/><path fill="#34A853" d="M12 24c3.2 0 6-1.1 8-2.9l-3.9-3c-1.1.7-2.5 1.2-4.1 1.2-3.1 0-5.8-2.1-6.7-5H1.3v3.1A12 12 0 0 0 12 24z"/><path fill="#FBBC05" d="M5.3 14.3a7.2 7.2 0 0 1 0-4.6V6.6h-4a12 12 0 0 0 0 10.8z"/><path fill="#EA4335" d="M12 4.8c1.8 0 3.3.6 4.6 1.8l3.4-3.4A12 12 0 0 0 1.3 6.6l4 3.1c.9-2.9 3.6-4.9 6.7-4.9z"/></svg>Continue with Google</button></div>' : ''}
+      <p class="acct-switch">${mode === 'signin' ? `New here? <button type="button" class="text-link" data-auth-mode="signup">Create an account</button> · <button type="button" class="text-link" data-auth-mode="reset">Forgot password?</button><br><button type="button" class="text-link" data-auth-mode="link">Email me a sign-in link instead</button>` : `Already have an account? <button type="button" class="text-link" data-auth-mode="signin">Sign in</button>`}</p>
+    </form>`;
+  if (!$('#resource-dialog').open) $('#resource-dialog').showModal();
+  const first = keep.email ? $('#resource-body input[name=password]') : $('#resource-body input'); first?.focus();
+}
+const EMAIL_LIMIT_MSG = 'Your account was <b>not</b> created yet: the sign-up email service is busy because many students joined at the same time. This is not your mistake. Please tell your teacher, or try again later. You can keep working — your answers are saved on this device.';
+/* Check the form before asking the server, so a typing mistake never uses up an attempt. */
+function checkAuthForm(mode, v) {
+  if (mode === 'signup' && !v.name) return 'Please write your full name.';
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.email)) return 'Please check your email address — it should look like name@example.com.';
+  if (mode !== 'reset' && mode !== 'link' && v.password.length < 6) return mode === 'signup' ? 'Choose a password with at least 6 characters.' : 'Please type your password.';
+  return '';
+}
+/* Toggles slide open and closed instead of jumping: the box grows from its old height to its new one. */
+const calm = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+function slideHeight(el, from, to, done) {
+  if (calm() || !el.animate || Math.abs(to - from) < 2) { done?.(); return; }
+  el.style.overflow = 'hidden';
+  const an = el.animate([{ height: from + 'px' }, { height: to + 'px' }], { duration: Math.min(520, 240 + Math.abs(to - from) * .35), easing: 'cubic-bezier(.22, .8, .24, 1)' });
+  an.onfinish = an.oncancel = () => { el.style.overflow = ''; done?.(); };
+}
+function morph(id, change) {   // re-draw the page, then let the box with this id slide to its new size
+  const before = document.getElementById(id)?.offsetHeight; change();
+  const el = document.getElementById(id); if (el && before) slideHeight(el, before, el.offsetHeight);
+}
+document.addEventListener('click', e => {   // every <details> (page guide, notebook sections) slides
+  const sum = e.target.closest('summary'); const det = sum?.parentElement;
+  if (!det || det.tagName !== 'DETAILS' || calm() || det.dataset.sliding) return;
+  e.preventDefault(); det.dataset.sliding = '1';
+  const from = det.offsetHeight;
+  if (!det.open) { det.open = true; det.classList.add('is-opening'); slideHeight(det, from, det.offsetHeight, () => { det.classList.remove('is-opening'); delete det.dataset.sliding; }); }
+  else { det.open = false; const to = det.offsetHeight; det.open = true; det.classList.add('is-closing'); slideHeight(det, from, to, () => { det.open = false; det.classList.remove('is-closing'); delete det.dataset.sliding; }); }
+});
+document.addEventListener('dec15:celebrate', e => { if (e.detail && !calm()) play?.confetti?.(e.detail); });
+/* a quiet "back to top" button on long pages */
+const topBtn = document.createElement('button');
+topBtn.type = 'button'; topBtn.className = 'to-top'; topBtn.setAttribute('aria-label', 'Back to the top of the page'); topBtn.innerHTML = icon('up');
+topBtn.onclick = () => { window.scrollTo({ top: 0, behavior: calm() ? 'auto' : 'smooth' }); $('#main')?.focus({ preventScroll: true }); };
+document.body.append(topBtn);
+/* DEC10: the dictionary button sits just above it (js/dictionary.js) */
+if (course.id === 'ielts' && window.DEC15Dictionary) { window.DEC15Dictionary.init({ icon, toast, esc }); document.body.classList.add('has-dict'); }
+let topTick = 0;
+addEventListener('scroll', () => { if (topTick) return; topTick = requestAnimationFrame(() => { topTick = 0; topBtn.classList.toggle('show', scrollY > innerHeight * 1.4);
+  const h = document.documentElement.scrollHeight - innerHeight; document.body.style.setProperty('--read', h > 0 ? Math.min(1, scrollY / h).toFixed(3) : 0); }); }, { passive: true });
+/* side panel: a long lesson name glides sideways on hover or focus, so it can be read in full */
+function glide(e, on) {
+  const n = e.target.closest?.('#nav .nav-part')?.querySelector('.nav-pname'); if (!n) return;
+  const over = n.scrollWidth - n.clientWidth;
+  if (on && over > 2) { n.style.setProperty('--shift', -(over + 6) + 'px'); n.style.setProperty('--dur', Math.min(2.6, .5 + over / 60) + 's'); n.classList.add('gliding'); }
+  else if (!on) n.classList.remove('gliding');
+}
+['mouseover', 'focusin'].forEach(t => document.addEventListener(t, e => glide(e, true)));
+['mouseout', 'focusout'].forEach(t => document.addEventListener(t, e => { if (!e.relatedTarget || !e.target.closest?.('.nav-part')?.contains(e.relatedTarget)) glide(e, false); }));
+/* ───────── account settings: details, picture, password ───────── */
+// Make a square 256 × 256 picture (centre crop) on the device. WebP where the browser supports it, else JPEG.
+async function squarePicture(file) {
+  if (!/^image\//.test(file.type)) throw new Error('Please choose a picture file (JPG, PNG or similar).');
+  if (file.size > 15 * 1024 * 1024) throw new Error('This picture is too big. Please choose one under 15 MB.');
+  const img = await new Promise((ok, bad) => { const i = new Image(); i.onload = () => ok(i); i.onerror = () => bad(new Error('This picture could not be opened. Try a JPG or PNG.')); i.src = URL.createObjectURL(file); });
+  const n = Math.min(img.naturalWidth, img.naturalHeight), c = document.createElement('canvas'); c.width = c.height = 256;
+  c.getContext('2d').drawImage(img, (img.naturalWidth - n) / 2, (img.naturalHeight - n) / 2, n, n, 0, 0, 256, 256); URL.revokeObjectURL(img.src);
+  const blob = await new Promise(ok => c.toBlob(ok, 'image/webp', .86));
+  return blob && blob.type === 'image/webp' ? blob : new Promise(ok => c.toBlob(ok, 'image/jpeg', .88));
+}
+const acctBusy = (form, on) => { const b = form?.querySelector('[type=submit]'); if (b) { b.disabled = on; b.classList.toggle('is-busy', on); } };
+document.addEventListener('submit', async e => {
+  const f = e.target.closest('[data-acct]'); if (!f) return;
+  e.preventDefault(); if (f.querySelector('[type=submit]')?.disabled) return;
+  const fd = new FormData(f), kind = f.dataset.acct, recovering = !!cloud?.recovery;
+  const again = (msg, ok) => accountDialog(recovering && kind === 'password' && !ok ? 'newpw' : 'account', '', { note: [kind, msg, ok] });
+  if (!navigator.onLine) return again('You are offline. Connect to the internet, then try again.');
+  acctBusy(f, true);
+  if (kind === 'profile') {
+    const err = await cloud.updateProfile({ full_name: fd.get('name'), student_id: fd.get('sid') });
+    acctBusy(f, false); if (err) return again(esc(err));
+    paintStatus(); wall?.load?.(); toast('Your details are saved.'); return again('Saved. Your new name appears at the top of the page and on your class wall posts.', true);
+  }
+  if (kind === 'password') {
+    const next = String(fd.get('next') || ''), cur = String(fd.get('current') || '');
+    const bad = next.length < 6 ? 'Choose a new password with at least 6 characters.' : next !== String(fd.get('again') || '') ? 'The two new passwords are not the same. Please type them again.' : !recovering && !cur ? 'Please type your current password.' : '';
+    if (bad) { acctBusy(f, false); return again(bad); }
+    const err = await cloud.changePassword(cur, next); acctBusy(f, false);
+    if (err) return again(esc(err));
+    toast('Your password is changed.'); return accountDialog('account', '', { note: ['password', 'Password changed. Use the new password next time you sign in.', true] });
+  }
+});
+document.addEventListener('change', async e => {
+  const inp = e.target.closest('[data-avatar-file]'); if (!inp || !inp.files?.[0]) return;
+  const photo = inp.closest('.acct-hero'); photo?.classList.add('is-busy');
+  try {
+    if (!navigator.onLine) throw new Error('You are offline. Connect to the internet, then try again.');
+    const err = await cloud.setAvatar(await squarePicture(inp.files[0]));
+    if (err) throw new Error(err);
+    paintStatus(); wall?.load?.(); toast('Your picture is saved.'); accountDialog('account', '', { note: ['photo', 'Picture saved.', true] });
+  } catch (err) { accountDialog('account', '', { note: ['photo', esc(err.message || String(err))] }); }
+});
+document.addEventListener('keydown', e => { const l = e.target.closest?.('.acct-photo-btns label'); if (l && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); l.querySelector('input')?.click(); } });
+/* works offline: the app keeps a copy of itself on the device (sw.js); answers are always saved on the device */
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || /[?&]sw=1\b/.test(location.search))) addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => null));
+addEventListener('offline', () => { paintStatus(); toast('You are offline. You can keep working — your answers are saved on this device.'); });
+addEventListener('online', () => { paintStatus(); toast('Back online.'); });
+/* Projector mode: for showing a lesson on the classroom screen. Big text, no side panel,
+   arrow keys move between activities, Esc or P leaves. */
+const presentBar = document.createElement('div');
+presentBar.className = 'present-bar'; presentBar.setAttribute('role', 'toolbar'); presentBar.setAttribute('aria-label', 'Projector controls');
+presentBar.innerHTML = `<button type="button" data-present-step="-1" aria-label="Previous activity">${icon('left')}</button><span class="present-where"></span><button type="button" data-present-step="1" aria-label="Next activity">${icon('arrow')}</button><button type="button" class="present-exit" data-present-exit>Exit</button>`;
+document.body.append(presentBar);
+function paintPresent() {
+  const cur = $('.act-tabs .current'), where = presentBar.querySelector('.present-where');
+  where.textContent = cur ? `${[...cur.parentNode.children].indexOf(cur) + 1} / ${cur.parentNode.children.length} · ${(document.getElementById('h-' + cur.dataset.jump)?.textContent || '').replace(/\s+/g, ' ').trim()}` : document.title.replace(/^DEC15 · /, '');
+  presentBar.querySelector('[data-present-step="-1"]').disabled = !cur?.previousElementSibling;
+  presentBar.querySelector('[data-present-step="1"]').disabled = !cur?.nextElementSibling;
+}
+function setPresent(on) {
+  document.body.classList.toggle('present', on); $('#present-toggle')?.setAttribute('aria-pressed', String(on));
+  if (on) { paintPresent(); document.documentElement.requestFullscreen?.().catch(() => null); toast('Projector mode: use ← → to move between activities. Press Esc to leave.'); }
+  else if (document.fullscreenElement) document.exitFullscreen?.().catch(() => null);
+}
+function presentStep(d) { const cur = $('.act-tabs .current'), to = d > 0 ? cur?.nextElementSibling : cur?.previousElementSibling; if (to) { const id = to.dataset.jump; to.click(); setTimeout(() => { paintPresent(); document.getElementById(id)?.scrollIntoView({ block: 'start' }); }, 60); } }
+$('#present-toggle').onclick = () => setPresent(!document.body.classList.contains('present'));
+presentBar.addEventListener('click', e => { const t = e.target.closest('button'); if (!t) return; if (t.dataset.presentStep) presentStep(Number(t.dataset.presentStep)); if (t.hasAttribute('data-present-exit')) setPresent(false); });
+document.addEventListener('keydown', e => {
+  if (e.target.closest?.('input, textarea, select, [contenteditable="true"]') || e.metaKey || e.ctrlKey || e.altKey || document.querySelector('dialog[open]')) return;
+  const on = document.body.classList.contains('present');
+  if ((e.key === 'p' || e.key === 'P') && (isTeacher() || on)) { setPresent(!on); e.preventDefault(); return; }
+  if (!on) return;
+  if (e.key === 'Escape') setPresent(false);
+  else if (e.key === 'ArrowRight') { presentStep(1); e.preventDefault(); }
+  else if (e.key === 'ArrowLeft') { presentStep(-1); e.preventDefault(); }
+});
+document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement && document.body.classList.contains('present')) setPresent(false); });
+addEventListener('hashchange', () => setTimeout(paintPresent, 80));
+/* tap a diagram to see it full size — useful on phones, where wide diagrams are small */
+function closeZoom() { const z = document.querySelector('.zoom'); if (z) z.remove(); }
+document.addEventListener('click', e => {
+  if (e.target.closest('.zoom')) { closeZoom(); return; }
+  const img = e.target.closest('figure.figure img'); if (!img) return;
+  const z = document.createElement('div');
+  z.className = 'zoom'; z.setAttribute('role', 'dialog'); z.setAttribute('aria-label', 'Enlarged picture. Tap to close.');
+  z.innerHTML = `<button class="zoom-x" type="button" aria-label="Close">×</button><div class="zoom-in"><img src="${esc(img.getAttribute('src'))}" alt="${esc(img.alt)}"></div>`;
+  document.body.append(z); z.querySelector('.zoom-x').focus();
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeZoom(); });
+window.addEventListener('hashchange', closeZoom);
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-cowrite]'); if (!b) return;
+  const a = allActivities.find(x => x.id === b.dataset.cowrite); if (!a) return;
+  if (!cloud?.user) { toast('Sign in to write together with your class.'); accountDialog('signin'); return; }
+  b.disabled = true;
+  loadCollab().then(() => window.DEC15Collab.open({ lessonId: lesson.id, activityId: a.id, title: a.title, goal: a.goal, getCloud: () => cloud, esc, icon, toast, signIn: () => accountDialog('signin'), isTeacher }))
+    .catch(() => toast('Write together could not open. Check your internet connection.')).finally(() => { b.disabled = false; });
+});
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-pw-show]'); if (!b) return;
+  const inp = b.previousElementSibling, show = inp.type === 'password';
+  inp.type = show ? 'text' : 'password'; b.textContent = show ? 'Hide' : 'Show'; b.setAttribute('aria-pressed', String(show)); inp.focus();
+});
+document.addEventListener('submit', async e => {
+  const f = e.target.closest('[data-auth]'); if (!f) return;
+  e.preventDefault();
+  const fd = new FormData(f), mode = f.dataset.auth, btn = f.querySelector('[type=submit]');
+  if (btn.disabled) return;   // one request at a time — double clicks used to send two
+  const v = { email: String(fd.get('email') || '').trim().toLowerCase(), password: String(fd.get('password') || ''), name: String(fd.get('name') || '').trim(), sid: String(fd.get('sid') || '').trim() };
+  const keep = { ...v, password: mode === 'signin' ? '' : v.password };
+  const bad = checkAuthForm(mode, v); if (bad) return accountDialog(mode, esc(bad), keep);
+  btn.disabled = true; btn.textContent = 'Please wait…';
+  let err;
+  if (mode === 'signin') err = await cloud.signIn(v.email, v.password);
+  if (mode === 'signup') err = await cloud.signUp(v.email, v.password, v.name, v.sid);
+  if (mode === 'reset') err = (await cloud.resetPassword(v.email)) || 'SENT';
+  if (mode === 'link') err = (await cloud.sendEmailLink(v.email, true)) || 'LINK_SENT';
+  if (err === 'LINK_SENT') return accountDialog('link', 'Check your inbox (and Junk/Spam). Open the link on this device to sign in — no password needed.', { email: v.email });
+  if (err === 'CHECK_EMAIL') return accountDialog('signin', 'Account created. Open the email we sent you (check Junk/Spam too) to confirm it, then sign in here.', { email: v.email });
+  if (err === 'SENT') return accountDialog('signin', 'If that email has an account, a reset link is on its way.', { email: v.email });
+  if (err === 'EMAIL_LIMIT') return accountDialog(mode, EMAIL_LIMIT_MSG, keep);
+  if (err && /already has an account/.test(err)) return accountDialog('signin', esc(err), { email: v.email });
+  if (err) return accountDialog(mode, esc(err), keep);
+  $('#resource-dialog').close(); toast('You are signed in. Your work is now saved online.');
+});
+
+/* ───────── timer ───────── */
+let timer = null, remaining = 0, deadline = 0, paused = false;
+function paintTimer() { const el = $('#timer-display'); if (el) el.textContent = Math.floor(remaining / 60) + ':' + pad(remaining % 60); }
+function startTimer(min) {
+  clearInterval(timer); $('#active-timer')?.remove(); remaining = min * 60; paused = false; deadline = Date.now() + remaining * 1000;
+  document.body.insertAdjacentHTML('beforeend', `<div class="timer-pop" id="active-timer" role="timer" aria-label="Activity timer"><span>${min}-minute activity</span><strong id="timer-display"></strong><button data-pause>Pause</button><button data-close-timer aria-label="Close timer">×</button></div>`);
+  paintTimer();
+  timer = setInterval(() => { if (paused) return; remaining = Math.max(0, Math.ceil((deadline - Date.now()) / 1000)); paintTimer(); if (!remaining) { clearInterval(timer); toast('Time is up. Finish your sentence and compare.'); } }, 250);
+}
+
+/* ───────── events ───────── */
+document.addEventListener('input', e => {
+  const t = e.target; if (!t.dataset.save) return;
+  state.values[t.dataset.save] = t.type === 'checkbox' ? t.checked : t.value; save();
+  play?.onInput(t);
+  kit?.onInput(t);
+  forms?.onInput(t);
+  if (t.type === 'checkbox' && t.closest('.checklist')?.querySelector('.check-meter')) rerender();
+});
+document.addEventListener('change', e => {
+  const t = e.target;
+  if (forms && forms.onChange(t)) return;
+  if (guide && guide.onChange(t, () => rerender())) return;
+  if (t.matches?.('[data-ws-lesson]')) { if (t.value && t.value !== lesson.id) location.hash = '#/' + t.value + '/notebook'; return; }
+  if (t.dataset.done) {
+    state.done[t.dataset.done] = t.checked; save(); rerender(); clearTimeout(klass?._ct); if (klass) klass._ct = setTimeout(() => klass.loadCounts(), 4000);
+    if (t.checked) {
+      const s = lesson.sections.find(x => x.activities.some(a => a.id === t.dataset.done));
+      const all = s && s.activities.every(a => state.done[a.id]);
+      document.querySelector(`[data-done="${t.dataset.done}"]`)?.closest('.done-toggle')?.classList.add('pop');
+      toast(all ? `${stageName(s)} complete — well done!` : 'Activity finished. Nice work.');
+    }
+  }
+});
+document.addEventListener('click', e => {
+  const t = e.target.closest('button,a,[data-week-tab]'); if (!t) return;
+  const d = t.dataset;
+  if (play && play.onClick(t, d)) return;
+  if (kit && kit.onClick(t, d)) return;
+  if (guide && guide.onClick(t, d, () => rerender())) return;
+  if (forms && forms.onClick(t, d)) return;
+  if (d.langTab) { const box = t.closest('.language'); box.querySelectorAll('[role=tab]').forEach((x, i) => { const on = x === t; x.setAttribute('aria-selected', on); x.tabIndex = on ? 0 : -1; box.querySelectorAll('[role=tabpanel]')[i].hidden = !on; }); return; }
+  if (d.quiz) { const k = d.quiz + '-' + d.i; state.values[k] = d.opt; delete state.checked[d.quiz]; save(); rerender(); return; }
+  if ((d.quizCheck || d.orderCheck || d.orderSolve || d.gridCheck || d.reveal) && locked()) { toast(LOCKED_MSG); return; }
+  if (d.quizCheck) {
+    const b = allActivities.flatMap(a => a.blocks).find(x => x.id === d.quizCheck);
+    const missing = b.items.filter((_, i) => !val(b.id + '-' + i)).length;
+    if (missing && !state.teacher) { toast(`Answer all the questions first (${missing} left).`); return; }
+    state.checked[b.id] = true; save(); rerender();
+    if (b.items.every((q, i) => val(b.id + '-' + i) === q.answer)) { toast('All correct — well done!'); play?.confetti(document.getElementById('quiz-' + b.id)); }
+    return;
+  }
+  if (d.order) { const i = Number(d.from); commitOrder(d.order, i, i + Number(d.dir)); return; }
+  if (d.orderCheck) { const b = orderBlock(d.orderCheck), o = orderOf(b); state.values[b.id] = o.join(','); state.checked[b.id] = true; save(); rerender();
+    if (o.every((x, i) => x === i)) { toast('Perfect order — well done!'); play?.confetti(document.getElementById('order-' + b.id)); } return; }
+  if (d.orderSolve) { const b = orderBlock(d.orderSolve), before = new Map(orderCards(b.id).map(el => [el.dataset.x, el.getBoundingClientRect().top]));
+    state.values[b.id] = b.items.map((_, i) => i).join(','); state.checked[b.id] = true; save(); rerender();
+    if (!reduceMotion()) orderCards(b.id).forEach(el => { const dy = before.get(el.dataset.x) - el.getBoundingClientRect().top; if (dy) el.animate([{ transform: `translateY(${dy}px)` }, { transform: 'none' }], { duration: 520, easing: 'cubic-bezier(.2,.7,.2,1)', delay: Number(el.dataset.x) * 40, fill: 'backwards' }); });
+    return; }
+  if (d.orderReset) { delete state.checked[d.orderReset]; save(); rerender(); return; }
+  if (d.gridCheck) {
+    const b = allActivities.flatMap(a => a.blocks).find(x => x.id === d.gridCheck);
+    const missing = b.rows.reduce((n, _, r) => n + b.columns.filter((_, c) => !b.given?.[`${r}-${c}`] && !val(`${b.id}-${r}-${c}`)).length, 0);
+    if (missing && !state.teacher) { toast(`Complete every box first (${missing} left).`); return; }
+    state.checked[b.id] = true; save(); rerender(); return;
+  }
+  if (d.gridReset) { delete state.checked[d.gridReset]; save(); rerender(); return; }
+  if (d.quizReset) { delete state.checked[d.quizReset]; save(); rerender(); return; }
+  if (d.choose) { state.values[d.choose] = d.opt; save(); rerender(); return; }
+  if (d.reveal) {
+    const a = allActivities.find(x => x.id === d.reveal);
+    if (!hasAttempt(a) && !state.teacher) { toast('Write or choose something first. Then compare with the suggested answers.'); return; }
+    state.revealed[a.id] = true; save(); morph('ans-' + a.id, rerender); document.getElementById('ans-' + a.id)?.classList.add('just-opened'); return;
+  }
+  if (d.unlock) { state.revealed['gate-' + d.unlock] = true; save(); rerender(); return; }
+  if (d.hideAnswers) { delete state.revealed[d.hideAnswers]; save(); morph('ans-' + d.hideAnswers, rerender); return; }
+  if (d.addRow) { state.rows[d.addRow] = (state.rows[d.addRow] || 0) + 1; save(); rerender(); return; }
+  if (d.weekTab) { homeWeek = Number(d.weekTab); rerender(); $(`#tab-week-${homeWeek}`)?.focus({ preventScroll: !t.classList.contains('week-tab') }); if (!t.classList.contains('week-tab')) $('.week')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
+  if (d.navWeek) {   // one week open at a time: opening a week folds the others
+    const w = Number(d.navWeek), wk = t.closest('.nav-week'), open = !wk.classList.contains('open'); navWeekOpen = open ? w : 0;
+    try { localStorage.setItem(CLS.id + '-nav-week', JSON.stringify(navWeekOpen)); } catch (e) { /* ignore */ }
+    if (open) document.querySelectorAll('.nav-week.open').forEach(o => { if (o !== wk) setFold(o, o.querySelector('[data-nav-week]'), false); });
+    setFold(wk, t, open);
+    if (open) setTimeout(() => wk.scrollIntoView({ block: 'nearest', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }), 340);
+    return; }
+  if (d.navDay) {   // one day open at a time: opening a day slides the others closed
+    const item = t.closest('.nav-dayitem'), open = !item.classList.contains('open');
+    if (open) document.querySelectorAll('.nav-dayitem.open').forEach(o => { const b = o.querySelector(':scope > [data-nav-day]'); if (o !== item && b) { navDayOpen[b.dataset.navDay] = false; setFold(o, b, false); } });   // the "You are here" day has no fold button and stays open
+    navDayOpen[d.navDay] = open; setFold(item, t, open);
+    if (open) setTimeout(() => item.scrollIntoView({ block: 'nearest', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }), 340);
+    return; }
+  if (t.id === 'side-settings') { const m = $('#side-menu'), open = m.hidden; m.hidden = !open; t.setAttribute('aria-expanded', String(open)); if (open) m.querySelector('button')?.focus(); return; }
+  if (t.id === 'menu-btn') { setSide(!document.body.classList.contains('side-open')); return; }
+  if (t.tagName === 'A' && t.closest('.sidebar')) { setSide(false); if ($('#side-search').value) { $('#side-search').value = ''; setTimeout(runSearch); } }
+  if (d.go) { const sec = lesson.sections.find(x => x.activities.some(a => a.id === d.go)); if (sec) { state.active[sec.id] = d.go; save(false); }
+    if (t.getAttribute('href') === location.hash) { e.preventDefault(); rerender(); $('.act-tabs')?.scrollIntoView({ block: 'start' }); }   // already on this page: just switch the tab
+    return; }
+  if (t.classList.contains('skip')) { e.preventDefault(); $('#main').focus(); return; }
+  if (d.gloss) { glossary(d.gloss); return; }
+  if (d.scroll) { const el = document.getElementById(d.scroll); el?.scrollIntoView({ behavior: calm() ? 'auto' : 'smooth', block: 'start' }); el?.focus({ preventScroll: true }); return; }
+  if (d.jump) {
+    const s = lesson.sections.find(x => x.activities.some(a => a.id === d.jump));
+    state.active[s.id] = d.jump; save(); render();
+    /* DEC10: Next / Previous at the bottom go back to the TOP of the page (it feels like a new part);
+       the numbered tabs at the top just change the part — the page does not move. The new part fades in. */
+    if (course.id === 'ielts') {
+      if (t.closest('.pager')) window.scrollTo({ top: 0, behavior: calm() ? 'auto' : 'smooth' });
+      const card = $('#' + d.jump); if (card) { card.classList.remove('act-enter'); void card.offsetWidth; card.classList.add('act-enter'); card.focus({ preventScroll: true }); }
+      return;
+    }
+    const el = $('.act-tabs'); el?.scrollIntoView({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+    $('#' + d.jump)?.focus({ preventScroll: true }); return;
+  }
+  if (d.source) { openSource(d.source, Number(d.srcWeek) || null); return; }
+  if (d.libWeek) { const n = Number(d.libWeek); libOpen = libOpen === n ? 0 : n; rerender(); return; }   // one week open at a time
+  if (t.hasAttribute('data-video')) { t.closest('.video-wrap').innerHTML = `<iframe title="${esc(d.title)}" src="https://www.youtube-nocookie.com/embed/${encodeURIComponent(d.video)}?start=${Number(d.start) || 0}" allow="encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>`; return; }
+  if (d.timer) { startTimer(Number(d.timer)); return; }
+  if (t.hasAttribute('data-pause')) { paused = !paused; if (!paused) deadline = Date.now() + remaining * 1000; t.textContent = paused ? 'Resume' : 'Pause'; return; }
+  if (t.hasAttribute('data-close-timer')) { clearInterval(timer); $('#active-timer')?.remove(); return; }
+  if (d.export) { runExport(d.export, t); return; }
+  if (d.authMode) { accountDialog(d.authMode); return; }
+  if (t.hasAttribute('data-avatar-remove')) { cloud.removeAvatar().then(err => { paintStatus(); wall?.load?.(); accountDialog('account', '', { note: ['photo', err ? esc(err) : 'Picture removed.', !err] }); }); return; }
+  if (t.hasAttribute('data-signout-all')) { if (!confirm('Sign out on every device where you are signed in?')) return; cloud.signOutEverywhere().then(() => { $('#resource-dialog').close(); toast('Signed out on all devices. Work on this device is still saved here.'); }); return; }
+  if (t.hasAttribute('data-google')) { t.disabled = true; cloud.signInWithGoogle().then(err => { if (err) { t.disabled = false; toast(err); } }); return; }
+  if (t.hasAttribute('data-teacher-link')) { t.disabled = true; cloud.sendEmailLink(cloudInfo.user?.email, false).then(err => accountDialog('account', '', { note: ['teacher', err ? esc(err === 'EMAIL_LIMIT' ? EMAIL_LIMIT_MSG : err) : 'Sent. Open the email (check Junk/Spam too) and click the link on this device.', !err] })); return; }
+  if (t.hasAttribute('data-signout')) { cloud.signOut().then(() => { $('#resource-dialog').close(); toast('Signed out. Work on this device is still saved here.'); }); return; }
+  if (t.hasAttribute('data-clear') && confirm('Clear all your answers on this device? Download your notes first if you need them.')) {
+    state = { ...state, values: {}, done: {}, revealed: {}, checked: {}, rows: {}, marks: {}, markDocuments: {} }; save(); render(); toast('Cleared.');
+  }
+});
+$('#account-btn').onclick = () => accountDialog();
+$('#side-search').addEventListener('input', runSearch);
+document.addEventListener('keydown', e => {   // arrow keys move between week tabs; Enter on a map stop opens its week
+  const t = e.target;
+  if (t.classList?.contains('week-tab') && /^Arrow(Left|Right)$/.test(e.key)) {
+    const all = [...document.querySelectorAll('.week-tab')], i = all.indexOf(t), n = all[(i + (e.key === 'ArrowRight' ? 1 : -1) + all.length) % all.length];
+    n.click(); e.preventDefault();
+  }
+  if (t.classList?.contains('cm-link') && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); t.dispatchEvent(new MouseEvent('click', { bubbles: true })); }
+});
+$('#side-search').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); $('#side-results .search-hit.first')?.click(); }
+  if (e.key === 'Escape') { e.target.value = ''; runSearch(); }
+});
+$('#scrim').onclick = () => setSide(false);
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && document.body.classList.contains('side-open')) setSide(false);
+  const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName || '') || document.activeElement?.isContentEditable;
+  if (e.key === '/' && !e.ctrlKey && !e.metaKey && !typing && !$('#resource-dialog').open) {
+    e.preventDefault(); if (matchMedia('(max-width: 900px)').matches) setSide(true); else $('#side-search').focus();
+  }
+});
+$('#teacher-toggle').onclick = () => { if (!isTeacher()) { toast('Teacher view is only for your teacher.'); return; } state.teacher = !state.teacher; save(); rerender(); toast(state.teacher ? 'Teacher view: answers and teacher notes are shown.' : 'Student view: answers open after students try.'); };
+$('#glossary-open').onclick = () => glossary();
+$('#source-open').onclick = () => openSource();
+$('#dialog-close').onclick = () => { reader.closeWord(); $('#resource-dialog').close(); };
+$('#text-toggle').onclick = e => { const on = document.body.classList.toggle('large-text'); e.currentTarget.setAttribute('aria-pressed', String(on)); };
+/* The course card under the logo (DEC10): the course code as a chip, then its name. */
+if (course.sideCard) {
+  /* DEC10: a ten-week strip under the course name shows where the term is up to (weeks done, this week, to come). */
+  const strip = (() => { const G = window.DEC15_GUIDE; if (!G?.weeks) return '';
+    const t = new Date(), today = new Date(t.getFullYear(), t.getMonth(), t.getDate()), parse = x => { const [y, m, d] = x.split('-').map(Number); return new Date(y, m - 1, d); };
+    const ws = G.weeks.filter(w => !w.brk); let now = 0;
+    ws.forEach((w, i) => { const a = parse(w.start), b = new Date(a.getFullYear(), a.getMonth(), a.getDate() + 6); if (today >= a) now = today <= b ? i : i + 1; });
+    return `<span class="sc-weeks" aria-label="Week ${Math.min(now + 1, ws.length)} of ${ws.length}">${ws.map((w, i) => `<i class="${i < now ? 'is-done' : i === now ? 'is-now' : ''}" title="Week ${w.n}"></i>`).join('')}</span>`; })();
+  $('#sidebar .uni').insertAdjacentHTML('afterend', `<div class="side-course"><b class="sc-code">${esc(course.code)}</b><span class="sc-name">${esc(course.sideCard.name)}<small>${esc(course.sideCard.note || '')}</small>${strip}</span></div>`);
+}
+/* Side panel colour (Settings): only for a course whose map lists sideColours (DEC10). Saved on this device. */
+if (course.sideColours?.length) {
+  const root = document.documentElement, key = CLS.id + '-side';
+  const now = () => root.dataset.side || course.sideColours[0][0];
+  const pick = $('#side-menu').appendChild(document.createElement('div'));
+  pick.className = 'side-colours';
+  const paint = () => { pick.innerHTML = `<span class="sc-label">Side panel colour</span><span class="sc-row" role="radiogroup" aria-label="Side panel colour">${course.sideColours.map(([id, name, hex]) =>
+    `<button type="button" role="radio" aria-checked="${now() === id}" data-side-colour="${id}" title="${name}" aria-label="${name}" style="--sc:${hex}"></button>`).join('')}</span>`; };
+  paint();
+  pick.onclick = e => {
+    const b = e.target.closest('[data-side-colour]'); if (!b) return;
+    root.dataset.side = b.dataset.sideColour; try { localStorage.setItem(key, b.dataset.sideColour); } catch (err) { /* this visit only */ }
+    paint(); pick.querySelector('[aria-checked="true"]')?.focus();
+  };
+}
+window.addEventListener('hashchange', () => { render(); window.scrollTo(0, 0); $('#main').focus({ preventScroll: true }); });
+render(); save(false);
+cloud = window.createDEC15Cloud({
+  cfg, lessonId: lesson.id, getState: () => state,
+  applyState: next => { state = { ...state, ...next, teacher: state.teacher }; save(false); rerender(); },
+  onChange: info => { const was = cloudInfo.user?.id; cloudInfo = info; paintStatus();
+    if (info.user?.id !== was) window.DEC15Planner?.onAuth?.(info);
+    if (info.recovery && info.user && !accountDialog.recoveryShown) { accountDialog.recoveryShown = true; setTimeout(() => accountDialog('newpw'), 300); }
+    if (wall && info.user?.id !== was) { wall.connect(); rerender(); }
+    if (forms && info.user?.id !== was) forms.connect();
+    chats?.connect();
+    if (klass && (info.user?.id || '') + ':' + (info.profile?.role || '') !== klass.key) { klass.key = (info.user?.id || '') + ':' + (info.profile?.role || ''); klass.connect(); window.DEC15Board?.reload?.(); if (window.DEC15Board?.mounted) { window.DEC15Board.unmount(); $('#board-root')?.remove(); } rerender(); } if (parseRoute().page === 'notebook' && info.status === 'saved' && info.profile && !paintStatus.named) { paintStatus.named = true; rerender(); } }
+});
+if (wall && cloud.enabled) rerender();   // show the class walls
+cloud.init().catch(e => { console.error(e); cloudInfo = { status: 'error' }; paintStatus(); });
+})();

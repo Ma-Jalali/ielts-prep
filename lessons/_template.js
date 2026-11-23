@@ -1,0 +1,124 @@
+/* IELTS PREP · LESSON TEMPLATE — copy this file to start a new lesson (or build the page in Studio: #/studio).
+
+   HOW TO ADD A LESSON (e.g. Week 3, Day 1 → iew3d1)
+   1. Copy this file to  lessons/week3/iew3d1.js  and change id, week, day and the content.
+   2. If the lesson uses new readings or a new listening, put them in  lessons/week3/sources.js
+      (window.DEC15_SOURCES = [ ... ]).
+   3. In  lessons/course.js  find the day, set  status: 'ready'  and list the files, e.g.
+        scripts: ['lessons/week3/sources.js', 'lessons/week3/iew3d1.js']
+      Optionally set  art: 'reading'  (the picture on the course map card).
+   4. In index.html and js/config.js raise the version number (?v=2.5 → ?v=2.6) so browsers
+      download the new files.
+
+   RULES THAT PROTECT STUDENTS' SAVED WORK
+   - id ('iew3d1') and every activity / field id are the keys of saved answers. Never rename them
+     after students have started. Add new ids instead.
+   - Ids must be unique inside the lesson (use a letter per stage: a1, a2 … b1, b2 …).
+
+   LOOK OF EACH STAGE
+   tone: 'amber' | 'teal' | 'blue' | 'clay' | 'plum' | 'green'                       (colour)
+   art:  'ai' | 'feedback' | 'critical' | 'writing' | 'reading' | 'listening' |
+         'discussion' | 'research' | 'assessment' | 'group'                        (illustration)
+
+   BLOCK TYPES (the Block gallery, Week 1 Day 2, shows each one working)
+     key        { type: 'key', title, points: [..], numbered?, tone?: 'warn', compare?: [{ label, text, eg }] }
+     steps      { type: 'steps', title?, items: [{ who: 'alone'|'pair'|'group'|'class', text }] }
+     talk       { type: 'talk', title?, prompts: [..] }
+     language   { type: 'language', title?, groups: [{ label, phrases: [..] }] }
+     model      { type: 'model', title, before?, text?, rows?: [[k, v]], list?: [..], note? }
+     cards      { type: 'cards', title?, numbered?, items: [{ label?, text }] }
+     quiz       { type: 'quiz', id, title?, shared?: [options], items: [{ q, options?, answer, why }] }
+     fields     { type: 'fields', title?, fields: [{ id, label, placeholder?, rows? }] }
+     table      { type: 'table', id, title?, columns: [..], fixed?: [row labels], rows?, extraRows? }
+     choose     { type: 'choose', id, title, options: [..] }
+     question   { type: 'question' }                         the essay question with highlighting tools
+     passage    { type: 'passage', id, title, text }         a paragraph students can highlight
+     listening  { type: 'listening', source, title, videoId, start, clip, transcripts: [[sourceId, label]] }
+     plan       { type: 'plan' }                             the essay outline
+     checklist  { type: 'checklist', id, title, items: [..] }
+     sources    { type: 'sources', ids: ['reading1', ...] }  buttons that open course texts
+     order      { type: 'order', id, title, items: [..in the CORRECT order..], ends?: ['Most effective', 'Least effective'], why? }
+                students see the items mixed and move them up/down, then check (ranking, sequencing)
+     grid       { type: 'grid', id, title, rows: [..], columns: [..], options: ['Agree', 'Doesn’t mention'],
+                  answers?: [[row 1 answers…], …], given?: { '0-0': 'Agree' } }   a table of drop-down choices
+     figure     { type: 'figure', src, alt, caption?, credit?, size?: 'small' | 'wide' }   a picture or diagram
+     tabs       { type: 'tabs', title?, tabs: [{ label, blocks: [...] }] }   one panel at a time under a sliding tab bar
+     toggle     { type: 'toggle', title, hint?, open?: true, blocks: [...] }   a fold that opens (hints, extra help, model answers)
+                ref: true makes it a reference fold (document icon, neutral colours): use it to bring an earlier text into a later tab.
+     group      { type: 'group', title, label?: 'Rules 1–5', goal? }   a large, unnumbered section heading (e.g. above a set of rule cards)
+     rule       { type: 'rule', n, title, explain, form?, pairs?: [['not academic', 'academic', 'note?']], note?, check?: { q, a } }
+                with pairs: a calm two-column Not academic | Academic table (4 pairs is a good number)
+     text       { type: 'text', title?, before?, text?, list?: [..] }   a plain, full-width document (no label, no colour) — e.g. inside a reference fold
+     carousel   { type: 'carousel', title?, slides: [{ title?, text?, image?, alt?, blocks? }] }   slides in one row (arrows, dots, swipe)
+                (flip cards with 6 or more cards become a carousel by themselves; table columns can be widened by dragging)
+     tip        { type: 'tip', text }
+     listening  … also url: 'https://…', urlLabel: 'Watch on TED.com' — a button for media that is not on YouTube
+     form       { type: 'form', id, title, intro?, observe?: 'Who are you observing?', scale?: ['Yes', 'Mostly', 'Needs work'],
+                  cols?: ['Comments', 'Action plan for further improvement'], sections: [{ label, hint?, items: [..] }],
+                  fields?: [{ id, label, rows?, placeholder? }], send?: true }   rating form (feedback / self-reflection)
+     scale      { type: 'scale', id, title?, statement, ends: ['Strongly disagree', 'Strongly agree'], mid?, answer?: 0–100, why? }
+     jeopardy   { type: 'jeopardy', id, title?, teams?: 4, seconds?: 20, cols: [{ title, clues: [{ pts, clue, answer }] }] }
+     Learning kit (js/kit.js — see the top of that file for every option):
+     match      { type: 'match', id, title?, hint?, left: [..], right: [..] }          tap-to-pair matching (right[i] goes with left[i])
+     spot       { type: 'spot', id, title?, hint?, label?, paras: ['… [[a phrase]] … [[*a right one]] …'] }   tap the phrases that do a job
+     outline    { type: 'outline', id, title?, hint?, items: [[level 0-2, text], …] }   indent notes into an outline
+     limit      { type: 'limit', id, title?, rule?, max, items: [{ q, accept: [..] | { need, any: [..] }, model, why? }] }   word-limit answers
+     bet        { type: 'bet', id, title?, coins?, items: [{ q, options, answer, why? }] }   multiple choice with a confidence bet
+     bingo      { type: 'bingo', id, title?, hint?, squares: [16 × { text, ask? }] }     find-someone-who bingo
+     squeeze    { type: 'squeeze', id, title?, hint?, items: [{ text, max, model }] }   sentence → notes under a character limit
+     Put these at the top level of an activity's blocks (not inside tabs or toggle), like quiz and order.
+     send: true on a form, table or fields block (the block needs an id) adds “Share with classmates” + PDF.
+                Use it only where students observe / give feedback to a classmate or group, or swap work.
+                Optional sendLabel and sendHint change the text. Recipients read it in “Shared with me” (#/shared).
+     teacher    { type: 'teacher', ref: 'w1d1-t1' }          only shown in Teacher view, and only to the teacher.
+                The note text is NOT kept in this file (the site is public): add it to the database
+                table teacher_notes (lesson_id, ref, body) in Supabase, and put only its ref here.
+   answers: { title?, items: [[label, answer], ...] } — opens after the student tries.
+   Class wall: every activity has one. Add wall: false to an activity (or the lesson) to hide it;
+   add share: false to a field (or a fields block) to hide its “Share with class” button. */
+
+window.DEC15_LESSON = {
+  id: 'iew3d1',
+  week: 3, day: 1,
+  title: 'Lesson title',
+  duration: 'About 4 hours',                 // optional, shown on the overview
+  question: 'The protected essay question — copy it exactly from the course materials.',
+  questionKind: 'Essay question',            // or e.g. 'Focus question' when the day has no essay question
+  questionLabel: 'This week’s essay question',  // the label above the question on the overview
+  wordTarget: '450–600 words',
+  journey: 'One or two sentences: what students will be able to do by the end of the day.',
+  image: 'assets/ui/library/hero.svg',       // optional hero picture
+  imageAlt: 'Describe the picture for screen readers.',
+  finish: { title: 'Next', text: 'What comes after this lesson' },
+
+  sections: [
+    {
+      id: 'reading', number: '01', code: '5A', minutes: 60,   // code = the Teacher’s Book lesson code
+      tone: 'plum', art: 'reading',
+      title: 'Reading to write',          // the Teacher’s Book lesson name, exactly as in the book
+      subtitle: 'A friendly one-line description',
+      outcome: 'What students can do after this stage.',
+      activities: [
+        {
+          id: 'r1', short: 'Warm-up', minutes: 10, grouping: 'Pair',
+          title: 'Activity title',        // use the Teacher’s Book heading (e.g. 'Warmer: Food waste hierarchy')
+          goal: 'One clear goal.',
+          blocks: [
+            { type: 'steps', items: [
+              { who: 'alone', text: 'Read the question.' },
+              { who: 'pair', text: 'Compare your ideas.' }
+            ] },
+            { type: 'key', title: 'The one idea to remember', points: ['Point one', 'Point two'] },
+            { type: 'fields', fields: [{ id: 'r1-1', label: 'My idea', placeholder: 'Write here…', rows: 3 }] }
+          ],
+          answers: { items: [['My idea', 'A model answer.']] }
+        }
+      ]
+    }
+  ],
+
+  extras: [],      // optional practice activities (same format as activities)
+  glossary: [      // [word, meaning, example]
+    ['example', 'something that shows what a rule or idea means', 'Give one example from the reading.']
+  ]
+};

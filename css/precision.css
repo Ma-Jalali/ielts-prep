@@ -1,0 +1,764 @@
+/* DEC10 · precision (v9.0): one last pass for exactness. Loaded last; everything is scoped to [data-course="ielts"],
+   so DEC15 is untouched. Nothing here changes lesson content, ids or behaviour — only measure, type and finish.
+   1. Tokens & base type   2. Page ground   3. Side panel (light)   4. Top bar & week bar
+   5. Course map   6. Calendar & assessments   7. Lesson pages   8. Lab, downloads, workspace   9. Small screens
+   One hairline (--px-line), one shadow scale (--px-e1 … --px-e3), one focus ring, tabular figures wherever numbers
+   line up, and no decoration that does not carry meaning. */
+
+/* ───────── 1. tokens & base type ───────── */
+[data-course="ielts"] {
+  --px-line: rgba(20, 41, 58, .1);
+  --px-line-soft: rgba(20, 41, 58, .065);
+  --px-line-strong: rgba(20, 41, 58, .16);
+  --px-e1: 0 0 0 1px var(--px-line-soft), 0 1px 2px rgba(20, 41, 58, .04);
+  --px-e2: 0 0 0 1px var(--px-line-soft), 0 1px 2px rgba(20, 41, 58, .04), 0 8px 20px -12px rgba(20, 41, 58, .16);
+  --px-e3: 0 0 0 1px var(--px-line-soft), 0 2px 4px rgba(20, 41, 58, .04), 0 18px 40px -20px rgba(20, 41, 58, .24);
+  --px-ochre: #e64626;
+  --px-ink: #14293a;
+  --px-ring: 0 0 0 2px #fff, 0 0 0 4px #1d5a87;
+}
+[data-course="ielts"] body { font-kerning: normal; font-optical-sizing: auto; font-synthesis: none; }
+/* figures: lining everywhere; tabular where they are compared or counted */
+[data-course="ielts"] :is(h1, h2, h3, h4, .wb-num, .dc-num, .ws-num, .wk-num) { font-variant-numeric: lining-nums; }
+[data-course="ielts"] :is(time, .wb-tx, .side-prog, #progress-label, .dc-foot, .resume-meta, .tab-min, .act-min, [class*="min"], [class*="count"], [class*="pct"], [class*="date"], [class*="when"], [class*="time"]) { font-variant-numeric: lining-nums tabular-nums; }
+[data-course="ielts"] :is(p, li, dd, blockquote) { text-wrap: pretty; }
+[data-course="ielts"] ::selection { background: #fde6b0; color: var(--px-ink); }
+/* one focus ring: a white gap, then blue — visible on paper, white and navy alike */
+[data-course="ielts"] :is(a, button, input, textarea, select, summary, [tabindex], [role="button"]):focus-visible { outline: 0; box-shadow: var(--px-ring); }
+[data-course="ielts"] :is(input, textarea, select):focus-visible { box-shadow: 0 0 0 1px #1d5a87, 0 0 0 4px rgba(29, 90, 135, .18); }
+[data-course="ielts"] main:focus-visible, [data-course="ielts"] .activity:focus-visible { box-shadow: none; }
+/* quiet scrollbars */
+[data-course="ielts"] * { scrollbar-width: thin; scrollbar-color: rgba(20, 41, 58, .22) transparent; }
+[data-course="ielts"] ::-webkit-scrollbar { width: 10px; height: 10px; }
+[data-course="ielts"] ::-webkit-scrollbar-thumb { background: rgba(20, 41, 58, .2); border-radius: 10px; border: 3px solid transparent; background-clip: content-box; }
+[data-course="ielts"] ::-webkit-scrollbar-thumb:hover { background-color: rgba(20, 41, 58, .36); }
+
+/* ───────── 2. page ground: warm paper with a breath of colour, not four coloured clouds ───────── */
+[data-course="ielts"] body {
+  background-color: #f4f1eb;
+  background-image:
+    radial-gradient(52% 40% at 92% 0%, rgba(173, 216, 201, .2), transparent 72%),
+    radial-gradient(44% 36% at 30% 0%, rgba(214, 208, 236, .16), transparent 72%),
+    radial-gradient(46% 40% at 8% 100%, rgba(240, 214, 170, .2), transparent 72%);
+  background-attachment: fixed;
+}
+
+/* ───────── 3. side panel (light, the default): a plain white sheet ─────────
+   No dot pattern, no glow, no second frame. One hairline, one soft shadow. Every icon tile is the same quiet tint of
+   its own colour; the open page is a flat tinted row with a 3px bar. The progress card stays in view at the foot. */
+[data-course="ielts"]:is(:not([data-side]), [data-side="light"]) .sidebar {
+  background: linear-gradient(180deg, #fff 0, #fff calc(100% - 140px), #fbf8f4 100%) !important;
+  outline: 0; padding: 16px 12px 0;
+}
+@media (min-width: 901px) {
+  [data-course="ielts"]:is(:not([data-side]), [data-side="light"]) .sidebar {
+    border-radius: 20px; outline: 0;
+    box-shadow: 0 0 0 1px var(--px-line), 0 1px 2px rgba(20, 41, 58, .04), 0 16px 36px -20px rgba(20, 41, 58, .22) !important;
+  }
+  [data-course="ielts"]:is(:not([data-side]), [data-side="light"]) .sidebar::before { content: none; }
+}
+[data-course="ielts"]:is(:not([data-side]), [data-side="light"]) .sidebar .uni { padding: 6px 12px 14px; }
+[data-course="ielts"]:is(:not([data-side]), [data-side="light"]) .sidebar .uni img { width: 132px; height: auto; display: block; }
+
+/* the course card */
+[data-course="ielts"]:is(:not([data-side]), [data-side="light"]) .sidebar .side-course {
+  margin: 0 2px; padding: 10px 12px 10px 10px; gap: 11px; border-radius: 12px; background: #fbf9f6;
+  -webkit-backdrop-filter: none; backdrop-filter: none; box-shadow: inset 0 0 0 1px var(--px-line-soft);
+}
+[data-course="ielts"]:is(:not([data-side]), [data-side="light"]) .sidebar .sc-code {
+  padding: 6px 8px; border-radius: 6px; background: var(--px-ochre); box-shadow: none; font-weight: 800; font-size: .7rem; letter-spacing: .08em;
+}
+[data-course="ielts"]:is(:not([data-side]), [data-side="light"]) .sidebar .sc-name { font-weight: 700; font-size: .81rem; letter-spacing: -.005em; }
+[data-course="ielts"]:is(:not([data-side]), [data-side="light"]) .sidebar .sc-name small { font-weight: 600; letter-spacing: 0; }
+
+/* search */
+[data-course="ielts"]:is(:not([data-side]), [data-side="light"]) .sidebar .side-course + .side-search { margin-top: 12px; }
+[data-course="ielts"]:is(:not([data-side]), [data-side="light"]) .sidebar .side-course + .side-search::before { content: none; }
+[data-course="ielts"]:is(:not([data-side]), [data-side="light"]) .sidebar .side-search { margin-left: 2px; margin-right: 2px; }
+[data-course="ielts"]:is(:not([data-side]), [data-side="light"]) .sidebar .side-search input {
+  height: 36px; border-radius: 10px; background: #fff; box-shadow: inset 0 0 0 1px var(--px-line); font-size: .84rem;
+}
+[data-course="ielts"]:is(:not([data-side]), [data-side="light"]) .sidebar .side-search input:hover { box-shadow: inset 0 0 0 1px var(--px-line-strong); }
+[data-course="ielts"]:is(:not([data-side]), [data-side="light"]) .sidebar .side-search input:focus { background: #fff; box-shadow: inset 0 0 0 1px #1d5a87, 0 0 0 3px rgba(29, 90, 135, .16); }
+[data-course="ielts"]:is(:not([data-side]), [data-side="light"]) .sidebar .side-search kbd { box-shadow: none; border-color: var(--px-line); background: #f7f5f1; font-size: .66rem; }
+
+/* rows */
+[data-course="ielts"]:is(:not([data-side]), [data-side="light"]) .sidebar .side-main { gap: 1px; padding-bottom: 14px; margin-top: 10px; }
+[data-course="ielts"]:is(:not([data-side]), [data-side="light"]) .sidebar .side-link {
+  height: 40px; padding: 0 10px 0 6px; gap: 11px; border-radius: 10px; color: #2c3a47; font-weight: 600; font-size: .86rem; letter-spacing: -.003em;
+  transition: background .15s, color .15s;
+}
+[data-course="ielts"]:is(:not([data-side]), [data-side="light"]) .sidebar .side-link:hover { background: rgba(20, 41, 58, .045); color: var(--px-ink); }
+[data-course="ielts"]:is(:not([data-side]), [data-side="light"]) .sidebar .side-link.active {
+  background: color-mix(in srgb, var(--tc) 9%, #fff); color: var(--px-ink); font-weight: 700;
+  -webkit-backdrop-filter: none; backdrop-filter: none; box-shadow: none;
+}
+[data-course="ielts"]:is(:not([data-side]), [data-side="light"]) .sidebar .side-link.active::before { left: -12px; top: 8px; bottom: 8px; height: auto; width: 3px; border-radius: 0 3px 3px 0; box-shadow: none; }
+[data-course="ielts"]:is(:not([data-side]), [data-side="light"]) .sidebar .side-link.active::after { content: none; }
+[data-course="ielts"]:is(:not([data-side]), [data-side="light"]) .sidebar .side-ic {
+  width: 28px; height: 28px; border-radius: 8px; background: color-mix(in srgb, var(--tc) 10%, #fff); box-shadow: none;
+  transition: background .15s, color .15s;
+}
+[data-course="ielts"]:is(:not([data-side]), [data-side="light"]) .sidebar .side-ic svg { width: 16px; height: 16px; stroke-width: 1.75; }
+[data-course="ielts"]:is(:not([data-side]), [data-side="light"]) .sidebar .side-link:hover .side-ic { transform: none; background: color-mix(in srgb, var(--tc) 16%, #fff); }
+[data-course="ielts"]:is(:not([data-side]), [data-side="light"]) .sidebar .side-link.active .side-ic { background: var(--tc); color: #fff; box-shadow: none; }
+[data-course="ielts"]:is(:not([data-side]), [data-side="light"]) .sidebar .side-ext { width: 11px; height: 11px; opacity: .55; }
+
+/* group label: small capitals and a rule — no ornament */
+[data-course="ielts"]:is(:not([data-side]), [data-side="light"]) .sidebar .side-group { margin: 14px 8px 6px !important; gap: 10px; font-size: .62rem; font-weight: 700; letter-spacing: .12em; color: #8a949d !important; }
+[data-course="ielts"]:is(:not([data-side]), [data-side="light"]) .sidebar .side-group::before { content: none; }
+[data-course="ielts"]:is(:not([data-side]), [data-side="light"]) .sidebar .side-group::after { background: var(--px-line-soft); }
+
+/* foot: progress and settings stay in view while the list scrolls */
+[data-course="ielts"]:is(:not([data-side]), [data-side="light"]) .sidebar .side-progress.side-foot {
+  position: sticky; bottom: 0; z-index: 2; margin: auto -12px 0; padding: 10px 14px 12px; border-radius: 0;
+  background: #fff !important; -webkit-backdrop-filter: none; backdrop-filter: none;
+  box-shadow: 0 -1px 0 var(--px-line-soft), 0 -12px 14px -10px rgba(255, 255, 255, .9) !important;
+}
+[data-course="ielts"]:is(:not([data-side]), [data-side="light"]) .sidebar .side-prog { font-size: .78rem; }
+[data-course="ielts"]:is(:not([data-side]), [data-side="light"]) .sidebar .side-gear { background: #fff; box-shadow: inset 0 0 0 1px var(--px-line); border-radius: 9px; }
+[data-course="ielts"]:is(:not([data-side]), [data-side="light"]) .sidebar .side-gear:hover,
+[data-course="ielts"]:is(:not([data-side]), [data-side="light"]) .sidebar .side-gear[aria-expanded="true"] { color: var(--px-ink); background: #f7f5f1; box-shadow: inset 0 0 0 1px var(--px-line-strong); }
+
+/* ───────── 4. top bar & week bar ─────────
+   Every control in the top bar is the same height (32px), the same radius (8px) and the same weight; the three tool
+   buttons are one segmented group behind a hairline. All ten weeks fit across the week bar on a laptop — none is cut off. */
+[data-course="ielts"] .masthead::before { background: rgba(252, 251, 248, .92); box-shadow: 0 1px 0 var(--px-line); }
+[data-course="ielts"] .masthead .topbar { gap: 8px; }
+[data-course="ielts"] .masthead .crumb { font-size: .8rem; letter-spacing: -.003em; gap: 8px; }
+[data-course="ielts"] .masthead .crumb b { font-weight: 700; color: var(--px-ink); }
+[data-course="ielts"] .masthead .crumb i { color: rgba(20, 41, 58, .28); }
+[data-course="ielts"] .masthead #save-status { margin-right: 0; font-size: .74rem; font-weight: 600; color: #5d6a74; }
+[data-course="ielts"] .masthead :is(.account-btn, .class-btn, .answers-pill, .timer-btn) {
+  height: 32px; border-radius: 8px; font-size: .78rem; font-weight: 650; letter-spacing: -.003em;
+}
+[data-course="ielts"] .masthead #save-status + .account-btn, [data-course="ielts"] .masthead .account-btn {
+  padding: 0 12px; color: var(--px-ink) !important; background: #fff !important; box-shadow: inset 0 0 0 1px var(--px-line-strong) !important;
+  transition: background .15s, box-shadow .15s;
+}
+[data-course="ielts"] .masthead #save-status + .account-btn:hover { background: #f7f5f1 !important; box-shadow: inset 0 0 0 1px rgba(20, 41, 58, .28) !important; }
+[data-course="ielts"] .masthead .class-btn { padding: 0 12px 0 4px; gap: 8px; }
+[data-course="ielts"] .masthead .class-btn .cb-lock { width: 24px; height: 24px; }
+[data-course="ielts"] .masthead .class-btn .cb-lock svg { width: 14px; height: 14px; }
+[data-course="ielts"] .masthead .tools { position: relative; gap: 0; padding: 0 0 0 9px; margin-left: 1px; background: none !important; box-shadow: none !important; border: 0; border-radius: 0; }
+[data-course="ielts"] .masthead .tools::before { content: ""; position: absolute; left: 0; top: 50%; width: 1px; height: 18px; margin-top: -9px; background: var(--px-line-strong); }
+[data-course="ielts"] .masthead .tools button { height: 32px; padding: 0 10px; gap: 7px; border-radius: 8px; font-size: .78rem; font-weight: 650; color: #3d505e; transition: background .15s, color .15s; }
+[data-course="ielts"] .masthead .tools button:hover { background: rgba(20, 41, 58, .055) !important; color: var(--px-ink); }
+[data-course="ielts"] .masthead .tools button .icon { width: 15px; height: 15px; }
+
+/* week bar */
+[data-course="ielts"] .weekbar .wb-row { gap: 2px; scrollbar-width: none; }
+[data-course="ielts"] .weekbar .wb-row::-webkit-scrollbar { display: none; }
+[data-course="ielts"] .weekbar .wb-item { height: 32px; gap: 7px; padding: 0 8px 0 4px; border-radius: 8px; font-size: .8rem; font-weight: 650; letter-spacing: -.003em; transition: background .15s, color .15s; }
+[data-course="ielts"] .weekbar .wb-item:hover, [data-course="ielts"] .weekbar .wb-item.open { background: rgba(20, 41, 58, .05) !important; }
+[data-course="ielts"] .weekbar .wb-item:hover .wb-num { transform: none; }
+[data-course="ielts"] .weekbar .wb-num { width: 22px; height: 22px; border-radius: 6px; font-size: .82rem; }
+[data-course="ielts"] .weekbar .wb-item.is-current .wb-num, [data-course="ielts"] .weekbar .wb-item.open .wb-num { box-shadow: none; background: var(--wk) !important; }
+[data-course="ielts"] .weekbar .wb-item.is-current .wb-num { background: var(--px-ochre) !important; }
+[data-course="ielts"] .weekbar .wb-item.is-current .wb-tx, [data-course="ielts"] .weekbar .wb-item.open .wb-tx { font-weight: 750; }
+[data-course="ielts"] .weekbar .wb-item.is-current::after { content: ""; position: absolute; left: 4px; right: 8px; bottom: -6px; height: 2px; border-radius: 2px 2px 0 0; background: var(--px-ochre); }
+[data-course="ielts"] .weekbar .wb-item.is-soon { color: #8a949d; }
+[data-course="ielts"] .weekbar .wb-chev { display: none; }
+[data-course="ielts"] .weekbar .wb-go { height: 28px; border-radius: 8px; font-size: .76rem; font-weight: 700; letter-spacing: -.003em; white-space: nowrap; }
+/* v9.9: on lesson pages the "Week 4 · Day 3" link had margin-left: auto, which took all the spare space, so the weeks
+   bunched to the left (on the course map they spread). Now the link joins the even spacing, so both pages match. */
+@media (min-width: 1360px) { [data-course="ielts"] .weekbar .wb-row { justify-content: space-between; } [data-course="ielts"] .weekbar .wb-go { margin-left: 12px; } }
+
+/* floating buttons: on a laptop they dock to the window edge, so they never sit on a button or a number in the page */
+[data-course="ielts"] .dx-fab { height: 44px; padding: 0 4px; gap: 8px; background: var(--px-ink); animation: none !important;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, .9), 0 8px 20px -10px rgba(20, 41, 58, .6); }
+[data-course="ielts"] .dx-fab-ic { width: 36px; height: 36px; background: #fffaf0; box-shadow: none; }
+[data-course="ielts"] .dx-fab-ic svg { width: 24px; height: 24px; }
+[data-course="ielts"] .dx-fab-ic::after { content: none; }
+[data-course="ielts"] .dx-fab:hover, [data-course="ielts"] .dx-fab:focus-visible { transform: none; box-shadow: 0 0 0 1px rgba(255, 255, 255, .9), 0 0 0 3px rgba(227, 168, 67, .55), 0 10px 22px -10px rgba(20, 41, 58, .7); }
+[data-course="ielts"] .to-top { width: 40px; height: 40px; background: #fff; border-color: var(--px-line-strong); box-shadow: var(--px-e2); -webkit-backdrop-filter: none; backdrop-filter: none; }
+@media (min-width: 901px) and (max-width: 1599px) {
+  [data-course="ielts"] .dx-fab { right: 0; bottom: 76px; padding: 0 2px 0 4px; border-radius: 12px 0 0 12px; box-shadow: 0 0 0 1px rgba(255, 255, 255, .9), -6px 8px 18px -10px rgba(20, 41, 58, .55); }
+  [data-course="ielts"] .dx-fab-ic { border-radius: 9px; }
+  [data-course="ielts"] .to-top { right: 0; bottom: 24px; width: 42px; border-radius: 12px 0 0 12px; border-right: 0; }
+  [data-course="ielts"] body.dx-docked .to-top { border-radius: 12px; border-right: 1px solid var(--px-line-strong); }
+}
+
+/* ───────── 5. course map ───────── */
+/* headers and small capitals: one eyebrow everywhere */
+[data-course="ielts"] .eyebrow { font-size: .68rem; font-weight: 700; letter-spacing: .12em; }
+[data-course="ielts"] .home-head h1 { letter-spacing: -.028em; }
+
+/* "today in class": a plain strip */
+[data-course="ielts"] .home-today { padding: 8px 14px 8px 12px; border-radius: 10px; background: #fff; box-shadow: var(--px-e1); transition: box-shadow .15s; }
+[data-course="ielts"] .home-today:hover { box-shadow: var(--px-e2); transform: none; }
+
+/* the map and the resume card share one frame */
+[data-course="ielts"] .course-map { border-radius: 18px; box-shadow: var(--px-e2); }
+[data-course="ielts"] .resume { border-radius: 18px; padding: 22px 24px 22px 22px; background: #fff !important; -webkit-backdrop-filter: none; backdrop-filter: none; box-shadow: var(--px-e2) !important; }
+[data-course="ielts"] .resume-art { border-radius: 12px; }
+
+/* week selector: the title never loses its end; the lesson count sits on the title's line */
+[data-course="ielts"] .week-tabs { gap: 4px; padding: 5px; border-radius: 16px; background: rgba(255, 255, 255, .6) !important; -webkit-backdrop-filter: none; backdrop-filter: none; box-shadow: inset 0 0 0 1px var(--px-line-soft) !important; }
+[data-course="ielts"] .week-tab {
+  display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; grid-template-areas: "num title meta" "num sub sub"; align-items: start; align-content: center; column-gap: 11px; row-gap: 1px;
+  padding: 11px 12px 17px 11px !important; border-radius: 11px; transition: background .15s, box-shadow .15s;
+}
+[data-course="ielts"] .week-tab:hover:not([aria-selected="true"]) { background: rgba(255, 255, 255, .7) !important; }
+[data-course="ielts"] .week-tab[aria-selected="true"] { background: #fff !important; box-shadow: var(--px-e2) !important; }
+[data-course="ielts"] .week-tab-num { grid-area: num; align-self: center; width: 34px; height: 34px; border-radius: 9px; font-size: 1rem; box-shadow: none !important; }
+[data-course="ielts"] .week-tab[aria-selected="true"] .week-tab-num { background: linear-gradient(160deg, #e9b452, #c98a1e) !important; color: #fff; }
+[data-course="ielts"] .week-tab-text { display: contents; }
+[data-course="ielts"] .week-tab-text b { grid-area: title; font-size: .9rem; font-weight: 750; line-height: 1.3; letter-spacing: -.008em; }
+[data-course="ielts"] .week-tab-text small { grid-area: sub; font-size: .74rem; line-height: 1.35; color: #5d6a74; text-wrap: balance; }
+[data-course="ielts"] .week-tab-meta { grid-area: meta; align-self: center; font-size: .6rem; font-weight: 700; letter-spacing: .08em; color: #8a949d; white-space: nowrap; }
+[data-course="ielts"] .week-tab::after { left: 11px; right: 12px; bottom: 7px; height: 2px; top: auto; background: rgba(20, 41, 58, .07); }
+[data-course="ielts"] .week-tab::before { left: 11px; bottom: 7px; height: 2px; width: calc((100% - 23px) * var(--p, 0) / 100%); }
+
+/* week heading */
+[data-course="ielts"] .week-num { width: 56px; height: 56px; border-radius: 14px; background: linear-gradient(160deg, #e9b452, #c98a1e); box-shadow: none; }
+[data-course="ielts"] .week-head h2 { letter-spacing: -.02em; }
+[data-course="ielts"] .week-head p { max-width: 78ch; font-size: .98rem; line-height: 1.55; }
+
+/* day cards */
+[data-course="ielts"] .day-card { border-radius: 16px; background: #fff !important; -webkit-backdrop-filter: none; backdrop-filter: none; box-shadow: var(--px-e2); transition: box-shadow .2s, transform .2s; }
+[data-course="ielts"] .day-card:hover { box-shadow: var(--px-e3); transform: translateY(-2px); }
+[data-course="ielts"] .day-card::before { height: 3px; }
+[data-course="ielts"] .day-title { font-size: 1.14rem; line-height: 1.24; letter-spacing: -.015em; padding: 12px 18px 0; text-wrap: balance; }
+[data-course="ielts"] .day-parts { padding-top: 12px; }
+[data-course="ielts"] .day-parts li { gap: 9px; font-size: .8rem; line-height: 1.38; color: #3d505e; }
+[data-course="ielts"] .day-parts li + li { margin-top: 6px; }
+[data-course="ielts"] .part-code { min-width: 26px; width: 26px; height: 17px; padding: 0; display: inline-grid; place-items: center; border-radius: 5px; font-size: .64rem; font-weight: 750; font-variant-numeric: lining-nums tabular-nums; margin-top: 1px; }
+[data-course="ielts"] .day-meter { height: 3px; margin: 16px 18px 0; background: rgba(20, 41, 58, .07); }
+[data-course="ielts"] .day-foot { padding: 12px 18px 16px; gap: 8px; font-size: .74rem; font-weight: 600; color: #5d6a74; white-space: nowrap; font-variant-numeric: lining-nums tabular-nums; }
+[data-course="ielts"] .day-go { padding: 0 10px 0 12px; height: 30px; display: inline-flex; align-items: center; gap: 5px; border-radius: 8px; font-size: .78rem; font-weight: 700; }
+[data-course="ielts"] .day-n-num { box-shadow: 0 0 0 3px #fff; }
+/* five narrow cards: every title keeps room for three lines, so the lists below start on one line across the week */
+[data-course="ielts"] .day-grid.many .day-title { min-height: calc(3 * 1.24em + 12px); }
+
+/* ───────── 6. calendar & assessments ─────────
+   One card: 18px corners, a hairline and a soft shadow. Equal 16px gaps between every block on the page. */
+[data-course="ielts"] :is(.gd-hero, .gd-week, .gx-today, .gx-next, .gd-sem, .gd-terms, .gx-readycard) { border-radius: 18px; }
+[data-course="ielts"] :is(.gd-hero, .gd-week, .gd-sem, .gd-terms, .gx-readycard) { box-shadow: var(--px-e2); }
+[data-course="ielts"] .gd-hero { padding: 28px 36px; }
+[data-course="ielts"] .gd-hero h1 { letter-spacing: -.028em; }
+[data-course="ielts"] .gx-focus { margin-top: 16px; gap: 16px; }
+[data-course="ielts"] .gd-sem { margin: 16px 0 4px; }
+[data-course="ielts"] .gx-today { box-shadow: var(--px-e2); border-color: rgba(230, 70, 38, .22); }
+[data-course="ielts"] .gx-next { box-shadow: 0 0 0 1px rgba(20, 41, 58, .4), 0 18px 36px -22px rgba(20, 41, 58, .6); }
+/* the countdown ring: a word ("Today") is set smaller than a number, so it stays inside the ring */
+[data-course="ielts"] .gx-ring b { font-variant-numeric: lining-nums; letter-spacing: -.02em; }
+[data-course="ielts"] .gx-ring.is-word b { font-size: 1.02rem; letter-spacing: -.01em; }
+[data-course="ielts"] .gx-kind { letter-spacing: .08em; white-space: normal; }
+/* week rail */
+[data-course="ielts"] .gd-rail button { border-radius: 12px; box-shadow: inset 0 0 0 1px var(--px-line-soft); transition: box-shadow .15s, background .15s; }
+[data-course="ielts"] .gd-rail button:hover:not(.is-now) { box-shadow: inset 0 0 0 1px var(--px-line-strong); }
+[data-course="ielts"] .gd-rail button small { font-variant-numeric: lining-nums tabular-nums; }
+
+/* ───────── 7. lesson pages ─────────
+   The same card as everywhere else (18px, hairline, soft shadow). The activity bar shows every activity of the stage
+   on a laptop — a tenth tab is no longer hidden past the edge. */
+[data-course="ielts"] :is(.hero, .essay-q-hero, .stage-head, .activity, .act-tabs, .journey a, .journey li, .how-read, .legend) { border-radius: 18px; }
+[data-course="ielts"] :is(.hero, .stage-head, .activity) { box-shadow: var(--px-e2); }
+[data-course="ielts"] .activity { background: #fff !important; -webkit-backdrop-filter: none; backdrop-filter: none; }
+[data-course="ielts"] .hero h1, [data-course="ielts"] .stage-head h1 { letter-spacing: -.028em; }
+[data-course="ielts"] .hero-lead, [data-course="ielts"] .stage-outcome { max-width: 62ch; }
+
+/* back link, stage dots and chips: 8px controls, like the top bar */
+[data-course="ielts"] .stage-back { border-radius: 9px; background: #fff; box-shadow: var(--px-e1); padding: 6px 12px 6px 8px; transition: box-shadow .15s; }
+[data-course="ielts"] .stage-back:hover { box-shadow: var(--px-e2); }
+[data-course="ielts"] .stage-meta .chip { border-radius: 8px; background: #fff; border-color: var(--px-line); font-variant-numeric: lining-nums tabular-nums; }
+
+/* activity bar */
+[data-course="ielts"] .act-tabs { grid-auto-columns: minmax(88px, 1fr); padding: 12px 8px 10px; background: rgba(255, 255, 255, .78) !important; -webkit-backdrop-filter: none; backdrop-filter: none; box-shadow: var(--px-e1) !important; scrollbar-width: none; }
+[data-course="ielts"] .act-tabs::-webkit-scrollbar { display: none; }
+[data-course="ielts"] .act-tabs button { width: auto; min-width: 0; padding: 0 4px 6px; }
+[data-course="ielts"] .act-tabs .tab-text { font-size: .8rem; font-weight: 650; letter-spacing: -.005em; line-height: 1.25; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+[data-course="ielts"] .act-tabs .tab-text small { font-size: .68rem; font-weight: 600; font-variant-numeric: lining-nums tabular-nums; color: #8a949d; }
+[data-course="ielts"] .act-tabs .tab-num { font-variant-numeric: lining-nums tabular-nums; }
+[data-course="ielts"] .act-tabs button.current .tab-num { box-shadow: 0 0 0 4px #fff, 0 0 0 5px color-mix(in srgb, var(--accent, #2b776e) 35%, transparent); }
+
+/* ───────── 8. one card radius across every page ─────────
+   Earlier layers gave large cards 20–28px corners, page by page. Every large card now has 18px; cards inside a card 12px. */
+[data-course="ielts"] :is(.hero, .essay-q-hero, .stage-head, .activity, .dayline, .journey-card, .legend-wrap,
+  .course-map, .resume, .gd-hero, .gd-week, .gx-today, .gx-next, .gd-sem, .gd-terms, .gx-readycard, .gx-card, .gd-tab, .gd-ready,
+  .lab-top, .lab-acc, .dlx-top, .dlx-item, .pl-head, .pl-calmain, .bd-empty, .ch-out-art, .page-hero, .sh-empty) { border-radius: 18px !important; }
+[data-course="ielts"] :is(.week-tabs, .act-tabs, .gd-rail) { border-radius: 16px !important; }
+[data-course="ielts"] :is(.dlx-desk, main .block) { border-radius: 14px; }
+[data-course="ielts"] :is(.lab-top, .dlx-top, .page-hero, .lab-acc, .dlx-item, .gx-card, .gd-tab, .gd-ready, .dayline, .journey-card, .legend-wrap) { box-shadow: var(--px-e2); }
+[data-course="ielts"] :is(.lab-top, .dlx-top, .page-hero) h1 { letter-spacing: -.028em; }
+[data-course="ielts"] .journey-card { transition: box-shadow .2s, transform .2s; }
+[data-course="ielts"] .journey-card:hover { box-shadow: var(--px-e3); }
+
+/* day timeline: every segment starts on the same line; the "next day" note shows two whole lines, never half a third */
+[data-course="ielts"] .dayline-seg, [data-course="ielts"] .dayline-flag { align-content: start; }
+[data-course="ielts"] .dayline-flag .dayline-num, [data-course="ielts"] .dayline-flag .dayline-title { align-self: start; }
+[data-course="ielts"] .dayline-flag .dayline-min { align-self: start; line-height: 1.45; max-height: calc(2 * 1.45em); }
+[data-course="ielts"] .dayline-min { font-variant-numeric: lining-nums tabular-nums; }
+
+/* ───────── 9. small screens ───────── */
+@media (max-width: 900px) {
+  [data-course="ielts"]:is(:not([data-side]), [data-side="light"]) .sidebar { padding: 14px 12px 0; }
+  [data-course="ielts"] .masthead .tools { padding-left: 0; margin-left: 0; }
+  [data-course="ielts"] .masthead .tools::before { content: none; }
+  [data-course="ielts"] .dx-fab { right: 0; padding: 0 2px 0 4px; border-radius: 12px 0 0 12px; height: 40px; }
+  [data-course="ielts"] .dx-fab-ic { width: 32px; height: 32px; border-radius: 9px; }
+  [data-course="ielts"] .dx-fab-ic svg { width: 22px; height: 22px; }
+  [data-course="ielts"] .week-tab { min-width: 216px; }
+  [data-course="ielts"] :is(.hero, .essay-q-hero, .stage-head, .activity, .course-map, .resume, .gd-hero, .gd-week, .gx-today, .gx-next, .gd-sem, .lab-top, .dlx-top, .dlx-item, .page-hero) { border-radius: 14px !important; }
+  [data-course="ielts"] .day-grid.many .day-title { min-height: 0; }
+}
+@media (prefers-reduced-motion: reduce) { [data-course="ielts"] .day-card:hover { transform: none; } }
+
+/* ───────── 10. lesson activity blocks (v9.1) ─────────
+   Every block type keeps its colour and its meaning (key point gold, speak purple, language bank blue, model green …).
+   What changes is the frame: one corner (14px), one inner padding (22px 24px), a tinted hairline instead of a coloured
+   drop shadow, and every block as wide as the column — the tip and the checklist no longer stop short of the others. */
+
+/* the activity card: head, body, foot */
+[data-course="ielts"] .act-head h2 { letter-spacing: -.022em; text-wrap: balance; }
+[data-course="ielts"] .act-count { font-variant-numeric: lining-nums tabular-nums; }
+[data-course="ielts"] .act-goal { border-radius: 10px; outline: 0; padding: 12px 16px 12px 18px; }
+[data-course="ielts"] .act-goal::before, [data-course="ielts"] .act-goal::after { box-shadow: none; }
+[data-course="ielts"] .act-head .timer-btn { border-radius: 9px; height: 34px; background: #fff; box-shadow: inset 0 0 0 1px var(--px-line-strong); font-variant-numeric: lining-nums tabular-nums; }
+[data-course="ielts"] .act-foot { background: #fbfaf7; box-shadow: inset 0 1px 0 var(--px-line-soft); }
+[data-course="ielts"] .done-toggle { border-radius: 10px; box-shadow: inset 0 0 0 1px var(--px-line-strong); transition: background .15s, box-shadow .15s; }
+[data-course="ielts"] .done-toggle:hover { background: #f7f5f1; }
+
+/* buttons: flat navy, no travelling shine */
+[data-course="ielts"] main :is(.btn, a.btn):not(.btn-quiet) {
+  background: var(--px-ink); box-shadow: 0 1px 2px rgba(20, 41, 58, .2), 0 6px 14px -8px rgba(20, 41, 58, .55); letter-spacing: -.003em;
+  transition: background .15s, box-shadow .15s, transform .15s;
+}
+[data-course="ielts"] main :is(.btn, a.btn):not(.btn-quiet)::after { content: none; }
+[data-course="ielts"] main :is(.btn, a.btn):not(.btn-quiet):hover { background: #1f3c55; box-shadow: 0 1px 2px rgba(20, 41, 58, .2), 0 10px 18px -8px rgba(20, 41, 58, .6); }
+[data-course="ielts"] main .btn-quiet:not(.pb-actions *, .gd-next *, .jp-foot *) { background: #fff; box-shadow: inset 0 0 0 1px var(--px-line-strong); transition: background .15s, box-shadow .15s; }
+[data-course="ielts"] main .btn-quiet:not(.pb-actions *, .gd-next *, .jp-foot *):hover { background: #f7f5f1; box-shadow: inset 0 0 0 1px rgba(20, 41, 58, .28); }
+
+/* block frame */
+[data-course="ielts"] .act-body > .block:not(.sticky) { max-width: none; }
+[data-course="ielts"] .act-body > :is(.block.talk, .block.language, .block.steps-block, .block.fscale, .block.kit, .block.play, .block.tip, .block.do-step, .block.checklist, .block.lg-fold, .answers) { border-radius: 14px; }
+[data-course="ielts"] .act-body > :is(.block.talk, .block.language, .block.steps-block, .block.fscale) { padding: 22px 24px; }
+[data-course="ielts"] .act-body > .block.key { border-radius: 16px; }
+[data-course="ielts"] .act-body > .block.talk { box-shadow: inset 0 0 0 1px rgba(110, 76, 170, .16); }
+[data-course="ielts"] .act-body > .block.language { box-shadow: inset 0 0 0 1px rgba(60, 110, 190, .16); }
+[data-course="ielts"] .act-body > .block.do-step { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent, #2b776e) 12%, transparent); }
+[data-course="ielts"] .act-body > .answers { border-radius: 14px; padding: 16px 20px; }
+
+/* block headings and labels: one size each */
+[data-course="ielts"] .act-body .block :is(h3, .block-heading) { letter-spacing: -.012em; text-wrap: balance; }
+[data-course="ielts"] .act-body .block-label { font-size: .64rem; font-weight: 750; letter-spacing: .12em; padding: 5px 10px 5px 8px; border-radius: 6px; box-shadow: none; }
+
+/* steps: the number, the "who" badge and the text sit on one grid */
+[data-course="ielts"] .act-body .steps li p { box-shadow: inset 0 0 0 1px var(--px-line-soft); border-radius: 10px; max-width: 72ch; }
+[data-course="ielts"] .act-body .who { font-size: .62rem; font-weight: 750; letter-spacing: .1em; }
+
+/* speak prompts and language-bank phrases: hairline cards, no drop shadow */
+[data-course="ielts"] .act-body .talk-prompts li { border-radius: 10px; box-shadow: inset 0 0 0 1px rgba(110, 76, 170, .14); }
+[data-course="ielts"] .act-body .block.language :is(.phrase, li) { box-shadow: inset 0 0 0 1px rgba(60, 110, 190, .18); border-radius: 8px; }
+
+/* text cards (definitions, sources): three across, set at reading size — five cards make 3 + 2, not 4 + an orphan */
+[data-course="ielts"] .act-body .cards { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+[data-course="ielts"] .act-body .cards .card { border-radius: 12px; padding: 16px 18px 18px; box-shadow: inset 0 0 0 1px var(--px-line); }
+[data-course="ielts"] .act-body .cards .card p { font-size: .93rem; line-height: 1.6; }
+[data-course="ielts"] .act-body .cards .card-label { font-size: .64rem; letter-spacing: .1em; font-variant-numeric: lining-nums; }
+
+/* writing fields, checklists, quizzes and tables */
+[data-course="ielts"] .act-body .block.fields :is(textarea, input[type="text"]) { max-width: none; width: 100%; border-radius: 10px; }
+[data-course="ielts"] .act-body .block.checklist :is(li, label) { border-radius: 10px; }
+[data-course="ielts"] .act-body .block.quiz .option { box-shadow: inset 0 0 0 1px var(--px-line-strong); background: #fff; transition: background .15s, box-shadow .15s; }
+[data-course="ielts"] .act-body .block.quiz .option:hover { background: #f7f5f1; }
+[data-course="ielts"] .act-body .table-block :is(th, td) { font-variant-numeric: lining-nums tabular-nums; }
+/* v9.8: table headings were 10px — too small to read. Column headings 12.5px (still small capitals);
+   row labels (the words already in the table, e.g. "the local community") as large as what students type. */
+[data-course="ielts"] .act-body .table-block thead th { font-size: .78rem; letter-spacing: .08em; }
+[data-course="ielts"] .act-body .table-block tbody th { font-size: .95rem; letter-spacing: 0; line-height: 1.45; font-weight: 600; color: var(--ink, #14293a); }
+[data-course="ielts"] .act-body .table-block tbody th .th-title { font-weight: 750; }
+[data-course="ielts"] .act-body .send-bar { border-radius: 14px; }
+[data-course="ielts"] .act-body .send-bar .btn { white-space: nowrap; }
+
+/* ───────── 11. My workspace (v9.1) ─────────
+   css/planner.css loads after this file (with the workspace itself), so every rule here carries the course prefix to
+   win. Same card as the rest of the site; controls are 34px high with 9px corners; figures in the calendars are tabular. */
+[data-course="ielts"] .pl :is(.pl-tree, .pl-main, .pl-rail, .pl-calside, .pl-calmain, .pl-todos, .nb-cover, .nb-empty) { border-radius: 18px; box-shadow: var(--px-e2); }
+[data-course="ielts"] .pl .pl-head { box-shadow: var(--px-e2); background: #fff; -webkit-backdrop-filter: none; backdrop-filter: none; }
+[data-course="ielts"] .pl :is(.ws-nb-bar, .pl-tsum) { border-radius: 14px; box-shadow: var(--px-e1); }
+[data-course="ielts"] .pl .pl-head h1 { letter-spacing: -.02em; }
+[data-course="ielts"] .pl .pl-private { letter-spacing: .1em; }
+
+/* tabs: one segmented control */
+[data-course="ielts"] .pl .pl-tabs { border-radius: 12px; padding: 4px; gap: 2px; background: rgba(20, 41, 58, .05); }
+[data-course="ielts"] .pl .pl-tabs button { border-radius: 9px; height: 38px; transition: background .15s, box-shadow .15s, color .15s; }
+[data-course="ielts"] .pl .pl-tabs button[aria-selected="true"], [data-course="ielts"] .pl .pl-tabs button.on, [data-course="ielts"] .pl .pl-tabs button.active { box-shadow: 0 0 0 1px var(--px-line-soft), 0 1px 2px rgba(20, 41, 58, .08), 0 4px 10px -6px rgba(20, 41, 58, .25); }
+[data-course="ielts"] .pl .pl-tabn { font-variant-numeric: lining-nums tabular-nums; }
+[data-course="ielts"] .pl .pl-status { border-radius: 8px; box-shadow: inset 0 0 0 1px var(--px-line-soft); font-weight: 600; }
+
+/* buttons and inputs */
+[data-course="ielts"] .pl .pl-btn { border-radius: 9px; height: 34px; letter-spacing: -.003em; box-shadow: none; transition: background .15s, box-shadow .15s; }
+[data-course="ielts"] .pl .pl-btn.ghost { background: #fff; box-shadow: inset 0 0 0 1px var(--px-line-strong); }
+[data-course="ielts"] .pl .pl-btn.ghost:hover { background: #f7f5f1; box-shadow: inset 0 0 0 1px rgba(20, 41, 58, .28); }
+[data-course="ielts"] .pl .pl-btn.pl-arrow { width: 34px; padding: 0; }
+[data-course="ielts"] .pl .pl-seg { border-radius: 9px; height: 34px; }
+[data-course="ielts"] .pl .pl-seg button { border-radius: 7px; }
+[data-course="ielts"] .pl .pl-todos :is(input, select) { border-radius: 10px; }
+[data-course="ielts"] .pl .pl-todos .pl-btn { height: 40px; border-radius: 10px; padding: 0 16px; }
+[data-course="ielts"] .pl .ws-nb-bar select { border-radius: 9px; box-shadow: inset 0 0 0 1px var(--px-line-strong); }
+[data-course="ielts"] .pl .nb-export-btn { border-radius: 14px; box-shadow: var(--px-e1); transition: box-shadow .15s, transform .15s; }
+[data-course="ielts"] .pl .nb-export-btn:hover { box-shadow: var(--px-e2); }
+[data-course="ielts"] .pl .pl-calchip, [data-course="ielts"] .pl .pl-calchip-t { font-variant-numeric: lining-nums tabular-nums; }
+
+/* calendars: every number is tabular, so days and hours sit in true columns */
+[data-course="ielts"] .pl :is(.pl-calmain, .pl-calside, .pl-rail, .pl-todos) { font-variant-numeric: lining-nums tabular-nums; }
+[data-course="ielts"] .pl .pl-calhead h2 { letter-spacing: -.022em; font-variant-numeric: lining-nums; }
+[data-course="ielts"] .pl .pl-wk-day { letter-spacing: .01em; }
+
+/* notes: the reading column and its tools */
+[data-course="ielts"] .pl .pl-note-title { letter-spacing: -.022em; }
+[data-course="ielts"] .pl :is(.pl-tb, .pl-ibtn, .pl-style) { transition: background .15s, box-shadow .15s, color .15s; }
+[data-course="ielts"] .pl .nb-cover h1 { letter-spacing: -.028em; }
+
+/* ───────── 12. interactive game blocks (v9.2) ─────────
+   Only measure changes here — corners, widths, column counts and figures. Nothing touches a colour, a shadow or a
+   state (chosen / right / wrong), so every game checks and marks answers exactly as before. */
+
+/* every game is as wide as the column: option lists and ordering lists no longer stop at 860–900px */
+[data-course="ielts"] .act-body :is(.choose-options, .order-list, .order-hint) { max-width: none; }
+
+/* one corner for the pieces inside a game (they ranged from 12 to 26px): panels 12px, things you tap 10px */
+[data-course="ielts"] .act-body :is(.quiz-item, .lm-item, .pa-item, .dt-item, .sq-item, .pr-item, .rw-item, .sp-text, .pb-part, .sort-pool, .sort-bucket,
+  .cloze-text, .reel-window, .bg-sq, .table-scroll, .bt-bank, .kit.hotspot img) { border-radius: 12px; }
+[data-course="ielts"] .act-body :is(.chat-log, .pb-preview, .flip-face) { border-radius: 14px; }
+[data-course="ielts"] .act-body :is(.choose-option, .order-item, .mt-card, .ol-row, .sort-card, .sort-slot, .kit .option, .msg-body) { border-radius: 10px; }
+[data-course="ielts"] .act-body :is(.kit, .play) :is(textarea, input[type="text"], input:not([type]), select:not(.gap select)) { border-radius: 10px; }
+
+/* flip cards: five across on a laptop, so a set of five is one row — not four and one left over */
+[data-course="ielts"] .act-body .flip-grid { grid-template-columns: repeat(auto-fit, minmax(168px, 1fr)); gap: 12px; }
+
+/* counters, scores and positions: tabular figures, so they do not jump as they count */
+[data-course="ielts"] .act-body :is(.mt-meter, .lm-count, .dt-score, .sq-gauge, .bg-score, .bt-bank, .bt-chip, .order-pos, .pa-num, .pr-num, .pb-num, .gap-num, .sort-letter, .choose-letter, .mt-tag) { font-variant-numeric: lining-nums tabular-nums; }
+[data-course="ielts"] .act-body .kit-hint { max-width: 72ch; }
+
+/* prompt builder: its two buttons sit on a navy panel — "Open Copilot" was white text on a white button, and
+   "Copy prompt" navy on navy. Now a gold primary button and an outlined secondary one, both readable. */
+[data-course="ielts"] main .pb-actions .btn:not(.btn-quiet) { background: #e3a843 !important; color: #14293a; box-shadow: none; }
+[data-course="ielts"] main .pb-actions .btn:not(.btn-quiet):hover { background: #edb95a !important; box-shadow: none; }
+[data-course="ielts"] main .pb-actions .btn:not(.btn-quiet):is(:disabled, [aria-disabled="true"]) { background: rgba(255, 255, 255, .12) !important; color: rgba(255, 255, 255, .6); opacity: 1; }
+[data-course="ielts"] main .pb-actions .btn-quiet { background: transparent !important; color: #fff; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .35); }
+[data-course="ielts"] main .pb-actions .btn-quiet:hover { background: rgba(255, 255, 255, .1) !important; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .55); }
+
+/* ───────── 13. dark side panels (v9.2): charcoal, black, navy, eucalypt ─────────
+   The same measures as the light panel (section 3) — 20px sheet, 40px rows, 28px icon tiles, 3px bar, the course
+   card under the logo, progress pinned at the foot — in each dark colour. Fixes: the search highlight was dark text
+   on a dark row; the progress line was cut off ("15 activities finish…"); the Ochre glow at the top is gone. */
+[data-course="ielts"][data-side]:not([data-side="light"]) .sidebar {
+  background: linear-gradient(180deg, var(--side-top), var(--side-bg) 38%, var(--side-end)) !important; padding: 16px 12px 0;
+}
+@media (min-width: 901px) { [data-course="ielts"][data-side]:not([data-side="light"]) .sidebar { border-radius: 20px; box-shadow: 0 0 0 1px rgba(0, 0, 0, .28), 0 1px 2px rgba(0, 0, 0, .1), 0 16px 36px -20px rgba(0, 0, 0, .5) !important; } }
+[data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .uni { padding: 6px 12px 14px; border-bottom: 0; margin-bottom: 0; }
+[data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .uni img { width: 132px; height: auto; display: block; }
+
+/* the course card, which the dark panels did not show */
+[data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .side-course {
+  display: flex; align-items: center; gap: 11px; margin: 0 2px; padding: 10px 12px 10px 10px; border-radius: 12px;
+  background: rgba(255, 255, 255, .07); box-shadow: inset 0 0 0 1px var(--side-line);
+}
+[data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .sc-code { padding: 6px 8px; border-radius: 6px; background: #e64626; color: #fff; font: 800 .7rem/1 var(--sans, Manrope, sans-serif); letter-spacing: .08em; }
+[data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .sc-name { display: grid; gap: 2px; color: #fff; font: 700 .81rem/1.15 var(--sans, Manrope, sans-serif); letter-spacing: -.005em; }
+[data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .sc-name small { color: var(--side-soft); font-weight: 600; font-size: .7rem; }
+[data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .sc-weeks i.is-done { background: #ff8a6b; opacity: .7; }
+[data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .sc-weeks i.is-now { background: #ff8a6b; box-shadow: 0 0 0 2px rgba(255, 138, 107, .25); }
+
+/* search and its results */
+[data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .side-course + .side-search { margin-top: 12px; }
+[data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .side-search { margin-left: 2px; margin-right: 2px; }
+[data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .side-search input { height: 36px; border-radius: 10px; font-size: .84rem; }
+[data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .side-search input:focus { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .7), 0 0 0 3px rgba(255, 255, 255, .16); }
+[data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .side-search kbd { background: rgba(255, 255, 255, .08); font-size: .66rem; box-shadow: none; }
+[data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .search-hit { border-radius: 10px; color: var(--side-text); }
+[data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .search-hit small { color: var(--side-faint); }
+[data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .side-results mark { background: rgba(227, 168, 67, .9); color: #14293a; border-radius: 3px; padding: 0 2px; }
+
+/* rows */
+[data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .side-main { gap: 1px; padding-bottom: 14px; margin-top: 10px; }
+[data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .side-link { height: 40px; padding: 0 10px 0 6px; gap: 11px; border-radius: 10px; font-weight: 600; font-size: .86rem; letter-spacing: -.003em; transition: background .15s, color .15s; }
+[data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .side-link.active { background: rgba(255, 255, 255, .12); box-shadow: none; font-weight: 700; }
+[data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .side-link.active::before { left: -12px; top: 8px; bottom: 8px; height: auto; width: 3px; border-radius: 0 3px 3px 0; background: #ff8a6b; box-shadow: none; }
+[data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .side-link.active::after { content: none; }
+[data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .side-ic { width: 28px; height: 28px; border-radius: 8px; box-shadow: none; }
+[data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .side-ic svg { width: 16px; height: 16px; stroke-width: 1.75; }
+[data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .side-link:hover .side-ic { transform: none; }
+[data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .side-ext { width: 11px; height: 11px; opacity: .6; }
+[data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .side-group { margin: 14px 8px 6px !important; gap: 10px; font-size: .62rem; font-weight: 700; letter-spacing: .12em; }
+[data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .side-group::before { content: none; }
+
+/* foot */
+[data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .side-progress.side-foot {
+  position: sticky; bottom: 0; z-index: 2; margin: auto -12px 0; padding: 10px 14px 12px; border-radius: 0;
+  background: var(--side-end) !important; box-shadow: 0 -1px 0 var(--side-line) !important;
+}
+[data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .side-prog { font-size: .78rem; }
+[data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .side-gear { border-radius: 9px; }
+
+@media (max-width: 900px) { [data-course="ielts"][data-side]:not([data-side="light"]) .sidebar { padding: 14px 12px 0; } }
+
+/* ───────── 14. Language Lab, Downloads, Assessments (v9.3) ───────── */
+
+/* Language Lab: the time and level chips have fixed widths, so "55 min" and "B1+" sit in true columns down a topic */
+[data-course="ielts"] .lab-row { border-radius: 12px; transition: background .15s; }
+[data-course="ielts"] .lab-row-chips { gap: 6px; }
+[data-course="ielts"] .lab-chip { justify-content: center; min-width: 76px; border-radius: 7px; font-weight: 650; font-variant-numeric: lining-nums tabular-nums; }
+[data-course="ielts"] .lab-chip.is-lv { min-width: 44px; }
+[data-course="ielts"] .lab-row-st { border-radius: 9px; }
+[data-course="ielts"] .lab-row-t b, [data-course="ielts"] .lab-acc-t b { letter-spacing: -.012em; }
+[data-course="ielts"] .lab-acc-n { font-variant-numeric: lining-nums tabular-nums; }
+[data-course="ielts"] .lab-acc-p b { font-variant-numeric: lining-nums; }
+[data-course="ielts"] .lab-top .eyebrow, [data-course="ielts"] .dlx-top .eyebrow { letter-spacing: .12em; }
+
+/* Downloads: inner panels follow the 12px inner corner; the two info panels start level and take only the height they need */
+[data-course="ielts"] .dlx-item :is(.dlx-desk, .dlx-when, .dlx-how, [class*="dlx-box"], [class*="dlx-col"]) { border-radius: 12px; }
+[data-course="ielts"] .dlx-item h2 { letter-spacing: -.022em; text-wrap: balance; }
+[data-course="ielts"] .dlx-what { max-width: 68ch; }
+[data-course="ielts"] .dlx-file-badge { font-variant-numeric: lining-nums tabular-nums; }
+
+/* Assessments */
+/* week strip: every week is the same neutral tile; the Ochre bar alone marks the weeks a long task runs across
+   (weeks 2–6 were tinted pink, which read as a different kind of week) */
+[data-course="ielts"] .gd-strip { border-radius: 14px; }
+[data-course="ielts"] .gd-strip li { border-radius: 10px; background: #f3efe7; }
+[data-course="ielts"] .gd-strip li.in-range { background: #f3efe7; }
+[data-course="ielts"] .gd-strip li.is-now { background: #14293a; box-shadow: none; }
+[data-course="ielts"] .gd-strip li b { font-variant-numeric: lining-nums; }
+[data-course="ielts"] .gd-strip li .gd-sc-bar { height: 3px; opacity: .7; }
+/* facts: five facts make one row of five, not four and one left over */
+[data-course="ielts"] .gd-facts { grid-template-columns: repeat(auto-fit, minmax(176px, 1fr)); gap: 10px; }
+[data-course="ielts"] .gd-facts > div { border-radius: 10px; }
+[data-course="ielts"] .gd-cards3 { gap: 10px; }
+[data-course="ielts"] .gd-cards3 .gd-card { border-radius: 12px; }
+[data-course="ielts"] .gd-lead { max-width: 68ch; }
+/* timeline and score: figures in columns */
+[data-course="ielts"] :is(.gx-tl, .gx-score, .gx-card) { font-variant-numeric: lining-nums tabular-nums; }
+/* rules and help: reading width for the prose (it ran the full 1,000px), same card as the page */
+[data-course="ielts"] .gd-fold { border-radius: 14px !important; box-shadow: var(--px-e1); }
+[data-course="ielts"] .gd-fold[open] { box-shadow: var(--px-e2); }
+[data-course="ielts"] .gd-fold-body > p:not(.gd-warn):not(.gd-links), [data-course="ielts"] .gd-fold-body > :is(ol, ul) > li { max-width: 82ch; }
+[data-course="ielts"] .gd-fold-body :is(.gd-warn, [class*="gd-yes"], [class*="gd-no"], [class*="gd-two"] > *, [class*="gd-contact"] > *) { border-radius: 10px; }
+/* six facts: two rows of three, not five and one left over */
+@media (min-width: 901px) { [data-course="ielts"] .gd-facts:has(> :nth-child(6):last-child) { grid-template-columns: repeat(3, 1fr); } }
+
+/* ───────── 15. Course calendar, Class board, Chats (v9.4) ───────── */
+
+/* Course calendar */
+/* week rail: the twelve tiles share the row exactly, so the rail ends flush with the cards above and below
+   (fixed 86px tiles ran 10px past the right edge) */
+@media (min-width: 1100px) {
+  [data-course="ielts"] .gd-rail { gap: 6px; overflow: visible; }
+  [data-course="ielts"] .gd-rail button { flex: 1 1 0; min-width: 0; }
+  [data-course="ielts"] .gd-rail button.is-brk { flex: .7 1 0; }
+  /* agenda: every day uses the same three columns (in class · after class · also on today), so the columns line up
+     down the week — a day with two parts used two wider columns */
+  [data-course="ielts"] .gd-week .gd-dbody { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+[data-course="ielts"] .gd-week .gd-day { border-radius: 14px; border-color: var(--px-line); }
+[data-course="ielts"] .gd-week .gd-day.is-today { box-shadow: 0 0 0 2px rgba(230, 70, 38, .16); }
+[data-course="ielts"] .gd-week .gd-dtile, [data-course="ielts"] .gx-cal { font-variant-numeric: lining-nums; }
+[data-course="ielts"] .gd-week :is(a, div, span)[class*="gd-it"], [data-course="ielts"] .gd-week .gd-dbody section > :is(a, div) { border-radius: 9px; }
+/* today + next assessment: the right column is as tall as the "today" card, so their bottoms line up */
+[data-course="ielts"] .gx-focus:not(.is-assess) .gx-side { align-content: stretch; grid-template-rows: 1fr auto; }
+[data-course="ielts"] .gx-focus:not(.is-assess) .gx-side:has(.gd-terms[open]) { grid-template-rows: auto auto; }
+[data-course="ielts"] .gd-week-tools button, [data-course="ielts"] .gd-week [class*="gd-filter"] button, [data-course="ielts"] .gd-week [class*="gd-seg"] button { font-variant-numeric: lining-nums tabular-nums; }
+
+/* Class board: the frame, paper and marker tray stay; corners and controls follow the rest of the site */
+[data-course="ielts"] .bd .bd-board { border-radius: 18px; }
+[data-course="ielts"] .bd .bd-paper { border-radius: 12px; }
+[data-course="ielts"] .bd .bd-tools { border-radius: 14px; box-shadow: var(--px-e2); }
+[data-course="ielts"] .bd .bd-badge { border-radius: 14px; box-shadow: var(--px-e2); }
+[data-course="ielts"] .bd .bd-views { border-radius: 12px; padding: 4px; }
+[data-course="ielts"] .bd .bd-views button { border-radius: 9px; }
+[data-course="ielts"] .bd .bd-act { border-radius: 9px; box-shadow: inset 0 0 0 1px var(--px-line-strong); background: #fff; transition: background .15s, box-shadow .15s; }
+[data-course="ielts"] .bd .bd-act:hover { background: #f7f5f1; box-shadow: inset 0 0 0 1px rgba(20, 41, 58, .28); }
+[data-course="ielts"] .bd :is(.bd-live, .bd-when) { border-radius: 7px; box-shadow: inset 0 0 0 1px var(--px-line); font-variant-numeric: lining-nums tabular-nums; }
+[data-course="ielts"] .bd .bd-card { border-radius: 12px; }
+[data-course="ielts"] .bd .bd-seg { border-radius: 9px; }
+[data-course="ielts"] .bd h1 { letter-spacing: -.028em; text-wrap: balance; }
+[data-course="ielts"] .bd .bd-paper :is(p, li) { max-width: 78ch; }
+
+/* Chats: bubbles, the round send button and the message field keep their chat shapes; the frame, lists and panels
+   follow the site */
+[data-course="ielts"] .ch-app { border-radius: 18px; box-shadow: var(--px-e2); }
+[data-course="ielts"] .ch-app :is(.ch-row, .ch-who) { border-radius: 12px; }
+[data-course="ielts"] .ch-app .ch-row.on { box-shadow: var(--px-e1); }
+[data-course="ielts"] .ch-app .ch-tile { border-radius: 12px; box-shadow: none; }
+[data-course="ielts"] .ch-app :is(.ch-round, .ch-ghost, .ch-search) { border-radius: 10px; }
+[data-course="ielts"] .ch-app .ch-search input { border-radius: 8px; }
+[data-course="ielts"] .ch-app .ch-acts { border-radius: 10px; }
+[data-course="ielts"] .ch-app .ch-opt { border-radius: 10px; }
+[data-course="ielts"] .ch-app :is(time, .ch-badge, .ch-opt, .ch-itabs i) { font-variant-numeric: lining-nums tabular-nums; }
+[data-course="ielts"] .ch-app h1, [data-course="ielts"] .ch-app .ch-ihead b { letter-spacing: -.02em; }
+/* details panel: all five tabs fit (the last one was cut off at "P…") */
+[data-course="ielts"] .ch-itabs { gap: 2px; padding: 10px 10px 0; }
+[data-course="ielts"] .ch-itabs button { flex: 1 1 auto; padding: 0 6px; font-size: .74rem; font-weight: 700; border-radius: 8px; white-space: nowrap; }
+[data-course="ielts"] .ch-itabs i { margin-left: 2px; padding: 1px 5px; font-size: .66rem; }
+
+/* ───────── 16. the remaining pages, dialogs and pop-ups (v9.5) ─────────
+   Shared with me, Name wheel, Readings, Photocopiables, and every dialog and pop-up: the same card (18px), inner
+   panel (12–14px) and control corner (8–10px) as the rest of the site. */
+[data-course="ielts"] :is(.rl-top, .rl-week, .pk-stage, .pk-panel, .pr-top, .sh-pick) { border-radius: 18px !important; }
+[data-course="ielts"] :is(.rl-top, .rl-week, .pk-panel, .sh-pick, .sh-list) { box-shadow: var(--px-e2); }
+[data-course="ielts"] :is(.rl-card, .sh-list, .pr-item, .pr-class) { border-radius: 14px !important; }
+[data-course="ielts"] .rl-card { box-shadow: var(--px-e1); transition: box-shadow .2s, transform .2s; }
+[data-course="ielts"] .rl-card:hover { box-shadow: var(--px-e3); }
+[data-course="ielts"] :is(.rl-top, .pr-top, .pk-head, .sh-hero) h1 { letter-spacing: -.028em; text-wrap: balance; }
+[data-course="ielts"] :is(.rl-top, .rl-week, .rl-card, .pr-item, .pr-top, .pk-panel) { font-variant-numeric: lining-nums tabular-nums; }
+[data-course="ielts"] .pr-top ~ ol > li, [data-course="ielts"] main ol > li.is-plan-b { border-radius: 12px; }
+
+/* dialogs: one sheet, one Close button */
+[data-course="ielts"] dialog#resource-dialog { border-radius: 18px; box-shadow: 0 0 0 1px rgba(20, 41, 58, .1), 0 24px 60px -24px rgba(20, 41, 58, .5); }
+[data-course="ielts"] dialog#resource-dialog .dialog-head h2 { letter-spacing: -.02em; }
+[data-course="ielts"] dialog#resource-dialog #dialog-close { height: 32px; padding: 0 12px; border-radius: 8px; background: #fff; box-shadow: inset 0 0 0 1px var(--px-line-strong); font-size: .78rem; font-weight: 650; transition: background .15s; }
+[data-course="ielts"] dialog#resource-dialog #dialog-close:hover { background: #f7f5f1; }
+[data-course="ielts"] dialog#resource-dialog :is(.acct-card, .acct-box) { border-radius: 14px; }
+[data-course="ielts"] dialog#resource-dialog .glossary-word { border-radius: 12px; }
+[data-course="ielts"] dialog#resource-dialog :is(input[type="text"], input[type="email"], input[type="password"], input:not([type]), textarea) { border-radius: 10px; }
+[data-course="ielts"] dialog#resource-dialog .btn:not(.btn-quiet) { background: var(--px-ink); box-shadow: 0 1px 2px rgba(20, 41, 58, .2), 0 6px 14px -8px rgba(20, 41, 58, .55); }
+[data-course="ielts"] dialog#resource-dialog .btn:not(.btn-quiet)::after { content: none; }
+
+/* pop-ups and side panels: class panel, timer, announcement, week menu */
+[data-course="ielts"] .class-panel { border-radius: 18px; }
+[data-course="ielts"] .class-panel :is(.cp-hand, .cp-people) { border-radius: 12px; }
+[data-course="ielts"] :is(.ct-pop, .an-pop) { border-radius: 14px; box-shadow: 0 0 0 1px rgba(20, 41, 58, .1), 0 20px 44px -20px rgba(20, 41, 58, .45); }
+[data-course="ielts"] :is(.ct-pop, .an-pop) :is(input, textarea) { border-radius: 10px; }
+[data-course="ielts"] .ct-pop { font-variant-numeric: lining-nums tabular-nums; }
+[data-course="ielts"] .wb-panel, [data-course="ielts"] .wb-panel .wb-grid { border-radius: 16px; }
+/* the unread badge on "Your class" sat on the last letters of the label */
+[data-course="ielts"] .masthead .class-btn :is(.cb-badge, .cb-hand) { top: -7px; right: -9px; box-shadow: 0 0 0 2px #fcfbf8; font-variant-numeric: lining-nums tabular-nums; }
+
+@media (max-width: 900px) {
+  [data-course="ielts"] :is(.rl-top, .rl-week, .pk-stage, .pk-panel, .pr-top, .sh-pick, .ch-app, .bd .bd-board) { border-radius: 14px !important; }
+  [data-course="ielts"] dialog#resource-dialog { border-radius: 14px; }
+}
+
+/* ───────── 17. phones and tablets (v9.6) ───────── */
+[data-course="ielts"] .wb-sheet-bar { display: none; }
+
+@media (max-width: 900px) {
+  /* THE WEEK MENU. It was broken on phones: the frosted top bar became the sheet's positioning box, so the sheet
+     opened above the screen, out of sight, and the week buttons then stopped answering. The bar is now plain (no
+     backdrop filter), and the menu is a real bottom sheet with a title, a Close button and a dimmed page behind it. */
+  [data-course="ielts"] .masthead { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; background: #fcfbf8; }
+  [data-course="ielts"] .masthead::before { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; background: #fcfbf8; }
+  [data-course="ielts"] .wb-panel {
+    position: fixed; left: 0; right: 0; bottom: 0; top: auto; width: auto; z-index: 6; max-height: none;
+    display: flex; flex-direction: column; border: 0; border-radius: 18px 18px 0 0 !important; overflow: hidden;
+    box-shadow: 0 -1px 0 var(--px-line), 0 -18px 44px -18px rgba(20, 41, 58, .45); padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+  [data-course="ielts"] .wb-panel[hidden] { display: none; }
+  [data-course="ielts"] .wb-panel.in { animation: pxSheet .26s cubic-bezier(.2, .8, .2, 1) both; }
+  [data-course="ielts"] .wb-panel.out { animation: pxSheetOut .18s ease-in forwards; }
+  [data-course="ielts"] .wb-panel > .wb-grid { border-radius: 0 !important; max-height: min(72vh, 72dvh); overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+  [data-course="ielts"] .wb-sheet-bar { position: relative; display: flex; align-items: center; justify-content: space-between; flex: none; padding: 16px 12px 8px 18px; background: #fff; }
+  [data-course="ielts"] .wb-sheet-bar::before { content: ""; position: absolute; top: 7px; left: 50%; width: 36px; height: 4px; margin-left: -18px; border-radius: 4px; background: rgba(20, 41, 58, .16); }
+  [data-course="ielts"] .wb-sheet-bar b { font: 600 1.2rem/1.2 var(--serif); letter-spacing: -.02em; color: var(--px-ink); }
+  [data-course="ielts"] .wb-close { height: 36px; padding: 0 14px; border: 0; border-radius: 9px; background: #f3efe7; color: var(--px-ink); font: 700 .82rem/1 var(--sans); }
+  /* the dimmed page behind the sheet; a tap on it closes the menu (js/app.js) */
+  [data-course="ielts"] body.wb-is-open .weekbar::after { content: ""; position: fixed; inset: 0 !important; z-index: 5; width: auto !important; height: auto !important; border-radius: 0 !important; transform: none !important; background: rgba(20, 41, 58, .42) !important; animation: pxFade .2s both; }
+  [data-course="ielts"] body.wb-is-open :is(.dx-fab, .to-top) { display: none; }
+  body.wb-is-open { overflow: hidden; }
+  /* inside the sheet: comfortable rows to tap */
+  [data-course="ielts"] .wb-panel .wb-intro { display: none; }
+  [data-course="ielts"] .wb-panel .wb-col { padding: 6px 12px 12px; }
+  [data-course="ielts"] .wb-panel :is(.wb-day, .wb-part, .wb-col a, .wb-col button) { min-height: 44px; }
+
+  /* the row of weeks: ten equal tiles that fit the screen — no sideways scrolling, nothing cut off */
+  [data-course="ielts"] .weekbar { padding: 0 10px; background: transparent; }
+  [data-course="ielts"] .weekbar .wb-row { gap: 0; overflow: visible; align-items: center; justify-content: flex-start; }
+  [data-course="ielts"] .weekbar .wb-row::before { content: "Week"; flex: none; margin: 0 6px 0 4px; color: #8a949d; font: 700 .6rem/1 var(--sans); letter-spacing: .1em; text-transform: uppercase; }
+  [data-course="ielts"] .weekbar .wb-item { flex: 1 1 0; min-width: 0; height: 42px; padding: 0; justify-content: center; border-radius: 9px; }
+  [data-course="ielts"] .weekbar .wb-item .wb-tx, [data-course="ielts"] .weekbar .wb-go { display: none; }
+  [data-course="ielts"] .weekbar .wb-num { width: 26px; height: 26px; border-radius: 7px; font-size: .86rem; }
+  [data-course="ielts"] .weekbar .wb-item.is-current::after { left: 50%; right: auto; width: 18px; margin-left: -9px; bottom: 1px; }
+  [data-course="ielts"] .weekbar .wb-item.open { background: rgba(20, 41, 58, .07) !important; }
+}
+@keyframes pxSheet { from { transform: translateY(24px); opacity: 0; } }
+@keyframes pxSheetOut { to { transform: translateY(24px); opacity: 0; } }
+@keyframes pxFade { from { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { [data-course="ielts"] .wb-panel, body.wb-is-open .weekbar::after { animation: none !important; } }
+
+@media (max-width: 600px) {
+  /* one row of controls at the top instead of two: the three tools become icons beside Sign in */
+  [data-course="ielts"] { --head: 104px; }
+  [data-course="ielts"] .masthead .topbar { flex-wrap: nowrap; gap: 6px; padding: 8px 10px; }
+  [data-course="ielts"] .masthead #save-status { font-size: 0; gap: 0; margin-left: auto; min-width: 12px; }
+  [data-course="ielts"] .masthead #save-status > span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  [data-course="ielts"] .masthead .tools { order: 5; flex: none; width: auto; gap: 0; padding: 0; margin: 0; }
+  [data-course="ielts"] .masthead .tools button { width: 36px; height: 36px; padding: 0; justify-content: center; }
+  [data-course="ielts"] .masthead .tools button span { display: none; }
+  [data-course="ielts"] .masthead .tools button .icon { display: block; width: 18px; height: 18px; }
+  [data-course="ielts"] .masthead :is(.account-btn, .class-btn, .timer-btn, .answers-pill) { height: 36px; flex: none; }
+  [data-course="ielts"] .masthead .menu-btn { flex: none; }
+}
+@media (max-width: 380px) { [data-course="ielts"] .masthead .menu-btn span { display: none; } [data-course="ielts"] .masthead .menu-btn { width: 40px; padding: 0; justify-content: center; } }
+
+/* small laptops and tablets held sideways (side panel showing): the ten weeks fit as number tiles and the three tools
+   are icons, so the top bar no longer runs off the right edge (it made every page scroll sideways at 1024px) */
+@media (min-width: 901px) and (max-width: 1359px) {
+  [data-course="ielts"] .weekbar .wb-row { gap: 2px; overflow: visible; justify-content: flex-start; align-items: center; }
+  [data-course="ielts"] .weekbar .wb-row::before { content: "Week"; flex: none; margin: 0 8px 0 2px; color: #8a949d; font: 700 .62rem/1 var(--sans); letter-spacing: .1em; text-transform: uppercase; }
+  [data-course="ielts"] .weekbar .wb-item { padding: 0 5px; }
+  [data-course="ielts"] .weekbar .wb-item .wb-tx { display: none; }
+  [data-course="ielts"] .weekbar .wb-go { margin-left: auto; }
+}
+@media (min-width: 901px) and (max-width: 1279px) {
+  [data-course="ielts"] .masthead .tools button span { display: none; }
+  [data-course="ielts"] .masthead .tools button { width: 34px; padding: 0; justify-content: center; }
+  [data-course="ielts"] .masthead .topbar { min-width: 0; }
+  [data-course="ielts"] .masthead .crumb { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+  /* day timeline: the "next day" note drops under the four stages instead of pushing the page wider */
+  [data-course="ielts"] .dayline { flex-wrap: wrap; row-gap: 12px; }
+  [data-course="ielts"] .dayline-flag { flex: 1 0 100%; }
+}
+
+@media (max-width: 900px) {
+  /* tablets held upright: tools join the first row as icons (they sat alone on a second row) */
+  [data-course="ielts"] .masthead .topbar { flex-wrap: nowrap; gap: 8px; }
+  [data-course="ielts"] .masthead .crumb { flex: 1 1 0; min-width: 0; overflow: hidden; white-space: nowrap; }
+  [data-course="ielts"] .masthead .tools { order: 5; flex: none; width: auto; gap: 0; padding: 0; margin: 0; }
+  [data-course="ielts"] .masthead .tools button { width: 36px; height: 36px; padding: 0; justify-content: center; }
+  [data-course="ielts"] .masthead .tools button span { display: none; }
+  [data-course="ielts"] .masthead .tools button .icon { display: block; width: 18px; height: 18px; }
+  [data-course="ielts"] { --head: 104px; }
+
+  /* course map: the week selector is five equal tiles (it scrolled sideways and cut the second title off) */
+  [data-course="ielts"] .week-tabs { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); overflow: visible; gap: 4px; }
+  [data-course="ielts"] .week-tab { min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 10px 2px 14px !important; }
+  [data-course="ielts"] .week-tab-text { display: block; text-align: center; }
+  [data-course="ielts"] .week-tab-text b { font-size: .78rem; white-space: nowrap; }
+  [data-course="ielts"] .week-tab-text small, [data-course="ielts"] .week-tab-meta { display: none; }
+  [data-course="ielts"] .week-tab::after, [data-course="ielts"] .week-tab::before { left: 10px; right: 10px; }
+  [data-course="ielts"] .week-tab::before { width: calc((100% - 20px) * var(--p, 0) / 100%); }
+  /* week heading: the number sits beside the title; the description takes the full width below */
+  [data-course="ielts"] .week-head { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 12px; row-gap: 8px; align-items: center; }
+  [data-course="ielts"] .week-head > div { display: contents; }
+  [data-course="ielts"] .week-head h2 { grid-column: 2; }
+  [data-course="ielts"] .week-head p { grid-column: 1 / -1; margin: 0; }
+  [data-course="ielts"] .week-num { width: 46px; height: 46px; border-radius: 12px; }
+  /* targets big enough for a thumb */
+  [data-course="ielts"] main :is(.btn, .btn-quiet, .done-toggle) { min-height: 44px; }
+  [data-course="ielts"] .act-tabs { grid-auto-columns: minmax(74px, 1fr); }
+  [data-course="ielts"] .sidebar .side-link { height: 46px; }
+}
+@media (max-width: 600px) {
+  [data-course="ielts"] main { padding-left: 14px; padding-right: 14px; }
+  [data-course="ielts"] .day-grid.many { grid-template-columns: 1fr; }
+  [data-course="ielts"] .act-body { padding-left: 16px; padding-right: 16px; }
+  [data-course="ielts"] .act-head { padding-left: 16px; }
+  [data-course="ielts"] .act-foot { padding-left: 16px; padding-right: 16px; }
+  [data-course="ielts"] .act-body > :is(.block.talk, .block.language, .block.steps-block, .block.fscale, .block.kit) { padding: 16px; }
+  [data-course="ielts"] .gd-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  [data-course="ielts"] .act-body .cards, [data-course="ielts"] .act-body .flip-grid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+}
+
+/* long e-mail addresses and links break inside a narrow card instead of running off the screen */
+[data-course="ielts"] main :is(.gd-facts, .gd-fold-body, .gd-tab, .act-body, .dlx-item) :is(a, dd) { overflow-wrap: anywhere; }
+[data-course="ielts"] .gd-facts > div { min-width: 0; }
+/* sideways tablets and small laptops: the course map's week selector is five equal tiles too */
+@media (min-width: 901px) and (max-width: 1279px) {
+  [data-course="ielts"] .week-tabs { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); overflow: visible; }
+  [data-course="ielts"] .week-tab { min-width: 0; grid-template-columns: 34px minmax(0, 1fr); grid-template-areas: "num title" "num sub"; }
+  [data-course="ielts"] .week-tab-meta { display: none; }
+  [data-course="ielts"] .week-tab-text small { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+}

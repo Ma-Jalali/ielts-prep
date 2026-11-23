@@ -1,0 +1,270 @@
+/* Looks that belong to one course only. dec10.html starts with <html data-course="ielts"> (added by tools/build-sw.js);
+   DEC15 (index.html) has no data-course, so nothing here can change it.
+   Colours: University of Sydney palette — Charcoal #424242, Ochre #e64626, Light grey #f1f1f1, Sandstone #fcede2,
+   Navy #1a355e, Eucalypt (darkened for white text) #4f7d74.
+
+   ───────── DEC10: a dark side panel (when chosen) ─────────
+   Light by default (see the end of this file). Students can choose a dark colour in Settings
+   (data-side on <html>, js/app.js): charcoal, black, navy or eucalypt. */
+[data-course="ielts"][data-side="charcoal"] { --side-bg: #424242; --side-top: #4a4a4a; --side-end: #3a3a3a; }
+[data-course="ielts"][data-side="black"] { --side-bg: #000; --side-top: #161616; --side-end: #000; }
+[data-course="ielts"][data-side="navy"] { --side-bg: #1a355e; --side-top: #22406d; --side-end: #152c4f; }
+[data-course="ielts"][data-side="eucalypt"] { --side-bg: #4f7d74; --side-top: #588a80; --side-end: #456e66; }
+[data-course="ielts"][data-side]:not([data-side="light"]) .sidebar {
+  --side-text: #f1f1f1; --side-soft: #cfcfcf; --side-faint: #a8a8a8; --side-line: rgba(255, 255, 255, .1);
+  color: var(--side-text);
+  background:
+    radial-gradient(140% 34% at 0% 0%, rgba(230, 70, 38, .16), transparent 70%),
+    linear-gradient(180deg, var(--side-top), var(--side-bg) 40%, var(--side-end)) !important;
+}
+@media (min-width: 901px) {
+  [data-course="ielts"][data-side]:not([data-side="light"]) .sidebar { box-shadow: 0 0 0 1px rgba(0, 0, 0, .25), 0 4px 10px rgba(0, 0, 0, .12), 0 30px 64px -24px rgba(0, 0, 0, .55) !important; }
+}
+@media (max-width: 900px) { [data-course="ielts"][data-side]:not([data-side="light"]) .sidebar { background: var(--side-bg) !important; color: var(--side-text); } }
+[data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .uni { border-bottom-color: var(--side-line); }
+[data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .uni img { content: url("../assets/logo-white.svg"); }
+
+/* search */
+[data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .side-search > .icon, [data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .side-search kbd { color: var(--side-faint); }
+[data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .side-search kbd { border-color: rgba(255, 255, 255, .2); }
+[data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .side-search input { background: rgba(255, 255, 255, .08); color: var(--side-text); box-shadow: inset 0 0 0 1px var(--side-line); }
+[data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .side-search input::placeholder { color: var(--side-faint); }
+[data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .side-search input:focus { background: rgba(255, 255, 255, .13); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .25), 0 0 0 4px rgba(230, 70, 38, .3); }
+[data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .search-hit { color: var(--side-soft); }
+[data-course="ielts"][data-side]:not([data-side="light"]) .sidebar a.search-hit:hover, [data-course="ielts"][data-side]:not([data-side="light"]) .sidebar a.search-hit:focus-visible,
+[data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .search-hit.first, [data-course="ielts"][data-side]:not([data-side="light"]) .sidebar button.search-hit:hover { background: rgba(255, 255, 255, .09); color: #fff; }
+
+/* links: light text; the coloured icon tiles stay; the open page is a lighter row with an ochre edge */
+[data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .side-link { color: var(--side-text); }
+[data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .side-link:hover { background: rgba(255, 255, 255, .08); color: #fff; }
+[data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .side-ic { box-shadow: 0 0 0 .5px rgba(0, 0, 0, .2); }
+[data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .side-link.active { background: rgba(255, 255, 255, .13); color: #fff; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .12); }
+[data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .side-link.active::before { background: #e64626; }
+[data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .side-ext { color: var(--side-faint); }
+[data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .side-group, [data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .nav-label { color: var(--side-faint) !important; }
+[data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .side-group::after { background: var(--side-line); }
+[data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .side-badge { box-shadow: 0 0 0 2px var(--side-bg); }
+
+/* progress card and settings button at the foot */
+[data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .side-progress.side-foot { background: rgba(255, 255, 255, .07); box-shadow: inset 0 0 0 1px var(--side-line) !important; }
+[data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .side-prog, [data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .side-progress { color: var(--side-soft); }
+[data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .side-progress #progress-label b { color: #fff; }
+[data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .side-ring circle { stroke: rgba(255, 255, 255, .15); }
+[data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .side-gear { background: rgba(255, 255, 255, .1); color: var(--side-text); box-shadow: inset 0 0 0 1px var(--side-line); }
+[data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .side-gear:hover, [data-course="ielts"][data-side]:not([data-side="light"]) .sidebar .side-gear[aria-expanded="true"] { background: rgba(255, 255, 255, .18); color: #fff; }
+
+/* Settings → Side panel colour: a row of round swatches (the settings menu itself stays white) */
+.side-colours { display: grid; gap: 8px; margin-top: 4px; padding: 10px 8px 6px; border-top: 1px solid rgba(20, 41, 58, .08); }
+.side-colours .sc-label { font-size: .84rem; font-weight: 600; color: #3a4d5d; }
+.side-colours .sc-row { display: flex; gap: 8px; }
+.side-colours button { width: 26px; height: 26px; padding: 0; border-radius: 50%; border: 0; cursor: pointer; background: var(--sc);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .18); transition: transform .15s; }
+.side-colours button:hover { transform: scale(1.1); }
+.side-colours button[aria-checked="true"] { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .18), 0 0 0 2px #fff, 0 0 0 4px #e64626; }
+.side-colours button:focus-visible { outline: 2px solid #e64626; outline-offset: 3px; }
+
+/* ───────── DEC10: the light side panel (the default) ─────────
+   A crisp white sheet that floats clearly above the page: a hairline edge and a deep soft shadow, an Ochre rule along
+   the top, a Sandstone header with a fine dot pattern behind the logo, a course badge, Sandstone hover rows, a white
+   "you are here" card with an Ochre edge, and a warm progress card at the foot. */
+:is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar {
+  --ochre: #e64626; --sand: #fcede2; --ink-2: #1f2d3a; --soft-2: #5b6874; --faint-2: #8d97a0; --line-2: rgba(20, 41, 58, .08);
+  color: var(--ink-2);
+  /* the dot pattern only behind the header: a white veil fades it out below the logo */
+  /* the dot pattern also rises softly from the foot, so the sheet reads as one designed panel */
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0) 0, rgba(255, 255, 255, .55) 60px, #fff 150px, #fff calc(100% - 190px), rgba(255, 255, 255, .5) calc(100% - 90px), rgba(255, 255, 255, .15) 100%),
+    radial-gradient(circle at 1px 1px, rgba(230, 70, 38, .18) 1px, transparent 1.5px) 0 0 / 14px 14px,
+    linear-gradient(180deg, var(--sand), #fff 150px, #fff calc(100% - 160px), var(--sand)) !important;
+}
+@media (min-width: 901px) {
+  :is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar {
+    box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(20, 41, 58, .09), 0 1px 2px rgba(20, 41, 58, .06),
+      0 10px 22px -10px rgba(20, 41, 58, .22), 0 34px 70px -22px rgba(20, 41, 58, .45) !important;
+  }
+  /* a fine frame a few pixels outside the sheet: it reads as a separate panel, not another card on the page */
+  :is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar { outline: 1px solid rgba(20, 41, 58, .1); outline-offset: 5px; }
+  /* an Ochre rule along the top edge of the sheet */
+  :is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar::before {
+    content: ""; position: absolute; top: 0; left: 24px; right: 24px; height: 3px; border-radius: 0 0 3px 3px;
+    background: linear-gradient(90deg, transparent, var(--ochre) 18%, var(--ochre) 82%, transparent); pointer-events: none;
+  }
+}
+
+/* header: the logo, then a small course badge */
+:is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar .uni { padding: 8px 10px 12px; border-bottom: 0; margin-bottom: 0; }
+:is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar .side-course + .side-search { position: relative; margin-top: 18px; }
+:is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar .side-course + .side-search::before {
+  content: ""; position: absolute; left: 6px; right: 6px; top: -9px; height: 1px; background: linear-gradient(90deg, transparent, var(--line-2) 15%, var(--line-2) 85%, transparent);
+}
+
+/* search */
+:is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar .side-search input {
+  background: #f4f4f4; border: 0; border-radius: 12px; color: var(--ink-2); box-shadow: inset 0 0 0 1px rgba(20, 41, 58, .06), inset 0 1px 2px rgba(20, 41, 58, .05);
+}
+:is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar .side-search input:focus {
+  background: #fff; box-shadow: inset 0 0 0 1px rgba(230, 70, 38, .5), 0 0 0 4px rgba(230, 70, 38, .14);
+}
+:is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar .side-search kbd { background: #fff; border-color: rgba(20, 41, 58, .12); color: var(--faint-2); box-shadow: 0 1px 0 rgba(20, 41, 58, .12); }
+
+/* section label: small caps with an Ochre diamond */
+:is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar .side-group { color: var(--faint-2) !important; letter-spacing: .14em; }
+:is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar .side-group::before {
+  content: ""; width: 5px; height: 5px; flex: none; transform: rotate(45deg); border-radius: 1px; background: var(--ochre); opacity: .8;
+}
+
+/* links */
+:is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar .side-link { color: #33414e; }
+:is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar .side-link:hover { background: color-mix(in srgb, var(--sand) 75%, #fff); color: var(--ink-2); }
+:is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar .side-link.active {
+  background: #fff; color: var(--ink-2); font-weight: 750;
+  box-shadow: 0 0 0 1px rgba(20, 41, 58, .07), 0 2px 4px rgba(20, 41, 58, .05), 0 10px 20px -12px rgba(20, 41, 58, .4);
+}
+:is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar .side-link.active::before { background: var(--ochre); }
+:is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar .side-link.active::after {
+  content: ""; margin-left: auto; width: 6px; height: 6px; border-radius: 50%; background: var(--ochre); box-shadow: 0 0 0 3px rgba(230, 70, 38, .15);
+}
+
+/* progress card and settings at the foot: warm Sandstone, an Ochre progress ring */
+:is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar .side-progress.side-foot {
+  background: linear-gradient(160deg, var(--sand), #fff 85%); box-shadow: inset 0 0 0 1px rgba(230, 70, 38, .14), 0 6px 14px -10px rgba(230, 70, 38, .5) !important;
+}
+:is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar .side-prog { color: var(--soft-2); }
+:is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar .side-ring circle { stroke: rgba(230, 70, 38, .14); }
+:is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar .side-ring circle + circle { stroke: var(--ochre); }
+:is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar .side-ring.is-done circle + circle { stroke: #3f7a3a; }
+:is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar .side-gear { background: #fff; color: var(--soft-2); }
+:is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar .side-gear:hover,
+:is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar .side-gear[aria-expanded="true"] { color: var(--ochre); box-shadow: 0 0 0 1px rgba(230, 70, 38, .35), 0 4px 10px -4px rgba(230, 70, 38, .5); }
+
+/* ───────── DEC10 light panel: details (v2.74) ─────────
+   The course card, icon tiles in University of Sydney colours, and frosted-glass "you are here" and progress cards. */
+:is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar {
+  /* each link's colour, from the University palette (Ochre, Jacaranda, Heritage Rose, Eucalypt, Navy …) */
+  --dec-map: #e64626; --dec-read: #4f68b8; --dec-note: #8a4f9e; --dec-planner: #3f8f7f;
+  --dec-board: #d9902a; --dec-chats: #2f9a63; --dec-shared: #1a355e; --dec-copy: #c0727a; --dec-cal: #b8331a; --dec-assess: #5b4f9e; --dec-pebble: #1f7f86;
+}
+:is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar .t-map { --tc: var(--dec-map); }
+:is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar .t-read { --tc: var(--dec-read); }
+:is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar .t-note { --tc: var(--dec-note); }
+:is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar .t-planner { --tc: var(--dec-planner); }
+:is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar .t-board { --tc: var(--dec-board); }
+:is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar .t-chats { --tc: var(--dec-chats); }
+:is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar .t-shared { --tc: var(--dec-shared); }
+:is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar .t-copy { --tc: var(--dec-copy); }
+:is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar .t-cal { --tc: var(--dec-cal); }
+:is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar .t-assess { --tc: var(--dec-assess); }
+:is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar .t-pebble { --tc: var(--dec-pebble); }
+
+/* the course card: a glass strip with an Ochre code chip */
+.side-course { display: none; }
+:is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar .side-course {
+  display: flex; align-items: center; gap: 10px; margin: 0 4px; padding: 7px 12px 7px 7px; border-radius: 14px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, .92), rgba(255, 255, 255, .62));
+  -webkit-backdrop-filter: blur(10px) saturate(1.5); backdrop-filter: blur(10px) saturate(1.5);
+  box-shadow: inset 0 1px 0 #fff, inset 0 0 0 1px rgba(255, 255, 255, .6), 0 0 0 1px rgba(230, 70, 38, .14), 0 8px 18px -12px rgba(230, 70, 38, .55);
+}
+:is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar .sc-code {
+  padding: 6px 9px; border-radius: 8px; color: #fff; font: 800 .74rem/1 var(--sans, Manrope, sans-serif); letter-spacing: .06em;
+  background: linear-gradient(160deg, #ee5a3a, #e64626); box-shadow: 0 4px 10px -5px rgba(230, 70, 38, .8);
+}
+:is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar .sc-name {
+  display: grid; gap: 2px; color: var(--ink-2); font: 750 .82rem/1.15 var(--sans, Manrope, sans-serif);
+}
+:is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar .sc-name small { color: var(--faint-2); font-weight: 650; font-size: .7rem; letter-spacing: .02em; }
+
+/* icon tiles: clean and modern, like iOS app icons — a soft tint of the link's colour, a thin icon in the full colour,
+   a hairline edge and a whisper of shadow; no gloss or bevel. The open page fills the tile with the colour. */
+:is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar .side-ic {
+  width: 32px; height: 32px; border-radius: 10px;
+  color: var(--tc);
+  background: linear-gradient(160deg, color-mix(in srgb, var(--tc) 20%, #fff), color-mix(in srgb, var(--tc) 9%, #fff));
+  box-shadow: inset 0 0 0 .5px color-mix(in srgb, var(--tc) 30%, transparent), 0 2px 6px -4px color-mix(in srgb, var(--tc) 70%, transparent);
+  transition: transform .25s cubic-bezier(.2, .8, .2, 1), background .25s, box-shadow .25s, color .25s;
+}
+:is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar .side-ic svg { width: 18px; height: 18px; stroke-width: 1.7; }
+:is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar .side-link:hover .side-ic {
+  transform: scale(1.06);
+  background: linear-gradient(160deg, color-mix(in srgb, var(--tc) 26%, #fff), color-mix(in srgb, var(--tc) 13%, #fff));
+}
+:is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar .side-link.active .side-ic {
+  color: #fff; background: linear-gradient(160deg, color-mix(in srgb, var(--tc) 82%, #fff), var(--tc));
+  box-shadow: 0 4px 10px -4px color-mix(in srgb, var(--tc) 85%, transparent);
+}
+
+/* rows: the hover and the open page take a whisper of the link's own colour, on glass */
+:is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar .side-link { height: 44px; }
+:is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar .side-link:hover { background: linear-gradient(90deg, color-mix(in srgb, var(--tc) 9%, #fff), rgba(255, 255, 255, 0)); }
+:is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar .side-link.active {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--tc) 11%, rgba(255, 255, 255, .9)), rgba(255, 255, 255, .78));
+  -webkit-backdrop-filter: blur(12px) saturate(1.5); backdrop-filter: blur(12px) saturate(1.5);
+  box-shadow: inset 0 1px 0 #fff, inset 0 0 0 1px rgba(255, 255, 255, .7), 0 0 0 1px color-mix(in srgb, var(--tc) 20%, rgba(20, 41, 58, .06)),
+    0 2px 4px rgba(20, 41, 58, .04), 0 12px 22px -14px color-mix(in srgb, var(--tc) 70%, rgba(20, 41, 58, .5));
+}
+:is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar .side-link.active::before { background: var(--tc); box-shadow: 0 0 10px color-mix(in srgb, var(--tc) 60%, transparent); }
+:is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar .side-link.active::after { background: var(--tc); box-shadow: 0 0 0 3px color-mix(in srgb, var(--tc) 18%, transparent); }
+
+/* the progress card and settings button: glass too */
+:is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar .side-progress.side-foot {
+  background: linear-gradient(160deg, rgba(252, 237, 226, .95), rgba(255, 255, 255, .7)) !important;
+  -webkit-backdrop-filter: blur(12px) saturate(1.5); backdrop-filter: blur(12px) saturate(1.5);
+  box-shadow: inset 0 1px 0 #fff, inset 0 0 0 1px rgba(255, 255, 255, .6), 0 0 0 1px rgba(230, 70, 38, .15), 0 10px 20px -14px rgba(230, 70, 38, .6) !important;
+}
+:is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar .side-gear {
+  background: linear-gradient(180deg, #fff, #f6f6f6); box-shadow: inset 0 1px 0 #fff, 0 0 0 1px rgba(20, 41, 58, .1), 0 3px 8px -4px rgba(20, 41, 58, .35);
+}
+@media (prefers-reduced-motion: reduce) {
+  :is([data-course="ielts"]:not([data-side]), [data-course="ielts"][data-side="light"]) .sidebar .side-ic { transition: none; }
+}
+
+/* DEC10: a new part (tab or Next) fades in, so the change is visible */
+[data-course="ielts"] .act-enter { animation: actEnter .45s cubic-bezier(.2, .7, .2, 1) both; }
+@keyframes actEnter { from { opacity: 0; transform: translateY(14px); } }
+@media (prefers-reduced-motion: reduce) { [data-course="ielts"] .act-enter { animation: none; } }
+
+/* ───── DEC10 · calmer activity pages ─────
+   The "Write together" card at the top of writing activities is hidden: the same button sits in the activity footer.
+   The class discussion is one slim bar (see js/wall.js, compact mode): tap it to open the composer and posts. */
+[data-course="ielts"] .cowrite-card { display: none; }
+[data-course="ielts"] .share-btn, [data-course="ielts"] .sb-btns { margin-top: 6px; }
+[data-course="ielts"] .activity .wall.wall-compact, [data-course="ielts"] .wall.wall-compact { padding: 0 !important; margin-top: 10px !important; margin-bottom: 22px !important; overflow: hidden; }
+.wall-bar { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 58px; padding: 9px 12px 9px 12px; border: 0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; transition: background .2s; }
+button.wall-bar:hover { background: color-mix(in srgb, var(--talk, #6d4c9f) 6%, transparent); }
+button.wall-bar:focus-visible { outline: 2px solid var(--talk); outline-offset: -2px; border-radius: 22px; }
+.wall-bar .wall-icon { width: 36px; height: 36px; border-radius: 12px; }
+.wall-bar .wall-icon .icon { width: 17px; height: 17px; }
+.wall-bar-tx { display: grid; gap: 1px; min-width: 0; flex: 1; }
+.wall-bar-tx > b { display: flex; align-items: center; gap: 8px; font: 600 1rem/1.3 var(--serif); color: var(--ink); white-space: nowrap; }
+.wall-bar-tx small { font: 500 .82rem/1.35 var(--sans); color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wall-bar-tx small b { font-weight: 800; color: var(--ink); }
+.wall-bar-meta { display: flex; align-items: center; gap: 8px; flex: none; }
+.wall-bar-meta .ws-faces { display: inline-flex; }
+.wall-bar-meta .ws-on { display: inline-flex; align-items: center; gap: 5px; font: 700 .74rem/1 var(--sans); color: #1d6b43; }
+.wall-new { display: inline-grid; place-items: center; height: 22px; padding: 0 9px; border-radius: 999px; background: #d4583a; color: #fff; font: 800 .7rem/1 var(--sans); animation: cbPulse 2s ease-in-out infinite; }
+.wall-bar-open { display: inline-flex; align-items: center; gap: 4px; flex: none; padding: 6px 10px 6px 12px; border-radius: 999px; background: color-mix(in srgb, var(--talk, #6d4c9f) 10%, #fff); color: var(--talk); font: 700 .78rem/1 var(--sans); }
+.wall-chev { width: 14px; height: 14px; transition: transform .25s var(--ease); }
+.wall-compact.is-open .wall-chev { transform: rotate(180deg); }
+.wall-body { padding: 2px 16px 18px; animation: kitIn .3s var(--ease) both; }
+.wall-empty-slim { padding: 10px 14px !important; font-size: .86rem; }
+@media (max-width: 640px) { .wall-bar { padding: 8px 10px; gap: 10px; } .wall-bar-meta .ws-faces, .wall-bar-meta .ws-on { display: none; } .wall-bar-open { padding: 6px 8px; } .wall-bar-open .wall-chev { display: none; } .wall-body { padding: 0 10px 14px; } }
+@media (prefers-reduced-motion: reduce) { .wall-new { animation: none; } .wall-body { animation: none; } }
+
+/* ───── DEC10 · side panel details (v2.95) ───── */
+[data-course="ielts"] .side-ic { width: 34px; height: 34px; border-radius: 11px; color: color-mix(in srgb, var(--tc) 72%, #14293a);
+  background: linear-gradient(150deg, color-mix(in srgb, var(--tc) 26%, #fff), color-mix(in srgb, var(--tc) 9%, #fff));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .95), inset 0 -1px 0 color-mix(in srgb, var(--tc) 14%, transparent), 0 0 0 .5px color-mix(in srgb, var(--tc) 32%, transparent), 0 3px 8px -5px color-mix(in srgb, var(--tc) 60%, transparent); }
+[data-course="ielts"] .side-ic svg { width: 19px; height: 19px; filter: drop-shadow(0 1px 0 rgba(255, 255, 255, .7)); }
+[data-course="ielts"] .side-link:hover .side-ic { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .95), 0 0 0 .5px color-mix(in srgb, var(--tc) 45%, transparent), 0 8px 16px -8px color-mix(in srgb, var(--tc) 80%, transparent); }
+[data-course="ielts"] .side-link.active .side-ic { color: #fff; background: linear-gradient(150deg, color-mix(in srgb, var(--tc) 88%, #fff), color-mix(in srgb, var(--tc) 85%, #14293a)); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .4), 0 8px 18px -8px color-mix(in srgb, var(--tc) 90%, transparent); }
+[data-course="ielts"] .side-link.active .side-ic svg { filter: none; }
+[data-course="ielts"] .side-link .side-tx { letter-spacing: .005em; }
+[data-course="ielts"] .side-link.active::after { content: ""; position: absolute; right: 12px; top: 50%; width: 6px; height: 6px; border-radius: 50%; background: var(--tc); transform: translateY(-50%); box-shadow: 0 0 0 3px color-mix(in srgb, var(--tc) 22%, #fff); }
+[data-course="ielts"] .sc-weeks { display: grid; grid-template-columns: repeat(10, 1fr); gap: 3px; margin-top: 7px; }
+[data-course="ielts"] .sc-weeks i { height: 5px; border-radius: 3px; background: rgba(20, 41, 58, .1); }
+[data-course="ielts"] .sc-weeks i.is-done { background: #e64626; opacity: .55; }
+[data-course="ielts"] .sc-weeks i.is-now { background: #e64626; box-shadow: 0 0 0 2px rgba(230, 70, 38, .2); animation: cbPulse 2.4s ease-in-out infinite; }
+[data-course="ielts"][data-side]:not([data-side="light"]) .sc-weeks i { background: rgba(255, 255, 255, .16); }
+[data-course="ielts"] .side-ring { width: 32px; height: 32px; }
+[data-course="ielts"] .side-ring circle + circle { stroke: #e64626; filter: drop-shadow(0 0 3px rgba(230, 70, 38, .45)); }
+[data-course="ielts"] .side-ring.is-done circle + circle { stroke: #2f9a63; }
+@media (prefers-reduced-motion: reduce) { [data-course="ielts"] .sc-weeks i.is-now { animation: none; } }
