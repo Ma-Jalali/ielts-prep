@@ -390,19 +390,28 @@ window.createStudio = function ({ lesson, course, days, esc, icon, toast, L, rer
   }
 
   /* ───────── page templates for "New page" ───────── */
+  const CB = (name, cat) => { const c = CAT.find(x => x.name === name && (!cat || x.cat === cat)); return c ? c.make() : { type: 'text', text: name }; };   // a catalogue block by name
+  const act = (short, title, goal, blocks, grouping = 'Alone') => ({ ...blankActivity(), id: uid(short.toLowerCase().replace(/\W+/g, '').slice(0, 6) || 'act'), short, title, goal, grouping, blocks });
   const STARTS = {
     blank: { name: 'Blank page', sections: () => [blankStage(1)] },
-    listening: { name: 'Listening lesson', sections: () => [{ ...blankStage(1), id: 'listen', tone: 'teal', art: 'listening', title: 'Listening', subtitle: 'Before, while and after listening',
-      activities: [{ ...blankActivity(), id: uid('pre'), short: 'Predict', title: 'Before you listen', goal: 'Predict the answers.', grouping: 'Pair', blocks: [{ type: 'steps', items: [{ who: 'alone', text: 'Read the questions.' }, { who: 'pair', text: 'Predict the kind of answer for each gap.' }] }] },
-        { ...blankActivity(), id: uid('lis'), short: 'Listen', title: 'Listen and answer', goal: 'Answer the questions.', blocks: [CAT.find(c => c.name === 'Listening recording').make(), CAT.find(c => c.name === 'Sentence / note completion').make()] }] }] },
+    listening: { name: 'Listening lesson', sections: () => [{ ...blankStage(1), id: 'listen', tone: 'teal', art: 'listening', title: 'Listening', subtitle: 'Predict, listen, check',
+      activities: [act('Predict', 'Before you listen', 'Read the questions and predict the kind of answer for each gap.', [{ type: 'steps', items: [{ who: 'alone', text: 'Read the questions.' }, { who: 'pair', text: 'Predict the kind of answer for each gap.' }] }], 'Pair'),
+        act('Listen', 'Listen and answer', 'Answer the questions as you listen.', [CB('Listening test screen')])] }] },
     reading: { name: 'Reading lesson', sections: () => [{ ...blankStage(1), id: 'read', tone: 'blue', art: 'reading', title: 'Reading', subtitle: 'Skim, scan, answer',
-      activities: [{ ...blankActivity(), id: uid('rd'), short: 'Read', title: 'Read the passage', goal: 'Find the information quickly.', blocks: [CAT.find(c => c.name === 'Reading passage').make(), CAT.find(c => c.name === 'True / False / Not Given').make()] }] }] },
-    writing: { name: 'Writing lesson', sections: () => [{ ...blankStage(1), id: 'write', tone: 'clay', art: 'writing', title: 'Writing', subtitle: 'Plan, write, check',
-      activities: [{ ...blankActivity(), id: uid('pl'), short: 'Plan', title: 'Plan your answer', goal: 'Decide your position and main ideas.', grouping: 'Pair', blocks: [{ type: 'key', title: 'The key idea', points: ['Point one', 'Point two'] }, CAT.find(c => c.type === 'fields' && c.cat === 'Write').make()] },
-        { ...blankActivity(), id: uid('wr'), short: 'Write', title: 'Write', goal: 'Write at least 250 words.', blocks: [CAT.find(c => c.name === 'Writing task box').make(), CAT.find(c => c.name === 'Band descriptor self-check').make()] }] }] },
+      activities: [act('Read', 'Read and answer', 'Find the information quickly.', [CB('Reading test screen')])] }] },
+    writing1: { name: 'Writing Task 1 lesson', sections: () => [{ ...blankStage(1), id: 'task1', tone: 'clay', art: 'writing', title: 'Writing Task 1', subtitle: 'Overview, key features, comparisons',
+      activities: [act('Plan', 'Plan your report', 'Find the overview and the key features.', [{ type: 'key', title: 'The key idea', points: ['Start with an overview.', 'Report the key features with figures.'] }], 'Pair'),
+        act('Write', 'Write your report', 'Write at least 150 words.', [CB('Writing Task 1 (Academic)'), CB('Band descriptor self-check')])] }] },
+    writing: { name: 'Writing Task 2 lesson', sections: () => [{ ...blankStage(1), id: 'write', tone: 'clay', art: 'writing', title: 'Writing Task 2', subtitle: 'Plan, write, check',
+      activities: [act('Plan', 'Plan your essay', 'Decide your position and main ideas.', [{ type: 'key', title: 'The key idea', points: ['Point one', 'Point two'] }, CB('Writing boxes', 'Write')], 'Pair'),
+        act('Write', 'Write your essay', 'Write at least 250 words.', [CB('Writing Task 2 (essay)'), CB('Band descriptor self-check')])] }] },
     speaking: { name: 'Speaking lesson', sections: () => [{ ...blankStage(1), id: 'speak', tone: 'plum', art: 'discussion', title: 'Speaking', subtitle: 'Parts 1, 2 and 3',
-      activities: [{ ...blankActivity(), id: uid('p1'), short: 'Part 1', title: 'Part 1 questions', goal: 'Answer with reasons and examples.', grouping: 'Pair', blocks: [CAT.find(c => c.name === 'Speaking Part 1 / Part 3 questions').make()] },
-        { ...blankActivity(), id: uid('p2'), short: 'Part 2', title: 'Cue card', goal: 'Talk for 1–2 minutes.', grouping: 'Pair', blocks: [CAT.find(c => c.name === 'Speaking Part 2 cue card').make(), { type: 'language', title: 'Useful language', groups: [{ label: 'Starting', phrases: ['I’d like to talk about …'] }] }] }] }] },
+      activities: [act('Part 1', 'Part 1: the interview', 'Answer with reasons and examples.', [CB('Speaking Part 1 (interview)')], 'Pair'),
+        act('Part 2', 'Part 2: the long turn', 'Talk for 1–2 minutes.', [CB('Speaking Part 2 (cue card)'), { type: 'language', title: 'Useful language', groups: [{ label: 'Starting', phrases: ['I’d like to talk about …'] }] }], 'Pair'),
+        act('Part 3', 'Part 3: the discussion', 'Give and justify opinions.', [CB('Speaking Part 3 (discussion)')], 'Pair')] }] },
+    language: { name: 'Vocabulary or grammar lesson', sections: () => [{ ...blankStage(1), id: 'language', tone: 'green', art: 'critical', title: 'Language', subtitle: 'Learn, practise, check',
+      activities: [act('Learn', 'Learn', 'The rule or the words, with examples.', [CB('Rule card')]),
+        act('Practise', 'Practise', 'Check your understanding.', [CB('Quiz: choose the correct answer'), CB('Quiz: complete the sentences')])] }] },
     four: { name: 'All four skills', sections: () => ['listening', 'reading', 'writing', 'speaking'].flatMap(k => STARTS[k].sections()) }
   };
   function createPage(f) {

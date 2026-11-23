@@ -51,8 +51,8 @@ window.DEC15_COURSE = {
   /* Pages outside the skills: not on the course map, opened by a link (the Block gallery is linked from Studio). */
   pages: [
     { id: 'ieblocks', status: 'ready', title: 'Block gallery', where: 'Studio', art: 'research',
-      parts: ['IELTS', 'Teach', 'Practise', 'Write', 'Listen & read', 'Layout', 'Class games'],
-      stages: ['ielts', 'teach', 'practise', 'write', 'media', 'layout', 'games'], tones: ['teal', 'amber', 'teal', 'clay', 'blue', 'plum', 'green'],
+      parts: ['IELTS Reading', 'IELTS Listening', 'IELTS Writing', 'IELTS Speaking', 'Media', 'Grammar & vocabulary', 'Teach', 'Practise', 'Write', 'Listen & read', 'Layout', 'Class games'],
+      stages: ['reading', 'listening', 'writing', 'speaking', 'media2', 'language', 'teach', 'practise', 'write', 'media', 'layout', 'games'], tones: ['blue', 'teal', 'clay', 'plum', 'amber', 'green', 'amber', 'teal', 'clay', 'blue', 'plum', 'green'],
       scripts: ['lessons/studio/ieblocks.js'] }
   ],
   /* THE SKILLS. Each part: n (its number; never change), theme (name), color, group, art (its icon), short, tag (one line under the name),
