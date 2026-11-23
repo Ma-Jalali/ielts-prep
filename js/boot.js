@@ -15,13 +15,14 @@
     w.days.push({ ...nd, status: 'ready', draft: true, scripts: [] }); w.days.sort((a, b) => a.day - b.day);
   });
   const days = course.weeks.flatMap(w => w.days.map(d => ({ ...d, week: w.n, theme: w.theme })))
-    .concat((course.lab?.strands || []).flatMap(st => st.lessons.map((l, i) => ({ ...l, lab: st.id, labN: i + 1, week: null, day: null }))));   // Skills Lab lessons
+    .concat((course.lab?.strands || []).flatMap(st => st.lessons.map((l, i) => ({ ...l, lab: st.id, labN: i + 1, week: null, day: null }))))   // Skills Lab lessons
+    .concat((course.pages || []).map(p => ({ ...p, page: true, week: null, day: null })));   // pages outside the course map (e.g. the Block gallery)
   const ready = id => days.find(d => d.id === id && d.status === 'ready');
   const hash = location.hash.slice(1);
   let id = (hash.match(/^\/([\w-]+)/) || [])[1];
   window.DEC15_STUDIO_PAGE = id === 'studio';
   if (!ready(id)) { try { id = localStorage.getItem(window.DEC15_CLASS.id + '-last-lesson'); } catch (e) { id = null; } }
-  if (!ready(id)) id = course.defaultLesson;
+  if (!ready(id)) id = (days.find(d => d.week && d.status === 'ready') || {}).id || course.defaultLesson;   // the first ready lesson, else the default page
   window.DEC15_DAYS = days;
   window.DEC15_LESSON_META = ready(id);
   window.DEC15_DRAFT = drafts.lessons?.[id] || null;
