@@ -278,3 +278,41 @@ mark.xs-hl.has-note.is-hl { background: #ffd65c; }
 .xs-note-card footer button:hover { background: #fff3cf; }
 .xs-note-card footer button[data-nc="del"] { color: #a91d2f; }
 @keyframes xsNoteIn { from { opacity: 0; transform: translateY(6px) scale(.97); } }
+
+/* ── the recording player (js/player.js) ── */
+.xs-player.xp { display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 16px; align-items: center; padding: 16px 18px 14px 16px; }
+.xp-play { position: relative; width: 76px; height: 76px; border: 0; border-radius: 22px; background: var(--brand, #d6283c); color: #fff; cursor: pointer; display: grid; place-items: center;
+  box-shadow: 0 10px 20px -8px rgba(214, 40, 60, .9), inset 0 1px 0 rgba(255, 255, 255, .25); transition: transform .12s, background .15s; -webkit-tap-highlight-color: transparent; }
+.xp-play:hover { background: #e23146; } .xp-play:active { transform: scale(.95); }
+.xp-play svg { width: 34px; height: 34px; }
+.xp-i-pause, .xp.is-playing .xp-i-play { display: none; } .xp.is-playing .xp-i-pause { display: block; } .xp-i-play { display: block; margin-left: 3px; }
+.xp-spin { display: none; position: absolute; inset: 6px; border-radius: 18px; border: 3px solid rgba(255, 255, 255, .35); border-top-color: #fff; animation: xpSpin .8s linear infinite; }
+.xp.is-loading .xp-spin { display: block; } @keyframes xpSpin { to { transform: rotate(360deg); } }
+.xp-main { display: grid; gap: 8px; min-width: 0; }
+.xp-top { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.xp-top b { font-family: var(--serif, 'Outfit', sans-serif); font-size: 1.08rem; font-weight: 650; } .xp-top span { font-size: .84rem; color: rgba(255, 255, 255, .72); font-weight: 600; }
+.xp-seekrow { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 10px; font: 600 .8rem/1 var(--sans, system-ui); font-variant-numeric: tabular-nums; color: rgba(255, 255, 255, .8); }
+.xp-seek { -webkit-appearance: none; appearance: none; width: 100%; height: 28px; background: transparent; cursor: pointer; margin: 0; --p: 0%; }
+.xp-seek::-webkit-slider-runnable-track { height: 6px; border-radius: 99px; background: linear-gradient(90deg, #fff var(--p), rgba(255, 255, 255, .22) var(--p)); }
+.xp-seek::-moz-range-track { height: 6px; border-radius: 99px; background: rgba(255, 255, 255, .22); } .xp-seek::-moz-range-progress { height: 6px; border-radius: 99px; background: #fff; }
+.xp-seek::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; margin-top: -6px; border-radius: 50%; background: #fff; box-shadow: 0 2px 6px rgba(0, 0, 0, .35); }
+.xp-seek::-moz-range-thumb { width: 18px; height: 18px; border: 0; border-radius: 50%; background: #fff; }
+.xp-ctrl { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.xp-ctrl button { position: relative; height: 42px; min-width: 46px; padding: 0 12px; border: 0; border-radius: 13px; background: rgba(255, 255, 255, .12); color: #fff; cursor: pointer; display: inline-grid; place-items: center; font: 800 .9rem/1 var(--sans, system-ui); -webkit-tap-highlight-color: transparent; transition: background .15s; }
+.xp-ctrl button:hover { background: rgba(255, 255, 255, .2); } .xp-ctrl button:active { transform: scale(.96); }
+.xp-ctrl button svg { width: 22px; height: 22px; } .xp-ctrl button small { position: absolute; font: 800 .56rem/1 var(--sans, system-ui); top: 50%; left: 50%; transform: translate(-50%, -38%); }
+.xp-speed { min-width: 58px !important; }
+.xp-vol { display: inline-flex; align-items: center; gap: 8px; margin-left: auto; }
+.xp-volume { width: 96px; accent-color: #fff; }
+.xp.is-muted .xp-wave { opacity: .25; }
+.xp-msg { margin: 2px 0 0; font-size: .86rem; color: #ffd7dc; } .xp-msg a { color: #fff; font-weight: 700; }
+.xp.is-broken .xp-play { background: #6b7287; box-shadow: none; }
+@media (max-width: 720px) {
+  .xs-player.xp { grid-template-columns: 1fr; gap: 12px; padding: 14px; }
+  .xp-main { display: contents; }
+  .xp-top { order: -2; } .xp-play { order: -1; width: 100%; height: 64px; border-radius: 18px; }
+  .xp-play::after { content: 'Play'; margin-left: 10px; font: 800 1.05rem/1 var(--sans, system-ui); } .xp.is-playing .xp-play::after { content: 'Pause'; }
+  .xp-play { display: flex; justify-content: center; align-items: center; }
+  .xp-ctrl { justify-content: space-between; } .xp-ctrl button { flex: 1; height: 48px; }
+  .xp-vol { margin-left: 0; flex: 1; } .xp-vol button { width: 100%; } .xp-volume { display: none; }
+}
