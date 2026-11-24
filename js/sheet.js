@@ -35,12 +35,19 @@
     const player = (a, i) => { const id = drive(a.src), m = String(a.title || '').match(/Questions?\s+(\d+)(?:\s*[–-]\s*(\d+))?/i);
       const range = m ? (m[2] ? `Questions ${m[1]}–${m[2]}` : `Question ${m[1]}`) : audios.length > 1 ? `Recording ${i + 1}` : `Questions 1–${lastN}`;
       const extra = String(a.title || '').match(/\(([^)]+)\)/);
-      const src = id ? `https://drive.google.com/uc?export=download&id=${id}` : a.src;
-      return `<div class="xs-player">
-        <span class="xs-play-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 10v4M8 7v10M12 4v16M16 8v8M20 11v2" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" fill="none"/></svg></span>
-        <div class="xs-play-main"><div class="xs-play-top"><b>${audios.length > 1 ? `Recording ${i + 1}` : 'Recording'}</b><span>${esc(range)}${extra ? ` · ${esc(extra[1])}` : ''}</span><i class="xs-wave" aria-hidden="true">${[...Array(28)].map((_, j) => `<b style="height:${4 + Math.round(Math.abs(Math.sin((j + 1) * (i + 2) * 1.7)) * 18)}px"></b>`).join('')}</i></div>
-          <audio controls preload="none" src="${esc(src)}"${id ? ` data-ie-drive="https://drive.google.com/file/d/${id}/preview"` : ''} title="${esc(a.title || 'Recording')}"></audio>
-          ${id ? `<a class="xs-drive" href="https://drive.google.com/file/d/${id}/view" target="_blank" rel="noopener">Not playing? Open it in Google Drive</a>` : ''}</div></div>`; };
+      const cfg = window.DEC15_CONFIG || {}, relay = id && cfg.supabaseUrl ? `${cfg.supabaseUrl.replace(/\/$/, '')}/functions/v1/ielts-audio?id=${id}` : '';
+      const direct = id ? `https://drive.usercontent.google.com/download?id=${id}&export=download` : a.src;
+      const I = (p, w = 2.2) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;
+      return `<div class="xs-player xp" data-fallback="${esc(relay ? direct : '')}">
+        <audio preload="metadata" src="${esc(relay || direct)}" title="${esc(a.title || 'Recording')}"></audio>
+        <button type="button" class="xp-play" aria-label="Play the recording"><span class="xp-i-play">${I('<path d="M8 5.5v13l10.5-6.5z" fill="currentColor" stroke="none"/>')}</span><span class="xp-i-pause">${I('<path d="M8.5 5.5v13M15.5 5.5v13"/>', 3.2)}</span><span class="xp-spin" aria-hidden="true"></span></button>
+        <div class="xp-main"><div class="xp-top xs-play-top"><b>${audios.length > 1 ? `Recording ${i + 1}` : 'Recording'}</b><span>${esc(range)}${extra ? ` · ${esc(extra[1])}` : ''}</span></div>
+          <div class="xp-seekrow"><span class="xp-t">0:00</span><input type="range" class="xp-seek" min="0" max="1000" step="1" value="0" aria-label="Position in the recording"><span class="xp-d">--:--</span></div>
+          <div class="xp-ctrl"><button type="button" data-xp="-10" aria-label="Back 10 seconds">${I('<path d="M4 12a8 8 0 1 0 2.5-5.8M4 4v4.5h4.5"/>', 2)}<small>10</small></button>
+            <button type="button" data-xp="+10" aria-label="Forward 10 seconds">${I('<path d="M20 12a8 8 0 1 1-2.5-5.8M20 4v4.5h-4.5"/>', 2)}<small>10</small></button>
+            <button type="button" class="xp-speed" data-xp="speed" aria-label="Playback speed">1×</button>
+            <span class="xp-vol"><button type="button" data-xp="mute" aria-label="Mute">${I('<path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor"/><path class="xp-wave" d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/>', 2)}</button><input type="range" class="xp-volume" min="0" max="1" step="0.05" value="1" aria-label="Volume"></span></div>
+          <p class="xp-msg" hidden>This recording could not play here. ${id ? `<a href="https://drive.google.com/file/d/${id}/view" target="_blank" rel="noopener">Open it in Google Drive</a>` : ''}</p></div></div>`; };
 
     /* ── one answer field: typed, or a letter ── */
     const field = (k, n, ans, letters) => { const v = val(k);
