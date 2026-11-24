@@ -1033,7 +1033,7 @@ function sectionPage(w, secId, grpId) {
       <h1>${partIcon(w, 'is-on sk-ic')}${esc(w.theme)}</h1>${w.tag ? `<p class="sk-tag">${esc(w.tag)}</p>` : ''}${w.summary ? `<p>${esc(w.summary)}</p>` : ''}
       <div class="sk-stats">${ME() ? `<span class="sk-me">${esc(ME())}’s progress</span>` : ''}<span><b>${all.ready}</b> ready</span><span><b>${all.done}</b> done</span>${all.ready ? `<span class="sk-bar" aria-label="${Math.round(100 * all.done / all.ready)}% done"><i style="width:${Math.round(100 * all.done / all.ready)}%"></i></span>` : ''}</div></div>${art}</header>`;
   const tabs = `<nav class="sk-tabs" aria-label="${esc(w.theme)}: sections" style="${partStyle(w)}">${S.map(x => { const st = groupStats(w, x.groups), on = x.id === sec.id;
-    const what = st.ready ? `${st.done ? `${st.done}/` : ''}${st.ready} ${x.groups.some(g => g.test) ? 'tests' : x.groups.some(g => g.slots) ? 'lessons' : 'exercises'}` : 'Coming soon';
+    const what = st.ready ? `${st.done ? `${st.done}/` : ''}${st.ready} ${(x.groups.some(g => g.test) ? 'test' : x.groups.some(g => g.slots) ? 'lesson' : 'exercise') + (st.ready === 1 ? '' : 's')}` : 'Coming soon';
     return `<a class="sk-tab${on ? ' is-on' : ''}${st.ready ? '' : ' is-soon'}" href="#/skill/${w.n}/${x.id}"${on ? ' aria-current="page"' : ''}><span class="sk-tab-ic">${icon(x.icon || 'book')}</span><b>${esc(x.title)}</b><small>${esc(what)}</small></a>`; }).join('')}</nav>`;
   let body = `<p class="sec-blurb">${esc(sec.blurb || '')}</p>`;
   if (sec.groups.length === 1 && sec.groups[0].map) {   // Learn: in order, on the road map
@@ -1688,9 +1688,9 @@ function skillPanel(w, col, route) {
       <div class="wb-sk-prog"><span><i style="width:${all.ready ? Math.round(100 * all.done / all.ready) : 0}%"></i></span><small>${all.ready ? `<b>${all.done}</b> of ${all.ready} done` : 'Coming soon'}</small></div>
       <a class="wb-sk-all" href="#/skill/${w.n}">Open ${esc(w.theme)} ${icon('arrow')}</a></div></div>`;
   const setLink = (x, g) => { const st = groupStats(w, [g]), cur = here && here.g === g, href = `#/skill/${w.n}/${x.id}${x.groups.length > 1 ? '/' + g.id : ''}`;
-    return `<li><a class="wb-set${cur ? ' is-cur' : ''}${st.ready ? '' : ' is-soon'}" href="${href}"${cur ? ' aria-current="true"' : ''}><b>${esc(g.title)}</b><small>${st.ready ? `${st.done ? `${st.done}/` : ''}${st.ready} ${g.test ? 'tests' : g.slots ? 'lessons' : 'exercises'}` : 'Coming soon'}</small>${st.ready ? `<span class="wb-set-bar"><i style="width:${Math.round(100 * st.done / st.ready)}%"></i></span>` : ''}</a></li>`; };
+    return `<li><a class="wb-set${cur ? ' is-cur' : ''}${st.ready ? '' : ' is-soon'}" href="${href}"${cur ? ' aria-current="true"' : ''}><b>${esc(g.title)}</b><small>${st.ready ? `${st.done ? `${st.done}/` : ''}${st.ready} ${(g.test ? 'test' : g.slots ? 'lesson' : 'exercise') + (st.ready === 1 ? '' : 's')}` : 'Coming soon'}</small>${st.ready ? `<span class="wb-set-bar"><i style="width:${Math.round(100 * st.done / st.ready)}%"></i></span>` : ''}</a></li>`; };
   const secs = S.map(x => { const rows = [...new Set(x.groups.map(g => g.by || ''))];
-    return `<section class="wb-sec"><a class="wb-sec-h" href="#/skill/${w.n}/${x.id}"><span class="wb-sec-ic">${icon(x.icon || 'book')}</span><b>${esc(x.title)}</b>${x.groups.length === 1 ? (() => { const g = x.groups[0], st = groupStats(w, [g]); return `<small class="wb-sec-n">${st.ready ? `${st.done ? `${st.done}/` : ''}${st.ready} ${g.test ? 'tests' : g.slots ? 'lessons' : 'exercises'}` : 'Coming soon'}</small>`; })() : ''}</a>
+    return `<section class="wb-sec"><a class="wb-sec-h" href="#/skill/${w.n}/${x.id}"><span class="wb-sec-ic">${icon(x.icon || 'book')}</span><b>${esc(x.title)}</b>${x.groups.length === 1 ? (() => { const g = x.groups[0], st = groupStats(w, [g]); return `<small class="wb-sec-n">${st.ready ? `${st.done ? `${st.done}/` : ''}${st.ready} ${(g.test ? 'test' : g.slots ? 'lesson' : 'exercise') + (st.ready === 1 ? '' : 's')}` : 'Coming soon'}</small>`; })() : ''}</a>
       ${x.groups.length > 1 ? rows.map(by => `${by && rows.length > 1 ? `<p class="wb-by">${esc(by)}</p>` : ''}<ul class="wb-sets">${x.groups.filter(g => (g.by || '') === by).map(g => setLink(x, g)).join('')}</ul>`).join('') : ''}</section>`; }).join('');
   const d = here ? w.days.find(x => x.id === lesson.id) : w.days.find(x => x.status === 'ready' && !isDone(x)) || w.days.find(x => x.status === 'ready');
   const pl = d && place(w.n, d.day);
@@ -2412,7 +2412,7 @@ document.addEventListener('change', e => {
   if (forms && forms.onChange(t)) return;
   if (guide && guide.onChange(t, () => rerender())) return;
   if (t.matches?.('[data-ws-lesson]')) { if (t.value && t.value !== lesson.id) location.hash = '#/' + t.value + '/notebook'; return; }
-  if (t.matches?.('[data-sheet-done]')) { lesson.sections.forEach(x => x.activities.forEach(a => { state.done[a.id] = t.checked; })); save(); rerender(); if (t.checked) toast(ME() ? `Exercise finished. Well done, ${ME()}!` : 'Exercise finished. Nice work.'); return; }
+  if (t.matches?.('[data-sheet-done]')) { lesson.sections.forEach(x => x.activities.forEach(a => { state.done[a.id] = t.checked; })); save(); rerender(); if (t.checked) { const w = lesson.learn ? 'Lesson' : 'Exercise'; toast(ME() ? `${w} finished. Well done, ${ME()}!` : `${w} finished. Nice work.`); } return; }
   if (t.dataset.done) {
     state.done[t.dataset.done] = t.checked; save(); rerender(); clearTimeout(klass?._ct); if (klass) klass._ct = setTimeout(() => klass.loadCounts(), 4000);
     if (t.checked) {

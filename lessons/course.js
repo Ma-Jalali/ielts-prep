@@ -85,6 +85,7 @@ window.DEC15_COURSE = {
           { id: 'tests', title: 'Practice tests', base: 2000, size: 10, test: true }] }
       ],
       days: [
+        { id: 'ieb2w1d1', day: 1, status: 'ready', title: 'Listening overview', sub: 'Two videos, the four parts, the day of the test and the marking', art: 'listening', parts: ['Lesson 1'], stages: ['learn'], tones: ['teal'], scripts: ['lessons/b2/listening/ieb2w1d1.js'] },
         { id: 'ieb2w1d101', day: 101, status: 'ready', title: 'A university course enquiry', sub: 'Note and form completion', art: 'listening', parts: ['Exercise 1'], stages: ['ex'], tones: ['teal'], scripts: ['lessons/b2/listening/ieb2w1d101.js'] },
         { id: 'ieb2w1d102', day: 102, status: 'ready', title: 'A job at a call centre', sub: 'Multiple choice and map labelling', art: 'listening', parts: ['Exercise 2'], stages: ['ex'], tones: ['teal'], scripts: ['lessons/b2/listening/ieb2w1d102.js'] },
         { id: 'ieb2w1d103', day: 103, status: 'ready', title: 'Volunteering abroad', sub: 'Note completion and short-answer questions', art: 'listening', parts: ['Exercise 3'], stages: ['ex'], tones: ['teal'], scripts: ['lessons/b2/listening/ieb2w1d103.js'] },
