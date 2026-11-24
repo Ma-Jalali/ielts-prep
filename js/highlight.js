@@ -34,7 +34,7 @@
 
   function hide() { closeCard?.(); bar?.remove(); bar = null; pop?.remove(); pop = null; pending = null; }
   function place(el, rect) { document.body.append(el); const w = el.offsetWidth, h = el.offsetHeight;
-    let x = rect.left + rect.width / 2 - w / 2, y = rect.top - h - 10; if (y < 8) y = rect.bottom + 10;
+    let x = rect.left + rect.width / 2 - w / 2, y = rect.top - h - 10; if (y < 8 || matchMedia('(pointer: coarse)').matches) y = rect.bottom + 12;   // on touch screens, below: the phone's own copy menu sits above
     el.style.left = Math.max(8, Math.min(innerWidth - w - 8, x)) + scrollX + 'px'; el.style.top = y + scrollY + 'px'; }   // page position: it scrolls with the words
   const btn = (act, label, icon) => `<button type="button" data-hl-act="${act}">${icon}<span>${label}</span></button>`;
   const IC = { hl: '<i class="xs-hl-sw is-hl"></i>', ul: '<i class="xs-hl-sw is-ul"></i>', note: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v12H9l-5 4z"/></svg>', del: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>' };
