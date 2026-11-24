@@ -2,7 +2,7 @@
    Source: Listening Section 1 Exercises (Practice No 24); answers from the teacher's key (folder 24). The folder has no recording script.
    Recordings stream from Google Drive. Ids (lesson, activities, blocks) are the keys of students' saved work: never rename them. */
 window.DEC15_LESSON = {
-  id: 'ieb2w1d124', week: 1, day: 124,
+  id: 'ieb2w1d124', week: 1, day: 124, sheet: true, illus: 'eco',
   title: 'Booking an eco-tourism holiday',
   duration: 'About 20 minutes',
   journey: 'Listen to a travel agent helping a customer choose an eco-tourism holiday. Complete the notes and the table.',

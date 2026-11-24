@@ -2,7 +2,7 @@
    Source: Listening Section 1 Exercises (Practice No 5); answers and recording script from the teacher's key (folder 05).
    Recordings stream from Google Drive. Ids (lesson, activities, blocks) are the keys of students' saved work: never rename them. */
 window.DEC15_LESSON = {
-  id: 'ieb2w1d105', week: 1, day: 105,
+  id: 'ieb2w1d105', week: 1, day: 105, sheet: true, illus: 'home',
   title: 'Sharing a flat',
   duration: 'About 20 minutes',
   journey: 'Listen to two flatmates talking about three people who phoned about their spare room. Complete the table and the notes.',

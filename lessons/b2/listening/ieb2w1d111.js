@@ -3,7 +3,7 @@
    The paper numbers the "choose TWO" item as Question 7 only; here it counts as Questions 7–8 (as in the real test), so the rest move up by one.
    Recordings stream from Google Drive. Ids (lesson, activities, blocks) are the keys of students' saved work: never rename them. */
 window.DEC15_LESSON = {
-  id: 'ieb2w1d111', week: 1, day: 111,
+  id: 'ieb2w1d111', week: 1, day: 111, sheet: true, illus: 'camera',
   title: 'Photography courses',
   duration: 'About 20 minutes',
   journey: 'Listen to a man phoning an art college about its photography courses. Complete the table and answer the multiple-choice questions.',

@@ -2,7 +2,7 @@
    Source: Listening Section 1 Exercises (Practice No 1); answers and recording script from the teacher's key (folder 01).
    Recordings stream from Google Drive. Ids (lesson, activities, blocks) are the keys of students' saved work: never rename them. */
 window.DEC15_LESSON = {
-  id: 'ieb2w1d101', week: 1, day: 101,
+  id: 'ieb2w1d101', week: 1, day: 101, sheet: true, illus: 'grad',
   title: 'A university course enquiry',
   duration: 'About 20 minutes',
   journey: 'Listen to a student calling a university about an International Business course. Complete the notes and the form.',

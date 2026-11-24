@@ -4,7 +4,7 @@
    numbered 1–6 in reading order: 1 name, 2 Noon price, 3 third departure time, 4–6 what is included.
    Recordings stream from Google Drive. Ids (lesson, activities, blocks) are the keys of students' saved work: never rename them. */
 window.DEC15_LESSON = {
-  id: 'ieb2w1d113', week: 1, day: 113,
+  id: 'ieb2w1d113', week: 1, day: 113, sheet: true, illus: 'boat',
   title: 'Harbour cruises',
   duration: 'About 20 minutes',
   journey: 'Listen to a customer phoning a company about its three harbour cruises. Complete the table and the sentences.',

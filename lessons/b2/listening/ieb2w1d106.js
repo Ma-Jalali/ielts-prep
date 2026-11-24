@@ -2,7 +2,7 @@
    Source: Listening Section 1 Exercises (Practice No 6); answers and recording script from the teacher's key (folder 06).
    Recordings stream from Google Drive. Ids (lesson, activities, blocks) are the keys of students' saved work: never rename them. */
 window.DEC15_LESSON = {
-  id: 'ieb2w1d106', week: 1, day: 106,
+  id: 'ieb2w1d106', week: 1, day: 106, sheet: true, illus: 'tv',
   title: 'A television repair',
   duration: 'About 20 minutes',
   journey: 'Listen to a woman phoning an electrical repair company about her television. Complete the notes, answer the questions, then choose the right answers.',

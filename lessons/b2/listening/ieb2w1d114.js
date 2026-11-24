@@ -2,7 +2,7 @@
    Source: Listening Section 1 Exercises (Practice No 14); answers from the teacher's key (folder 14). The key has no script for this conversation.
    Recordings stream from Google Drive. Ids (lesson, activities, blocks) are the keys of students' saved work: never rename them. */
 window.DEC15_LESSON = {
-  id: 'ieb2w1d114', week: 1, day: 114,
+  id: 'ieb2w1d114', week: 1, day: 114, sheet: true, illus: 'bus',
   title: 'A city bus tour',
   duration: 'About 20 minutes',
   journey: 'Listen to a tourist booking a city bus tour and asking for advice about a museum and restaurants. Complete the form, then choose and match.',

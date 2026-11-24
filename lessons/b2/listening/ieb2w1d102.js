@@ -2,7 +2,7 @@
    Source: Listening Section 1 Exercises (Practice No 2); answers and recording script from the teacher's key (folder 02).
    Recordings stream from Google Drive. Ids (lesson, activities, blocks) are the keys of students' saved work: never rename them. */
 window.DEC15_LESSON = {
-  id: 'ieb2w1d102', week: 1, day: 102,
+  id: 'ieb2w1d102', week: 1, day: 102, sheet: true, illus: 'headset',
   title: 'A job at a call centre',
   duration: 'About 20 minutes',
   journey: 'Listen to a student phoning an employment agency about a summer job at a call centre. Answer the questions, then follow the directions on the map.',

@@ -2,7 +2,7 @@
    Source: Listening Section 1 Exercises (Practice No 18); answers and recording script from the teacher's key (folder 18, Progress Test 1).
    Recordings stream from Google Drive. Ids (lesson, activities, blocks) are the keys of students' saved work: never rename them. */
 window.DEC15_LESSON = {
-  id: 'ieb2w1d118', week: 1, day: 118,
+  id: 'ieb2w1d118', week: 1, day: 118, sheet: true, illus: 'suitcase',
   title: 'College trips',
   duration: 'About 20 minutes',
   journey: 'Listen to a student asking about the trips her college has planned this term, and then about the weekend in Bath. Complete the notes and the sentences.',

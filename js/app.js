@@ -588,6 +588,18 @@ function nextStageLink(section) {
 }
 
 /* ───────── pages ───────── */
+/* A practice exercise on one page (js/sheet.js): recordings above their questions, answers and script at the bottom */
+const isSheet = () => !!(lesson.sheet && window.IELTSSheet && !labHere && !STUDIO());   // in Studio the lesson opens in the editor as before
+function sheetPage() {
+  const w = course.weeks.find(x => x.n === lesson.week), pl = UNITS && place(lesson.week, lesson.day), nx = nextLesson();
+  const setHref = pl ? `#/skill/${lesson.week}/${pl.s.id}${pl.g.slots || pl.g.test ? '' : '/' + pl.g.id}` : '#/';
+  const trail = [w && { href: `#/skill/${lesson.week}`, label: w.theme }, pl && { href: `#/skill/${lesson.week}/${pl.s.id}`, label: pl.s.title }, pl && !pl.g.slots && !pl.g.test && { href: setHref, label: pl.g.title }].filter(Boolean);
+  const tone = TONES[lesson.sections?.[0]?.tone] || TONES.teal;
+  return window.IELTSSheet.page(lesson, { esc, icon, val: k => state.values[k], done: id => !!state.done[id], trail, name: pl ? pl.name : lesson.title,
+    back: { href: setHref, label: pl && !pl.g.slots && !pl.g.test ? `${pl.g.title} exercises` : pl ? pl.s.title : 'Course map' },
+    eyebrow: [w?.theme, pl && !pl.g.slots && !pl.g.test ? pl.g.title : null, pl?.name].filter(Boolean).join(' · '),
+    next: nx ? { href: '#/' + nx.id, label: `Next: ${place(nx.week, nx.day)?.name || nx.title}` } : null, acc: w ? partColor(w) : tone[0], soft: w ? `color-mix(in srgb, ${partColor(w)} 10%, #fff)` : tone[1] });
+}
 function stagePage(s) {
   if (labHere) return labLessonPage(s);
   const activeId = state.active[s.id] && s.activities.some(a => a.id === state.active[s.id]) ? state.active[s.id] : s.activities[0].id;
@@ -1915,13 +1927,15 @@ function render() {
     return;
   }
   const main = $('#main'), changed = main.dataset.route !== route; main.dataset.route = route;
-  $('#main').innerHTML = route === 'home' ? courseHome() : s ? stagePage(s) : route === 'sources' ? sourcesPage() : route === 'extra' ? extrasPage() : route === 'notebook' ? notebook() : overview();
-  document.body.dataset.page = s ? 'stage' : route;
+  const sheet = isSheet() && (route === 'overview' || !!s);
+  $('#main').innerHTML = route === 'home' ? courseHome() : sheet ? sheetPage() : s ? stagePage(s) : route === 'sources' ? sourcesPage() : route === 'extra' ? extrasPage() : route === 'notebook' ? notebook() : overview();
+  document.body.dataset.page = sheet ? 'sheet' : s ? 'stage' : route;
   if (changed && !matchMedia('(prefers-reduced-motion: reduce)').matches) { main.classList.remove('route-in'); void main.offsetWidth; main.classList.add('route-in'); clearTimeout(render.t); render.t = setTimeout(() => main.classList.remove('route-in'), 900); }
   if (s) { document.body.style.setProperty('--accent', TONES[s.tone][0]); document.body.style.setProperty('--accent-bg', TONES[s.tone][1]); }
   else { document.body.style.removeProperty('--accent'); document.body.style.removeProperty('--accent-bg'); }
   const pageName = route === 'home' ? '' : s ? s.title : pageNames[route];
   $('#crumb').innerHTML = route === 'home' ? `<a href="#/" aria-label="${esc(course.code)} course map" title="Course map">${icon('home')}</a><i>/</i><b>Course map</b>`
+    : sheet ? `<a href="#/" aria-label="${esc(course.code)} course map" title="Course map">${icon('home')}</a><i>/</i>${lessonTrail()}<b>${esc(crumbName())}</b>`
     : labHere && s ? `<a href="#/" aria-label="${esc(course.code)} course map" title="Course map">${icon('home')}</a><i>/</i><a href="#/lab">${LABT}</a><i>/</i><b>${esc(lesson.title)}</b>`
     : `<a href="#/" aria-label="${esc(course.code)} course map" title="Course map">${icon('home')}</a><i>/</i>${labHere ? `<a href="#/lab">${LABT}</a><i>/</i>` : ''}${lessonTrail()}${route === 'overview' ? `<b>${esc(labHere ? lesson.title : crumbName())}</b>` : `<a href="${L('overview')}">${esc(labHere ? lesson.title : crumbName())}</a><i>/</i><b>${esc(pageName)}</b>`}`;
   document.title = `${course.code} · ${route === 'home' ? 'Course map' : labHere ? LABT + ' · ' + lesson.title : `${whereLong(', ')}${route === 'overview' ? '' : ' · ' + pageName}`}`;
@@ -2323,6 +2337,7 @@ document.addEventListener('change', e => {
   if (forms && forms.onChange(t)) return;
   if (guide && guide.onChange(t, () => rerender())) return;
   if (t.matches?.('[data-ws-lesson]')) { if (t.value && t.value !== lesson.id) location.hash = '#/' + t.value + '/notebook'; return; }
+  if (t.matches?.('[data-sheet-done]')) { lesson.sections.forEach(x => x.activities.forEach(a => { state.done[a.id] = t.checked; })); save(); rerender(); if (t.checked) toast('Exercise finished. Nice work.'); return; }
   if (t.dataset.done) {
     state.done[t.dataset.done] = t.checked; save(); rerender(); clearTimeout(klass?._ct); if (klass) klass._ct = setTimeout(() => klass.loadCounts(), 4000);
     if (t.checked) {

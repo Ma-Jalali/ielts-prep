@@ -2,7 +2,7 @@
    Source: Listening Section 1 Exercises (Practice No 8); answers and recording script from the teacher's key (folder 08).
    Recordings stream from Google Drive. Ids (lesson, activities, blocks) are the keys of students' saved work: never rename them. */
 window.DEC15_LESSON = {
-  id: 'ieb2w1d108', week: 1, day: 108,
+  id: 'ieb2w1d108', week: 1, day: 108, sheet: true, illus: 'chat',
   title: 'Student interviews',
   duration: 'About 20 minutes',
   journey: 'Listen to a student counsellor interviewing two students about their courses, clubs and free time. Complete the notes.',

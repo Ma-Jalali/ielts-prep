@@ -2,7 +2,7 @@
    Source: Listening Section 1 Exercises (Practice No 22); answers and recording script from the teacher's key (folder 22).
    Recordings stream from Google Drive. Ids (lesson, activities, blocks) are the keys of students' saved work: never rename them. */
 window.DEC15_LESSON = {
-  id: 'ieb2w1d122', week: 1, day: 122,
+  id: 'ieb2w1d122', week: 1, day: 122, sheet: true, illus: 'health',
   title: 'Student health and welfare services',
   duration: 'About 20 minutes',
   journey: 'Listen to a new student asking an adviser about health and welfare services at Glenfield, then ordering an information pack. Complete the table and the form.',

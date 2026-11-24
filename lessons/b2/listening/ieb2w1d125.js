@@ -3,7 +3,7 @@
    max is 3 in the form so that a phone number written in groups (040 422 9160) still counts as one number.
    Recordings stream from Google Drive. Ids (lesson, activities, blocks) are the keys of students' saved work: never rename them. */
 window.DEC15_LESSON = {
-  id: 'ieb2w1d125', week: 1, day: 125,
+  id: 'ieb2w1d125', week: 1, day: 125, sheet: true, illus: 'people',
   title: 'Joining an international social club',
   duration: 'About 20 minutes',
   journey: 'Listen to Jenny applying to join an international social club and finding out what the club does. Complete the form and answer the multiple-choice questions.',
