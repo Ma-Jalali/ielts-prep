@@ -1,0 +1,90 @@
+/* IELTS Prep · phones (js/mobile.js). The mini player and picture viewer work on every screen; the rest is ≤ 720px. */
+.m-bar, .m-head { display: none; }
+
+/* ── mini player ── */
+.m-mini { position: fixed; z-index: 70; left: 50%; bottom: 18px; transform: translateX(-50%); width: min(560px, calc(100vw - 20px)); display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: center; gap: 10px;
+  padding: 8px 14px 8px 8px; border-radius: 18px; background: linear-gradient(120deg, #18213f, #2a3563); color: #fff; box-shadow: 0 18px 36px -14px rgba(24, 33, 63, .7); animation: mMini .22s ease-out; }
+.m-mini[hidden] { display: none; }
+@keyframes mMini { from { opacity: 0; transform: translate(-50%, 12px); } }
+.m-mini button { border: 0; background: none; color: inherit; cursor: pointer; display: grid; place-items: center; }
+.m-mini-play { width: 44px; height: 44px; border-radius: 13px; background: var(--brand, #d6283c) !important; box-shadow: 0 6px 14px -6px rgba(214, 40, 60, .9); }
+.m-mini-play svg { width: 22px; height: 22px; }
+.m-mini-tx { display: grid; gap: 6px; min-width: 0; cursor: pointer; }
+.m-mini-tx b { font: 650 .86rem/1.2 var(--sans, system-ui); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.m-mini-bar { height: 4px; border-radius: 99px; background: rgba(255, 255, 255, .2); overflow: hidden; }
+.m-mini-bar i { display: block; height: 100%; background: #fff; border-radius: 99px; transition: width .25s linear; }
+.m-mini-rew { position: relative; width: 38px; height: 38px; border-radius: 12px; background: rgba(255, 255, 255, .12) !important; }
+.m-mini-rew svg { width: 18px; height: 18px; } .m-mini-rew small { position: absolute; right: 3px; bottom: 1px; font: 800 .58rem/1 var(--sans, system-ui); }
+.m-mini-t { font: 600 .76rem/1 var(--sans, system-ui); color: rgba(255, 255, 255, .75); white-space: nowrap; font-variant-numeric: tabular-nums; }
+body.has-mini .to-top, body.has-mini .dx-fab { opacity: 0; pointer-events: none; }
+
+/* ── picture viewer ── */
+.xs .xs-pic, .xs .xs-figure img { cursor: zoom-in; }
+.m-view { position: fixed; inset: 0; z-index: 200; background: rgba(12, 17, 34, .94); display: grid; grid-template-rows: auto 1fr; }
+.m-view[hidden] { display: none; }
+.m-view-tools { display: flex; justify-content: flex-end; gap: 8px; padding: 10px calc(10px + env(safe-area-inset-right)) 10px 10px; padding-top: calc(10px + env(safe-area-inset-top)); }
+.m-view-tools button { width: 46px; height: 46px; border-radius: 14px; border: 0; background: rgba(255, 255, 255, .14); color: #fff; display: grid; place-items: center; cursor: pointer; }
+.m-view-tools svg { width: 22px; height: 22px; }
+.m-view-scroll { overflow: auto; -webkit-overflow-scrolling: touch; padding: 10px; touch-action: pan-x pan-y pinch-zoom; }
+.m-view-pic { margin: auto; min-width: 100%; }
+.m-view-pic .xs-pic, .m-view-pic .xs-figure { margin: 0; max-width: none; border-radius: 10px; background: #fff; }
+.m-view-pic img { width: 100% !important; max-width: none !important; height: auto; display: block; }
+body.m-view-open { overflow: hidden; }
+
+@media (max-width: 720px) {
+  /* bottom tab bar instead of the numbered bar */
+  .weekbar { display: none !important; }
+  .m-bar { position: fixed; z-index: 80; left: 0; right: 0; bottom: 0; display: grid; grid-template-columns: repeat(5, 1fr); padding: 6px 6px calc(6px + env(safe-area-inset-bottom));
+    background: rgba(255, 255, 255, .96); -webkit-backdrop-filter: saturate(1.4) blur(14px); backdrop-filter: saturate(1.4) blur(14px); border-top: 1px solid rgba(24, 33, 63, .1); box-shadow: 0 -8px 24px -18px rgba(24, 33, 63, .4); }
+  .m-tab { display: grid; justify-items: center; gap: 3px; padding: 6px 2px 4px; border: 0; border-radius: 12px; background: none; color: #5a6382; font: 700 .68rem/1 var(--sans, system-ui); text-decoration: none; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .m-tab svg { width: 24px; height: 24px; }
+  .m-tab.is-on { color: var(--brand, #d6283c); }
+  .m-tab.is-on svg { stroke-width: 2.3; }
+  .m-tab:active { background: rgba(24, 33, 63, .06); }
+  body { padding-bottom: calc(68px + env(safe-area-inset-bottom)); }
+  .m-mini { bottom: calc(74px + env(safe-area-inset-bottom)); }
+  .dx-fab, .to-top { display: none !important; }
+  html.gate-on .m-bar, html.gate-show .m-bar { display: none; }
+
+  /* top bar: back arrow and the page's name */
+  .m-head { display: flex; align-items: center; gap: 4px; min-width: 0; flex: 1; }
+  .topbar #menu-btn { display: none !important; }
+  .m-back { flex: none; width: 40px; height: 40px; margin-left: -6px; border-radius: 12px; display: grid; place-items: center; color: var(--ink, #18213f); }
+  .m-back svg { width: 24px; height: 24px; } .m-back:active { background: rgba(24, 33, 63, .06); }
+  .m-title { font: 650 1.02rem/1.2 var(--serif, 'Outfit', sans-serif); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--ink, #18213f); }
+  .m-head:not(:has(.m-back)) .m-title { padding-left: 4px; }
+
+  /* answer boxes: 16px so phones do not zoom in, and big enough to tap */
+  .xs-gap input, .xs-gap select, .stu-add input, .xs-hl-pop textarea { font-size: 16px !important; }
+  .xs-gap input, .xs-gap select { height: 40px; }
+  .xs-gn { min-width: 26px; height: 26px; }
+  .xs-opt { padding: 12px 14px; min-height: 48px; }
+  .xs-mlist li { padding: 10px 12px; }
+
+  /* exercise page: tighter top, tips you can swipe, one back link */
+  .xs { gap: 14px; padding-bottom: 24px; }
+  .xs-trail { display: none; }
+  .xs-hero { padding: 20px 18px 18px 22px; border-radius: 22px; }
+  .xs-hero h1 { font-size: 1.6rem; margin: 6px 0 8px; }
+  .xs-hero p { font-size: .94rem; }
+  .xs-facts { margin-top: 12px; gap: 6px; } .xs-facts li { height: 28px; font-size: .78rem; padding: 0 10px; }
+  .xs-prep { padding: 14px 0 14px 14px; border-radius: 18px; }
+  .xs-prep-k { padding-left: 2px; }
+  .xs-tips4 { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 8px; padding: 0 14px 4px 0; scrollbar-width: none; }
+  .xs-tips4::-webkit-scrollbar { display: none; }
+  .xs-tips4 li { flex: 0 0 72%; scroll-snap-align: start; }
+  .xs-part { padding: 16px 12px 18px; gap: 20px; }
+  .xs-paper { padding: 14px 12px; } .xs-paper-t { margin: -14px -12px 12px; padding: 10px 12px; font-size: 1rem; }
+  .xs-player { padding: 12px; border-radius: 16px; }
+  .xs-pic::after { content: 'Tap to enlarge'; position: absolute; right: 8px; bottom: 8px; padding: 4px 8px; border-radius: 8px; background: rgba(24, 33, 63, .78); color: #fff; font: 700 .68rem/1 var(--sans, system-ui); pointer-events: none; }
+  .xs-key li { padding: 10px 12px; }
+  .xs-foot { flex-direction: column; align-items: stretch; } .xs-nav { display: grid; grid-template-columns: 1fr 1fr; } .xs-nav .btn, .xs-nav .btn-quiet { width: 100%; }
+
+  /* exercise list: the whole row is the button */
+  .sk-row { padding: 12px 12px; gap: 12px; }
+  .sk-st { width: 34px; height: 34px; padding: 0; justify-content: center; font-size: 0; gap: 0; border-radius: 50%; }
+  .sk-st.is-soon { display: none; }
+  .sk-st .icon { width: 16px; height: 16px; }
+  .sk-row-tx b { font-size: .95rem; line-height: 1.3; }
+}
+body.side-open .m-mini, body.m-view-open .m-mini { display: none; }
