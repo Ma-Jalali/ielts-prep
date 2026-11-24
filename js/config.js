@@ -11,7 +11,7 @@ window.DEC15_CONFIG = {
   // Use the project URL and the PUBLISHABLE / anon key — never the service_role key. Leave blank to save on the device only.
   supabaseUrl: 'https://bogagtbkiavnhuohzqzb.supabase.co',
   supabaseKey: 'sb_publishable_SThek4oq-ojxSq-CqIbTCg_mDvMkAYR',
-  version: '2.9'
+  version: '3.0'
 };
 /* The app was built for several courses sharing one Supabase project. This site is one course (IELTS, id 'ielts');
    the class around the lessons (class list, chat, study groups, announcements, class board, answers switch, timer)

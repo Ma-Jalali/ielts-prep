@@ -4,6 +4,7 @@
 window.IELTSStudents = (() => {
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
   let list = null, msg = null, busy = false, el = null;
+  const G_OPTS = sel => Object.entries(window.IELTSCharacter?.LABELS || { female: 'Female', male: 'Male', nonbinary: 'Non-binary / LGBTQ+', unspecified: 'Prefer not to say' }).map(([k, v]) => `<option value="${k}"${k === (sel || 'unspecified') ? ' selected' : ''}>${v}</option>`).join('');
   async function call(body) {
     const cfg = window.DEC15_CONFIG, token = await window.IELTS_GATE.token();
     const r = await fetch(cfg.supabaseUrl.replace(/\/$/, '') + '/functions/v1/ielts-admin', { method: 'POST', headers: { 'Content-Type': 'application/json', apikey: cfg.supabaseKey, Authorization: 'Bearer ' + token }, body: JSON.stringify(body) });
@@ -17,9 +18,9 @@ window.IELTSStudents = (() => {
     const st = (list || []).filter(m => m.role !== 'admin');
     if (!list) return '<p class="stu-empty">Loading your students…</p>';
     if (!st.length) return '<p class="stu-empty">No students yet. Add your first student above.</p>';
-    return `<ul class="stu-list">${st.map(m => `<li class="stu-row" data-id="${esc(m.user_id)}"><span class="stu-av" aria-hidden="true">${esc((m.first_name || m.email || '?')[0].toUpperCase())}</span>
+    return `<ul class="stu-list">${st.map(m => `<li class="stu-row" data-id="${esc(m.user_id)}"><span class="stu-av" aria-hidden="true">${window.IELTSCharacter ? window.IELTSCharacter.portrait(m.gender, 42) : esc((m.first_name || m.email || '?')[0].toUpperCase())}</span>
       <span class="stu-tx"><b>${esc(m.first_name || '—')}</b><small>${esc(m.email)}</small></span><span class="stu-date">Added ${new Date(m.created_at).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}</span>
-      <span class="stu-act"><button type="button" class="btn-quiet btn-sm" data-stu="password">New password</button><button type="button" class="btn-quiet btn-sm stu-del" data-stu="remove">Remove</button></span></li>`).join('')}</ul>`;
+      <span class="stu-act"><select class="stu-gender" data-stu-gender aria-label="Gender of ${esc(m.first_name || m.email)}">${G_OPTS(m.gender)}</select><button type="button" class="btn-quiet btn-sm" data-stu="password">New password</button><button type="button" class="btn-quiet btn-sm stu-del" data-stu="remove">Remove</button></span></li>`).join('')}</ul>`;
   }
   function html() {
     const n = (list || []).filter(m => m.role !== 'admin').length;
@@ -28,6 +29,7 @@ window.IELTSStudents = (() => {
       <form class="stu-add" autocomplete="off"><h2>Add a student</h2>
         <label><span>First name</span><input name="first" required placeholder="e.g. Isla"></label>
         <label><span>Email</span><input name="email" type="email" required placeholder="student@email.com"></label>
+        <label><span>Gender <small>(their character on the maps)</small></span><select name="gender">${G_OPTS('unspecified')}</select></label>
         <label><span>Password</span><span class="stu-pw"><input name="password" required minlength="6" value="${pw()}"><button type="button" class="btn-quiet btn-sm" data-stu="gen">New</button></span></label>
         <button class="btn" type="submit"${busy ? ' disabled' : ''}>${busy ? 'Adding…' : 'Add student'}</button></form>
       <section class="stu-box"><h2>Students <small>${list ? n : ''}</small></h2>${rows()}</section></section>`;
@@ -37,13 +39,15 @@ window.IELTSStudents = (() => {
   function mount(node) { el = node; el.innerHTML = html(); if (!list) load();
     if (el.dataset.wired) return; el.dataset.wired = '1';
     el.addEventListener('submit', async e => { if (!e.target.matches('.stu-add')) return; e.preventDefault(); const f = e.target;
-      const first = f.first.value.trim(), email = f.email.value.trim(), password = f.password.value;
+      const first = f.first.value.trim(), email = f.email.value.trim(), password = f.password.value, gender = f.gender.value;
       busy = true; paint();
-      try { const out = await call({ action: 'add', first_name: first, email, password }); busy = false; list = null; await load();
+      try { const out = await call({ action: 'add', first_name: first, email, password, gender }); busy = false; list = null; await load();
         msg = out.existing ? { kind: 'ok', html: `<b>${esc(first)}</b> is added. This email already had an account (from another course), so they sign in with <b>their own existing password</b>.` }
           : { kind: 'ok', html: `<b>${esc(first)}</b> is added. Send them: <span class="stu-cred">Email: <code>${esc(email)}</code> · Password: <code>${esc(password)}</code></span> <button type="button" class="btn-quiet btn-sm" data-stu="copy" data-copy="${esc(`IELTS Preparation\n${location.href.split('#')[0]}\nEmail: ${email}\nPassword: ${password}`)}">Copy</button>` };
         paint(); }
       catch (err) { busy = false; say(err.message, 'err'); } });
+    el.addEventListener('change', async e => { const s = e.target.closest('[data-stu-gender]'); if (!s) return; const row = s.closest('.stu-row'), m = list.find(x => x.user_id === row.dataset.id);
+      try { await call({ action: 'gender', user_id: m.user_id, gender: s.value }); m.gender = s.value; say(`${m.first_name || m.email}'s character is now: ${window.IELTSCharacter?.LABELS[s.value] || s.value}.`); } catch (err) { say(err.message, 'err'); } });
     el.addEventListener('click', async e => { const b = e.target.closest('[data-stu]'); if (!b) return; const act = b.dataset.stu, row = b.closest('.stu-row'), m = row && list.find(x => x.user_id === row.dataset.id);
       if (act === 'gen') { el.querySelector('[name=password]').value = pw(); return; }
       if (act === 'copy') { try { await navigator.clipboard.writeText(b.dataset.copy); b.textContent = 'Copied'; } catch (err) { b.textContent = 'Select and copy'; } return; }

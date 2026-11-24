@@ -206,3 +206,48 @@ body.side-open .m-mini, body.m-view-open .m-mini { display: none; }
   .xs-nav .btn { order: -1; height: 52px; font-size: 1rem; }
 }
 @media (max-width: 720px) { #main { overflow-x: clip; } }   /* full-width strips never widen the page */
+
+/* ── the home page on phones: greeting with the student's character, a big Continue card, small stats, compact skills ── */
+.hm { display: none; }
+@media (max-width: 720px) {
+  .hm { display: grid; gap: 12px; margin-bottom: 18px; }
+  body[data-page="home"] .home-head, body[data-page="home"] .resume { display: none; }
+  .hm-hi { display: flex; align-items: center; gap: 12px; padding: 4px 2px; }
+  .hm-pic { flex: none; width: 58px; height: 58px; border-radius: 50%; box-shadow: 0 0 0 3px #fff, 0 8px 18px -10px rgba(24, 33, 63, .5); }
+  .hm-pic svg { display: block; }
+  .hm-hi-tx { flex: 1; min-width: 0; display: grid; }
+  .hm-hi-tx span { font: 600 .86rem/1.2 var(--sans, system-ui); color: var(--muted, #5a6382); }
+  .hm-hi-tx b { font: 700 1.6rem/1.15 var(--serif, 'Outfit', sans-serif); letter-spacing: -.01em; color: var(--ink, #18213f); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .hm-ring { flex: none; width: 54px; height: 54px; border-radius: 50%; display: grid; place-items: center; background: conic-gradient(var(--brand, #d6283c) calc(var(--p) * 1%), rgba(24, 33, 63, .08) 0); }
+  .hm-ring b { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: var(--paper, #f4f6fb); font: 800 .9rem/1 var(--sans, system-ui); color: var(--ink, #18213f); }
+  .hm-ring small { font-size: .62rem; }
+  .hm-next { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) 118px; align-items: center; gap: 8px; padding: 18px 12px 18px 20px; border-radius: 22px; overflow: hidden; text-decoration: none; color: #fff;
+    background: radial-gradient(120% 140% at 0% 0%, color-mix(in srgb, var(--accent, #0e8a8f) 70%, #fff) 0%, var(--accent, #0e8a8f) 45%, color-mix(in srgb, var(--accent, #0e8a8f) 70%, #18213f) 100%);
+    box-shadow: 0 18px 30px -18px color-mix(in srgb, var(--accent, #0e8a8f) 90%, #000); -webkit-tap-highlight-color: transparent; }
+  .hm-next:active { transform: scale(.98); }
+  .hm-next-tx { display: grid; gap: 4px; min-width: 0; }
+  .hm-next-k { font: 800 .68rem/1 var(--sans, system-ui); letter-spacing: .12em; text-transform: uppercase; opacity: .85; }
+  .hm-next b { font: 700 1.24rem/1.2 var(--serif, 'Outfit', sans-serif); }
+  .hm-next small { font: 600 .78rem/1.3 var(--sans, system-ui); opacity: .85; }
+  .hm-next-go { justify-self: start; margin-top: 8px; display: inline-flex; align-items: center; gap: 6px; height: 38px; padding: 0 16px; border-radius: 999px; background: #fff; color: color-mix(in srgb, var(--accent, #0e8a8f) 85%, #18213f); font: 800 .86rem/1 var(--sans, system-ui); }
+  .hm-next-go .icon { width: 16px; height: 16px; }
+  .hm-art { width: 132px; height: auto; margin: -10px -14px -16px 0; --xs-soft: rgba(255, 255, 255, .16); filter: drop-shadow(0 8px 14px rgba(0, 0, 0, .2)); }
+  .hm-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .hm-stats span { display: grid; justify-items: center; gap: 2px; padding: 10px 4px; border-radius: 16px; background: #fff; border: 1px solid rgba(24, 33, 63, .08); }
+  .hm-stats b { font: 800 1.2rem/1 var(--sans, system-ui); color: var(--ink, #18213f); }
+  .hm-stats small { font: 600 .72rem/1 var(--sans, system-ui); color: var(--muted, #5a6382); }
+
+  /* the town map as a card, then compact skill tiles */
+  body[data-page="home"] .campus { border-radius: 20px; overflow: hidden; margin-bottom: 14px; }
+  .skill-group { margin-top: 14px; }
+  .skill-group-head h2 { font-size: 1.15rem; margin: 0 0 2px; } .skill-group-head p { font-size: .84rem; margin: 0 0 8px; }
+  .skill-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 8px !important; }
+  .skill-card { padding: 12px !important; border-radius: 16px !important; min-height: 0 !important; gap: 8px !important; }
+  .skill-card-ic { width: 40px !important; height: 40px !important; border-radius: 12px !important; }
+  .skill-card-tx b { font-size: .98rem !important; } .skill-card-tx small { font-size: .74rem !important; line-height: 1.3; }
+  .skill-card-meta { font-size: .66rem !important; }
+}
+@media (max-width: 720px) {
+  .hm-next .hm-art { display: block !important; }
+  .hm-ring b { display: flex; align-items: center; justify-content: center; gap: 0; }
+}
