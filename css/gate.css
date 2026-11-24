@@ -54,3 +54,10 @@ html.gate-show body { overflow: hidden; }
 .stu-date { font-size: .8rem; color: var(--muted); } .stu-act { display: flex; gap: 6px; } .stu-del { color: #a91d2f; }
 .stu-empty { margin: 6px 0 0; color: var(--muted); }
 @media (max-width: 760px) { .stu-add { grid-template-columns: 1fr; } .stu-row { grid-template-columns: auto minmax(0, 1fr); } .stu-date { display: none; } .stu-act { grid-column: 1 / -1; } }
+.stu-add { grid-template-columns: 1fr 1.3fr 1fr 1fr auto; }
+.stu-add select, .stu-gender { height: 44px; padding: 0 10px; border-radius: 12px; border: 1.5px solid var(--line-2); background: #f9fafd; font: inherit; font-size: .9rem; }
+.stu-gender { height: 34px; font-size: .8rem; }
+.stu-add label small { font-weight: 500; color: var(--muted); }
+.stu-av { width: 42px; height: 42px; padding: 0; overflow: hidden; background: none; }
+.stu-av svg { display: block; }
+@media (max-width: 760px) { .stu-add { grid-template-columns: 1fr; } .stu-act { flex-wrap: wrap; } }

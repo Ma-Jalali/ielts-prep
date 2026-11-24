@@ -748,7 +748,7 @@ function courseMapRich(current, stops = course.map, opt = {}) {
     return now
       ? `<g class="cm-label cm-label-now"><rect x="${x - wd / 2}" y="${ty - 14.5}" width="${wd}" height="22" rx="11" fill="#18213f"/><circle cx="${x - wd / 2 + 12}" cy="${ty - 3.5}" r="3" fill="#e3a843"/><text x="${x + 7}" y="${ty}" text-anchor="middle" font-size="11.5" font-weight="700" font-family="Manrope, sans-serif" fill="#fff">${t}</text></g>`
       : `<g class="cm-label"><rect x="${x - wd / 2}" y="${ty - 13}" width="${wd}" height="19" rx="9.5" fill="#fffdf6" fill-opacity=".9" stroke="#18213f" stroke-opacity=".08"/><text x="${x}" y="${ty}" text-anchor="middle" font-size="11.5" font-weight="700" font-family="Manrope, sans-serif" fill="#18213f">${t}</text></g>`; };
-  const walker = `<g transform="translate(-34 -2)"><g class="cm-walker"><ellipse cy="13" rx="7" ry="1.8" fill="#18213f" opacity=".14"/><path d="M-2 4-4 12M2 4l3 8" stroke="#2c3e50" stroke-width="2.4" stroke-linecap="round"/><rect x="-4.5" y="-7" width="9" height="12" rx="3.5" fill="#2f6db5"/><rect x="-8" y="-6" width="5" height="9" rx="2" fill="#e3a843"/><path d="M4-4l3 5" stroke="#f0c9a0" stroke-width="2.2" stroke-linecap="round"/><circle cy="-11" r="4.2" fill="#f0c9a0"/><path d="M-4.2-11.5a4.2 4.2 0 0 1 8.4-1c-2 .6-5 .6-8.4 1z" fill="#3b2a20"/></g></g>`;
+  const walker = window.IELTSCharacter ? window.IELTSCharacter.walker(window.IELTS_GATE?.member?.gender) : '';   // the student's own character (js/character.js)
   const peaks = [[60, 92], [150, 70], [240, 82], [360, 66], [470, 74], [585, 56], [700, 70], [820, 58], [940, 66]];
   return `<svg class="course-map-svg cm-rich" viewBox="0 0 1000 ${H}" role="group" aria-label="${esc(opt.aria || `Course map: ${stops.map(w => UNITS ? w.label : `Week ${w.n}, ${w.label}`).join('; ')}. You are in ${unitName(current)}.`)}">
     <defs>
@@ -1006,7 +1006,7 @@ const pickHomeWeek = () => { const ws = course.weeks; if (!ws.some(w => w.n === 
    the road map is drawn inside each skill, with its lessons as the stops. */
 /* one line on a part's progress: "To plan", "3 lessons", "2 of 3 done" */
 function partMeta(w) { const ready = w.days.filter(d => d.status === 'ready'), done = ready.filter(d => { const [a, b] = dayProgress(d); return b && a === b; }).length;
-  return !w.days.length ? 'To plan' : !ready.length ? `${w.days.length} planned` : done ? `${done} of ${ready.length} done` : `${ready.length} lesson${ready.length === 1 ? '' : 's'}`; }
+  return !w.days.length ? 'Coming soon' : !ready.length ? `${w.days.length} planned` : done ? `${done} of ${ready.length} done` : `${ready.length} lesson${ready.length === 1 ? '' : 's'}`; }
 /* the home page's course map: an illustrated town, one landmark per part (js/campus.js) */
 const campusMap = () => window.IELTSCampus ? `<section class="campus" aria-label="Course map"><div class="campus-scroll">${window.IELTSCampus({ parts: course.weeks, esc, meta: partMeta })}</div></section>` : '';
 function skillGrid() {
@@ -1099,9 +1099,26 @@ function weekTabs() {
       ${w.days.length ? `<ol class="day-grid${w.days.length > 3 ? ' many' : ''}">${w.days.map(dayCard).join('')}</ol>` : ''}
     </div></section>`;
 }
+/* The home page's top on phones: the student's character and greeting, their progress, and a big Continue card */
+function homePhone() {
+  if (!UNITS) return '';
+  const me = ME(), gender = window.IELTS_GATE?.member?.gender, ready = days.filter(d => d.status === 'ready' && d.week), done = ready.filter(d => isDone(d));
+  const next = ready.find(d => !isDone(d)) || ready[0], pl = next && place(next.week, next.day), w = next && course.weeks.find(x => x.n === next.week);
+  const pct = ready.length ? Math.round(100 * done.length / ready.length) : 0, open = course.weeks.filter(x => x.days.some(d => d.status === 'ready')).length;
+  const pic = window.IELTSCharacter ? window.IELTSCharacter.portrait(gender, 58) : '';
+  const art = next && window.IELTSSheetArt ? window.IELTSSheetArt(({ listening: 'headset', reading: 'books' })[w?.art] || 'headset', 'hm-art') : '';
+  return `<section class="hm" aria-label="Your start">
+    <header class="hm-hi"><span class="hm-pic">${pic}</span><div class="hm-hi-tx"><span>${GREET()}${me ? ',' : ''}</span><b>${esc(me || 'Welcome')}</b></div>
+      <span class="hm-ring" style="--p:${pct}" aria-label="${pct}% of the ready lessons done"><b>${pct}<small>%</small></b></span></header>
+    ${next ? `<a class="hm-next" href="#/${next.id}" style="${w ? partStyle(w) : ''}"><span class="hm-next-tx"><span class="hm-next-k">${done.length ? 'Continue' : 'Start here'}</span>
+      <b>${esc(next.title)}</b><small>${esc(pl ? [w?.theme, pl.g.slots || pl.g.test ? null : pl.g.title, pl.name].filter(Boolean).join(' · ') : '')}</small>
+      <span class="hm-next-go">${done.length ? 'Continue' : 'Start'} ${icon('arrow')}</span></span>${art}</a>` : ''}
+    <div class="hm-stats"><span><b>${done.length}</b><small>done</small></span><span><b>${Math.max(0, ready.length - done.length)}</b><small>to go</small></span><span><b>${open}</b><small>skill${open === 1 ? '' : 's'} open</small></span></div>
+  </section>`;
+}
 function courseHome() {
   const n = nextUp(), done = coreActivities.filter(a => state.done[a.id]).length, pct = Math.round(100 * done / coreActivities.length);
-  return `<header class="home-head">
+  return `${homePhone()}<header class="home-head">
       <span class="eyebrow">${esc(course.code)} · ${esc(course.topic)}</span>
       <h1>${ME() ? `${esc(ME())}’s course map` : 'Your course map'}</h1>
       ${course.intro === '' ? '' : `<p>${ME() ? `<b class="home-hi">${GREET()}, ${esc(ME())}.</b> ` : ''}${esc(course.intro || 'Pick up where you left off, or open any lesson below.')}</p>`}
