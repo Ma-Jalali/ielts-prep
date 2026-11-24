@@ -56,11 +56,16 @@
         <div class="xp-resume" hidden><span>You stopped at <b class="xp-rt">0:00</b></span><button type="button" data-xp="resume">Continue</button><button type="button" data-xp="restart">Start again</button></div>
         <p class="xp-msg" hidden>This recording could not play here. ${id ? `<a href="https://drive.google.com/file/d/${id}/view" target="_blank" rel="noopener">Open it in Google Drive</a>` : ''}</p></div>`; };
 
-    /* ── one answer field: typed, or a letter ── */
-    const field = (k, n, ans, letters) => { const v = val(k);
-      return letters ? `<label class="xs-gap is-letter"><span class="xs-gn">${n}</span><select data-save="${esc(k)}" aria-label="Question ${n}"><option value=""></option>${letters.map(x => `<option${v === x ? ' selected' : ''}>${x}</option>`).join('')}</select></label>`
-        : `<label class="xs-gap"><span class="xs-gn">${n}</span><input type="text" autocomplete="off" spellcheck="false" data-save="${esc(k)}" value="${esc(v)}" aria-label="Question ${n}" style="--w:${Math.max(7, Math.min(22, String(ans).split('|')[0].length + 3))}ch"></label>`; };
-    const filler = (b, c) => t => esc(t).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/\[\[(.+?)\]\]/g, (_, a) => { const i = c.i++; return field(`${b.id}-${i}`, (Number(b.from) || 1) + i, a, b.bank ? b.bank.map((_, j) => LET[j]) : null); });
+    /* ── one answer field: typed, or a letter ──
+       A letter answer is a "Choose" box: the face shows "Choose" (or the letter and its option), and a transparent native
+       select over it opens the phone's or computer's own list, which shows each letter with its option in full. */
+    const optText = o => String(o ?? '').replace(/^[A-Z]\s+(?=\S)/, '').replace(/\*\*/g, '');
+    const face = (v, letters, texts) => { const j = letters.indexOf(v); return v ? `<b>${esc(v)}</b>${texts && texts[j] ? `<small>${esc(optText(texts[j]))}</small>` : ''}` : '<span>Choose</span>'; };
+    const picker = (k, n, letters, texts) => { const v = val(k);
+      return `<span class="xs-pick${v ? ' has-v' : ''}"><span class="xs-pick-face" aria-hidden="true">${face(v, letters, texts)}</span><select data-save="${esc(k)}" aria-label="Question ${n}: choose a letter" data-texts="${esc(JSON.stringify((texts || []).map(optText)))}"><option value="">Choose…</option>${letters.map((x, j) => `<option value="${x}"${v === x ? ' selected' : ''}>${x}${texts && texts[j] ? ` — ${esc(optText(texts[j]))}` : ''}</option>`).join('')}</select></span>`; };
+    const field = (k, n, ans, letters, texts) => letters ? `<label class="xs-gap is-letter"><span class="xs-gn">${n}</span>${picker(k, n, letters, texts)}</label>`
+        : `<label class="xs-gap"><span class="xs-gn">${n}</span><input type="text" autocomplete="off" spellcheck="false" data-save="${esc(k)}" value="${esc(val(k))}" aria-label="Question ${n}" style="--w:${Math.max(7, Math.min(22, String(ans).split('|')[0].length + 3))}ch"></label>`;
+    const filler = (b, c) => t => esc(t).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/\[\[(.+?)\]\]/g, (_, a) => { const i = c.i++; return field(`${b.id}-${i}`, (Number(b.from) || 1) + i, a, b.bank ? b.bank.map((_, j) => LET[j]) : null, b.bank); });
     const box = (title, opts, keys) => `<div class="xs-box">${title ? `<b class="xs-box-t">${esc(title)}</b>` : ''}<ul>${opts.map((o, j) => `<li><span class="xs-let">${keys[j]}</span><span>${fmt(String(o).replace(/^[A-Z]\s+(?=\S)/, ''))}</span></li>`).join('')}</ul></div>`;
     const range = b => { const f = Number(b.from) || 1, n = count(b); return n > 1 ? `Questions ${f}–${f + n - 1}` : `Question ${f}`; };
     const rubric = b => `<div class="xs-rubric"><span class="xs-range">${range(b)}</span>${b.instruction ? `<p>${fmt(b.instruction)}</p>` : ''}</div>`;
@@ -85,7 +90,7 @@
       ieDiagram(b) { const labs = b.labels || [], f = Number(b.from) || 1, letters = b.bank ? b.bank.map((_, j) => LET[j]) : null;
         return `${rubric(b)}<div class="xs-paper is-diagram">${b.title ? `<h3 class="xs-paper-t">${esc(b.title)}</h3>` : ''}<div class="xs-diag${b.bank ? ' has-box' : ''}">
           <figure class="xs-pic"><img src="${esc(b.src)}" alt="${esc(b.alt || '')}" loading="lazy">${labs.map((l, i) => `<span class="xs-pin" style="left:${Number(l.x) || 0}%;top:${Number(l.y) || 0}%">${f + i}</span>`).join('')}</figure>
-          <div class="xs-diag-side">${b.bank ? box(b.bankTitle || 'Choose from', b.bank, letters) : ''}<div class="xs-labels">${labs.map((l, i) => `<div class="xs-lab">${l.text ? `<span>${esc(l.text)}</span>` : ''}${field(`${b.id}-${i}`, f + i, l.answer, letters)}</div>`).join('')}</div></div></div></div>`; },
+          <div class="xs-diag-side">${b.bank ? box(b.bankTitle || 'Choose from', b.bank, letters) : ''}<div class="xs-labels">${labs.map((l, i) => `<div class="xs-lab">${l.text ? `<span>${esc(l.text)}</span>` : ''}${field(`${b.id}-${i}`, f + i, l.answer, letters, b.bank)}</div>`).join('')}</div></div></div></div>`; },
       ieChoice(b) { const f = Number(b.from) || 1;
         return `${rubric(b)}<ol class="xs-mcq">${(b.items || []).map((it, i) => { const k = `${b.id}-${i}`, v = val(k);
           return `<li class="xs-mq"><div class="xs-mq-q"><span class="xs-qn">${f + i}</span><p>${fmt(it.q)}</p></div><div class="xs-opts" role="radiogroup" aria-label="Question ${f + i}">${(it.options || []).map((o, j) =>
@@ -94,7 +99,7 @@
         return `${rubric(b)}<div class="xs-mq is-multi" data-from="${Number(b.from) || 1}" data-n="${count(b)}"><div class="xs-mq-q"><span class="xs-qn is-wide">${range(b).replace('Questions ', '')}</span><p>${fmt(b.q)}<small>Choose ${['', 'ONE', 'TWO', 'THREE', 'FOUR'][pick] || pick} letters.${Number(b.numbers) === 1 ? ` You need ${pick === 2 ? 'both' : 'all of them'} for the mark.` : ''}</small></p></div>
           <div class="xs-opts">${(b.options || []).map((o, j) => { const k = `${b.id}-${LET[j]}`; return `<label class="xs-opt is-check"><input type="checkbox" data-save="${esc(k)}"${val(k) === true ? ' checked' : ''}><span class="xs-let">${LET[j]}</span><span class="xs-ot">${fmt(o)}</span></label>`; }).join('')}</div></div>`; },
       ieMatch(b) { const f = Number(b.from) || 1, keys = (b.options || []).map((_, j) => b.numbering === 'roman' ? ROM[j] : LET[j]);
-        return `${rubric(b)}<div class="xs-match">${box(b.boxTitle, b.options || [], keys)}<ol class="xs-mlist">${(b.items || []).map((it, i) => `<li><span class="xs-mq-t">${fmt(it.q)}</span>${field(`${b.id}-${i}`, f + i, it.answer, keys)}</li>`).join('')}</ol></div>`; },
+        return `${rubric(b)}<div class="xs-match">${box(b.boxTitle, b.options || [], keys)}<ol class="xs-mlist">${(b.items || []).map((it, i) => `<li><label class="xs-mrow"><span class="xs-gn">${f + i}</span><span class="xs-mq-t">${fmt(it.q)}</span>${picker(`${b.id}-${i}`, f + i, keys, b.options || [])}</label></li>`).join('')}</ol></div>`; },
       figure(b) { return `<figure class="xs-figure"><img src="${esc(b.src)}" alt="${esc(b.alt || '')}" loading="lazy">${b.caption ? `<figcaption>${esc(b.caption)}</figcaption>` : ''}</figure>`; }
     };
 
@@ -175,11 +180,17 @@
       ${body}
       <section class="xs-end" aria-label="Answers">
         <details class="xs-fold is-key"${ctx.open ? ' open' : ''}><summary><span class="xs-fold-ic">${icon('check')}</span><span class="xs-fold-tx"><b>Check your answers</b><small>Open the answer key when you have finished</small></span><i class="xs-chev" aria-hidden="true"></i></summary>
-          <p class="xs-key-note">Compare each answer with yours. Spelling counts; capital letters do not. Where more than one answer is right, the others are shown underneath.</p>${keyHTML}</details>
+          ${(() => { const m = window.IELTS_GATE?.member, L = m && m.lang && m.lang !== 'en' && window.IELTSCharacter?.lang(m.lang); return L ? `<p class="xs-l1"><bdi lang="${L.code}" dir="${L.rtl ? 'rtl' : 'ltr'}">${esc(L.done)}</bdi> <span>Time to check your answers.</span></p>` : ''; })()}<p class="xs-key-note">Compare each answer with yours. Spelling counts; capital letters do not. Where more than one answer is right, the others are shown underneath.</p>${keyHTML}</details>
         ${scriptHTML}
         <footer class="xs-foot"><label class="xs-done"><input type="checkbox" data-sheet-done${doneAll ? ' checked' : ''}><span>I have finished this exercise</span></label>
           <span class="xs-nav">${ctx.back ? `<a class="btn-quiet" href="${esc(ctx.back.href)}">${icon('left')}All exercises</a>` : ''}${ctx.next ? `<a class="btn" href="${esc(ctx.next.href)}">${esc(ctx.next.label)} ${icon('arrow')}</a>` : ''}</span></footer>
       </section></article>`;
   }
+  /* the "Choose" box shows the chosen letter (and its option) as soon as it changes */
+  document.addEventListener('change', e => { const sel = e.target.closest?.('.xs-pick select'); if (!sel) return; const box = sel.parentElement, v = sel.value;
+    let texts = []; try { texts = JSON.parse(sel.dataset.texts || '[]'); } catch (err) { /* none */ }
+    const j = [...sel.options].findIndex(o => o.value === v) - 1, t = j >= 0 ? texts[j] : '';
+    const esc2 = x => String(x ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+    box.classList.toggle('has-v', !!v); box.querySelector('.xs-pick-face').innerHTML = v ? `<b>${esc2(v)}</b>${t ? `<small>${esc2(t)}</small>` : ''}` : '<span>Choose</span>'; });
   window.IELTSSheet = { page };
 })();

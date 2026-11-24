@@ -748,7 +748,7 @@ function courseMapRich(current, stops = course.map, opt = {}) {
     return now
       ? `<g class="cm-label cm-label-now"><rect x="${x - wd / 2}" y="${ty - 14.5}" width="${wd}" height="22" rx="11" fill="#18213f"/><circle cx="${x - wd / 2 + 12}" cy="${ty - 3.5}" r="3" fill="#e3a843"/><text x="${x + 7}" y="${ty}" text-anchor="middle" font-size="11.5" font-weight="700" font-family="Manrope, sans-serif" fill="#fff">${t}</text></g>`
       : `<g class="cm-label"><rect x="${x - wd / 2}" y="${ty - 13}" width="${wd}" height="19" rx="9.5" fill="#fffdf6" fill-opacity=".9" stroke="#18213f" stroke-opacity=".08"/><text x="${x}" y="${ty}" text-anchor="middle" font-size="11.5" font-weight="700" font-family="Manrope, sans-serif" fill="#18213f">${t}</text></g>`; };
-  const walker = window.IELTSCharacter ? window.IELTSCharacter.walker(window.IELTS_GATE?.member?.gender) : '';   // the student's own character (js/character.js)
+  const walker = window.IELTSCharacter ? window.IELTSCharacter.walker(window.IELTS_GATE?.member?.gender, window.IELTS_GATE?.member?.avatar) : '';   // the student's own character (js/character.js)
   const peaks = [[60, 92], [150, 70], [240, 82], [360, 66], [470, 74], [585, 56], [700, 70], [820, 58], [940, 66]];
   return `<svg class="course-map-svg cm-rich" viewBox="0 0 1000 ${H}" role="group" aria-label="${esc(opt.aria || `Course map: ${stops.map(w => UNITS ? w.label : `Week ${w.n}, ${w.label}`).join('; ')}. You are in ${unitName(current)}.`)}">
     <defs>
@@ -1100,15 +1100,17 @@ function weekTabs() {
     </div></section>`;
 }
 /* The home page's top on phones: the student's character and greeting, their progress, and a big Continue card */
+/* a hello in the student's first language (set by the teacher on the Students page), e.g. "¡Hola!" or "¡Hola, Isla!" */
+function L1HI(withName) { const m = window.IELTS_GATE?.member; return m && window.IELTSCharacter ? window.IELTSCharacter.hello(m.lang, withName ? ME() : '') : ''; }
 function homePhone() {
   if (!UNITS) return '';
   const me = ME(), gender = window.IELTS_GATE?.member?.gender, ready = days.filter(d => d.status === 'ready' && d.week), done = ready.filter(d => isDone(d));
   const next = ready.find(d => !isDone(d)) || ready[0], pl = next && place(next.week, next.day), w = next && course.weeks.find(x => x.n === next.week);
   const pct = ready.length ? Math.round(100 * done.length / ready.length) : 0, open = course.weeks.filter(x => x.days.some(d => d.status === 'ready')).length;
-  const pic = window.IELTSCharacter ? window.IELTSCharacter.portrait(gender, 58) : '';
+  const pic = window.IELTSCharacter ? window.IELTSCharacter.portrait(gender, 58, window.IELTS_GATE?.member?.avatar) : '';
   const art = next && window.IELTSSheetArt ? window.IELTSSheetArt(({ listening: 'headset', reading: 'books' })[w?.art] || 'headset', 'hm-art') : '';
   return `<section class="hm" aria-label="Your start">
-    <header class="hm-hi"><span class="hm-pic">${pic}</span><div class="hm-hi-tx"><span>${GREET()}${me ? ',' : ''}</span><b>${esc(me || 'Welcome')}</b></div>
+    <header class="hm-hi"><span class="hm-pic">${pic}</span><div class="hm-hi-tx">${L1HI() ? `<em class="hm-l1">${L1HI()}</em>` : ''}<span>${GREET()}${me ? ',' : ''}</span><b>${esc(me || 'Welcome')}</b></div>
       <span class="hm-ring" style="--p:${pct}" aria-label="${pct}% of the ready lessons done"><b>${pct}<small>%</small></b></span></header>
     ${next ? `<a class="hm-next" href="#/${next.id}" style="${w ? partStyle(w) : ''}"><span class="hm-next-tx"><span class="hm-next-k">${done.length ? 'Continue' : 'Start here'}</span>
       <b>${esc(next.title)}</b><small>${esc(pl ? [w?.theme, pl.g.slots || pl.g.test ? null : pl.g.title, pl.name].filter(Boolean).join(' · ') : '')}</small>
@@ -1121,7 +1123,7 @@ function courseHome() {
   return `${homePhone()}<header class="home-head">
       <span class="eyebrow">${esc(course.code)} · ${esc(course.topic)}</span>
       <h1>${ME() ? `${esc(ME())}’s course map` : 'Your course map'}</h1>
-      ${course.intro === '' ? '' : `<p>${ME() ? `<b class="home-hi">${GREET()}, ${esc(ME())}.</b> ` : ''}${esc(course.intro || 'Pick up where you left off, or open any lesson below.')}</p>`}
+      ${course.intro === '' ? '' : `<p>${ME() ? `${L1HI() ? `<b class="home-l1">${L1HI()}</b> ` : ''}<b class="home-hi">${GREET()}, ${esc(ME())}.</b> ` : ''}${esc(course.intro || 'Pick up where you left off, or open any lesson below.')}</p>`}
       ${classToday ? (() => { const { d, week, day } = classToday, ready = d.status === 'ready', inner = `<span class="ht-dot" aria-hidden="true"></span><span class="ht-hi">${GREET()}</span><span class="ht-txt">Today in class · ${WEEKDAY[day - 1]}, Week ${week}</span><b>${esc(d.title)}</b>${ready ? icon('arrow') : '<small>Coming soon</small>'}`;
         return ready ? `<a class="home-today" href="#/${d.id}">${inner}</a>` : `<span class="home-today is-soon">${inner}</span>`; })() : ''}
     </header>
