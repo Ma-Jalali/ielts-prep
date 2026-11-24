@@ -237,3 +237,27 @@
 .xs-tips4 li.is-tip .xs-t4-ic { background: var(--gold, #f4a52e); color: #fff; }
 @media (max-width: 1100px) { .xs-tips4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 560px) { .xs-tips4 { grid-template-columns: 1fr; } }
+
+/* ── highlight, underline and notes (js/highlight.js) ── */
+.xs [data-hl] { -webkit-user-select: text; user-select: text; }
+mark.xs-hl { color: inherit; background: none; padding: 0; border-radius: 3px; }
+mark.xs-hl.is-hl { background: #ffe680; box-shadow: 0 0 0 1px #ffe680; }
+mark.xs-hl.is-ul { text-decoration: underline 2.5px var(--brand, #d6283c); text-underline-offset: 3px; }
+mark.xs-hl { cursor: pointer; }
+mark.xs-hl.has-note.is-hl { background: #ffd65c; }
+.xs-hl-note-ic { display: inline-block; width: 14px; height: 14px; margin: 0 2px 0 1px; vertical-align: super; border-radius: 4px 4px 4px 1px; background: var(--gold, #f4a52e); cursor: pointer; }
+.xs-hl-bar { position: absolute; z-index: 90; display: inline-flex; gap: 2px; padding: 4px; border-radius: 12px; background: var(--ink, #18213f); box-shadow: 0 10px 24px -10px rgba(24, 33, 63, .7); animation: xsHlIn .14s ease-out; }
+.xs-hl-bar button { display: inline-flex; align-items: center; gap: 7px; height: 34px; padding: 0 12px; border: 0; border-radius: 9px; background: none; color: #fff; font: 600 .84rem/1 var(--sans, system-ui); cursor: pointer; }
+.xs-hl-bar button:hover, .xs-hl-bar button:focus-visible { background: rgba(255, 255, 255, .14); outline: none; }
+.xs-hl-bar svg { width: 16px; height: 16px; }
+.xs-hl-sw { width: 16px; height: 16px; border-radius: 4px; }
+.xs-hl-sw.is-hl { background: #ffe680; }
+.xs-hl-sw.is-ul { border-bottom: 3px solid var(--brand, #d6283c); border-radius: 0; height: 12px; background: none; position: relative; }
+.xs-hl-sw.is-ul::before { content: 'U'; position: absolute; inset: -3px 0 0; font: 800 .8rem/1 var(--sans, system-ui); text-align: center; color: #fff; }
+.xs-hl-pop { position: absolute; z-index: 90; width: min(320px, calc(100vw - 16px)); display: grid; gap: 10px; padding: 14px; border-radius: 14px; background: #fff; border: 1px solid rgba(24, 33, 63, .14); box-shadow: 0 16px 36px -14px rgba(24, 33, 63, .55); animation: xsHlIn .14s ease-out; }
+.xs-hl-pop label { display: grid; gap: 6px; font-size: .86rem; }
+.xs-hl-pop textarea { width: 100%; resize: vertical; padding: 8px 10px; border-radius: 10px; border: 1px solid rgba(24, 33, 63, .2); font: inherit; font-size: .92rem; background: #fffdf3; }
+.xs-hl-pop textarea:focus { outline: 2px solid var(--gold, #f4a52e); outline-offset: 1px; }
+.xs-hl-pop > div { display: flex; justify-content: space-between; gap: 8px; }
+.xs-hl-pop .btn, .xs-hl-pop .btn-quiet { height: 34px; padding: 0 14px; font-size: .82rem; }
+@keyframes xsHlIn { from { opacity: 0; transform: translateY(4px); } }

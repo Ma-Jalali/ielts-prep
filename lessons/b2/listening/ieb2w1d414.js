@@ -18,7 +18,7 @@ window.DEC15_LESSON = {
         blocks: [{
           type: 'ieTest', id: 'ieb2w1d414-test', title: 'Part 4 · Exercise 14',
           audios: [
-            { title: 'Recording · Questions 1–10', src: 'https://drive.google.com/file/d/1FKzqrZdRnrlKUElkQWFSUs6ArGf599qt/view', note: 'A lecture on the history of CFCs and the damage they do to the ozone layer.' }
+            { title: 'Recording · Questions 1–10', src: 'https://drive.google.com/file/d/1WJnosKsAli6rG4ljhYi5rf9LO-AWEySz/view', note: 'A lecture on the history of CFCs and the damage they do to the ozone layer.' }
           ],
           blocks: [
             { type: 'ieTable', id: 'ieb2w1d414-q1', from: 1,
