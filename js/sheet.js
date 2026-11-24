@@ -34,6 +34,8 @@
   function learnPage(L, ctx) {
     const { esc, icon } = ctx, fmt = t => esc(String(t ?? '')).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
     const drive = s => { const m = String(s || '').match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?.*id=)([\w-]{10,})/); return m && m[1]; };
+    /* the video streams from Google Drive through the 'ielts-audio' relay (?kind=video: byte ranges, so it plays and seeks on iPhones too) */
+    const cfg = window.DEC15_CONFIG || {}, relay = id => cfg.supabaseUrl ? `${cfg.supabaseUrl.replace(/\/$/, '')}/functions/v1/ielts-audio?kind=video&id=${id}` : `https://drive.usercontent.google.com/download?id=${id}&export=download`;
     const SV = { play: '<path d="M8 5.5v13l10.5-6.5z" fill="currentColor" stroke="none"/>', ok: '<path d="M20 6 9 17l-5-5"/>', no: '<path d="M6 6l12 12M18 6 6 18"/>',
       chat: '<path d="M4 5h16v11H9l-5 4z"/>', mic: '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>', people: '<circle cx="8" cy="8" r="3"/><circle cx="16" cy="8" r="3"/><path d="M2.5 19c.8-3.4 3-5 5.5-5s4.7 1.6 5.5 5M11 19c.8-3.4 2.6-5 5-5s4.4 1.6 5.2 5"/>', lecture: '<rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M12 16v4M8 20h8"/>' };
     const sv = (k, w = 2) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${SV[k]}</svg>`;
@@ -42,7 +44,8 @@
     const R = {
       videos: b => `<section class="xl-band is-videos">${head(b, 'Watch')}${(b.items || []).map(v => { const i = ++vn, id = drive(v.src), k = `${L.id}-v${i}`, seen = ctx.val(k) === true;
         return `<article class="xl-video"><div class="xl-video-h"><span class="xl-vn">${i}</span><span class="xl-vt"><b>${esc(v.title)}</b>${v.note ? `<small>${fmt(v.note)}</small>` : ''}</span>${v.length ? `<span class="xl-len">${esc(v.length)}</span>` : ''}</div>
-          <div class="xl-frame">${id ? `<iframe src="https://drive.google.com/file/d/${id}/preview" title="${esc(v.title)}" allow="autoplay; fullscreen" allowfullscreen loading="lazy"></iframe>` : ''}</div>
+          <div class="xl-frame" data-xl-drive="${esc(id || '')}">${id ? `<video controls playsinline preload="metadata" src="${esc(relay(id))}" title="${esc(v.title)}" data-xl-k="${esc(k)}"></video>
+            <button type="button" class="xl-cover" data-xl-play aria-label="Play video ${i}: ${esc(v.title)}"><span class="xl-cover-btn">${sv('play')}</span><span class="xl-cover-tx"><small>Video ${i}</small><b>${esc(v.title)}</b></span></button>` : ''}</div>
           <div class="xl-video-f"><label class="xl-seen"><input type="checkbox" data-save="${esc(k)}"${seen ? ' checked' : ''}><span>I watched this video</span></label>${id ? `<a href="https://drive.google.com/file/d/${id}/view" target="_blank" rel="noopener">${icon('open')}Open in Google Drive</a>` : ''}</div></article>`; }).join('')}</section>`,
       parts: b => `<section class="xl-band">${head(b, 'The test')}<ol class="xl-parts">${(b.items || []).map((p, i) => `<li style="--d:${i}"><span class="xl-pi">${sv(p.icon || ['chat', 'mic', 'people', 'lecture'][i], 1.8)}</span>
           <span class="xl-pn">Part ${esc(p.n)}</span><b>${esc(p.who)}</b><span class="xl-pw">${fmt(p.what)}</span>${p.eg ? `<small>e.g. ${fmt(p.eg)}</small>` : ''}<span class="xl-pq">${esc(p.qs)}</span><i class="xl-level" aria-label="Difficulty ${i + 1} of 4">${[0, 1, 2, 3].map(j => `<b class="${j <= i ? 'on' : ''}"></b>`).join('')}</i></li>`).join('')}</ol>
@@ -66,6 +69,14 @@
       <section class="xs-end"><footer class="xs-foot"><label class="xs-done"><input type="checkbox" data-sheet-done${doneAll ? ' checked' : ''}><span>I have finished this lesson</span></label>
         <span class="xs-nav">${ctx.back ? `<a class="btn-quiet" href="${esc(ctx.back.href)}">${icon('left')}All lessons</a>` : ''}${ctx.next ? `<a class="btn" href="${esc(ctx.next.href)}">${esc(ctx.next.label)} ${icon('arrow')}</a>` : ''}</span></footer></section></article>`;
   }
+  /* Learn videos: the cover starts the video; one video at a time; finishing a video ticks "I watched this video";
+     if the relay cannot play it, Drive's own player takes its place */
+  document.addEventListener('click', e => { const c = e.target.closest?.('[data-xl-play]'); if (!c) return; const v = c.parentElement.querySelector('video'); c.parentElement.classList.add('is-on'); v?.play().catch(() => {}); });
+  ['play', 'ended', 'error'].forEach(ev => document.addEventListener(ev, e => { const v = e.target; if (!(v instanceof HTMLVideoElement) || !v.closest('.xl-frame')) return; const f = v.closest('.xl-frame');
+    if (ev === 'play') { f.classList.add('is-on'); document.querySelectorAll('.xl-frame video, .xp audio').forEach(x => { if (x !== v && !x.paused) x.pause(); }); }
+    if (ev === 'ended') { const box = document.querySelector(`input[data-save="${CSS.escape(v.dataset.xlK || '')}"]`); if (box && !box.checked) { box.checked = true; box.dispatchEvent(new Event('change', { bubbles: true })); } }
+    if (ev === 'error' && f.dataset.xlDrive) { f.classList.add('is-on'); f.innerHTML = `<iframe src="https://drive.google.com/file/d/${f.dataset.xlDrive}/preview" title="${v.title.replace(/"/g, '&quot;')}" allow="autoplay; fullscreen" allowfullscreen></iframe>`; } }, true));
+
   /* true or false in a Learn lesson: the answer and why, as soon as a button is pressed (nothing is saved or marked) */
   document.addEventListener('click', e => { const b = e.target.closest?.('[data-xl-tf]'); if (!b) return; const li = b.closest('li'), right = li.dataset.xlAns === b.dataset.xlTf;
     li.querySelectorAll('[data-xl-tf]').forEach(x => { x.classList.toggle('is-pick', x === b); x.classList.toggle('is-ans', x.dataset.xlTf === li.dataset.xlAns); });
