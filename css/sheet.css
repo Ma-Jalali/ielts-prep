@@ -436,3 +436,102 @@ mark.xs-hl.has-note.is-hl { background: #ffd65c; }
 
 /* a section with one question block: its header already says 'Questions 1–6' */
 .xs-part.is-one .xs-range { display: none; }
+
+/* ───────── a Learn lesson on one page (learnPage in js/sheet.js) ───────── */
+.xl-band { padding: 26px 30px 28px; border-radius: var(--xs-r); background: #fff; border: 1px solid var(--xs-line); box-shadow: 0 1px 2px rgba(24, 33, 63, .04), 0 18px 40px -32px rgba(24, 33, 63, .35); }
+.xl-h { margin-bottom: 18px; }
+.xl-k { display: block; margin-bottom: 4px; font: 750 .72rem/1.3 var(--sans, system-ui); letter-spacing: .1em; text-transform: uppercase; color: var(--xs-acc); }
+.xl-h h2 { margin: 0; font: 650 1.35rem/1.2 var(--serif, 'Outfit', sans-serif); letter-spacing: -.015em; }
+.xl-h p { margin: 6px 0 0; max-width: 70ch; font-size: .98rem; line-height: 1.55; color: #3a4466; }
+.xl-foot { margin: 16px 0 0; font-size: .92rem; line-height: 1.55; color: #3a4466; }
+
+/* videos */
+.xl-video + .xl-video { margin-top: 22px; padding-top: 22px; border-top: 1px solid var(--xs-line); }
+.xl-video-h { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
+.xl-vn { flex: none; width: 38px; height: 38px; border-radius: 12px; display: grid; place-items: center; background: var(--xs-ink); color: #fff; font: 750 .95rem/1 var(--serif, 'Outfit', sans-serif); }
+.xl-vt { flex: 1; min-width: 0; display: grid; gap: 2px; } .xl-vt b { font: 650 1.08rem/1.25 var(--serif, 'Outfit', sans-serif); } .xl-vt small { font-size: .88rem; color: var(--muted, #5a6382); line-height: 1.4; }
+.xl-len { flex: none; font: 700 .78rem/1 var(--sans, system-ui); color: var(--muted, #5a6382); }
+.xl-frame { position: relative; aspect-ratio: 16 / 9; border-radius: 16px; overflow: hidden; background: #0e1430 radial-gradient(circle at 50% 50%, #26306a, #0e1430 70%); box-shadow: 0 18px 40px -24px rgba(24, 33, 63, .6); }
+.xl-frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.xl-video-f { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 12px; }
+.xl-video-f a { display: inline-flex; align-items: center; gap: 6px; font-size: .86rem; font-weight: 700; color: var(--xs-acc); text-decoration: none; } .xl-video-f a svg { width: 15px; height: 15px; }
+.xl-seen { display: inline-flex; align-items: center; gap: 9px; font-size: .9rem; font-weight: 650; cursor: pointer; }
+.xl-seen input { width: 20px; height: 20px; accent-color: var(--xs-acc); }
+
+/* key numbers */
+.xl-facts { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; }
+.xl-facts li { display: grid; gap: 6px; align-content: start; padding: 16px 14px; border-radius: 16px; background: var(--xs-soft); }
+.xl-facts b { font: 700 1.9rem/1 var(--serif, 'Outfit', sans-serif); letter-spacing: -.02em; color: var(--xs-acc); }
+.xl-facts span { font-size: .84rem; line-height: 1.4; color: #3a4466; }
+
+/* the four parts */
+.xl-parts { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.xl-parts li { position: relative; display: flex; flex-direction: column; gap: 4px; padding: 18px 16px 16px; border-radius: 18px; border: 1px solid var(--xs-line); background: linear-gradient(180deg, #fff, #fafbfd); }
+.xl-pi { width: 42px; height: 42px; margin-bottom: 8px; border-radius: 13px; display: grid; place-items: center; background: var(--xs-soft); color: var(--xs-acc); } .xl-pi svg { width: 22px; height: 22px; }
+.xl-pn { font: 750 .72rem/1.2 var(--sans, system-ui); letter-spacing: .09em; text-transform: uppercase; color: var(--xs-acc); }
+.xl-parts b { font: 650 1.06rem/1.25 var(--serif, 'Outfit', sans-serif); }
+.xl-pw { font-size: .9rem; line-height: 1.45; color: #3a4466; }
+.xl-parts small { font-size: .8rem; line-height: 1.4; color: var(--muted, #6a7391); font-style: italic; }
+.xl-pq { margin-top: auto; padding-top: 12px; font: 700 .8rem/1 var(--sans, system-ui); color: var(--xs-ink); }
+.xl-level { position: absolute; top: 20px; right: 16px; display: flex; gap: 3px; align-items: flex-end; }
+.xl-level b { width: 4px; border-radius: 2px; background: #e1e4ee; } .xl-level b:nth-child(1) { height: 7px; } .xl-level b:nth-child(2) { height: 10px; } .xl-level b:nth-child(3) { height: 13px; } .xl-level b:nth-child(4) { height: 16px; }
+.xl-level b.on { background: var(--xs-acc); }
+
+/* checklists */
+.xl-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+.xl-list li { display: flex; gap: 12px; align-items: flex-start; padding: 12px 0; font-size: .98rem; line-height: 1.55; color: #2a3354; }
+.xl-list li + li { border-top: 1px solid var(--xs-line); }
+.xl-tick { flex: none; width: 24px; height: 24px; margin-top: 1px; border-radius: 50%; display: grid; place-items: center; background: var(--xs-soft); color: var(--xs-acc); } .xl-tick svg { width: 13px; height: 13px; }
+.xl-band.is-gold { background: linear-gradient(180deg, #fffaf0, #fff); border-color: #f3e2bd; } .xl-band.is-gold .xl-k { color: #b27100; } .xl-band.is-gold .xl-tick { background: #fdecc8; color: #a86a00; }
+
+/* questions and answers */
+.xl-faq { display: grid; border: 1px solid var(--xs-line); border-radius: 16px; overflow: hidden; }
+.xl-faq details + details { border-top: 1px solid var(--xs-line); }
+.xl-faq summary { list-style: none; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 15px 18px; cursor: pointer; font: 650 1rem/1.35 var(--serif, 'Outfit', sans-serif); }
+.xl-faq summary::-webkit-details-marker { display: none; }
+.xl-faq summary:hover { background: #f8f9fc; }
+.xl-faq details[open] summary { color: var(--xs-acc); }
+.xl-faq details[open] .xs-chev { transform: rotate(180deg); }
+.xl-faq details > div { padding: 0 18px 14px; }
+.xl-faq details p { margin: 0 0 8px; max-width: 72ch; font-size: .95rem; line-height: 1.6; color: #3a4466; }
+
+/* band table */
+.xl-table { overflow-x: auto; border: 1px solid var(--xs-line); border-radius: 16px; max-width: 520px; }
+.xl-table table { width: 100%; border-collapse: collapse; font-size: .95rem; }
+.xl-table th, .xl-table td { padding: 10px 18px; text-align: left; border-bottom: 1px solid var(--xs-line); font-variant-numeric: tabular-nums; }
+.xl-table thead th { background: #f6f7fb; font-size: .76rem; letter-spacing: .06em; text-transform: uppercase; color: #3b4566; }
+.xl-table tbody tr:last-child > * { border-bottom: 0; }
+.xl-table tbody th { width: 30%; font: 700 1rem var(--serif, 'Outfit', sans-serif); }
+.xl-table tr:has(b) { background: var(--xs-soft); }
+
+/* true or false */
+.xl-check { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.xl-check li { display: flex; gap: 12px; padding: 14px 16px; border-radius: 16px; border: 1px solid var(--xs-line); background: #fff; transition: border-color .2s, background .2s; }
+.xl-cn { flex: none; width: 28px; height: 28px; border-radius: 9px; display: grid; place-items: center; background: var(--xs-ink); color: #fff; font: 750 .82rem/1 var(--sans, system-ui); }
+.xl-cq { flex: 1; min-width: 0; display: grid; gap: 10px; } .xl-cq > p:first-child { margin: 3px 0 0; font-size: .98rem; line-height: 1.45; font-weight: 600; }
+.xl-tf { display: flex; gap: 8px; }
+.xl-tf button { height: 36px; padding: 0 16px; border-radius: 999px; border: 1px solid var(--xs-line-2); background: #fff; font: 700 .84rem/1 var(--sans, system-ui); color: var(--xs-ink); cursor: pointer; }
+.xl-tf button:hover { background: #f4f6fa; }
+.xl-tf button.is-ans { background: #1f8a5b; border-color: #1f8a5b; color: #fff; }
+.xl-tf button.is-pick:not(.is-ans) { background: #fdecee; border-color: #e3a1aa; color: #a91d2f; }
+.xl-why { margin: 0; font-size: .88rem; line-height: 1.5; color: #3a4466; } .xl-why[hidden] { display: none; }
+.xl-check li.is-right { border-color: #b7dfc9; background: #f3fbf6; } .xl-check li.is-right .xl-verdict { color: #1f7a4f; }
+.xl-check li.is-wrong { border-color: #f1c7cd; background: #fff6f7; } .xl-check li.is-wrong .xl-verdict { color: #a91d2f; }
+
+@media (max-width: 1100px) { .xl-facts { grid-template-columns: repeat(3, minmax(0, 1fr)); } .xl-parts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 720px) {
+  .xl-band { padding: 20px 16px 22px; border-radius: 18px; }
+  .xl-h h2 { font-size: 1.18rem; }
+  .xl-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; } .xl-facts li { padding: 14px 12px; } .xl-facts b { font-size: 1.6rem; }
+  .xl-parts { grid-template-columns: 1fr; gap: 10px; }
+  .xl-check { grid-template-columns: 1fr; }
+  .xl-frame { border-radius: 12px; margin: 0 -4px; }
+  .xl-video-f { flex-direction: column; align-items: flex-start; }
+}
+.xl-facts span b { font: inherit; font-weight: 750; letter-spacing: 0; color: var(--xs-ink); }
+@media (max-width: 720px) {
+  .xl-parts li { display: grid; grid-template-columns: 40px minmax(0, 1fr); column-gap: 12px; row-gap: 3px; padding: 14px 14px 14px 12px; }
+  .xl-parts li > :not(.xl-pi):not(.xl-level) { grid-column: 2; }
+  .xl-pi { grid-row: 1 / span 5; width: 40px; height: 40px; margin: 0; }
+  .xl-pq { padding-top: 6px; } .xl-level { top: 16px; right: 14px; }
+}
