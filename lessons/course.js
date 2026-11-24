@@ -75,7 +75,7 @@ window.DEC15_COURSE = {
          lesson yet shows as "coming soon". Rename anything here; never change a base once students have started. */
       sections: [
         { id: 'learn', title: 'Learn', icon: 'book', blurb: 'Strategy lessons: how the test works and how to approach each part. Start here, in order.', groups: [
-          { id: 'learn', title: 'Strategy lessons', base: 0, size: 6, map: true, slots: ['Listening overview', 'Part 1: everyday conversation', 'Part 2: everyday monologue', 'Part 3: academic discussion', 'Part 4: academic lecture', 'Skills and strategies'] }] },
+          { id: 'learn', title: 'Strategy lessons', base: 0, size: 5, map: true, slots: ['Listening overview', 'Part 1: everyday conversation', 'Part 2: everyday monologue', 'Part 3: academic discussion', 'Part 4: academic lecture'] }] },
         { id: 'practise', title: 'Practise', icon: 'target', blurb: 'Short exercises, one part of the test at a time. Choose a part, then an exercise.', groups: [
           { id: 'part1', qs: 'Questions 1–10', title: 'Part 1', by: 'By part', sub: 'A conversation in an everyday context', base: 100, size: 25 },
           { id: 'part2', qs: 'Questions 11–20', title: 'Part 2', by: 'By part', sub: 'A monologue in an everyday context', base: 200, size: 25 },

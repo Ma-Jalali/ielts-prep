@@ -190,3 +190,7 @@ input:focus-visible + .sx-sw { outline: 2px solid #fff; outline-offset: 2px; }
 
 /* the Studio link in the side panel */
 .t-studio { --tc: #b07d12; }
+
+/* close Studio on this device */
+.sx-dock .sx-dock-x { width: 34px; height: 34px; padding: 0; justify-content: center; margin-left: 2px; border-radius: 50%; background: rgba(255, 255, 255, .1); font-size: 1.3rem; line-height: 1; }
+.sx-dock .sx-dock-x:hover { background: rgba(255, 255, 255, .2); }
