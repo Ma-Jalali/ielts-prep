@@ -18,8 +18,11 @@ window.createStudio = function ({ lesson, course, days, esc, icon, toast, L, rer
   const ls = { get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
     set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { toast('Could not save on this device (storage is full or blocked).'); return false; } },
     del(k) { try { localStorage.removeItem(k); } catch (e) { /* ignore */ } } };
-  if (window.DEC15_STUDIO_PAGE) ls.set(K_ON, true);
-  if (!ls.get(K_ON, false)) return null;   // Studio is off on this device: the app runs exactly as before
+  /* IELTS: Studio is for the teacher only. A student who opens #/studio sees nothing, and a device where Studio was
+     left on shows it again only when the teacher signs in. */
+  const teacher = () => !window.IELTS_GATE || !!window.IELTS_GATE.isAdmin;
+  if (window.DEC15_STUDIO_PAGE && teacher()) ls.set(K_ON, true);
+  if (!ls.get(K_ON, false) || !teacher()) return null;   // Studio is off on this device: the app runs exactly as before
   document.getElementById('side-studio')?.removeAttribute('hidden');
 
   const CAT = window.STUDIO_BLOCKS || [], uid = window.STUDIO_UID || (p => `${p}-${Math.random().toString(36).slice(2, 6)}`);
@@ -465,6 +468,7 @@ window.createStudio = function ({ lesson, course, days, esc, icon, toast, L, rer
         <li><b>Edit.</b> With Edit mode on, hover a block for its toolbar: move, duplicate, copy, delete, <b>Edit</b> (all its fields) and <b>+</b> (add a block below). <b>Double-click any text</b> to type over it. Activities and stages have their own bars.</li>
         <li><b>Build.</b> “Add a block” opens the catalogue: IELTS question types (True/False/Not Given, completion, matching, cue cards …) and every element of the design. The <a href="#/${course.galleryLesson || PREFIX + 'w1d2'}">Block gallery</a> shows each one working; copy any block there and paste it on your page.</li>
         <li><b>Publish.</b> Download the lesson file and put it in ${UNITS ? 'its skill’s folder (<code>lessons/b2/&lt;skill&gt;/</code>)' : '<code>lessons/week&lt;n&gt;/</code>'} with its course.js entry — or <b>Download all drafts</b> and give the file to Claude to publish. Then discard the draft.</li>
+        <li><b>Learn pages and Writing.</b> Pages like Listening → Learn open in the <b>page builder</b> when Edit is on: every element has a toolbar (Edit, move, duplicate, delete) and “Add an element” gives tabs, toggle lists, tip boxes, cards, steps, tables, model answers, writing boxes and more. For a new Writing page, open Writing Task 1 or 2 → Learn or Practise and press <b>New lesson</b> / <b>New task</b>. Press <b>Publish</b> in the page bar and students see it straight away; no files needed.</li>
         <li><b>Undo</b> with the dock button or <kbd>Ctrl</kbd>/<kbd>⌘</kbd> + <kbd>Z</kbd> (outside a text box).</li></ol>
         <button type="button" class="sx-btn-q" data-sx-off>Turn Studio off on this device</button></section>
     </div>`;
@@ -489,7 +493,8 @@ window.createStudio = function ({ lesson, course, days, esc, icon, toast, L, rer
       <label class="sx-dock-sw${onLessonPage() ? '' : ' is-off'}" title="${onLessonPage() ? 'Show the editing tools on this page' : 'Open a lesson page to edit it'}"><input type="checkbox" data-sx-edit-toggle${editing ? ' checked' : ''}${onLessonPage() ? '' : ' disabled'}><span class="sx-sw" aria-hidden="true"><i></i></span><span>Edit</span></label>
       ${onLessonPage() ? `<span class="sx-dock-state${draft ? ' is-draft' : ''}">${draft ? 'Draft' : 'Published'}</span>
       <button type="button" data-sx-dock="undo" title="Undo (Ctrl/Cmd + Z)"${undo.length ? '' : ' disabled'}>${I.undo}<span>Undo</span></button>
-      <button type="button" data-sx-dock="export" title="Download this page as a lesson file">${I.out}<span>Export</span></button>` : ''}`;
+      <button type="button" data-sx-dock="export" title="Download this page as a lesson file">${I.out}<span>Export</span></button>` : ''}
+      <button type="button" class="sx-dock-x" data-sx-dock="close" title="Close Studio on this device (open #/studio to bring it back)" aria-label="Close Studio">×</button>`;
   }
   function afterRender(r) {
     route = r; document.body.classList.toggle('sx-editing', editing && onLessonPage());
@@ -513,7 +518,9 @@ window.createStudio = function ({ lesson, course, days, esc, icon, toast, L, rer
     if (t.dataset.sxL) { stop(); onLessonBar(t); return; }
     if (t.dataset.sxLi) { stop(); onList(t); return; }
     if (t.closest('.sx-panel') && (t.dataset.sxP || t.dataset.sxPtab || t.dataset.sxAddkey)) { stop(); onPanelButton(t); return; }
-    if (t.dataset.sxDock) { stop(); if (t.dataset.sxDock === 'undo') doUndo(); else exportLesson(lesson.id); return; }
+    if (t.dataset.sxDock) { stop(); if (t.dataset.sxDock === 'undo') doUndo();
+      else if (t.dataset.sxDock === 'close') { if (!confirm('Close Studio on this device? Your drafts stay saved. To open it again, go to …/#/studio')) return; ls.del(K_ON); ls.del(K_EDIT); document.body.classList.remove('sx-editing'); location.hash = '#/'; location.reload(); }
+      else exportLesson(lesson.id); return; }
     if (route === 'studio' && t.closest('.sx-page') && onStudioPage(t)) { stop(); return; }
   }, true);
   document.addEventListener('submit', e => { if (e.target.matches('[data-sx-new]')) { e.preventDefault(); createPage(e.target); } }, true);

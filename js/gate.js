@@ -46,8 +46,14 @@
       check(true); };
   }
 
+  /* a session saved on this device that the sign-in library did not pick up: restore it once before asking to sign in */
+  async function restore() { let saved = null; try { saved = JSON.parse(localStorage.getItem('dec15-auth') || 'null'); } catch (e) { /* none */ }
+    const s = saved && (saved.currentSession || saved);
+    if (!s || !s.refresh_token) return null;
+    try { const r = await G.client.auth.setSession({ access_token: s.access_token, refresh_token: s.refresh_token }); return r.data?.session?.user || null; } catch (e) { return null; } }
   async function check(fresh) {
-    const { data } = await G.client.auth.getSession(), user = data.session?.user;
+    let { data } = await G.client.auth.getSession(), user = data.session?.user;
+    if (!user && !fresh) user = await restore();
     if (!user) { page(); return; }
     let row = null, offline = false;
     try { const r = await G.client.from('ielts_members').select('first_name, role, email, gender, avatar, first_language').eq('user_id', user.id).maybeSingle(); if (r.error) throw r.error; row = r.data; }
@@ -60,8 +66,15 @@
     open();
   }
 
+  /* pages built in Studio and published online (table ielts_pages): the teacher also gets unpublished ones.
+     Kept on this device too, so they open offline. js/boot.js adds them to the course. */
+  async function pages() { const K = 'ielts-pages';
+    try { const r = await G.client.from('ielts_pages').select('id, week, day, entry, lesson, published, updated_at'); if (r.error) throw r.error;
+      try { localStorage.setItem(K, JSON.stringify(r.data || [])); } catch (e) { /* storage full */ } return r.data || []; }
+    catch (e) { try { return JSON.parse(localStorage.getItem(K) || '[]'); } catch (x) { return []; } } }
   let opened = false;
-  function open() { if (opened) return; opened = true;
+  async function open() { if (opened) return; opened = true;
+    window.IELTS_PAGES = await pages();
     document.getElementById('gate')?.remove(); root.classList.remove('gate-on', 'gate-show');
     loadScript('js/boot.js?v=' + (cfg.version || ''));
     /* a removed student: checked again whenever the page comes back into view */
@@ -71,7 +84,11 @@
 
   (async () => {
     try { if (!window.supabase) await loadScript('js/vendor/supabase.min.js?v=' + (cfg.version || ''));
-      G.client = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseKey, { auth: { persistSession: true, autoRefreshToken: true, storageKey: 'dec15-auth' } });
+      /* Safari: on a reload the closing page can keep the browser-wide (navigator.locks) sign-in lock, so the new page gave
+         up waiting and started without the saved session ("sign in again after every refresh"). A lock kept inside this
+         page avoids that; only one copy of the sign-in code runs here anyway. */
+      const held = {}, pageLock = (name, wait, fn) => { const run = (held[name] || Promise.resolve()).catch(() => {}).then(() => fn()); held[name] = run.catch(() => {}); return run; };
+      G.client = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseKey, { auth: { persistSession: true, autoRefreshToken: true, storageKey: 'dec15-auth', lock: pageLock } });
       G.client.auth.onAuthStateChange(evt => { if (evt === 'PASSWORD_RECOVERY') G.recovery = true; if (evt === 'SIGNED_OUT' && opened) { cache.set(null); location.replace(location.pathname); } });
       await check(false);
     } catch (e) { page('The sign-in service could not be reached. Check your connection and reload the page.', 'is-err'); }

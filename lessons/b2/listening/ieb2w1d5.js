@@ -9,7 +9,7 @@ window.DEC15_LESSON = {
   title: 'Part 4: academic lecture',
   duration: 'About 70 minutes',
   journey: 'Part 4 is a lecture by one speaker and the hardest part of the test. Learn how lectures are organised, use signpost words to follow them, and handle note and flow-chart completion, then practise with five exercises from class.',
-  finish: { title: 'Next', text: 'Skills and strategies' },
+  finish: { title: 'Next', text: 'Practise: Part 1 exercises' },
   learn: {
     tags: ['Questions 31–40', 'One speaker'],
     jump: [['xl-tips', 'Tips', 'tip'], ['xl-ex', 'Exercises', 'pen'], ['xl-check', 'Check yourself', 'ok']],

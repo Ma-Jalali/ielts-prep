@@ -75,7 +75,7 @@ window.DEC15_COURSE = {
          lesson yet shows as "coming soon". Rename anything here; never change a base once students have started. */
       sections: [
         { id: 'learn', title: 'Learn', icon: 'book', blurb: 'Strategy lessons: how the test works and how to approach each part. Start here, in order.', groups: [
-          { id: 'learn', title: 'Strategy lessons', base: 0, size: 6, map: true, slots: ['Listening overview', 'Part 1: everyday conversation', 'Part 2: everyday monologue', 'Part 3: academic discussion', 'Part 4: academic lecture', 'Skills and strategies'] }] },
+          { id: 'learn', title: 'Strategy lessons', base: 0, size: 5, map: true, slots: ['Listening overview', 'Part 1: everyday conversation', 'Part 2: everyday monologue', 'Part 3: academic discussion', 'Part 4: academic lecture'] }] },
         { id: 'practise', title: 'Practise', icon: 'target', blurb: 'Short exercises, one part of the test at a time. Choose a part, then an exercise.', groups: [
           { id: 'part1', qs: 'Questions 1–10', title: 'Part 1', by: 'By part', sub: 'A conversation in an everyday context', base: 100, size: 25 },
           { id: 'part2', qs: 'Questions 11–20', title: 'Part 2', by: 'By part', sub: 'A monologue in an everyday context', base: 200, size: 25 },
@@ -192,8 +192,24 @@ window.DEC15_COURSE = {
         { id: 'ieb2w1d425', day: 425, status: 'ready', title: 'A company training scheme', sub: 'Multiple choice and sentence completion', art: 'listening', parts: ['Exercise 25'], stages: ['ex'], tones: ['teal'], scripts: ['lessons/b2/listening/ieb2w1d425.js'] }
       ] },
     { n: 2, theme: 'Reading', color: '#2b67d1', group: 'skills', art: 'reading', short: 'Reading', tag: '3 passages · 60 minutes', tone: 'blue', folder: 'lessons/b2/reading', summary: '', days: [] },
-    { n: 3, theme: 'Writing Task 1 (Academic)', color: '#e2552f', group: 'skills', art: 'chart', short: 'Writing Task 1', tag: '150+ words · about 20 minutes', tone: 'clay', folder: 'lessons/b2/writing-task1', summary: '', days: [] },
-    { n: 4, theme: 'Writing Task 2', color: '#c2185b', group: 'skills', art: 'essay', short: 'Writing Task 2', tag: '250+ words · about 40 minutes', tone: 'clay', folder: 'lessons/b2/writing-task2', summary: '', days: [] },
+    { n: 3, theme: 'Writing Task 1 (Academic)', color: '#e2552f', group: 'skills', art: 'chart', short: 'Writing Task 1', tag: '150+ words · about 20 minutes', tone: 'clay', folder: 'lessons/b2/writing-task1', summary: '', 
+      /* pages are built in Studio and published online (table ielts_pages): an open group lists only the pages that exist */
+      sections: [
+        { id: 'learn', title: 'Learn', icon: 'book', blurb: 'Lessons: how Task 1 works and how to write it well.', groups: [
+          { id: 'learn', title: 'Lessons', base: 0, size: 99, open: true, noun: 'Lesson' }] },
+        { id: 'practise', title: 'Practise', icon: 'target', blurb: 'Writing tasks to practise, with tips and model answers.', groups: [
+          { id: 'tasks', title: 'Tasks', base: 100, size: 99, open: true, noun: 'Task' }] }
+      ],
+      days: [] },
+    { n: 4, theme: 'Writing Task 2', color: '#c2185b', group: 'skills', art: 'essay', short: 'Writing Task 2', tag: '250+ words · about 40 minutes', tone: 'clay', folder: 'lessons/b2/writing-task2', summary: '', 
+      /* pages are built in Studio and published online (table ielts_pages): an open group lists only the pages that exist */
+      sections: [
+        { id: 'learn', title: 'Learn', icon: 'book', blurb: 'Lessons: how Task 2 works and how to write it well.', groups: [
+          { id: 'learn', title: 'Lessons', base: 0, size: 99, open: true, noun: 'Lesson' }] },
+        { id: 'practise', title: 'Practise', icon: 'target', blurb: 'Writing tasks to practise, with tips and model answers.', groups: [
+          { id: 'tasks', title: 'Tasks', base: 100, size: 99, open: true, noun: 'Task' }] }
+      ],
+      days: [] },
     { n: 5, theme: 'Speaking', color: '#7a4fd0', group: 'skills', art: 'discussion', short: 'Speaking', tag: 'Parts 1, 2 and 3', tone: 'plum', folder: 'lessons/b2/speaking', summary: '', days: [] },
     { n: 6, theme: 'Vocabulary', color: '#1f9254', group: 'language', art: 'research', short: 'Vocabulary', tag: '', tone: 'green', folder: 'lessons/b2/vocabulary', summary: '', days: [] },
     { n: 7, theme: 'Grammar', color: '#c97a0a', group: 'language', art: 'critical', short: 'Grammar', tag: '', tone: 'amber', folder: 'lessons/b2/grammar', summary: '', days: [] }
