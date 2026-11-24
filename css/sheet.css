@@ -1,7 +1,7 @@
 /* IELTS · a practice exercise on one page (js/sheet.js). One calm column: the title card, then each recording with
    its questions laid out like the exam paper, then the answers and the script at the bottom. */
 .xs { --xs-acc: var(--accent, #2b776e); --xs-ink: var(--ink, #18213f); --xs-line: rgba(24, 33, 63, .12); --xs-line-2: rgba(24, 33, 63, .2);
-  --xs-r: 22px; max-width: 880px; margin: 0 auto; padding: 4px 0 64px; display: grid; gap: 22px; color: var(--xs-ink); }
+  --xs-r: 22px; width: 100%; margin: 0; padding: 4px 0 64px; display: grid; gap: 22px; color: var(--xs-ink); }
 .xs * { box-sizing: border-box; }
 .xs b { font-weight: 700; }
 
@@ -18,8 +18,8 @@
 .xs-crumbs b { color: var(--xs-ink); }
 
 /* ── the title card ── */
-.xs-hero { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) 230px; align-items: center; gap: 18px; padding: 30px 30px 30px 34px; border-radius: 28px; overflow: hidden;
-  background: linear-gradient(135deg, #fff 0%, #fff 45%, var(--xs-soft) 100%); border: 1px solid var(--xs-line); box-shadow: 0 1px 2px rgba(24, 33, 63, .04), 0 18px 40px -30px rgba(24, 33, 63, .45); }
+.xs-hero { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) minmax(260px, 340px); align-items: center; gap: 18px; padding: 30px 30px 30px 34px; border-radius: 28px; overflow: hidden;
+  background: radial-gradient(circle at 1px 1px, rgba(24, 33, 63, .07) 1px, transparent 1.5px) 0 0 / 18px 18px, linear-gradient(135deg, #fff 0%, #fff 40%, var(--xs-soft) 100%); border: 1px solid var(--xs-line); box-shadow: 0 1px 2px rgba(24, 33, 63, .04), 0 18px 40px -30px rgba(24, 33, 63, .45); }
 .xs-hero::before { content: ''; position: absolute; inset: 0 auto 0 0; width: 6px; background: var(--xs-acc); }
 .xs-eyebrow { display: inline-block; font-size: .74rem; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; color: var(--xs-acc); }
 .xs-hero h1 { margin: 8px 0 10px; font-family: var(--serif, 'Outfit', sans-serif); font-size: clamp(1.7rem, 3.4vw, 2.35rem); line-height: 1.12; letter-spacing: -.02em; font-weight: 650; }
@@ -29,8 +29,22 @@
 .xs-facts b { color: var(--xs-acc); font-weight: 800; }
 .xs-art { width: 100%; height: auto; display: block; filter: drop-shadow(0 10px 14px rgba(24, 33, 63, .1)); }
 
-.xs-tip { display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; padding: 14px 20px; border-radius: 16px; background: #fff8eb; border: 1px solid #f6dfb2; font-size: .92rem; color: #5b4618; line-height: 1.5; }
-.xs-tip b { color: #8a5a00; white-space: nowrap; }
+.xs-prep { padding: 24px 28px 26px; border-radius: var(--xs-r); background: #fff; border: 1px solid var(--xs-line); box-shadow: 0 1px 2px rgba(24, 33, 63, .04); }
+.xs-prep header { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
+.xs-prep-k { font-size: .74rem; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; color: var(--brand, #d6283c); }
+.xs-prep h2 { margin: 0; font-family: var(--serif, 'Outfit', sans-serif); font-size: 1.3rem; font-weight: 650; letter-spacing: -.01em; }
+.xs-steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; counter-reset: s; }
+.xs-steps li { position: relative; display: grid; align-content: start; gap: 6px; padding: 16px 16px 18px; border-radius: 16px; background: #f8f9fc; border: 1px solid var(--xs-line); }
+.xs-steps li:not(:last-child)::after { content: ''; position: absolute; right: -11px; top: 34px; width: 8px; height: 8px; border-top: 2px solid var(--xs-line-2); border-right: 2px solid var(--xs-line-2); transform: rotate(45deg); }
+.xs-step-ic { position: relative; width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center; background: var(--xs-soft); color: var(--xs-acc); margin-bottom: 6px; }
+.xs-step-ic svg { width: 24px; height: 24px; }
+.xs-step-ic i { position: absolute; right: -6px; top: -6px; width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; background: var(--xs-ink); color: #fff; font-style: normal; font-size: .7rem; font-weight: 800; border: 2px solid #fff; }
+.xs-steps b { font-family: var(--serif, 'Outfit', sans-serif); font-size: 1.02rem; font-weight: 650; }
+.xs-steps span:not(.xs-step-ic) { font-size: .88rem; line-height: 1.5; color: var(--ink-2, #39436a); }
+.xs-tips { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-top: 14px; }
+.xs-tips p { margin: 0; padding: 14px 16px 14px 46px; position: relative; border-radius: 14px; background: #fff8eb; border: 1px solid #f6dfb2; font-size: .9rem; line-height: 1.5; color: #5b4618; }
+.xs-tips p::before { content: '!'; position: absolute; left: 14px; top: 14px; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; background: var(--gold, #f4a52e); color: #fff; font-weight: 800; font-size: .8rem; }
+.xs-tips b { display: block; color: #7a4f00; margin-bottom: 2px; }
 
 /* ── a recording with its questions ── */
 .xs-part { display: grid; gap: 26px; padding: 26px 30px 30px; border-radius: var(--xs-r); background: #fff; border: 1px solid var(--xs-line); box-shadow: 0 1px 2px rgba(24, 33, 63, .04), 0 14px 34px -28px rgba(24, 33, 63, .4); }
@@ -42,6 +56,9 @@
 .xs-play-main { min-width: 0; display: grid; gap: 8px; }
 .xs-play-top { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
 .xs-play-top b { font-family: var(--serif, 'Outfit', sans-serif); font-size: 1.08rem; font-weight: 650; }
+.xs-wave { margin-left: auto; display: inline-flex; align-items: center; gap: 3px; height: 24px; }
+.xs-wave b { width: 3px; border-radius: 2px; background: rgba(255, 255, 255, .28); }
+.xs-wave b:nth-child(-n+9) { background: var(--brand, #d6283c); }
 .xs-play-top span { font-size: .84rem; color: rgba(255, 255, 255, .72); font-weight: 600; }
 .xs-player audio { width: 100%; height: 42px; border-radius: 999px; color-scheme: light; }
 .xs-player iframe { width: 100%; height: 66px; border: 0; border-radius: 12px; background: #fff; }
@@ -167,7 +184,7 @@
 .xs-fold[open] .xs-chev { transform: rotate(180deg); }
 .xs-fold[open] > summary { border-bottom: 1px solid var(--xs-line); }
 .xs-key-note { margin: 18px 24px 4px; font-size: .9rem; color: var(--muted, #5a6382); line-height: 1.5; }
-.xs-key { list-style: none; margin: 0; padding: 14px 24px 24px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 14px; }
+.xs-key { list-style: none; margin: 0; padding: 14px 24px 24px; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px 14px; }
 .xs-key li { display: flex; gap: 12px; align-items: flex-start; padding: 10px 14px; border-radius: 12px; background: #f8f9fc; border: 1px solid var(--xs-line); }
 .xs-key li.is-wide { grid-column: 1 / -1; }
 .xs-kn { flex: none; display: inline-grid; place-items: center; min-width: 28px; height: 28px; padding: 0 7px; border-radius: 8px; background: var(--xs-acc); color: #fff; font-weight: 800; font-size: .82rem; }
@@ -186,13 +203,17 @@
 .xs-nav { display: inline-flex; gap: 10px; flex-wrap: wrap; }
 
 /* ── small screens ── */
+@media (max-width: 1100px) { .xs-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); } .xs-steps li::after { display: none; } }
 @media (max-width: 720px) {
   .xs { gap: 16px; }
   .xs-hero { grid-template-columns: 1fr; padding: 24px 22px 22px 26px; }
   .xs-art { display: none; }
   .xs-part { padding: 20px 16px 22px; border-radius: 18px; }
+  .xs-prep { padding: 20px 16px; }
+  .xs-steps { grid-template-columns: 1fr 1fr; }
+  .xs-steps li::after { display: none; }
   .xs-player { grid-template-columns: 1fr; }
-  .xs-play-ic { display: none; }
+  .xs-play-ic, .xs-wave { display: none; }
   .xs-paper { padding: 16px; }
   .xs-paper-t { margin: -16px -16px 14px; padding: 12px 16px; }
   .xs-row { grid-template-columns: 1fr; gap: 0; }
