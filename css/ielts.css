@@ -192,3 +192,13 @@
 .iq-take { display: flex; align-items: center; gap: 10px; } .iq-take audio { flex: 1; height: 36px; }
 @media (prefers-reduced-motion: reduce) { .iq-rec.is-rec .iq-rec-btn i { animation: none; } }
 @media (max-width: 640px) { .iq { padding: 16px; } .iq-item { grid-template-columns: 30px minmax(0, 1fr); } .iq-item .iq-v { grid-column: 2; justify-self: start; } .iq-list.is-rows .iq-item { grid-template-columns: 30px minmax(0, 1fr) 84px; } .iq-form dl { grid-template-columns: 1fr; } }
+.iq-drive-link { display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; font-size: .84rem; font-weight: 600; color: var(--muted); text-decoration: none; }
+.iq-drive-link:hover { color: var(--ink); text-decoration: underline; }
+.iq-drive-link .icon { width: 14px; height: 14px; }
+.iq-pane .iq-media + .iq-media { margin-top: 12px; }
+.iq-form dt.iq-fh { grid-column: 1 / -1; background: var(--ink, #18213f); color: #fff; font: 800 .78rem/1.6 var(--sans); letter-spacing: .06em; text-transform: uppercase; }
+/* a listening test: the recordings need less room than a passage, the questions more */
+.iq-split.is-audio { grid-template-columns: minmax(260px, .7fr) minmax(0, 1.3fr); }
+@media (max-width: 900px) { .iq-split.is-audio { grid-template-columns: 1fr; } }
+/* form rows: text and gaps wrap instead of being cut off */
+.iq-form dd { display: flex; flex-wrap: wrap; align-items: center; column-gap: 6px; min-width: 0; }

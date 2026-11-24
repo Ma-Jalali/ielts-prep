@@ -77,7 +77,7 @@ window.DEC15_COURSE = {
         { id: 'learn', title: 'Learn', icon: 'book', blurb: 'Strategy lessons: how the test works and how to approach each part. Start here, in order.', groups: [
           { id: 'learn', title: 'Strategy lessons', base: 0, size: 6, map: true, slots: ['Listening overview', 'Part 1: everyday conversation', 'Part 2: everyday monologue', 'Part 3: academic discussion', 'Part 4: academic lecture', 'Skills and strategies'] }] },
         { id: 'practise', title: 'Practise', icon: 'target', blurb: 'Short exercises. Practise one part of the test, or one question type, at a time.', groups: [
-          { id: 'part1', title: 'Part 1', by: 'By part', sub: 'A conversation in an everyday context', base: 100, size: 20 },
+          { id: 'part1', title: 'Part 1', by: 'By part', sub: 'A conversation in an everyday context', base: 100, size: 25 },
           { id: 'part2', title: 'Part 2', by: 'By part', sub: 'A monologue in an everyday context', base: 200, size: 20 },
           { id: 'part3', title: 'Part 3', by: 'By part', sub: 'A discussion in an educational context', base: 300, size: 20 },
           { id: 'part4', title: 'Part 4', by: 'By part', sub: 'A lecture on an academic subject', base: 400, size: 20 },
@@ -90,7 +90,33 @@ window.DEC15_COURSE = {
         { id: 'test', title: 'Test', icon: 'clock', blurb: 'Full practice tests: all four parts, 40 questions, about 30 minutes, under test conditions.', groups: [
           { id: 'tests', title: 'Practice tests', base: 2000, size: 10, test: true }] }
       ],
-      days: [] },
+      days: [
+        { id: 'ieb2w1d101', day: 101, status: 'ready', title: 'A university course enquiry', art: 'listening', parts: ['Exercise 1'], stages: ['ex'], tones: ['teal'], scripts: ['lessons/b2/listening/ieb2w1d101.js'] },
+        { id: 'ieb2w1d102', day: 102, status: 'ready', title: 'Exercise 2', art: 'listening', parts: ['Exercise 2'], stages: ['ex'], tones: ['teal'], scripts: ['lessons/b2/listening/ieb2w1d102.js'] },
+        { id: 'ieb2w1d103', day: 103, status: 'ready', title: 'Exercise 3', art: 'listening', parts: ['Exercise 3'], stages: ['ex'], tones: ['teal'], scripts: ['lessons/b2/listening/ieb2w1d103.js'] },
+        { id: 'ieb2w1d104', day: 104, status: 'ready', title: 'Exercise 4', art: 'listening', parts: ['Exercise 4'], stages: ['ex'], tones: ['teal'], scripts: ['lessons/b2/listening/ieb2w1d104.js'] },
+        { id: 'ieb2w1d105', day: 105, status: 'ready', title: 'Exercise 5', art: 'listening', parts: ['Exercise 5'], stages: ['ex'], tones: ['teal'], scripts: ['lessons/b2/listening/ieb2w1d105.js'] },
+        { id: 'ieb2w1d106', day: 106, status: 'ready', title: 'Exercise 6', art: 'listening', parts: ['Exercise 6'], stages: ['ex'], tones: ['teal'], scripts: ['lessons/b2/listening/ieb2w1d106.js'] },
+        { id: 'ieb2w1d107', day: 107, status: 'ready', title: 'Exercise 7', art: 'listening', parts: ['Exercise 7'], stages: ['ex'], tones: ['teal'], scripts: ['lessons/b2/listening/ieb2w1d107.js'] },
+        { id: 'ieb2w1d108', day: 108, status: 'ready', title: 'Exercise 8', art: 'listening', parts: ['Exercise 8'], stages: ['ex'], tones: ['teal'], scripts: ['lessons/b2/listening/ieb2w1d108.js'] },
+        { id: 'ieb2w1d109', day: 109, status: 'ready', title: 'Exercise 9', art: 'listening', parts: ['Exercise 9'], stages: ['ex'], tones: ['teal'], scripts: ['lessons/b2/listening/ieb2w1d109.js'] },
+        { id: 'ieb2w1d110', day: 110, status: 'ready', title: 'Exercise 10', art: 'listening', parts: ['Exercise 10'], stages: ['ex'], tones: ['teal'], scripts: ['lessons/b2/listening/ieb2w1d110.js'] },
+        { id: 'ieb2w1d111', day: 111, status: 'ready', title: 'Exercise 11', art: 'listening', parts: ['Exercise 11'], stages: ['ex'], tones: ['teal'], scripts: ['lessons/b2/listening/ieb2w1d111.js'] },
+        { id: 'ieb2w1d112', day: 112, status: 'ready', title: 'Exercise 12', art: 'listening', parts: ['Exercise 12'], stages: ['ex'], tones: ['teal'], scripts: ['lessons/b2/listening/ieb2w1d112.js'] },
+        { id: 'ieb2w1d113', day: 113, status: 'ready', title: 'Exercise 13', art: 'listening', parts: ['Exercise 13'], stages: ['ex'], tones: ['teal'], scripts: ['lessons/b2/listening/ieb2w1d113.js'] },
+        { id: 'ieb2w1d114', day: 114, status: 'ready', title: 'Exercise 14', art: 'listening', parts: ['Exercise 14'], stages: ['ex'], tones: ['teal'], scripts: ['lessons/b2/listening/ieb2w1d114.js'] },
+        { id: 'ieb2w1d115', day: 115, status: 'ready', title: 'Exercise 15', art: 'listening', parts: ['Exercise 15'], stages: ['ex'], tones: ['teal'], scripts: ['lessons/b2/listening/ieb2w1d115.js'] },
+        { id: 'ieb2w1d116', day: 116, status: 'ready', title: 'Exercise 16', art: 'listening', parts: ['Exercise 16'], stages: ['ex'], tones: ['teal'], scripts: ['lessons/b2/listening/ieb2w1d116.js'] },
+        { id: 'ieb2w1d117', day: 117, status: 'ready', title: 'Exercise 17', art: 'listening', parts: ['Exercise 17'], stages: ['ex'], tones: ['teal'], scripts: ['lessons/b2/listening/ieb2w1d117.js'] },
+        { id: 'ieb2w1d118', day: 118, status: 'ready', title: 'Exercise 18', art: 'listening', parts: ['Exercise 18'], stages: ['ex'], tones: ['teal'], scripts: ['lessons/b2/listening/ieb2w1d118.js'] },
+        { id: 'ieb2w1d119', day: 119, status: 'ready', title: 'Exercise 19', art: 'listening', parts: ['Exercise 19'], stages: ['ex'], tones: ['teal'], scripts: ['lessons/b2/listening/ieb2w1d119.js'] },
+        { id: 'ieb2w1d120', day: 120, status: 'ready', title: 'Exercise 20', art: 'listening', parts: ['Exercise 20'], stages: ['ex'], tones: ['teal'], scripts: ['lessons/b2/listening/ieb2w1d120.js'] },
+        { id: 'ieb2w1d121', day: 121, status: 'ready', title: 'Exercise 21', art: 'listening', parts: ['Exercise 21'], stages: ['ex'], tones: ['teal'], scripts: ['lessons/b2/listening/ieb2w1d121.js'] },
+        { id: 'ieb2w1d122', day: 122, status: 'ready', title: 'Exercise 22', art: 'listening', parts: ['Exercise 22'], stages: ['ex'], tones: ['teal'], scripts: ['lessons/b2/listening/ieb2w1d122.js'] },
+        { id: 'ieb2w1d123', day: 123, status: 'ready', title: 'Exercise 23', art: 'listening', parts: ['Exercise 23'], stages: ['ex'], tones: ['teal'], scripts: ['lessons/b2/listening/ieb2w1d123.js'] },
+        { id: 'ieb2w1d124', day: 124, status: 'ready', title: 'Exercise 24', art: 'listening', parts: ['Exercise 24'], stages: ['ex'], tones: ['teal'], scripts: ['lessons/b2/listening/ieb2w1d124.js'] },
+        { id: 'ieb2w1d125', day: 125, status: 'ready', title: 'Exercise 25', art: 'listening', parts: ['Exercise 25'], stages: ['ex'], tones: ['teal'], scripts: ['lessons/b2/listening/ieb2w1d125.js'] }
+      ] },
     { n: 2, theme: 'Reading', color: '#2b67d1', group: 'skills', art: 'reading', short: 'Reading', tag: '3 passages · 60 minutes', tone: 'blue', folder: 'lessons/b2/reading', summary: '', days: [] },
     { n: 3, theme: 'Writing Task 1 (Academic)', color: '#e2552f', group: 'skills', art: 'chart', short: 'Writing Task 1', tag: '150+ words · about 20 minutes', tone: 'clay', folder: 'lessons/b2/writing-task1', summary: '', days: [] },
     { n: 4, theme: 'Writing Task 2', color: '#c2185b', group: 'skills', art: 'essay', short: 'Writing Task 2', tag: '250+ words · about 40 minutes', tone: 'clay', folder: 'lessons/b2/writing-task2', summary: '', days: [] },

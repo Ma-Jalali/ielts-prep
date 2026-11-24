@@ -106,7 +106,7 @@ window.createIELTSKit = function ({ getState, save, rerender, esc, strip, icon, 
     let body = '';
     if (L === 'summary') body = `<div class="iq-sum">${b.title ? `<h4>${esc(b.title)}</h4>` : ''}${String(b.text || '').split(/\n\s*\n/).map(p => `<p>${fillGaps(b, p.replace(/\n/g, ' '), c)}</p>`).join('')}</div>`;
     else if (L === 'notes') body = `<div class="iq-notes">${b.title ? `<h4>${esc(b.title)}</h4>` : ''}${lines.filter(l => l.trim()).map(l => l.startsWith('# ') ? `<h5>${esc(l.slice(2))}</h5>` : l.startsWith('- ') ? `<p class="is-bul">${fillGaps(b, l.slice(2), c)}</p>` : `<p>${fillGaps(b, l, c)}</p>`).join('')}</div>`;
-    else if (L === 'form') body = `<div class="iq-form">${b.title ? `<h4>${esc(b.title)}</h4>` : ''}<dl>${lines.filter(l => l.trim()).map(l => { const m = l.match(/^([^:]+):\s*(.*)$/); return m ? `<dt>${esc(m[1])}</dt><dd>${fillGaps(b, m[2], c)}</dd>` : `<dt></dt><dd>${fillGaps(b, l, c)}</dd>`; }).join('')}</dl></div>`;
+    else if (L === 'form') body = `<div class="iq-form">${b.title ? `<h4>${esc(b.title)}</h4>` : ''}<dl>${lines.filter(l => l.trim()).map(l => { if (l.startsWith('# ')) return `<dt class="iq-fh">${esc(l.slice(2))}</dt>`; const m = l.match(/^([^:]+):\s*(.*)$/); return m ? `<dt>${esc(m[1])}</dt><dd>${fillGaps(b, m[2], c)}</dd>` : `<dt></dt><dd>${fillGaps(b, l, c)}</dd>`; }).join('')}</dl></div>`;
     else if (L === 'flow') body = `<div class="iq-flow">${b.title ? `<h4>${esc(b.title)}</h4>` : ''}${lines.filter(l => l.trim()).map((l, i, A) => `<div class="iq-fbox">${fillGaps(b, l, c)}</div>${i < A.length - 1 ? '<span class="iq-farrow" aria-hidden="true"></span>' : ''}`).join('')}</div>`;
     else body = `<ol class="iq-lines">${b.title ? `<h4>${esc(b.title)}</h4>` : ''}${lines.filter(l => l.trim()).map(l => `<li>${fillGaps(b, l, c)}</li>`).join('')}</ol>`;
     return `<section class="block iq is-gap" id="iq-${esc(b.id)}">${head(b, n)}${b.bankFirst ? bankBox(b) : ''}${body}${b.bankFirst ? '' : bankBox(b)}${foot(b, scoreGaps(b, all), n)}</section>`; };
@@ -131,7 +131,7 @@ window.createIELTSKit = function ({ getState, save, rerender, esc, strip, icon, 
     const s = String(src || '').trim(); let m;
     if ((m = s.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{6,})/))) return { kind: 'frame', url: `https://www.youtube-nocookie.com/embed/${m[1]}?rel=0`, ratio: '16/9' };
     if ((m = s.match(/vimeo\.com\/(?:video\/)?(\d+)/))) return { kind: 'frame', url: `https://player.vimeo.com/video/${m[1]}`, ratio: '16/9' };
-    if ((m = s.match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?.*id=)([\w-]{10,})/))) return { kind: 'drive', url: `https://drive.google.com/file/d/${m[1]}/preview`, direct: `https://drive.google.com/uc?export=download&id=${m[1]}` };
+    if ((m = s.match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?.*id=)([\w-]{10,})/))) return { kind: 'drive', url: `https://drive.google.com/file/d/${m[1]}/preview`, direct: `https://drive.google.com/uc?export=download&id=${m[1]}`, view: `https://drive.google.com/file/d/${m[1]}/view` };
     if (/soundcloud\.com\//.test(s)) return { kind: 'frame', url: `https://w.soundcloud.com/player/?url=${encodeURIComponent(s)}&color=%23d6283c&visual=false`, ratio: 'auto', h: 166 };
     if (/dropbox\.com\//.test(s)) return { kind: 'file', url: s.replace(/[?&]dl=0/, '').replace('www.dropbox.com', 'dl.dropboxusercontent.com') };
     if (/1drv\.ms|onedrive\.live\.com/.test(s)) return { kind: 'frame', url: s.replace('redir?', 'embed?'), ratio: 'auto', h: 120 };
@@ -143,7 +143,10 @@ window.createIELTSKit = function ({ getState, save, rerender, esc, strip, icon, 
     if (m?.kind === 'file' || (m?.kind === 'drive' && b.once)) player = b.once
       ? `<div class="iq-once" data-ie-once="${esc(b.id)}"><audio preload="metadata" src="${esc(m.direct || m.url)}"></audio><button type="button" class="iq-play" data-ie-play="${esc(b.id)}" aria-label="Play the recording">${icon('play')}</button><div class="iq-once-tx"><b>Play the recording</b><small>Exam mode: it plays once, as in the test. You cannot pause or go back.</small><span class="iq-once-bar"><i></i></span></div></div>`
       : `<audio class="iq-audio" controls preload="metadata" src="${esc(m.direct || m.url)}"></audio>`;
-    else if (m?.kind === 'drive') player = `<iframe class="iq-frame is-audio" src="${esc(m.url)}" title="${esc(b.title || 'Recording')}" allow="autoplay" loading="lazy"></iframe>`;
+    /* Google Drive: the recording streams from Drive into the page's own player (nothing is stored on the site); if Drive
+       refuses to stream it, the player swaps itself for Drive's own player (see the 'error' listener below) */
+    else if (m?.kind === 'drive') player = `<audio class="iq-audio" controls preload="none" src="${esc(m.direct)}" data-ie-drive="${esc(m.url)}" title="${esc(b.title || 'Recording')}"></audio>`;
+    if (m?.kind === 'drive') player += `<a class="iq-drive-link" href="${esc(m.view)}" target="_blank" rel="noopener">${icon('open')}Open in Google Drive</a>`;
     else if (m?.kind === 'frame') player = `<iframe class="iq-frame" style="${m.h ? `height:${m.h}px` : `aspect-ratio:${m.ratio}`}" src="${esc(m.url)}" title="${esc(b.title || 'Recording')}" allow="autoplay; encrypted-media" allowfullscreen loading="lazy"></iframe>`;
     return `<section class="block iq-media is-audio"><header><span class="iq-media-ic">${icon('play')}</span><div><h3>${esc(b.title || 'Recording')}</h3>${b.note ? `<p>${fmt(b.note)}</p>` : ''}</div></header>${player}
       ${b.transcript ? `<details class="iq-trans"><summary>Transcript</summary><div>${String(b.transcript).split(/\n\s*\n/).map(p => `<p>${fmt(p)}</p>`).join('')}</div></details>` : ''}</section>`; };
@@ -155,12 +158,12 @@ window.createIELTSKit = function ({ getState, save, rerender, esc, strip, icon, 
 
   /* ───────── ieTest: the computer-delivered test screen (passage left, questions right) ───────── */
   const paras = t => String(t || '').split(/\n\s*\n/).map(p => p.trim()).filter(Boolean);
-  B.ieTest = (b, a) => { const p = b.passage || {}, au = b.audio;
-    const left = au && au.src ? B.ieAudio({ ...au, title: au.title || b.title || 'Recording' })
+  B.ieTest = (b, a) => { const p = b.passage || {}, au = b.audio, aus = (b.audios || []).filter(x => x && x.src);   // audios: several recordings (e.g. the two halves of a Part)
+    const left = aus.length ? aus.map((x, i) => B.ieAudio({ ...x, title: x.title || `Recording ${i + 1}` })).join('') : au && au.src ? B.ieAudio({ ...au, title: au.title || b.title || 'Recording' })
       : `<article class="iq-passage"><span class="iq-passage-k">${esc(p.label || 'Reading passage')}</span>${p.title ? `<h3>${esc(p.title)}</h3>` : ''}${p.subtitle ? `<p class="iq-passage-sub">${esc(p.subtitle)}</p>` : ''}
         ${paras(p.text).map(x => { const m = x.match(/^([A-Z])\s{1,3}(.+)$/s); return m ? `<p class="has-letter"><b class="iq-plet">${m[1]}</b>${fmt(m[2])}</p>` : `<p>${fmt(x)}</p>`; }).join('')}</article>`;
     return `<section class="block iq-test" id="iqt-${esc(b.id || '')}"><header class="iq-test-bar"><b>${esc(b.title || 'Test')}</b>${b.minutes ? `<span class="iq-timer" data-ie-timer="${Number(b.minutes) * 60}" data-key="${esc(b.id || '')}">${icon('clock')}<span>${b.minutes}:00</span><button type="button" class="iq-timer-go" data-ie-timer-go>Start</button></span>` : ''}</header>
-      <div class="iq-split"><div class="iq-pane is-left" tabindex="0" role="region" aria-label="${esc(au?.src ? 'Recording' : 'Passage')}">${left}</div><div class="iq-pane is-right" tabindex="0" role="region" aria-label="Questions">${inner(b.blocks, a)}</div></div></section>`; };
+      <div class="iq-split${aus.length || (au && au.src) ? ' is-audio' : ''}"><div class="iq-pane is-left" tabindex="0" role="region" aria-label="${esc(au?.src ? 'Recording' : 'Passage')}">${left}</div><div class="iq-pane is-right" tabindex="0" role="region" aria-label="Questions">${inner(b.blocks, a)}</div></div></section>`; };
 
   /* ───────── ieWriting: a Writing task, as in the test ───────── */
   B.ieWriting = b => { const k = b.id, v = String(val(k)), n = words(v).length, min = Number(b.minWords) || (Number(b.task) === 1 ? 150 : 250), min_ = Number(b.minutes) || (Number(b.task) === 1 ? 20 : 40);
@@ -251,5 +254,8 @@ window.createIELTSKit = function ({ getState, save, rerender, esc, strip, icon, 
     if (b.type === 'ieMulti') { if (val(b.id)) out.push({ t: 'qa', label: strip(b.q || range(b, Number(b.pick) || 2)), value: val(b.id) }); return out; }
     const n = counts(b)[1]; for (let i = 0; i < n; i++) { const v = val(`${b.id}-${i}`); if (String(v).trim()) out.push({ t: 'qa', label: `Question ${from(b) + i}`, value: v }); }
     return out; }
+  /* a Google Drive recording that cannot stream into the page's player: use Drive's own player instead */
+  document.addEventListener('error', e => { const au = e.target; if (!(au instanceof HTMLMediaElement) || !au.dataset.ieDrive) return;
+    const f = document.createElement('iframe'); f.className = 'iq-frame is-audio'; f.src = au.dataset.ieDrive; f.title = au.title || 'Recording'; f.allow = 'autoplay'; au.replaceWith(f); }, true);
   return { B, register, onClick, onInput, notebookItems };
 };
