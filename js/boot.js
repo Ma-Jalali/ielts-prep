@@ -8,6 +8,15 @@
 (() => {
   const course = window.DEC15_COURSE, cfg = window.DEC15_CONFIG;
   const drafts = (() => { try { return JSON.parse(localStorage.getItem(course.id + '-studio-drafts') || '{}'); } catch (e) { return {}; } })();
+  /* IELTS: pages built in Studio and published online (js/gate.js fetched them). They join their skill like any lesson;
+     a page that also has a lesson file opens the online version. Unpublished ones reach only the teacher. */
+  const online = {};
+  (window.IELTS_PAGES || []).forEach(p => { if (!p || !p.id || !p.lesson) return; online[p.id] = p;
+    let w = course.weeks.find(x => x.n === p.week); if (!w) return;
+    const e = p.entry || {}, info = { id: p.id, day: p.day, status: 'ready', title: p.lesson.title || e.title || p.id, sub: e.sub || '', art: e.art || w.art || 'writing',
+      parts: e.parts || ['Lesson'], stages: (p.lesson.sections || []).map(s => s.id), tones: (p.lesson.sections || []).map(s => s.tone || 'teal'), scripts: [], online: true, published: !!p.published };
+    const at = w.days.findIndex(d => d.id === p.id);
+    if (at >= 0) w.days[at] = { ...w.days[at], ...info }; else { w.days.push(info); w.days.sort((a, b) => a.day - b.day); } });
   (drafts.days || []).forEach(nd => {   // pages that exist only in Studio
     if (course.weeks.some(w => w.days.some(d => d.id === nd.id))) return;
     let w = course.weeks.find(x => x.n === nd.week);
@@ -26,6 +35,7 @@
   window.DEC15_DAYS = days;
   window.DEC15_LESSON_META = ready(id);
   window.DEC15_DRAFT = drafts.lessons?.[id] || null;
+  if (online[id]) window.DEC15_LESSON = JSON.parse(JSON.stringify(online[id].lesson));   // the published page (a draft on this device still wins)
 
   // all files download at the same time; async = false keeps them running in order
   [...(course.scripts || []), ...ready(id).scripts, 'js/studio-apply.js', 'js/app.js'].forEach(src => {

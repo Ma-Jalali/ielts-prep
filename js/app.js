@@ -46,7 +46,7 @@ const unitShort = n => UNITS ? (course.weeks.find(w => w.n === n)?.short || unit
 /* A part can be organised in sections (course.js → sections: Learn · Practise · Test). Each group of a section owns a block
    of lesson numbers (base + 1 … base + 99), so a lesson's number says where it belongs: 207 = Practise · Part 2 · Exercise 7. */
 const secOf = w => (w?.sections?.length ? w.sections : null);
-function place(wn, day) { const w = course.weeks.find(x => x.n === wn); for (const sec of secOf(w) || []) for (const g of sec.groups) if (day > g.base && day < g.base + 100) { const n = day - g.base; return { w, s: sec, g, n, name: g.slots?.[n - 1] || (g.test ? `Practice test ${n}` : `Exercise ${n}`) }; } return null; }
+function place(wn, day) { const w = course.weeks.find(x => x.n === wn); for (const sec of secOf(w) || []) for (const g of sec.groups) if (day > g.base && day < g.base + 100) { const n = day - g.base; return { w, s: sec, g, n, name: g.slots?.[n - 1] || (g.test ? `Practice test ${n}` : `${g.noun || 'Exercise'} ${n}`) }; } return null; }
 const placeWhere = (pl, sep) => [unitName(pl.w.n), pl.g.slots || pl.g.test ? null : pl.g.title, pl.name].filter(Boolean).join(sep);
 const dayWhere = (w, d, sep = ', ') => { const pl = UNITS && place(w, d); return pl ? placeWhere(pl, sep === ', ' ? ' · ' : sep) : `${unitName(w)}${sep}${DW} ${d}`; };
 const whereLong = (sep = ' · ') => labHere ? `${LABT} · ${labHere.st.short} ${labHere.n}` : !lesson.week ? lesson.where || lesson.title : dayWhere(lesson.week, lesson.day, sep);
@@ -140,6 +140,7 @@ const ICON = {
   flag: '<path d="M5 21V4m0 1h11l-2 4 2 4H5"/>',
   quote: '<path d="M4.5 11.5c0-3 1.6-5 4.5-5.8M4.5 11.5h3.8v5.8H4.5zM13.5 11.5c0-3 1.6-5 4.5-5.8M13.5 11.5h3.8v5.8h-3.8z"/>',
   lock: '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
   sprout: '<path d="M12 20v-8m0 0c0-4-3-6-7-6 0 4 3 6 7 6zm0-2c0-4 3-6 7-6 0 4-3 6-7 6z"/>',
   smile: '<circle cx="12" cy="12" r="9"/><path d="M8.5 14.5c1 1.3 2.2 2 3.5 2s2.5-.7 3.5-2M9 9.5h.01M15 9.5h.01"/>',
   share: '<path d="M12 15V4m-4 4 4-4 4 4M5 13v6h14v-6"/>',
@@ -184,6 +185,9 @@ const forms = window.createDEC15Forms ? window.createDEC15Forms({ getState: () =
 /* Studio (js/studio.js): edit any page in place and build new pages from the blocks — only on devices where it is switched on */
 const studio = window.createStudio ? window.createStudio({ lesson, course, days, esc, icon, toast, L, rerender: () => rerender(), getState: () => state, B: () => B }) : null;
 const STUDIO = () => !!studio?.editing();
+/* Page builder (js/pagebuilder.js): in Studio, the teacher edits Learn-style pages (tabs, folds, cards …), builds new
+   Writing pages and publishes them online */
+const builder = studio && window.createPageBuilder ? window.createPageBuilder({ lesson, course, days, esc, icon, toast, rerender: () => rerender(), editing: () => STUDIO() }) : null;
 /* ───────── label registry (for notebook + export) ───────── */
 const labels = {}, owner = {};
 const planParts = [
@@ -589,14 +593,14 @@ function nextStageLink(section) {
 
 /* ───────── pages ───────── */
 /* A practice exercise on one page (js/sheet.js): recordings above their questions, answers and script at the bottom */
-const isSheet = () => !!(lesson.sheet && window.IELTSSheet && !labHere && !STUDIO());   // in Studio the lesson opens in the editor as before
+const isSheet = () => !!(lesson.sheet && window.IELTSSheet && !labHere && (!STUDIO() || lesson.learn));   // in Studio a sheet opens in the editor as before; a Learn page is edited in place (js/pagebuilder.js)
 function sheetPage() {
   const w = course.weeks.find(x => x.n === lesson.week), pl = UNITS && place(lesson.week, lesson.day), nx = nextLesson();
   const setHref = pl ? `#/skill/${lesson.week}/${pl.s.id}${pl.g.slots || pl.g.test ? '' : '/' + pl.g.id}` : '#/';
   const trail = [w && { href: `#/skill/${lesson.week}`, label: w.theme }, pl && { href: `#/skill/${lesson.week}/${pl.s.id}`, label: pl.s.title }, pl && !pl.g.slots && !pl.g.test && { href: setHref, label: pl.g.title }].filter(Boolean);
   const tone = TONES[lesson.sections?.[0]?.tone] || TONES.teal;
-  return window.IELTSSheet.page(lesson, { esc, icon, val: k => state.values[k], done: id => !!state.done[id], trail, name: pl ? pl.name : lesson.title,
-    back: { href: setHref, label: pl && !pl.g.slots && !pl.g.test ? `${pl.g.title} exercises` : pl ? pl.s.title : 'Course map' },
+  return window.IELTSSheet.page(lesson, { esc, icon, val: k => state.values[k], done: id => !!state.done[id], trail, edit: !!(builder && STUDIO() && lesson.learn), builder, name: pl ? pl.name : lesson.title,
+    back: { href: setHref, label: pl && pl.g.open ? `All ${pl.g.title.toLowerCase()}` : pl && !pl.g.slots && !pl.g.test ? `${pl.g.title} exercises` : pl ? pl.s.title : 'Course map' },
     eyebrow: [w?.theme, pl && !pl.g.slots && !pl.g.test ? pl.g.title : null, pl?.name].filter(Boolean).join(' · '),
     next: nx ? { href: '#/' + nx.id, label: `Next: ${place(nx.week, nx.day)?.name || nx.title}` } : null, acc: w ? partColor(w) : tone[0], soft: w ? `color-mix(in srgb, ${partColor(w)} 10%, #fff)` : tone[1] });
 }
@@ -1059,16 +1063,19 @@ function sectionPage(w, secId, grpId) {
         <span class="sk-part-bar"><i style="width:${st.ready ? Math.round(100 * st.done / st.ready) : 0}%"></i></span></a></li>`; }).join('')}</ol>`;
     const at = groupLessons(w, g), st = groupStats(w, [g]), view = lsGet(CLS.id + '-ex-view', 'list');
     const status = (d, a, b, done) => !d || d.status !== 'ready' ? '<span class="sk-st is-soon">Coming soon</span>' : done ? `<span class="sk-st is-done">${icon('check')}Done</span>` : a ? `<span class="sk-st is-on">Continue ${icon('arrow')}</span>` : `<span class="sk-st">Start ${icon('arrow')}</span>`;
-    const items = [...Array(g.size)].map((_, i) => { const n = i + 1, d = at[n], ready = d?.status === 'ready', [a, b] = d ? dayProgress(d) : [0, 0], done = ready && b && a === b; return { n, d, ready, a, b, done }; });
-    const list = `<ol class="sk-list">${items.map(({ n, d, ready, a, b, done }) => { const inner = `<span class="sk-n${done ? ' is-done' : ''}">${done ? icon('check') : n}</span><span class="sk-row-tx"><b>${esc(ready ? d.title : `Exercise ${n}`)}</b>${ready && d.sub ? `<small>${esc(d.sub)}</small>` : ''}</span>${ready && a && !done ? `<span class="sk-row-bar"><i style="width:${Math.round(100 * a / b)}%"></i></span>` : ''}${status(d, a, b, done)}`;
-      return `<li>${ready ? `<a class="sk-row${done ? ' is-done' : ''}" href="#/${d.id}" aria-label="Exercise ${n}: ${esc(d.title)}${done ? ', done' : ''}">${inner}</a>` : `<div class="sk-row is-soon">${inner}</div>`}</li>`; }).join('')}</ol>`;
+    const items = [...Array(g.size)].map((_, i) => { const n = i + 1, d = at[n], ready = d?.status === 'ready', [a, b] = d ? dayProgress(d) : [0, 0], done = ready && b && a === b; return { n, d, ready, a, b, done }; })
+      .filter(x => !g.open || x.ready);   // an open group (pages built in Studio) lists only the pages that exist
+    const noun = g.noun || 'Exercise';
+    const list = `<ol class="sk-list">${items.map(({ n, d, ready, a, b, done }) => { const inner = `<span class="sk-n${done ? ' is-done' : ''}">${done ? icon('check') : n}</span><span class="sk-row-tx"><b>${esc(ready ? d.title : `${noun} ${n}`)}</b>${ready && d.sub ? `<small>${esc(d.sub)}</small>` : ''}</span>${ready && a && !done ? `<span class="sk-row-bar"><i style="width:${Math.round(100 * a / b)}%"></i></span>` : ''}${status(d, a, b, done)}`;
+      return `<li>${ready ? `<a class="sk-row${done ? ' is-done' : ''}" href="#/${d.id}" aria-label="${noun} ${n}: ${esc(d.title)}${done ? ', done' : ''}">${inner}</a>` : `<div class="sk-row is-soon">${inner}</div>`}</li>`; }).join('')}</ol>`;
     const grid = `<ol class="ex-grid">${items.map(({ n, d, ready, a, b, done }) => { const inner = `<span class="ex-n">${done ? icon('check') : n}</span><span class="ex-t">${esc(ready ? d.title : 'Coming soon')}</span>${ready && a && !done ? `<span class="ex-bar"><i style="width:${Math.round(100 * a / b)}%"></i></span>` : ''}`;
       return `<li>${ready ? `<a class="ex-tile${done ? ' is-done' : a ? ' is-on' : ''}" href="#/${d.id}" aria-label="Exercise ${n}: ${esc(d.title)}${done ? ', done' : ''}">${inner}</a>` : `<div class="ex-tile is-soon" aria-label="Exercise ${n}: coming soon">${inner}</div>`}</li>`; }).join('')}</ol>`;
     const vbtn = (v, label, path) => `<button type="button" class="sk-vbtn${view === v ? ' is-on' : ''}" data-ex-view="${v}" aria-pressed="${view === v}" title="${label}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true">${path}</svg><span>${label}</span></button>`;
     body += `<section class="set-panel sk-panel" style="${partStyle(w)}"><header><div><h2>${esc(g.title)}${g.qs ? ` <small>${esc(g.qs)}</small>` : ''}</h2>${g.sub ? `<p>${esc(g.sub)}</p>` : ''}</div>
-      <div class="sk-panel-tools"><span class="set-count">${st.ready ? `<b>${st.done}</b> of ${st.ready} done` : `${g.size} exercises · coming soon`}</span>
+      <div class="sk-panel-tools"><span class="set-count">${st.ready ? `<b>${st.done}</b> of ${st.ready} done` : g.open ? 'Coming soon' : `${g.size} exercises · coming soon`}</span>
         <div class="sk-view" role="group" aria-label="Show exercises as">${vbtn('list', 'List', '<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/>')}${vbtn('grid', 'Grid', '<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/>')}</div></div></header>
-      ${view === 'grid' ? grid : list}</section>`;
+      ${g.open && !items.length ? `<p class="sk-empty">${icon('sprout')}<span>The ${esc(noun.toLowerCase())}s for ${esc(w.theme)} will appear here soon.</span></p>` : view === 'grid' ? grid : list}
+      ${g.open && builder?.on() ? `<button type="button" class="sk-new" data-pb-new="${w.n}:${g.base}:${esc(noun)}">${icon('plus')}New ${esc(noun.toLowerCase())}</button>` : ''}</section>`;
   }
   return `<section class="week sec-page" aria-label="${esc(w.theme)}">${head}${tabs}${body}</section>`;
 }
@@ -2027,7 +2034,7 @@ function render() {
   if (cm && here && cm.scrollWidth > cm.clientWidth) { const r = here.getBoundingClientRect(), c = cm.getBoundingClientRect(); cm.scrollLeft += r.left - c.left - c.width / 2 + r.width / 2; }
   const tabs = $('.act-tabs'), cur = $('.act-tabs .current'); if (tabs && cur) tabs.scrollLeft = cur.offsetLeft - tabs.offsetLeft - 12;
   reader.mount();
-  studio?.afterRender(route);
+  studio?.afterRender(route); builder?.afterRender(route);
   requestAnimationFrame(() => { revealBlocks(); paintLayout(); });
 }
 let plannerLoad = null;

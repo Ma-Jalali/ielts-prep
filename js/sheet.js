@@ -44,13 +44,8 @@
                  each exercise is a fold: the recording(s) and the questions inside it, laid out like the practice
                  exercises (js/sheet.js page(), embedded), with its answers folded at the bottom
      Any block may have kicker, title, intro. A video's "I watched this video" is saved as <lesson id>-v<n>. */
-  function learnPage(L, ctx) {
-    const { esc, icon } = ctx, fmt = t => esc(String(t ?? '')).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/\*(.+?)\*/g, '<i>$1</i>');
-    const paras = t => String(t ?? '').split(/\n\s*\n/).map(p => `<p>${fmt(p).replace(/\n/g, '<br>')}</p>`).join('');
-    const drive = s => { const m = String(s || '').match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?.*id=)([\w-]{10,})/); return m && m[1]; };
-    /* the video streams from Google Drive through the 'ielts-audio' relay (?kind=video: byte ranges, so it plays and seeks on iPhones too) */
-    const cfg = window.DEC15_CONFIG || {}, relay = id => cfg.supabaseUrl ? `${cfg.supabaseUrl.replace(/\/$/, '')}/functions/v1/ielts-audio?kind=video&id=${id}` : `https://drive.usercontent.google.com/download?id=${id}&export=download`;
-    const SV = { play: '<path d="M8 5.5v13l10.5-6.5z" fill="currentColor" stroke="none"/>', ok: '<path d="M20 6 9 17l-5-5"/>', no: '<path d="M6 6l12 12M18 6 6 18"/>',
+  /* the icons of Learn pages (also used by js/pagebuilder.js through window.IELTSSheetIcon) */
+  const SV = { play: '<path d="M8 5.5v13l10.5-6.5z" fill="currentColor" stroke="none"/>', ok: '<path d="M20 6 9 17l-5-5"/>', no: '<path d="M6 6l12 12M18 6 6 18"/>',
       chat: '<path d="M4 5h16v11H9l-5 4z"/>', mic: '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>', people: '<circle cx="8" cy="8" r="3"/><circle cx="16" cy="8" r="3"/><path d="M2.5 19c.8-3.4 3-5 5.5-5s4.7 1.6 5.5 5M11 19c.8-3.4 2.6-5 5-5s4.4 1.6 5.2 5"/>', lecture: '<rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M12 16v4M8 20h8"/>',
       tip: '<path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V16h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z"/>', warn: '<path d="M12 3 2 20h20z"/><path d="M12 10v4M12 17v.5"/>', info: '<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/>',
       ear: '<path d="M7 9a5 5 0 0 1 10 0c0 3-3 4-3 7a3 3 0 0 1-6 0"/><path d="M10 10a2 2 0 0 1 4 0"/>', pen: '<path d="M4 20l4-1 11-11-3-3L5 16z"/><path d="M14 6l3 3"/>', eye: '<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
@@ -58,17 +53,27 @@
       clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>', map: '<path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/>', hash: '<path d="M5 9h14M5 15h14M10 4 8 20M16 4l-2 16"/>', abc: '<path d="M3 17 6.5 7 10 17M4.2 13.5h4.6"/><path d="M13 7v10h3.2a2.6 2.6 0 0 0 0-5.2H13h2.8a2.4 2.4 0 0 0 0-4.8z"/>',
       repeat: '<path d="M4 12a8 8 0 0 1 14-5.3M20 12a8 8 0 0 1-14 5.3"/><path d="M18 3v4h-4M6 21v-4h4"/>', star: '<path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/>', list: '<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/>',
       signpost: '<path d="M12 3v18M5 6h11l3 3-3 3H5zM19 13H8l-3 3 3 3h11z"/>', speak: '<path d="M4 5h16v11H9l-5 4z"/><path d="M8 9.5h8M8 12.5h5"/>' };
-    const sv = (k, w = 2) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${SV[k] || SV.tip}</svg>`;
+  const sv = (k, w = 2) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${SV[k] || SV.tip}</svg>`;
+  window.IELTSSheetIcon = k => sv(k, 1.9);
+  function learnPage(L, ctx) {
+    const { esc, icon } = ctx, ED = !!ctx.edit, UI = ctx.builder?.ui || { tab: () => 0, open: () => false };
+    const fmt = t => esc(String(t ?? '')).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/\*(.+?)\*/g, '<i>$1</i>').replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');   // **bold**, *italic*, [link](https://…)
+    const paras = t => String(t ?? '').split(/\n\s*\n/).map(p => `<p>${fmt(p).replace(/\n/g, '<br>')}</p>`).join('');
+    const drive = s => { const m = String(s || '').match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?.*id=)([\w-]{10,})/); return m && m[1]; };
+    /* the video streams from Google Drive through the 'ielts-audio' relay (?kind=video: byte ranges, so it plays and seeks on iPhones too) */
+    const cfg = window.DEC15_CONFIG || {}, relay = id => cfg.supabaseUrl ? `${cfg.supabaseUrl.replace(/\/$/, '')}/functions/v1/ielts-audio?kind=video&id=${id}` : `https://drive.usercontent.google.com/download?id=${id}&export=download`;
     let vn = 0, tn = 0;
     const head = (b, k, top) => b.title || b.intro ? (top ? `<header class="xl-h"><span class="xl-k">${esc(b.kicker || k)}</span>${b.title ? `<h2>${esc(b.title)}</h2>` : ''}${b.intro ? `<p>${fmt(b.intro)}</p>` : ''}</header>`
       : `<header class="xl-sh">${b.title ? `<h3>${esc(b.title)}</h3>` : ''}${b.intro ? `<p>${fmt(b.intro)}</p>` : ''}</header>`) : '';
-    const inner = (b, top) => (R[b.type] || (() => ''))(b, top);
-    const many = (blocks, top) => (blocks || []).map(x => draw(x, top)).join('');
-    const KICK = { videos: 'Watch', parts: 'The test', facts: 'At a glance', list: 'Remember', faq: 'Questions', check: 'Check yourself', table: 'Reference', tabs: 'Tips', folds: 'Tips', cards: 'Tips', steps: 'Method', chips: 'Words', note: '', text: '', reveal: 'Try it', spot: 'Try it', exercises: 'In-class exercises' };
-    function draw(b, top) {
-      if (b.type === 'note') return R.note(b);
-      return top ? `<section class="xl-band${b.tone ? ' is-' + esc(b.tone) : ''} is-${esc(b.type)}"${b.anchor ? ` id="${esc(b.anchor)}"` : ''}>${head(b, KICK[b.type] || '', true)}${inner(b, true)}</section>`
-        : `<div class="xl-sub is-${esc(b.type)}${b.tone ? ' is-' + esc(b.tone) : ''}">${head(b, '', false)}${inner(b, false)}</div>`;
+    const inner = (b, top, path) => (R[b.type] || (() => ED ? `<p class="pb-unknown">Unknown element: ${esc(b.type)}</p>` : ''))(b, top, path);
+    /* a list of blocks; in Studio (ED) each block gets its toolbar and the list an "Add" button (js/pagebuilder.js) */
+    const many = (blocks, top, base) => (blocks || []).map((x, i) => draw(x, top, `${base}.${i}`)).join('') + (ED ? ctx.builder.addHTML(base, top) : '');
+    const KICK = { videos: 'Watch', parts: 'The test', facts: 'At a glance', list: 'Remember', faq: 'Questions', check: 'Check yourself', table: 'Reference', tabs: 'Tips', folds: 'Tips', cards: 'Tips', steps: 'Method', chips: 'Words', note: '', text: '', reveal: 'Try it', spot: 'Try it', exercises: 'In-class exercises', image: '', model: 'Model answer', write: 'Your turn' };
+    function draw(b, top, path) {
+      const out = b.type === 'note' ? R.note(b) : b.type === 'divider' ? R.divider(b)
+        : top ? `<section class="xl-band${b.tone ? ' is-' + esc(b.tone) : ''} is-${esc(b.type)}"${b.anchor ? ` id="${esc(b.anchor)}"` : ''}>${head(b, KICK[b.type] || '', true)}${inner(b, true, path)}</section>`
+        : `<div class="xl-sub is-${esc(b.type)}${b.tone ? ' is-' + esc(b.tone) : ''}">${head(b, '', false)}${inner(b, false, path)}</div>`;
+      return ED ? ctx.builder.wrap(b, path, out, top) : out;
     }
     const R = {
       videos: b => (b.items || []).map(v => { const i = ++vn, id = drive(v.src), k = `${L.id}-v${i}`, seen = ctx.val(k) === true;
@@ -85,10 +90,10 @@
       table: b => `<div class="xl-table${b.wide ? ' is-wide' : ''}"><table>${(b.head || []).length ? `<thead><tr>${b.head.map(h => `<th scope="col">${esc(h)}</th>`).join('')}</tr></thead>` : ''}<tbody>${(b.rows || []).map(r => `<tr>${r.map((c, j) => j ? `<td>${fmt(c)}</td>` : `<th scope="row">${fmt(c)}</th>`).join('')}</tr>`).join('')}</tbody></table></div>${b.foot ? `<p class="xl-foot">${fmt(b.foot)}</p>` : ''}`,
       check: b => `<ol class="xl-check">${(b.items || []).map((c, i) => `<li data-xl-ans="${c.answer ? 'T' : 'F'}"><span class="xl-cn">${i + 1}</span><div class="xl-cq"><p>${fmt(c.s)}</p>
           <div class="xl-tf"><button type="button" data-xl-tf="T">True</button><button type="button" data-xl-tf="F">False</button></div><p class="xl-why" hidden><b class="xl-verdict"></b> ${fmt(c.why)}</p></div></li>`).join('')}</ol>`,
-      tabs: (b, top) => { const id = `xlt${++tn}`;
-        return `<div class="xl-tabs" data-xl-tabs><div class="xl-tabbar" role="tablist" aria-label="${esc(b.title || 'Topics')}">${(b.items || []).map((t, i) => `<button type="button" role="tab" id="${id}-t${i}" aria-controls="${id}-p${i}" aria-selected="${i === 0}" tabindex="${i === 0 ? 0 : -1}" data-xl-tab="${i}">${t.icon ? sv(t.icon, 1.9) : ''}<span>${esc(t.label)}</span></button>`).join('')}</div>
-          ${(b.items || []).map((t, i) => `<div class="xl-panel" role="tabpanel" id="${id}-p${i}" aria-labelledby="${id}-t${i}"${i === 0 ? '' : ' hidden'}>${t.lead ? `<p class="xl-lead">${fmt(t.lead)}</p>` : ''}${many(t.blocks, false)}</div>`).join('')}</div>`; },
-      folds: b => `<div class="xl-folds" data-xl-folds>${(b.items || []).map((f, i) => `<details class="xl-fold"${b.open === i ? ' open' : ''}><summary>${f.icon ? `<span class="xl-fold-ic">${sv(f.icon, 1.9)}</span>` : ''}<span class="xl-fold-tx"><b>${fmt(f.title)}</b>${f.sub ? `<small>${fmt(f.sub)}</small>` : ''}</span><i class="xs-chev" aria-hidden="true"></i></summary><div class="xl-fold-in">${many(f.blocks, false)}</div></details>`).join('')}</div>`,
+      tabs: (b, top, path) => { const id = `xlt${++tn}`, sel = Math.min(UI.tab(path), Math.max(0, (b.items || []).length - 1));
+        return `<div class="xl-tabs" data-xl-tabs><div class="xl-tabbar" role="tablist" aria-label="${esc(b.title || 'Topics')}">${(b.items || []).map((t, i) => `<button type="button" role="tab" id="${id}-t${i}" aria-controls="${id}-p${i}" aria-selected="${i === sel}" tabindex="${i === sel ? 0 : -1}" data-xl-tab="${i}" data-xl-path="${esc(path || '')}">${t.icon ? sv(t.icon, 1.9) : ''}<span>${esc(t.label)}</span></button>`).join('')}</div>
+          ${(b.items || []).map((t, i) => `<div class="xl-panel" role="tabpanel" id="${id}-p${i}" aria-labelledby="${id}-t${i}"${i === sel ? '' : ' hidden'}>${t.lead ? `<p class="xl-lead">${fmt(t.lead)}</p>` : ''}${many(t.blocks, false, `${path}.items.${i}.blocks`)}</div>`).join('')}</div>`; },
+      folds: (b, top, path) => `<div class="xl-folds" data-xl-folds>${(b.items || []).map((f, i) => `<details class="xl-fold"${(ED ? UI.open(`${path}.items.${i}`) : b.open === i) ? ' open' : ''} data-xl-path="${esc(`${path}.items.${i}`)}"><summary>${f.icon ? `<span class="xl-fold-ic">${sv(f.icon, 1.9)}</span>` : ''}<span class="xl-fold-tx"><b>${fmt(f.title)}</b>${f.sub ? `<small>${fmt(f.sub)}</small>` : ''}</span><i class="xs-chev" aria-hidden="true"></i></summary><div class="xl-fold-in">${many(f.blocks, false, `${path}.items.${i}.blocks`)}</div></details>`).join('')}</div>`,
       cards: b => `<ul class="xl-cards${b.cols ? ' is-' + b.cols : ''}">${(b.items || []).map(c => `<li><span class="xl-card-ic">${sv(c.icon || 'tip', 1.9)}</span><span><b>${fmt(c.t)}</b>${c.d ? `<span>${fmt(c.d)}</span>` : ''}</span></li>`).join('')}</ul>`,
       steps: b => `<ol class="xl-steps">${(b.items || []).map((s, i) => `<li><span class="xl-step-n">${esc(s.n || i + 1)}</span><div><b>${fmt(s.t)}</b>${s.d ? `<div class="xl-step-d">${Array.isArray(s.d) ? `<ul>${s.d.map(x => `<li>${fmt(x)}</li>`).join('')}</ul>` : paras(s.d)}</div>` : ''}</div></li>`).join('')}</ol>`,
       chips: b => (b.groups || []).map(g => `<div class="xl-chipg">${g.label ? `<span class="xl-chipl">${fmt(g.label)}</span>` : ''}<ul class="xl-chips${b.tone ? ' is-' + esc(b.tone) : ''}">${(g.items || []).map(w => `<li>${fmt(w)}</li>`).join('')}</ul></div>`).join(''),
@@ -97,9 +102,17 @@
       reveal: b => { let k = 0; return `<ol class="xl-reveal">${(b.items || []).map(r => `<li><span class="xl-cn${r.n ? ' is-eg' : ''}">${esc(r.n || String.fromCharCode(97 + k++))}</span><div><p>${fmt(r.q)}</p><button type="button" class="xl-show" data-xl-show>Show the answer</button><p class="xl-ans" hidden>${fmt(r.a)}</p></div></li>`).join('')}</ol>`; },
       spot: b => `<ol class="xl-spot">${(b.items || []).map((s, i) => `<li data-xl-right="${Number(s.answer) || 0}"><div class="xl-talk">${(s.lines || []).map(([who, said], j) => `<p class="${j % 2 ? 'is-b' : 'is-a'}"><b>${esc(who)}</b><span>${fmt(said)}</span></p>`).join('')}</div>
           <p class="xl-spot-q"><span class="xl-cn">${i + 1}</span>${fmt(s.q)}</p><div class="xl-opts">${(s.options || []).map((o, j) => `<button type="button" data-xl-opt="${j}"><span class="xs-let">${['i', 'ii', 'iii', 'iv'][j] || j + 1}</span><span>${fmt(o)}</span></button>`).join('')}</div><p class="xl-why" hidden><b class="xl-verdict"></b> ${fmt(s.why)}</p></li>`).join('')}</ol>`,
+      image: b => b.src ? `<figure class="xl-img${b.size ? ' is-' + esc(b.size) : ''}"><img src="${esc(b.src)}" alt="${esc(b.alt || '')}" loading="lazy">${b.caption ? `<figcaption>${fmt(b.caption)}</figcaption>` : ''}</figure>` : (ED ? '<p class="pb-unknown">Add a picture link in Edit.</p>' : ''),
+      model: b => { const body = `<div class="xl-model-paper">${b.label ? `<span class="xl-model-k">${esc(b.label)}</span>` : ''}${paras(b.text)}${b.words ? `<span class="xl-model-n">${esc(b.words)}</span>` : ''}</div>${(b.notes || []).length ? `<ul class="xl-model-notes">${b.notes.map(n => `<li>${fmt(n)}</li>`).join('')}</ul>` : ''}`;
+        return b.fold ? `<details class="xl-model is-fold"${ED ? ' open' : ''}><summary>${sv('eye', 1.9)}<span>${esc(b.show || 'Show the model answer')}</span><i class="xs-chev" aria-hidden="true"></i></summary>${body}</details>` : `<div class="xl-model">${body}</div>`; },
+      write: b => { const k = `${L.id}-${b.key || 'write'}`, v = String(ctx.val(k) ?? ''), n = v.trim() ? v.trim().split(/\s+/).length : 0, min = Number(b.minWords) || 0;
+        return `<div class="xl-write" data-xl-min="${min}"><div class="xl-task">${b.label ? `<span class="xl-task-k">${esc(b.label)}</span>` : ''}${paras(b.prompt)}${b.src ? `<img src="${esc(b.src)}" alt="${esc(b.alt || 'The task picture')}" loading="lazy">` : ''}${b.minutes || min ? `<p class="xl-task-rule">${[b.minutes ? `Spend about ${esc(b.minutes)} minutes on this task.` : '', min ? `Write at least ${min} words.` : ''].filter(Boolean).join(' ')}</p>` : ''}</div>
+          <label class="xl-answer"><span>Your answer</span><textarea rows="${Number(b.rows) || 12}" data-save="${esc(k)}" spellcheck="true" placeholder="${esc(b.placeholder || 'Write your answer here …')}">${esc(v)}</textarea></label>
+          <p class="xl-count"><b>${n}</b> word${n === 1 ? '' : 's'}${min ? ` <span>of at least ${min}</span>` : ''}</p></div>`; },
+      divider: b => `<div class="xl-divider" role="separator">${b.title ? `<span>${esc(b.title)}</span>` : ''}</div>`,
       exercises: b => `<div class="xl-exs">${(b.items || []).map((x, i) => { const qs = (x.blocks || []).filter(isQ), n = qs.reduce((a, q) => a + count(q), 0), kinds = [...new Set(qs.map(kindOf).filter(Boolean))];
         const sub = { id: x.id, title: x.title, sections: [{ activities: [{ id: 'listen', blocks: [{ type: 'ieTest', audios: x.audio || [], blocks: x.blocks || [] }] }] }] };
-        return `<details class="xl-ex" id="ex-${esc(x.id)}" data-xl-ex><summary><span class="xl-ex-n">${i + 1}</span><span class="xl-ex-tx"><b>${esc(x.title)}</b><small>${[n ? `${n} question${n === 1 ? '' : 's'}` : '', (x.audio || []).length ? `${x.audio.length > 1 ? x.audio.length + ' recordings' : 'Recording'}` : 'No recording', ...(x.kind ? [x.kind] : kinds)].filter(Boolean).map(esc).join(' · ')}</small></span>
+        return `<details class="xl-ex" id="ex-${esc(x.id)}" data-xl-ex${ED && UI.open('ex-' + x.id) ? ' open' : ''}><summary><span class="xl-ex-n">${i + 1}</span><span class="xl-ex-tx"><b>${esc(x.title)}</b><small>${[n ? `${n} question${n === 1 ? '' : 's'}` : '', (x.audio || []).length ? `${x.audio.length > 1 ? x.audio.length + ' recordings' : 'Recording'}` : 'No recording', ...(x.kind ? [x.kind] : kinds)].filter(Boolean).map(esc).join(' · ')}</small></span>
           <span class="xl-ex-go"><span class="xl-ex-open">Start</span><span class="xl-ex-close">Close</span></span></summary>
           <div class="xl-ex-in">${x.tip ? R.note({ tone: 'tip', title: 'Before you start', text: x.tip }) : ''}${page(sub, Object.assign({}, ctx, { embed: true }))}</div></details>`; }).join('')}</div>`
     };
@@ -113,8 +126,8 @@
       <header class="xs-hero"><div class="xs-hero-tx"><span class="xs-eyebrow">${esc(ctx.eyebrow || 'Learn')}</span><h1>${esc(L.title)}</h1>${L.journey ? `<p>${esc(L.journey)}</p>` : ''}
         <ul class="xs-facts">${nVid ? `<li><b>${nVid}</b> video${nVid === 1 ? '' : 's'}</li>` : ''}${nEx ? `<li><b>${nEx}</b> exercise${nEx === 1 ? '' : 's'}</li>` : ''}${L.duration ? `<li>${esc(L.duration)}</li>` : ''}${(L.learn.tags || []).map(t => `<li>${esc(t)}</li>`).join('')}</ul></div>
         ${window.IELTSSheetArt ? window.IELTSSheetArt(L.illus) : ''}</header>
-      ${jump}
-      ${many(blocks, true)}
+      ${ED ? ctx.builder.barHTML() : ''}${jump}
+      ${many(blocks, true, 'blocks')}
       <section class="xs-end"><footer class="xs-foot"><label class="xs-done"><input type="checkbox" data-sheet-done${doneAll ? ' checked' : ''}><span>I have finished this lesson</span></label>
         <span class="xs-nav">${ctx.back ? `<a class="btn-quiet" href="${esc(ctx.back.href)}">${icon('left')}All lessons</a>` : ''}${ctx.next ? `<a class="btn" href="${esc(ctx.next.href)}">${esc(ctx.next.label)} ${icon('arrow')}</a>` : ''}</span></footer></section></article>`;
   }
@@ -146,6 +159,10 @@
     if (ev === 'play') { f.classList.add('is-on'); document.querySelectorAll('.xl-frame video, .xp audio').forEach(x => { if (x !== v && !x.paused) x.pause(); }); }
     if (ev === 'ended') { const box = document.querySelector(`input[data-save="${CSS.escape(v.dataset.xlK || '')}"]`); if (box && !box.checked) { box.checked = true; box.dispatchEvent(new Event('change', { bubbles: true })); } }
     if (ev === 'error' && f.dataset.xlDrive) { f.classList.add('is-on'); f.innerHTML = `<iframe src="https://drive.google.com/file/d/${f.dataset.xlDrive}/preview" title="${v.title.replace(/"/g, '&quot;')}" allow="autoplay; fullscreen" allowfullscreen></iframe>`; } }, true));
+
+  /* the live word count under a writing box */
+  document.addEventListener('input', e => { const t = e.target; if (!t.matches?.('.xl-write textarea')) return; const box = t.closest('.xl-write'), n = t.value.trim() ? t.value.trim().split(/\s+/).length : 0, min = +box.dataset.xlMin || 0;
+    const c = box.querySelector('.xl-count'); c.innerHTML = `<b>${n}</b> word${n === 1 ? '' : 's'}${min ? ` <span>of at least ${min}</span>` : ''}`; c.classList.toggle('is-ok', !!min && n >= min); });
 
   /* true or false in a Learn lesson: the answer and why, as soon as a button is pressed (nothing is saved or marked) */
   document.addEventListener('click', e => { const b = e.target.closest?.('[data-xl-tf]'); if (!b) return; const li = b.closest('li'), right = li.dataset.xlAns === b.dataset.xlTf;

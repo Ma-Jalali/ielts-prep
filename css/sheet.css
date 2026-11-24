@@ -671,3 +671,34 @@ mark.xs-hl.has-note.is-hl { background: #ffd65c; }
 .xl-table.is-wide { max-width: none; }
 .xl-table tbody th { width: 40%; } .xl-table.is-wide tbody th { width: auto; }
 .xl-cn.is-eg { width: auto; padding: 0 7px; background: var(--xs-acc); }
+
+/* ───────── Learn pages: picture, model answer, writing box, divider ───────── */
+.xl-img { margin: 0; } .xl-img img { display: block; max-width: 100%; height: auto; margin: 0 auto; border-radius: 14px; border: 1px solid var(--xs-line); }
+.xl-img.is-small img { max-width: 420px; } .xl-img.is-wide img { width: 100%; }
+.xl-img figcaption { margin-top: 8px; text-align: center; font-size: .86rem; color: var(--muted, #5a6382); }
+.xl-model-paper { position: relative; padding: 22px 24px; border-radius: 6px 18px 18px 6px; background: #fffdf7; border: 1px solid #efe3c3; border-left: 4px solid var(--xs-acc); box-shadow: 0 12px 28px -24px rgba(24, 33, 63, .5); font-family: Georgia, 'Times New Roman', serif; }
+.xl-model-paper p { margin: 0 0 12px; font-size: 1.02rem; line-height: 1.75; color: #22283f; } .xl-model-paper p:last-of-type { margin-bottom: 0; }
+.xl-model-k { display: inline-block; margin-bottom: 12px; padding: 3px 10px; border-radius: 999px; background: color-mix(in srgb, var(--xs-acc) 12%, #fff); color: var(--xs-acc); font: 750 .72rem/1.4 var(--sans, system-ui); letter-spacing: .06em; text-transform: uppercase; }
+.xl-model-n { display: block; margin-top: 12px; text-align: right; font: 650 .8rem var(--sans, system-ui); color: var(--muted, #6a7391); }
+.xl-model-notes { margin: 14px 0 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+.xl-model-notes li { position: relative; padding-left: 22px; font-size: .92rem; line-height: 1.5; color: #3a4466; }
+.xl-model-notes li::before { content: ''; position: absolute; left: 4px; top: .55em; width: 8px; height: 8px; border-radius: 50%; background: var(--xs-acc); }
+.xl-model.is-fold > summary { list-style: none; display: inline-flex; align-items: center; gap: 8px; height: 42px; padding: 0 16px; border-radius: 999px; border: 1px solid var(--xs-line-2); background: #fff; cursor: pointer; font: 700 .9rem var(--sans, system-ui); color: var(--xs-acc); }
+.xl-model.is-fold > summary::-webkit-details-marker { display: none; } .xl-model.is-fold > summary svg { width: 18px; height: 18px; }
+.xl-model.is-fold[open] > summary { margin-bottom: 14px; } .xl-model.is-fold[open] .xs-chev { transform: rotate(180deg); }
+.xl-write { display: grid; gap: 12px; }
+.xl-task { padding: 18px 20px; border-radius: 16px; background: #f7f9fb; border: 1px solid var(--xs-line); }
+.xl-task p { margin: 0 0 8px; font-size: 1rem; line-height: 1.6; } .xl-task img { display: block; max-width: 100%; margin: 10px auto; border-radius: 10px; background: #fff; }
+.xl-task-k { display: inline-block; margin-bottom: 8px; font: 750 .72rem/1.3 var(--sans, system-ui); letter-spacing: .09em; text-transform: uppercase; color: var(--xs-acc); }
+.xl-task-rule { margin: 10px 0 0 !important; font-weight: 700; font-size: .92rem !important; color: var(--xs-ink); }
+.xl-answer { display: grid; gap: 6px; } .xl-answer > span { font: 700 .82rem var(--sans, system-ui); color: #3a4466; }
+.xl-answer textarea { width: 100%; padding: 14px 16px; border-radius: 14px; border: 1.5px solid var(--xs-line-2); background: #fff; font: 1rem/1.7 Georgia, 'Times New Roman', serif; color: var(--xs-ink); resize: vertical; }
+.xl-answer textarea:focus { outline: none; border-color: var(--xs-acc); box-shadow: 0 0 0 3px color-mix(in srgb, var(--xs-acc) 18%, transparent); }
+.xl-count { margin: 0; text-align: right; font-size: .86rem; color: var(--muted, #6a7391); font-variant-numeric: tabular-nums; } .xl-count b { color: var(--xs-ink); } .xl-count.is-ok b { color: #1f7a4f; }
+.xl-divider { display: flex; align-items: center; gap: 14px; margin: 6px 0; color: var(--muted, #6a7391); font: 750 .74rem var(--sans, system-ui); letter-spacing: .1em; text-transform: uppercase; }
+.xl-divider::before, .xl-divider::after { content: ''; flex: 1; height: 1px; background: var(--xs-line-2); } .xl-divider:not(:has(span))::before { display: none; }
+/* an open group with no pages yet; the teacher's "New lesson" button (Studio on) */
+.sk-empty { display: flex; align-items: center; gap: 10px; margin: 8px 0 0; padding: 18px; border-radius: 16px; background: #f7f9fb; color: var(--muted, #5a6382); }
+.sk-empty svg { width: 20px; height: 20px; color: var(--accent, #2b776e); }
+.sk-new { display: inline-flex; align-items: center; gap: 8px; margin-top: 12px; height: 40px; padding: 0 16px; border-radius: 999px; border: 1.5px dashed var(--accent, #2b776e); background: #fff; color: var(--accent, #2b776e); font: 700 .88rem var(--sans, system-ui); cursor: pointer; }
+.sk-new svg { width: 16px; height: 16px; } .sk-new:hover { background: color-mix(in srgb, var(--accent, #2b776e) 8%, #fff); }

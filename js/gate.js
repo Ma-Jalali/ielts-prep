@@ -66,8 +66,15 @@
     open();
   }
 
+  /* pages built in Studio and published online (table ielts_pages): the teacher also gets unpublished ones.
+     Kept on this device too, so they open offline. js/boot.js adds them to the course. */
+  async function pages() { const K = 'ielts-pages';
+    try { const r = await G.client.from('ielts_pages').select('id, week, day, entry, lesson, published, updated_at'); if (r.error) throw r.error;
+      try { localStorage.setItem(K, JSON.stringify(r.data || [])); } catch (e) { /* storage full */ } return r.data || []; }
+    catch (e) { try { return JSON.parse(localStorage.getItem(K) || '[]'); } catch (x) { return []; } } }
   let opened = false;
-  function open() { if (opened) return; opened = true;
+  async function open() { if (opened) return; opened = true;
+    window.IELTS_PAGES = await pages();
     document.getElementById('gate')?.remove(); root.classList.remove('gate-on', 'gate-show');
     loadScript('js/boot.js?v=' + (cfg.version || ''));
     /* a removed student: checked again whenever the page comes back into view */
