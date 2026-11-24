@@ -18,7 +18,7 @@
   const count = b => b.type === 'ieChoice' || b.type === 'ieMatch' || b.type === 'ieTFNG' ? (b.items || []).length : b.type === 'ieMulti' ? Number(b.numbers) || Number(b.pick) || (b.answers || []).length
     : b.type === 'ieTable' ? (b.rows || []).flat().flatMap(gapsIn).length : b.type === 'ieDiagram' ? (b.labels || []).length : gapsIn(b.text).length;
   const KINDS = { form: 'Form completion', notes: 'Note completion', sentences: 'Sentence completion', short: 'Short answers', summary: 'Summary completion', flow: 'Flow chart' };
-  const kindOf = b => b.type === 'ieGap' ? KINDS[b.layout] || 'Completion' : b.type === 'ieTable' ? 'Table completion' : b.type === 'ieDiagram' ? (/\bmap\b/i.test(`${b.title || ''} ${b.alt || ''}`) ? 'Map labelling' : /\bplan\b|floor|layout/i.test(`${b.title || ''} ${b.alt || ''}`) ? 'Plan labelling' : 'Diagram labelling')
+  const kindOf = b => b.kindName ? b.kindName : b.type === 'ieTFNG' ? (b.kind === 'ynng' ? 'Yes / No / Not Given' : 'True / False / Not Given') : b.type === 'ieGap' ? KINDS[b.layout] || 'Completion' : b.type === 'ieTable' ? 'Table completion' : b.type === 'ieDiagram' ? (/\bmap\b/i.test(`${b.title || ''} ${b.alt || ''}`) ? 'Map labelling' : /\bplan\b|floor|layout/i.test(`${b.title || ''} ${b.alt || ''}`) ? 'Plan labelling' : 'Diagram labelling')
     : b.type === 'ieChoice' || b.type === 'ieMulti' ? 'Multiple choice' : b.type === 'ieMatch' ? 'Matching' : '';
 
   /* ───────── a Learn lesson (strategy lesson) on one page ─────────
@@ -57,7 +57,7 @@
   window.IELTSSheetIcon = k => sv(k, 1.9);
   function learnPage(L, ctx) {
     const { esc, icon } = ctx, ED = !!ctx.edit, UI = ctx.builder?.ui || { tab: () => 0, open: () => false };
-    const fmt = t => esc(String(t ?? '')).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/\*(.+?)\*/g, '<i>$1</i>').replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');   // **bold**, *italic*, [link](https://…)
+    const fmt = t => esc(String(t ?? '')).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/\*(.+?)\*/g, '<i>$1</i>').replace(/==(.+?)==/g, '<mark>$1</mark>').replace(/~~(.+?)~~/g, '<s>$1</s>').replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');   // **bold**, *italic*, [link](https://…)
     const paras = t => String(t ?? '').split(/\n\s*\n/).map(p => `<p>${fmt(p).replace(/\n/g, '<br>')}</p>`).join('');
     const drive = s => { const m = String(s || '').match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?.*id=)([\w-]{10,})/); return m && m[1]; };
     /* the video streams from Google Drive through the 'ielts-audio' relay (?kind=video: byte ranges, so it plays and seeks on iPhones too) */
@@ -68,7 +68,7 @@
     const inner = (b, top, path) => (R[b.type] || (() => ED ? `<p class="pb-unknown">Unknown element: ${esc(b.type)}</p>` : ''))(b, top, path);
     /* a list of blocks; in Studio (ED) each block gets its toolbar and the list an "Add" button (js/pagebuilder.js) */
     const many = (blocks, top, base) => (blocks || []).map((x, i) => draw(x, top, `${base}.${i}`)).join('') + (ED ? ctx.builder.addHTML(base, top) : '');
-    const KICK = { videos: 'Watch', parts: 'The test', facts: 'At a glance', list: 'Remember', faq: 'Questions', check: 'Check yourself', table: 'Reference', tabs: 'Tips', folds: 'Tips', cards: 'Tips', steps: 'Method', chips: 'Words', note: '', text: '', reveal: 'Try it', spot: 'Try it', exercises: 'In-class exercises', image: '', model: 'Model answer', write: 'Your turn' };
+    const KICK = { versus: 'Try it', scale: 'Reference', videos: 'Watch', parts: 'The test', facts: 'At a glance', list: 'Remember', faq: 'Questions', check: 'Check yourself', table: 'Reference', tabs: 'Tips', folds: 'Tips', cards: 'Tips', steps: 'Method', chips: 'Words', note: '', text: '', reveal: 'Try it', spot: 'Try it', exercises: 'In-class exercises', image: '', model: 'Model answer', write: 'Your turn' };
     function draw(b, top, path) {
       const out = b.type === 'note' ? R.note(b) : b.type === 'divider' ? R.divider(b)
         : top ? `<section class="xl-band${b.tone ? ' is-' + esc(b.tone) : ''} is-${esc(b.type)}"${b.anchor ? ` id="${esc(b.anchor)}"` : ''}>${head(b, KICK[b.type] || '', true)}${inner(b, true, path)}</section>`
@@ -81,8 +81,8 @@
           <div class="xl-frame" data-xl-drive="${esc(id || '')}">${id ? `<video controls playsinline preload="metadata" src="${esc(relay(id))}" title="${esc(v.title)}" data-xl-k="${esc(k)}"></video>
             <button type="button" class="xl-cover" data-xl-play aria-label="Play video ${i}: ${esc(v.title)}"><span class="xl-cover-btn">${sv('play')}</span><span class="xl-cover-tx"><small>Video ${i}</small><b>${esc(v.title)}</b></span></button>` : ''}</div>
           <div class="xl-video-f"><label class="xl-seen"><input type="checkbox" data-save="${esc(k)}"${seen ? ' checked' : ''}><span>I watched this video</span></label>${id ? `<a href="https://drive.google.com/file/d/${id}/view" target="_blank" rel="noopener">${icon('open')}Open in Google Drive</a>` : ''}</div></article>`; }).join(''),
-      parts: b => `<ol class="xl-parts">${(b.items || []).map((p, i) => `<li style="--d:${i}"${p.on ? ' class="is-on"' : ''}><span class="xl-pi">${sv(p.icon || ['chat', 'mic', 'people', 'lecture'][i], 1.8)}</span>
-          <span class="xl-pn">Part ${esc(p.n)}</span><b>${esc(p.who)}</b><span class="xl-pw">${fmt(p.what)}</span>${p.eg ? `<small>e.g. ${fmt(p.eg)}</small>` : ''}<span class="xl-pq">${esc(p.qs)}</span><i class="xl-level" aria-label="Difficulty ${i + 1} of 4">${[0, 1, 2, 3].map(j => `<b class="${j <= i ? 'on' : ''}"></b>`).join('')}</i></li>`).join('')}</ol>
+      parts: b => `<ol class="xl-parts${(b.items || []).length === 3 ? ' is-3' : ''}">${(b.items || []).map((p, i) => `<li style="--d:${i}"${p.on ? ' class="is-on"' : ''}><span class="xl-pi">${sv(p.icon || ['chat', 'mic', 'people', 'lecture'][i], 1.8)}</span>
+          <span class="xl-pn">${esc(p.label || `Part ${p.n}`)}</span><b>${esc(p.who)}</b><span class="xl-pw">${fmt(p.what)}</span>${p.eg ? `<small>e.g. ${fmt(p.eg)}</small>` : ''}<span class="xl-pq">${esc(p.qs)}</span><i class="xl-level" aria-label="Difficulty ${i + 1} of 4">${[0, 1, 2, 3].map(j => `<b class="${j <= i ? 'on' : ''}"></b>`).join('')}</i></li>`).join('')}</ol>
         ${b.foot ? `<p class="xl-foot">${fmt(b.foot)}</p>` : ''}`,
       facts: b => `<ul class="xl-facts${(b.items || []).length < 6 ? ' is-' + (b.items || []).length : ''}">${(b.items || []).map(([big, small]) => `<li><b>${esc(big)}</b><span>${fmt(small)}</span></li>`).join('')}</ul>`,
       list: b => `<ul class="xl-list">${(b.items || []).map(t => `<li><span class="xl-tick">${sv('ok', 2.6)}</span><span>${fmt(t)}</span></li>`).join('')}</ul>`,
@@ -99,7 +99,7 @@
       chips: b => (b.groups || []).map(g => `<div class="xl-chipg">${g.label ? `<span class="xl-chipl">${fmt(g.label)}</span>` : ''}<ul class="xl-chips${b.tone ? ' is-' + esc(b.tone) : ''}">${(g.items || []).map(w => `<li>${fmt(w)}</li>`).join('')}</ul></div>`).join(''),
       note: b => `<aside class="xl-note is-${esc(b.tone || 'tip')}"><span class="xl-note-ic">${sv(b.tone === 'warn' ? 'warn' : b.tone === 'info' ? 'info' : 'tip', 2)}</span><div>${b.title ? `<b>${fmt(b.title)}</b>` : ''}${paras(b.text)}</div></aside>`,
       text: b => `<div class="xl-text">${paras(b.text)}</div>`,
-      reveal: b => { let k = 0; return `<ol class="xl-reveal">${(b.items || []).map(r => `<li><span class="xl-cn${r.n ? ' is-eg' : ''}">${esc(r.n || String.fromCharCode(97 + k++))}</span><div><p>${fmt(r.q)}</p><button type="button" class="xl-show" data-xl-show>Show the answer</button><p class="xl-ans" hidden>${fmt(r.a)}</p></div></li>`).join('')}</ol>`; },
+      reveal: b => { let k = 0; return `<ol class="xl-reveal">${(b.items || []).map(r => `<li><span class="xl-cn${r.n ? ' is-eg' : ''}">${esc(r.n || String.fromCharCode(97 + k++))}</span><div><p>${fmt(r.q).replace(/\n/g, '<br>')}</p><button type="button" class="xl-show" data-xl-show>Show the answer</button><p class="xl-ans" hidden>${fmt(r.a).replace(/\n/g, '<br>')}</p></div></li>`).join('')}</ol>`; },
       spot: b => `<ol class="xl-spot">${(b.items || []).map((s, i) => `<li data-xl-right="${Number(s.answer) || 0}"><div class="xl-talk">${(s.lines || []).map(([who, said], j) => `<p class="${j % 2 ? 'is-b' : 'is-a'}"><b>${esc(who)}</b><span>${fmt(said)}</span></p>`).join('')}</div>
           <p class="xl-spot-q"><span class="xl-cn">${i + 1}</span>${fmt(s.q)}</p><div class="xl-opts">${(s.options || []).map((o, j) => `<button type="button" data-xl-opt="${j}"><span class="xs-let">${['i', 'ii', 'iii', 'iv'][j] || j + 1}</span><span>${fmt(o)}</span></button>`).join('')}</div><p class="xl-why" hidden><b class="xl-verdict"></b> ${fmt(s.why)}</p></li>`).join('')}</ol>`,
       image: b => b.src ? `<figure class="xl-img${b.size ? ' is-' + esc(b.size) : ''}"><img src="${esc(b.src)}" alt="${esc(b.alt || '')}" loading="lazy">${b.caption ? `<figcaption>${fmt(b.caption)}</figcaption>` : ''}</figure>` : (ED ? '<p class="pb-unknown">Add a picture link in Edit.</p>' : ''),
@@ -109,11 +109,17 @@
         return `<div class="xl-write" data-xl-min="${min}"><div class="xl-task">${b.label ? `<span class="xl-task-k">${esc(b.label)}</span>` : ''}${paras(b.prompt)}${b.src ? `<img src="${esc(b.src)}" alt="${esc(b.alt || 'The task picture')}" loading="lazy">` : ''}${b.minutes || min ? `<p class="xl-task-rule">${[b.minutes ? `Spend about ${esc(b.minutes)} minutes on this task.` : '', min ? `Write at least ${min} words.` : ''].filter(Boolean).join(' ')}</p>` : ''}</div>
           <label class="xl-answer"><span>Your answer</span><textarea rows="${Number(b.rows) || 12}" data-save="${esc(k)}" spellcheck="true" placeholder="${esc(b.placeholder || 'Write your answer here …')}">${esc(v)}</textarea></label>
           <p class="xl-count"><b>${n}</b> word${n === 1 ? '' : 's'}${min ? ` <span>of at least ${min}</span>` : ''}</p></div>`; },
+      /* a question beside the passage it comes from: choose TRUE / FALSE / NOT GIVEN (or any options), then see why */
+      versus: b => `<ol class="xl-vs">${(b.items || []).map((v, i) => { const O = v.options || b.options || ['TRUE', 'FALSE', 'NOT GIVEN'], r = typeof v.answer === 'number' ? v.answer : Math.max(0, O.indexOf(v.answer));
+        return `<li data-xl-right="${r}"><div class="xl-vs-pair"><p class="xl-vs-q"><span class="xl-vs-k">${esc(v.qLabel || b.qLabel || 'Question')}</span><span>${fmt(v.q)}</span></p><p class="xl-vs-p"><span class="xl-vs-k">${esc(v.pLabel || b.pLabel || 'Passage')}</span><span>${fmt(v.p)}</span></p></div>
+          <div class="xl-opts is-row"><span class="xl-cn">${esc(v.n || i + 1)}</span>${O.map((o, j) => `<button type="button" data-xl-opt="${j}">${fmt(o)}</button>`).join('')}</div><p class="xl-why" hidden><b class="xl-verdict"></b> ${fmt(v.why)}</p></li>`; }).join('')}</ol>`,
+      /* a scale from 100% down to 0%: words of quantity or certainty, strongest first */
+      scale: b => `<ol class="xl-scale">${(b.items || []).map((x, i, a) => `<li style="--p:${Math.max(4, Number(x.p ?? (100 - i * 100 / Math.max(1, a.length - 1))) || 4)}%"><span class="xl-sc-v">${esc(x.v)}</span><span class="xl-sc-bar" aria-hidden="true"><i></i></span><span class="xl-sc-w">${(x.words || []).map(w => `<em>${fmt(w)}</em>`).join('')}${x.note ? `<small>${fmt(x.note)}</small>` : ''}</span></li>`).join('')}</ol>`,
       divider: b => `<div class="xl-divider" role="separator">${b.title ? `<span>${esc(b.title)}</span>` : ''}</div>`,
       exercises: b => `<div class="xl-exs">${(b.items || []).map((x, i) => { const qs = (x.blocks || []).filter(isQ), n = qs.reduce((a, q) => a + count(q), 0), kinds = [...new Set(qs.map(kindOf).filter(Boolean))];
-        const sub = { id: x.id, title: x.title, sections: [{ activities: [{ id: 'listen', blocks: [{ type: 'ieTest', audios: x.audio || [], blocks: x.blocks || [] }] }] }] };
-        return `<details class="xl-ex" id="ex-${esc(x.id)}" data-xl-ex${ED && UI.open('ex-' + x.id) ? ' open' : ''}><summary><span class="xl-ex-n">${i + 1}</span><span class="xl-ex-tx"><b>${esc(x.title)}</b><small>${[n ? `${n} question${n === 1 ? '' : 's'}` : '', (x.audio || []).length ? `${x.audio.length > 1 ? x.audio.length + ' recordings' : 'Recording'}` : 'No recording', ...(x.kind ? [x.kind] : kinds)].filter(Boolean).map(esc).join(' · ')}</small></span>
-          <span class="xl-ex-go"><span class="xl-ex-open">Start</span><span class="xl-ex-close">Close</span></span></summary>
+        const sub = { id: x.id, title: x.title, sections: [{ activities: [{ id: 'listen', blocks: [{ type: 'ieTest', audios: x.audio || [], passage: x.passage, blocks: x.blocks || [] }] }] }] };
+        return `<details class="xl-ex" id="ex-${esc(x.id)}" data-xl-ex${ED && UI.open('ex-' + x.id) ? ' open' : ''}><summary><span class="xl-ex-n">${i + 1}</span><span class="xl-ex-tx"><b>${esc(x.title)}</b><small>${[n ? `${n} question${n === 1 ? '' : 's'}` : '', (x.audio || []).length ? `${x.audio.length > 1 ? x.audio.length + ' recordings' : 'Recording'}` : x.passage ? 'Reading passage' : '', ...(x.kind ? [x.kind] : kinds)].filter(Boolean).map(esc).join(' · ')}</small></span>
+          <span class="xl-ex-go"><span class="xl-ex-open">${esc(x.go || 'Start')}</span><span class="xl-ex-close">Close</span></span></summary>
           <div class="xl-ex-in">${x.tip ? R.note({ tone: 'tip', title: 'Before you start', text: x.tip }) : ''}${page(sub, Object.assign({}, ctx, { embed: true }))}</div></details>`; }).join('')}</div>`
     };
     const blocks = L.learn.blocks || [], acts = (L.sections || []).flatMap(s => s.activities || []), doneAll = acts.length && acts.every(a => ctx.done(a.id));
@@ -173,11 +179,16 @@
   function page(L, ctx) {
     const { esc, icon } = ctx, val = k => ctx.val(k) ?? '';
     if (L.learn) return learnPage(L, ctx);
-    const fmt = t => esc(String(t ?? '')).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+    const fmt = t => esc(String(t ?? '')).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/(^|[^*\w])\*([^*\n]+?)\*(?![*\w])/g, '$1<i>$2</i>').replace(/==(.+?)==/g, '<mark>$1</mark>');
     const acts = (L.sections || []).flatMap(s => s.activities || []);
     const test = acts.flatMap(a => a.blocks || []).find(b => b.type === 'ieTest') || { blocks: acts.flatMap(a => a.blocks || []).filter(b => isQ(b) || b.type === 'figure'), audios: [] };
     const blocks = test.blocks || [], audios = (test.audios || (test.audio ? [test.audio] : [])).filter(a => a && a.src);
     const scriptAct = acts.find(a => a.id === 'script'), qs = blocks.filter(isQ);
+    /* a reading passage: paragraphs split by a blank line; "A  " (a letter and two spaces) labels a paragraph, "### " is a heading inside it */
+    const P = test.passage, pfmt = t => fmt(t).replace(/_(.+?)_/g, '<i>$1</i>');
+    const passageHTML = P && P.text ? `<article class="xs-text${P.scroll === false ? '' : ' is-scroll'}"><header class="xs-text-h"><span class="xs-text-k">${esc(P.label || 'Reading passage')}</span>${P.title ? `<h3>${esc(P.title)}</h3>` : ''}${P.subtitle ? `<p>${esc(P.subtitle)}</p>` : ''}</header>
+      <div class="xs-text-b" tabindex="0" role="region" aria-label="${esc(P.title || 'The passage')}">${String(P.text).split(/\n\s*\n/).map(par => { const t = par.trim(); if (t.startsWith('### ')) { const [h, ...rest] = t.slice(4).split('\n'); return `<h4>${pfmt(h)}</h4>${rest.join(' ').trim() ? `<p>${pfmt(rest.join('\n')).replace(/\n/g, '<br>')}</p>` : ''}`; } if (t.startsWith('* ')) return `<p class="xs-text-fn">${pfmt(t.slice(2))}</p>`;
+        const m = t.match(/^([A-Z])\s{2,}([\s\S]*)$/); return m ? `<p class="has-l"><span class="xs-text-l">${m[1]}</span>${pfmt(m[2]).replace(/\n/g, '<br>')}</p>` : `<p>${pfmt(t).replace(/\n/g, '<br>')}</p>`; }).join('')}</div></article>` : '';
     const total = qs.reduce((n, b) => n + count(b), 0), lastN = qs.reduce((m, b) => Math.max(m, (Number(b.from) || 1) + count(b) - 1), 0);
 
     /* ── the player: streams from Google Drive into the page's own player; Drive's player is the fallback ── */
@@ -249,8 +260,13 @@
           return `<li class="xs-mq"><div class="xs-mq-q"><span class="xs-qn">${f + i}</span><p>${fmt(it.q)}</p></div><div class="xs-opts" role="radiogroup" aria-label="Question ${f + i}">${(it.options || []).map((o, j) =>
             `<label class="xs-opt"><input type="radio" name="${esc(k)}" value="${LET[j]}" data-save="${esc(k)}"${v === LET[j] ? ' checked' : ''}><span class="xs-let">${LET[j]}</span><span class="xs-ot">${fmt(o)}</span></label>`).join('')}</div></li>`; }).join('')}</ol>`; },
       ieMulti(b) { const pick = Number(b.pick) || (b.answers || []).length || 2;
-        return `${rubric(b)}<div class="xs-mq is-multi" data-from="${Number(b.from) || 1}" data-n="${count(b)}"><div class="xs-mq-q"><span class="xs-qn is-wide">${range(b).replace('Questions ', '')}</span><p>${fmt(b.q)}<small>Choose ${['', 'ONE', 'TWO', 'THREE', 'FOUR'][pick] || pick} letters.${Number(b.numbers) === 1 ? ` You need ${pick === 2 ? 'both' : 'all of them'} for the mark.` : ''}</small></p></div>
+        return `${rubric(b)}<div class="xs-mq is-multi" data-from="${Number(b.from) || 1}" data-n="${count(b)}"><div class="xs-mq-q"><span class="xs-qn is-wide">${range(b).replace('Questions ', '')}</span><p>${fmt(b.q)}<small>Choose ${['', 'ONE', 'TWO', 'THREE', 'FOUR', 'FIVE', 'SIX'][pick] || pick} letters.${Number(b.numbers) === 1 ? ` You need ${pick === 2 ? 'both' : 'all of them'} for the mark.` : ''}</small></p></div>
           <div class="xs-opts">${(b.options || []).map((o, j) => { const k = `${b.id}-${LET[j]}`; return `<label class="xs-opt is-check"><input type="checkbox" data-save="${esc(k)}"${val(k) === true ? ' checked' : ''}><span class="xs-let">${LET[j]}</span><span class="xs-ot">${fmt(o)}</span></label>`; }).join('')}</div></div>`; },
+      ieTFNG(b) { const f = Number(b.from) || 1, yn = b.kind === 'ynng', O = yn ? ['YES', 'NO', 'NOT GIVEN'] : ['TRUE', 'FALSE', 'NOT GIVEN'];
+        const legend = (yn ? [['YES', 'if the statement agrees with the views or claims of the writer'], ['NO', 'if the statement contradicts the views or claims of the writer'], ['NOT GIVEN', 'if it is impossible to say what the writer thinks about this']]
+          : [['TRUE', 'if the statement agrees with the information'], ['FALSE', 'if the statement contradicts the information'], ['NOT GIVEN', 'if there is no information on this']]);
+        return `${rubric(b)}${b.legend === false ? '' : `<dl class="xs-tf-legend">${legend.map(([k, d]) => `<div><dt>${k}</dt><dd>${d}</dd></div>`).join('')}</dl>`}<ol class="xs-tfng">${(b.items || []).map((it, i) => { const k = `${b.id}-${i}`, v = String(val(k)).toUpperCase();
+          return `<li><p class="xs-tf-q"><span class="xs-qn">${f + i}</span><span>${fmt(it.q)}</span></p><span class="xs-tf-o" role="radiogroup" aria-label="Question ${f + i}">${O.map(o => `<label class="xs-tfo"><input type="radio" name="${esc(k)}" value="${o}" data-save="${esc(k)}"${v === o ? ' checked' : ''}><span>${o}</span></label>`).join('')}</span></li>`; }).join('')}</ol>`; },
       ieMatch(b) { const f = Number(b.from) || 1, keys = (b.options || []).map((_, j) => b.numbering === 'roman' ? ROM[j] : LET[j]);
         return `${rubric(b)}<div class="xs-match">${box(b.boxTitle, b.options || [], keys)}<ol class="xs-mlist">${(b.items || []).map((it, i) => `<li><label class="xs-mrow"><span class="xs-gn">${f + i}</span><span class="xs-mq-t">${fmt(it.q)}</span>${picker(`${b.id}-${i}`, f + i, keys, b.options || [])}</label></li>`).join('')}</ol></div>`; },
       figure(b) { return `<figure class="xs-figure"><img src="${esc(b.src)}" alt="${esc(b.alt || '')}" loading="lazy">${b.caption ? `<figcaption>${esc(b.caption)}</figcaption>` : ''}</figure>`; }
@@ -275,12 +291,13 @@
     qs.forEach(b => { const f = Number(b.from) || 1;
       if (b.type === 'ieGap' || b.type === 'ieTable' || b.type === 'ieDiagram') { const all = b.type === 'ieTable' ? (b.rows || []).flat().flatMap(gapsIn) : b.type === 'ieDiagram' ? (b.labels || []).map(l => l.answer) : gapsIn(b.text);
         all.forEach((a, i) => { if (b.bank) { const j = LET.indexOf(String(a).trim()); key.push({ n: f + i, main: a, also: [], note: b.bank[j] ? String(b.bank[j]).replace(/^[A-Z]\s+(?=\S)/, '') : '' }); }
-          else { const [m, ...o] = alts(a); key.push({ n: f + i, main: m, also: o }); } }); }
-      else if (b.type === 'ieChoice') (b.items || []).forEach((it, i) => { const j = LET.indexOf(String(it.answer).toUpperCase()); key.push({ n: f + i, main: it.answer, also: [], note: it.options?.[j] || '' }); });
-      else if (b.type === 'ieMatch') (b.items || []).forEach((it, i) => { const keys = (b.options || []).map((_, j) => b.numbering === 'roman' ? ROM[j] : LET[j]), j = keys.indexOf(String(it.answer)); key.push({ n: f + i, main: it.answer, also: [], note: b.options?.[j] || '' }); });
-      else if (b.type === 'ieMulti') { const n = count(b); key.push({ n: n > 1 ? `${f}–${f + n - 1}` : f, main: (b.answers || []).join(', '), also: [], note: `${(b.answers || []).map(x => b.options?.[LET.indexOf(x)]).filter(Boolean).join('; ')} · in either order`, wide: true }); } });
+          else { const [m, ...o] = alts(a); key.push({ n: f + i, main: m, also: o, why: (b.why || [])[i] }); } }); }
+      else if (b.type === 'ieChoice') (b.items || []).forEach((it, i) => { const j = LET.indexOf(String(it.answer).toUpperCase()); key.push({ n: f + i, main: it.answer, also: [], note: it.options?.[j] || '', why: it.why }); });
+      else if (b.type === 'ieTFNG') (b.items || []).forEach((it, i) => key.push({ n: f + i, main: it.answer, also: [], why: it.why }));
+      else if (b.type === 'ieMatch') (b.items || []).forEach((it, i) => { const keys = (b.options || []).map((_, j) => b.numbering === 'roman' ? ROM[j] : LET[j]), j = keys.indexOf(String(it.answer)); key.push({ n: f + i, main: it.answer, also: [], note: String(b.options?.[j] || '').replace(/^[A-Z]\s+(?=\S)/, ''), why: it.why }); });
+      else if (b.type === 'ieMulti') { const n = count(b); key.push({ n: n > 1 ? `${f}–${f + n - 1}` : f, main: (b.answers || []).join(', '), also: [], note: `${(b.answers || []).map(x => b.options?.[LET.indexOf(x)]).filter(Boolean).join('; ')} · in any order`, why: b.why, wide: true }); } });
     key.sort((a, b) => parseInt(a.n) - parseInt(b.n));
-    const keyHTML = `<ol class="xs-key">${key.map(k => `<li class="${k.wide ? 'is-wide' : ''}"><span class="xs-kn">${k.n}</span><span class="xs-ka"><b>${esc(k.main)}</b>${k.note ? `<small>${esc(k.note)}</small>` : ''}${k.also.length ? `<small class="xs-also">also accepted: ${k.also.map(esc).join(' · ')}</small>` : ''}</span></li>`).join('')}</ol>`;
+    const keyHTML = `<ol class="xs-key">${key.map(k => `<li class="${k.wide ? 'is-wide' : ''}"><span class="xs-kn">${k.n}</span><span class="xs-ka"><b>${esc(k.main)}</b>${k.note ? `<small>${esc(k.note)}</small>` : ''}${k.also.length ? `<small class="xs-also">also accepted: ${k.also.map(esc).join(' · ')}</small>` : ''}${k.why ? `<small class="xs-kwhy">${fmt(k.why)}</small>` : ''}</span></li>`).join('')}</ol>`;
 
     /* ── the recording script (when the key has one) ── */
     const scr = [];
@@ -324,14 +341,14 @@
     const sec = (L.sections || [])[0] || {}, doneAll = acts.length && acts.every(a => ctx.done(a.id));
     const crumbs = (ctx.trail || []).map(t => `<a href="${esc(t.href)}">${esc(t.label)}</a><span aria-hidden="true">›</span>`).join('');
     /* inside a Learn page: only the recording(s), the questions and the answers (see learnPage, 'exercises') */
-    if (ctx.embed) return `<div class="xl-exbody">${body}<details class="xs-fold is-key xl-key"${ctx.open ? ' open' : ''}><summary><span class="xs-fold-ic">${icon('check')}</span><span class="xs-fold-tx"><b>Answers</b><small>Open them when you have finished</small></span><i class="xs-chev" aria-hidden="true"></i></summary><p class="xs-key-note">Spelling counts; capital letters do not. Other right answers are shown underneath.</p>${keyHTML}</details></div>`;
+    if (ctx.embed) return `<div class="xl-exbody">${passageHTML}${body}<details class="xs-fold is-key xl-key"${ctx.open ? ' open' : ''}><summary><span class="xs-fold-ic">${icon('check')}</span><span class="xs-fold-tx"><b>Answers</b><small>Open them when you have finished</small></span><i class="xs-chev" aria-hidden="true"></i></summary><p class="xs-key-note">Spelling counts; capital letters do not. Other right answers are shown underneath.</p>${keyHTML}</details></div>`;
     return `<article class="xs" style="--xs-soft:${ctx.soft || '#e6f3f1'}${ctx.acc ? `;--xs-acc:${ctx.acc}` : ''}" data-total="${total}">
       <div class="xs-strip" aria-label="Your progress in this exercise"><b class="xs-strip-t">${esc(L.title)}</b><span class="xs-strip-bar" aria-hidden="true"><i></i></span><span class="xs-strip-n"><b>0</b> / ${total}</span><button type="button" class="xs-strip-go" data-xs-answers>Answers</button></div>
       <nav class="xs-trail" aria-label="Where you are">${ctx.back ? `<a class="xs-back" href="${esc(ctx.back.href)}">${icon('left')}<span>${esc(ctx.back.label)}</span></a>` : ''}<span class="xs-crumbs">${crumbs}<b>${esc(ctx.name || '')}</b></span></nav>
       <header class="xs-hero"><div class="xs-hero-tx"><span class="xs-eyebrow">${esc(ctx.eyebrow || 'Listening')}</span><h1>${esc(L.title)}</h1>${L.journey ? `<p>${esc(L.journey)}</p>` : ''}
         <ul class="xs-facts"><li><b>${total}</b> questions</li><li><b>${audios.length || 1}</b> recording${audios.length === 1 ? '' : 's'}</li>${kinds.map(k => `<li>${esc(k)}</li>`).join('')}</ul></div>
         ${window.IELTSSheetArt ? window.IELTSSheetArt(L.illus) : ''}</header>
-      ${prep()}
+      ${passageHTML ? passageHTML : prep()}
       ${body}
       <section class="xs-end" aria-label="Answers">
         <details class="xs-fold is-key"${ctx.open ? ' open' : ''}><summary><span class="xs-fold-ic">${icon('check')}</span><span class="xs-fold-tx"><b>Check your answers</b><small>Open the answer key when you have finished</small></span><i class="xs-chev" aria-hidden="true"></i></summary>

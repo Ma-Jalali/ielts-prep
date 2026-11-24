@@ -702,3 +702,85 @@ mark.xs-hl.has-note.is-hl { background: #ffd65c; }
 .sk-empty svg { width: 20px; height: 20px; color: var(--accent, #2b776e); }
 .sk-new { display: inline-flex; align-items: center; gap: 8px; margin-top: 12px; height: 40px; padding: 0 16px; border-radius: 999px; border: 1.5px dashed var(--accent, #2b776e); background: #fff; color: var(--accent, #2b776e); font: 700 .88rem var(--sans, system-ui); cursor: pointer; }
 .sk-new svg { width: 16px; height: 16px; } .sk-new:hover { background: color-mix(in srgb, var(--accent, #2b776e) 8%, #fff); }
+
+/* ───────── Reading: marks, passages, True / False / Not Given, question vs passage, scales ───────── */
+.xs mark { background: linear-gradient(180deg, transparent 52%, color-mix(in srgb, var(--xs-acc) 26%, #fff3b0) 52%); color: inherit; padding: 0 .12em; border-radius: 3px; }
+.xs s { text-decoration-thickness: 2px; text-decoration-color: #d0485c; color: #8a93ad; }
+
+/* the passage: a page of paper with lettered paragraphs; long passages scroll inside their own box */
+.xs-text { border-radius: 18px; background: #fff; border: 1px solid var(--xs-line); box-shadow: 0 1px 2px rgba(24, 33, 63, .04), 0 16px 36px -30px rgba(24, 33, 63, .45); overflow: hidden; }
+.xs-text-h { padding: 18px 26px 14px; border-bottom: 1px solid var(--xs-line); background: linear-gradient(180deg, color-mix(in srgb, var(--xs-acc) 7%, #fff), #fff); }
+.xs-text-k { display: inline-flex; align-items: center; gap: 6px; font: 750 .7rem/1 var(--sans, system-ui); letter-spacing: .12em; text-transform: uppercase; color: var(--xs-acc); }
+.xs-text-k::before { content: ''; width: 14px; height: 2px; border-radius: 2px; background: currentColor; }
+.xs-text-h h3 { margin: 8px 0 0; font: 650 1.3rem/1.25 var(--serif, Georgia, serif); color: var(--xs-ink); text-wrap: balance; }
+.xs-text-h p { margin: 4px 0 0; color: var(--muted, #6a7391); font-style: italic; font-size: .92rem; }
+.xs-text-b { padding: 18px 26px 22px; font: 400 1.02rem/1.75 var(--serif, Georgia, serif); color: #232b48; }
+.xs-text.is-scroll .xs-text-b { max-height: min(68vh, 620px); overflow: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+.xs-text-b:focus-visible { outline: 2px solid var(--xs-acc); outline-offset: -4px; }
+.xs-text-b p { margin: 0 0 14px; } .xs-text-b p:last-child { margin-bottom: 0; }
+.xs-text-b p.has-l { position: relative; padding-left: 40px; }
+.xs-text-l { position: absolute; left: 0; top: 3px; width: 26px; height: 26px; border-radius: 8px; display: grid; place-items: center; background: var(--xs-ink); color: #fff; font: 800 .82rem/1 var(--sans, system-ui); }
+.xs-text-b h4 { margin: 18px 0 6px; font: 750 .92rem/1.3 var(--sans, system-ui); color: var(--xs-ink); } .xs-text-b h4:first-child { margin-top: 0; }
+.xs-text-fn { font: 400 .8rem/1.5 var(--sans, system-ui) !important; color: var(--muted, #6a7391); border-top: 1px dashed var(--xs-line-2); padding-top: 10px; }
+.xl-exbody > .xs-text { margin-bottom: 18px; }
+
+/* True / False / Not Given in an exercise: a legend, then each statement with three pill buttons */
+.xs-tf-legend { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 0 0 14px; }
+.xs-tf-legend div { padding: 10px 12px; border-radius: 12px; background: #f8f9fc; border: 1px solid var(--xs-line); }
+.xs-tf-legend dt { font: 800 .74rem/1 var(--sans, system-ui); letter-spacing: .06em; color: var(--xs-ink); }
+.xs-tf-legend dd { margin: 4px 0 0; font-size: .8rem; line-height: 1.35; color: var(--muted, #6a7391); }
+.xs-tfng { list-style: none; margin: 0; padding: 0; border: 1px solid var(--xs-line); border-radius: 14px; overflow: hidden; background: #fff; }
+.xs-tfng li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px 16px; align-items: center; padding: 12px 14px; }
+.xs-tfng li + li { border-top: 1px solid var(--xs-line); }
+.xs-tf-q { display: flex; gap: 12px; align-items: flex-start; margin: 0; line-height: 1.5; }
+.xs-tf-o { display: inline-flex; padding: 3px; border-radius: 999px; background: #f1f3f8; border: 1px solid var(--xs-line); }
+.xs-tfo { position: relative; cursor: pointer; }
+.xs-tfo input { position: absolute; opacity: 0; pointer-events: none; }
+.xs-tfo span { display: block; padding: 7px 12px; border-radius: 999px; font: 750 .72rem/1 var(--sans, system-ui); letter-spacing: .04em; color: #59627f; white-space: nowrap; transition: background .15s, color .15s; }
+.xs-tfo:hover span { color: var(--xs-ink); }
+.xs-tfo input:checked + span { background: var(--xs-acc); color: #fff; box-shadow: 0 2px 6px -2px color-mix(in srgb, var(--xs-acc) 70%, transparent); }
+.xs-tfo input:focus-visible + span { outline: 2px solid var(--xs-acc); outline-offset: 2px; }
+.xs-kwhy { display: block; margin-top: 4px; color: #3a4466 !important; font-style: normal !important; line-height: 1.45; }
+.xs-kwhy::before { content: 'Why: '; font-weight: 750; color: var(--xs-acc); }
+
+/* question vs passage (Learn): two cards, then the answer buttons */
+.xl-vs { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+.xl-vs > li { padding: 14px; border-radius: 18px; border: 1px solid var(--xs-line); background: #fff; display: grid; gap: 12px; }
+.xl-vs-pair { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
+.xl-vs-pair p { margin: 0; padding: 12px 14px 13px; border-radius: 13px; display: grid; gap: 5px; line-height: 1.5; font-size: .96rem; }
+.xl-vs-q { background: color-mix(in srgb, var(--xs-acc) 8%, #fff); border: 1px solid color-mix(in srgb, var(--xs-acc) 24%, #fff); }
+.xl-vs-p { background: #f7f5ef; border: 1px solid #e9e3d3; font-family: var(--serif, Georgia, serif); }
+.xl-vs-k { font: 800 .66rem/1 var(--sans, system-ui); letter-spacing: .12em; text-transform: uppercase; color: var(--xs-acc); }
+.xl-vs-p .xl-vs-k { color: #8a7a4f; }
+.xl-opts.is-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.xl-opts.is-row .xl-cn { margin-right: 4px; }
+.xl-opts.is-row button { padding: 8px 14px; border-radius: 999px; font: 750 .78rem/1 var(--sans, system-ui); letter-spacing: .03em; }
+.xl-opts.is-row button.is-ans { color: #14663f; }
+.xl-opts.is-row button.is-pick:not(.is-ans) { color: #a91d2f; }
+.xl-vs li.is-right { border-color: #b7dfc9; background: #f6fcf8; } .xl-vs li.is-right .xl-verdict { color: #1f7a4f; }
+.xl-vs li.is-wrong { border-color: #f1c7cd; background: #fffafa; } .xl-vs li.is-wrong .xl-verdict { color: #a91d2f; }
+
+/* a scale (100% → 0%) */
+.xl-scale { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.xl-scale li { display: grid; grid-template-columns: 64px minmax(80px, 30%) minmax(0, 1fr); gap: 14px; align-items: center; padding: 10px 14px; border-radius: 14px; background: #fff; border: 1px solid var(--xs-line); }
+.xl-sc-v { font: 800 .9rem/1.1 var(--sans, system-ui); color: var(--xs-ink); }
+.xl-sc-bar { height: 10px; border-radius: 99px; background: #eef0f5; overflow: hidden; }
+.xl-sc-bar i { display: block; height: 100%; width: var(--p); border-radius: inherit; background: linear-gradient(90deg, color-mix(in srgb, var(--xs-acc) 55%, #fff), var(--xs-acc)); }
+.xl-sc-w { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.xl-sc-w em { font-style: normal; padding: 4px 10px; border-radius: 999px; background: #f4f6fa; border: 1px solid var(--xs-line); font-size: .86rem; font-weight: 600; }
+.xl-sc-w small { flex-basis: 100%; color: var(--muted, #6a7391); font-size: .8rem; }
+
+@media (max-width: 720px) {
+  .xs-text-h { padding: 16px 18px 12px; } .xs-text-b { padding: 16px 18px 18px; font-size: .98rem; }
+  .xs-text.is-scroll .xs-text-b { max-height: 60vh; }
+  .xs-text-b p.has-l { padding-left: 34px; }
+  .xs-tf-legend { grid-template-columns: 1fr; gap: 6px; } .xs-tf-legend div { display: flex; gap: 8px; align-items: baseline; padding: 8px 12px; } .xs-tf-legend dd { margin: 0; }
+  .xs-tfng li { grid-template-columns: minmax(0, 1fr); }
+  .xs-tf-o { justify-self: start; margin-left: 38px; max-width: calc(100% - 38px); }
+  .xs-tfo span { padding: 8px 11px; }
+  .xl-vs-pair { grid-template-columns: minmax(0, 1fr); }
+  .xl-scale li { grid-template-columns: 52px minmax(0, 1fr); } .xl-sc-w { grid-column: 1 / -1; }
+}
+.xl-parts.is-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 1100px) { .xl-parts.is-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 860px) { .xl-parts.is-3 { grid-template-columns: 1fr; } }
