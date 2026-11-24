@@ -79,7 +79,8 @@ window.createDEC15Cloud = function ({ cfg, lessonId, getState, applyState, onCha
   async function init() {
     if (!enabled) { set('local'); return; }
     if (!window.supabase) await new Promise((ok, bad) => { const sc = document.createElement('script'); sc.src = 'js/vendor/supabase.min.js?v=' + (cfg.version || ''); sc.onload = ok; sc.onerror = bad; document.head.appendChild(sc); });
-    client = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseKey, { auth: { persistSession: true, autoRefreshToken: true, storageKey: 'dec15-auth' } });
+    client = window.IELTS_GATE?.client || window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseKey, { auth: { persistSession: true, autoRefreshToken: true, storageKey: 'dec15-auth' } });   // the sign-in gate's client, when there is one
+    if (window.IELTS_GATE?.recovery) recovery = true;
     const { data } = await client.auth.getSession();
     user = data.session?.user || null;
     if (user) { await loadProfile(); await pull(); } else set('signed-out');
