@@ -949,6 +949,8 @@ const partStyle = w => `--accent:${partColor(w)};--accent-bg:color-mix(in srgb, 
    course.menusHidden in course.js is the default before the teacher has chosen. A hidden page cannot be opened by students. */
 const MENUS = [['calendar', 'side-calendar', 'Course calendar'], ['assessments', 'side-assess', 'Assessments'], ['band', 'side-band', 'Band calculator'], ['board', 'side-board', 'Class board'],
   ['chats', 'side-chats', 'Chats'], ['shared', 'side-shared', 'Shared with me'], ['picker', 'side-pick', 'Name wheel']];
+/* Top-bar buttons the teacher can hide (Settings → "Top bar"); hidden for everyone, the teacher too, until shown again */
+const TOPBAR = [['top-announce', 'announce-btn', 'Messages'], ['top-class', 'class-btn', 'Class']];
 const menusHidden = () => { const v = klass?.setting?.('menu_hidden'); return Array.isArray(v) ? v : course.menusHidden || []; };
 const menuOff = route => !isTeacher() && menusHidden().includes(route);
 /* Side panel groups fold open and shut (click the group's heading); remembered on this device. */
@@ -958,6 +960,7 @@ document.addEventListener('click', e => { const g = e.target.closest?.('#sidebar
 document.addEventListener('keydown', e => { const g = e.target.closest?.('#sidebar .side-group[data-fold]'); if (g && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); toggleFold(g.dataset.fold); } });
 function paintMenus() {
   const off = menusHidden(), t = isTeacher();
+  TOPBAR.forEach(([k, id]) => $('#' + id)?.classList.toggle('top-off', off.includes(k)));
   MENUS.forEach(([k, id]) => { const el = $('#' + id); if (!el) return; const h = off.includes(k); el.classList.toggle('menu-off', h && !t); el.classList.toggle('menu-off-teacher', h && t); el.title = h && t ? 'Hidden from students' : el.title === 'Hidden from students' ? '' : el.title; });
   const groups = [...document.querySelectorAll('#sidebar .side-group')];   // a group label with nothing left under it is hidden too
   const folds = sideFolds();
@@ -971,12 +974,19 @@ function paintMenus() {
   if (!box && menu) { box = menu.appendChild(document.createElement('div')); box.id = 'side-menus'; box.className = 'side-menus'; }
   if (!box) return;
   const avail = MENUS.filter(([, id]) => { const el = $('#' + id); return el && !el.hidden; });
-  box.innerHTML = `<span class="sc-label">Side panel for students</span>${avail.map(([k, , label]) => { const on = !off.includes(k);
+  const ansOpen = klass?.answersOpen !== false, sw = (attr, on, label, state) => `<button type="button" class="teacher-toggle" ${attr} aria-pressed="${on}"><span class="tt-switch" aria-hidden="true"><i></i></span>${esc(label)} <span class="tt-state">${state}</span></button>`;
+  const extra = `<span class="sc-label">Answers for students</span>${sw('data-answers-toggle', ansOpen, 'Check answers', ansOpen ? 'Open' : 'Closed')}
+    <span class="sc-label">Top bar</span>${TOPBAR.map(([k, , label]) => sw(`data-menu-toggle="${k}"`, !off.includes(k), label, off.includes(k) ? 'Hidden' : 'Shown')).join('')}`;
+  box.innerHTML = extra + `<span class="sc-label">Side panel for students</span>${avail.map(([k, , label]) => { const on = !off.includes(k);
     return `<button type="button" class="teacher-toggle" data-menu-toggle="${k}" aria-pressed="${on}"><span class="tt-switch" aria-hidden="true"><i></i></span>${esc(label)} <span class="tt-state">${on ? 'Shown' : 'Hidden'}</span></button>`; }).join('')}<small class="side-menus-note">Applies to every student, straight away.</small>`;
 }
 document.addEventListener('click', async e => { const b = e.target.closest?.('[data-menu-toggle]'); if (!b) return;
   const k = b.dataset.menuToggle, off = menusHidden(), next = off.includes(k) ? off.filter(x => x !== k) : [...off, k];
-  if (await klass?.saveSetting?.('menu_hidden', next)) toast(`${MENUS.find(m => m[0] === k)[2]} is now ${next.includes(k) ? 'hidden from' : 'shown to'} students.`); });
+  const top = TOPBAR.find(m => m[0] === k);
+  if (await klass?.saveSetting?.('menu_hidden', next)) { paintMenus(); toast(top ? `${top[2]} is now ${next.includes(k) ? 'hidden from' : 'shown in'} the top bar.` : `${MENUS.find(m => m[0] === k)[2]} is now ${next.includes(k) ? 'hidden from' : 'shown to'} students.`); } });
+document.addEventListener('click', async e => { const b = e.target.closest?.('[data-answers-toggle]'); if (!b || !klass) return;   // Settings → Answers for students
+  const open = klass.answersOpen !== false;
+  if (await klass.saveSetting('answers_open', !open)) { paintMenus(); toast(!open ? 'Answers are open: students can check and see the answers.' : 'Answers are closed: students cannot check or see the answers.'); } });
 const partGroups = () => { const gs = course.groups?.length ? course.groups : [{ id: 'all', title: UW + 's' }];
   return gs.map(g => ({ ...g, parts: course.weeks.filter(w => (w.group || gs[0].id) === g.id) })).filter(g => g.parts.length); };
 function paintSkillNav(route) {
@@ -1045,7 +1055,7 @@ function sectionPage(w, secId, grpId) {
     const pic = x => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${PI[x.id] || '<path d="M5 12h14"/>'}</svg>`;
     body += `<ol class="sk-parts" style="${partStyle(w)}">${sec.groups.map(x => { const st = groupStats(w, [x]), on = x.id === g.id;
       return `<li><a class="sk-part${on ? ' is-on' : ''}" href="#/skill/${w.n}/${sec.id}/${x.id}"${on ? ' aria-current="page"' : ''}><span class="sk-part-ic">${pic(x)}</span>
-        <span class="sk-part-tx"><b>${esc(x.title)}</b><small>${esc(x.sub || '')}</small></span><span class="sk-part-meta">${x.qs ? `<em>${esc(x.qs)}</em>` : ''}<span>${st.ready ? `${st.done} / ${st.ready}` : 'Coming soon'}</span></span>
+        <span class="sk-part-tx"><b>${esc(x.title)}</b><small>${esc(x.sub || '')}</small></span><span class="sk-part-meta">${x.qs ? `<em><span class="sk-q-long">${esc(x.qs)}</span><span class="sk-q-short">${esc(x.qs.replace(/^Questions\s*/, 'Q '))}</span></em>` : ''}<span>${st.ready ? `${st.done} / ${st.ready}` : 'Coming soon'}</span></span>
         <span class="sk-part-bar"><i style="width:${st.ready ? Math.round(100 * st.done / st.ready) : 0}%"></i></span></a></li>`; }).join('')}</ol>`;
     const at = groupLessons(w, g), st = groupStats(w, [g]), view = lsGet(CLS.id + '-ex-view', 'list');
     const status = (d, a, b, done) => !d || d.status !== 'ready' ? '<span class="sk-st is-soon">Coming soon</span>' : done ? `<span class="sk-st is-done">${icon('check')}Done</span>` : a ? `<span class="sk-st is-on">Continue ${icon('arrow')}</span>` : `<span class="sk-st">Start ${icon('arrow')}</span>`;
