@@ -154,3 +154,55 @@ body.side-open .m-mini, body.m-view-open .m-mini { display: none; }
 }
 
 @media (max-width: 720px) { .masthead, .masthead .topbar { background: rgba(250, 249, 246, .985) !important; -webkit-backdrop-filter: none !important; backdrop-filter: none !important; } }   /* no text showing through the top bar */
+
+/* ── lesson cards (Learn) on phones: one compact row each — number, lesson and title, status ── */
+@media (max-width: 720px) {
+  [data-course="ielts"] .sec-page .day-grid { grid-template-columns: 1fr !important; gap: 8px; }
+  [data-course="ielts"] .sec-page .day-card { min-height: 0; border-radius: 16px; overflow: hidden; }
+  [data-course="ielts"] .sec-page .day-card.is-soon, [data-course="ielts"] .sec-page .day-card.is-ready > a { display: grid !important; grid-template-columns: 44px minmax(0, 1fr) auto; grid-template-areas: "n e s" "n t t"; column-gap: 12px; row-gap: 2px; align-items: center; padding: 12px 14px !important; min-height: 0 !important; height: auto !important; }
+  [data-course="ielts"] .sec-page .day-card .day-art, [data-course="ielts"] .sec-page .day-card .day-parts, [data-course="ielts"] .sec-page .day-card .day-meter, [data-course="ielts"] .sec-page .day-card .day-foot { display: none !important; }
+  [data-course="ielts"] .sec-page .day-label, [data-course="ielts"] .sec-page .day-n { display: contents !important; }
+  [data-course="ielts"] .sec-page .day-n-num { grid-area: n; display: grid !important; width: 44px; height: 44px; margin: 0 !important; font-size: 1.2rem; box-shadow: 0 6px 12px -8px color-mix(in srgb, var(--dc) 85%, transparent); }
+  [data-course="ielts"] .sec-page .day-n-txt { grid-area: e; grid-row: 1; align-self: end; display: block !important; margin: 0 !important; font-size: .68rem; letter-spacing: .14em; }
+  [data-course="ielts"] .sec-page .day-n-txt small { display: none; }
+  [data-course="ielts"] .sec-page .day-label > span:not(.day-n) { display: inline-flex !important; grid-area: s; grid-row: 1; align-self: center; justify-self: end; margin: 0 !important; position: static !important; height: 24px; padding: 0 9px; font-size: .64rem; gap: 4px; white-space: nowrap; }
+  [data-course="ielts"] .sec-page .day-label > span .icon { width: 13px; height: 13px; }
+  [data-course="ielts"] .sec-page .day-title { grid-area: t; grid-row: 2; align-self: start; padding: 0 !important; margin: 0; font-size: 1.02rem; line-height: 1.25; }
+  [data-course="ielts"] .sec-page .day-card::before, [data-course="ielts"] .sec-page .day-card::after { display: none; }
+}
+
+/* ── an exercise on phones: a progress strip that stays under the top bar, a tighter page ── */
+.xs-strip { display: none; }
+@media (max-width: 720px) {
+  .xs-strip { position: sticky; top: 57px; z-index: 32; display: grid; grid-template-columns: minmax(0, 1fr) auto auto; grid-template-areas: "t n go" "bar bar go"; align-items: center; gap: 4px 10px;
+    margin: -4px -16px 0; padding: 8px 16px 9px; background: rgba(250, 249, 246, .985); border-bottom: 1px solid rgba(24, 33, 63, .08); box-shadow: 0 8px 16px -14px rgba(24, 33, 63, .5); }
+  .xs-strip-t { grid-area: t; font: 700 .86rem/1.2 var(--sans, system-ui); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--ink, #18213f); }
+  .xs-strip-n { grid-area: n; font: 600 .78rem/1 var(--sans, system-ui); color: var(--muted, #5a6382); font-variant-numeric: tabular-nums; }
+  .xs-strip-n b { color: var(--xs-acc); font-weight: 800; }
+  .xs-strip-bar { grid-area: bar; height: 5px; border-radius: 99px; background: rgba(24, 33, 63, .08); overflow: hidden; }
+  .xs-strip-bar i { display: block; width: 0; height: 100%; border-radius: 99px; background: var(--xs-acc); transition: width .3s ease; }
+  .xs-strip.is-full .xs-strip-bar i { background: linear-gradient(90deg, var(--xs-acc), #2fb38a); }
+  .xs-strip-go { grid-area: go; height: 36px; padding: 0 14px; border: 0; border-radius: 12px; background: var(--xs-acc); color: #fff; font: 800 .8rem/1 var(--sans, system-ui); cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .xs-strip-go:active { transform: scale(.96); }
+  .m-head .m-title { max-width: 52vw; }
+
+  /* tighter page: the questions get the full width */
+  .xs { gap: 12px; }
+  .xs-hero { padding: 16px 16px 14px 20px; border-radius: 20px; }
+  .xs-hero::before { width: 5px; }
+  .xs-eyebrow { font-size: .66rem; }
+  .xs-hero h1 { font-size: 1.42rem; margin: 4px 0 6px; }
+  .xs-hero p { font-size: .88rem; line-height: 1.45; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .xs-facts li:nth-child(n+3) { display: none; }   /* questions and recordings only; the types are in the list */
+  .xs-part { margin: 0 -10px; padding: 14px 10px 16px; border-radius: 18px; }
+  .xs-rubric p { font-size: .94rem; }
+  .xs-paper { border-radius: 14px; }
+  .xs-mq-q p { font-size: .98rem; }
+  .xs-opts { gap: 6px; }
+  .xs-end { gap: 10px; }
+  .xs-fold > summary { padding: 14px 14px; gap: 12px; }
+  .xs-fold-ic { width: 40px; height: 40px; border-radius: 12px; }
+  .xs-nav { grid-template-columns: 1fr; }
+  .xs-nav .btn { order: -1; height: 52px; font-size: 1rem; }
+}
+@media (max-width: 720px) { #main { overflow-x: clip; } }   /* full-width strips never widen the page */

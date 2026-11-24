@@ -91,7 +91,7 @@
           return `<li class="xs-mq"><div class="xs-mq-q"><span class="xs-qn">${f + i}</span><p>${fmt(it.q)}</p></div><div class="xs-opts" role="radiogroup" aria-label="Question ${f + i}">${(it.options || []).map((o, j) =>
             `<label class="xs-opt"><input type="radio" name="${esc(k)}" value="${LET[j]}" data-save="${esc(k)}"${v === LET[j] ? ' checked' : ''}><span class="xs-let">${LET[j]}</span><span class="xs-ot">${fmt(o)}</span></label>`).join('')}</div></li>`; }).join('')}</ol>`; },
       ieMulti(b) { const pick = Number(b.pick) || (b.answers || []).length || 2;
-        return `${rubric(b)}<div class="xs-mq is-multi"><div class="xs-mq-q"><span class="xs-qn is-wide">${range(b).replace('Questions ', '')}</span><p>${fmt(b.q)}<small>Choose ${['', 'ONE', 'TWO', 'THREE', 'FOUR'][pick] || pick} letters.${Number(b.numbers) === 1 ? ` You need ${pick === 2 ? 'both' : 'all of them'} for the mark.` : ''}</small></p></div>
+        return `${rubric(b)}<div class="xs-mq is-multi" data-from="${Number(b.from) || 1}" data-n="${count(b)}"><div class="xs-mq-q"><span class="xs-qn is-wide">${range(b).replace('Questions ', '')}</span><p>${fmt(b.q)}<small>Choose ${['', 'ONE', 'TWO', 'THREE', 'FOUR'][pick] || pick} letters.${Number(b.numbers) === 1 ? ` You need ${pick === 2 ? 'both' : 'all of them'} for the mark.` : ''}</small></p></div>
           <div class="xs-opts">${(b.options || []).map((o, j) => { const k = `${b.id}-${LET[j]}`; return `<label class="xs-opt is-check"><input type="checkbox" data-save="${esc(k)}"${val(k) === true ? ' checked' : ''}><span class="xs-let">${LET[j]}</span><span class="xs-ot">${fmt(o)}</span></label>`; }).join('')}</div></div>`; },
       ieMatch(b) { const f = Number(b.from) || 1, keys = (b.options || []).map((_, j) => b.numbering === 'roman' ? ROM[j] : LET[j]);
         return `${rubric(b)}<div class="xs-match">${box(b.boxTitle, b.options || [], keys)}<ol class="xs-mlist">${(b.items || []).map((it, i) => `<li><span class="xs-mq-t">${fmt(it.q)}</span>${field(`${b.id}-${i}`, f + i, it.answer, keys)}</li>`).join('')}</ol></div>`; },
@@ -165,7 +165,8 @@
     /* ── the page ── */
     const sec = (L.sections || [])[0] || {}, doneAll = acts.length && acts.every(a => ctx.done(a.id));
     const crumbs = (ctx.trail || []).map(t => `<a href="${esc(t.href)}">${esc(t.label)}</a><span aria-hidden="true">›</span>`).join('');
-    return `<article class="xs" style="--xs-soft:${ctx.soft || '#e6f3f1'}${ctx.acc ? `;--xs-acc:${ctx.acc}` : ''}">
+    return `<article class="xs" style="--xs-soft:${ctx.soft || '#e6f3f1'}${ctx.acc ? `;--xs-acc:${ctx.acc}` : ''}" data-total="${total}">
+      <div class="xs-strip" aria-label="Your progress in this exercise"><b class="xs-strip-t">${esc(L.title)}</b><span class="xs-strip-bar" aria-hidden="true"><i></i></span><span class="xs-strip-n"><b>0</b> / ${total}</span><button type="button" class="xs-strip-go" data-xs-answers>Answers</button></div>
       <nav class="xs-trail" aria-label="Where you are">${ctx.back ? `<a class="xs-back" href="${esc(ctx.back.href)}">${icon('left')}<span>${esc(ctx.back.label)}</span></a>` : ''}<span class="xs-crumbs">${crumbs}<b>${esc(ctx.name || '')}</b></span></nav>
       <header class="xs-hero"><div class="xs-hero-tx"><span class="xs-eyebrow">${esc(ctx.eyebrow || 'Listening')}</span><h1>${esc(L.title)}</h1>${L.journey ? `<p>${esc(L.journey)}</p>` : ''}
         <ul class="xs-facts"><li><b>${total}</b> questions</li><li><b>${audios.length || 1}</b> recording${audios.length === 1 ? '' : 's'}</li>${kinds.map(k => `<li>${esc(k)}</li>`).join('')}</ul></div>
