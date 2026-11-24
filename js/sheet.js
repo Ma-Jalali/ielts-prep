@@ -38,16 +38,23 @@
       const cfg = window.DEC15_CONFIG || {}, relay = id && cfg.supabaseUrl ? `${cfg.supabaseUrl.replace(/\/$/, '')}/functions/v1/ielts-audio?id=${id}` : '';
       const direct = id ? `https://drive.usercontent.google.com/download?id=${id}&export=download` : a.src;
       const I = (p, w = 2.2) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;
-      return `<div class="xs-player xp" data-fallback="${esc(relay ? direct : '')}">
+      const skip = (fwd, n) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${fwd ? '<path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3"/><path d="M19.8 3.8v3.6h-3.6"/>' : '<path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3"/><path d="M4.2 3.8v3.6h3.6"/>'}<text x="12" y="15.6" text-anchor="middle" font-size="7.6" font-weight="800" fill="currentColor" stroke="none" font-family="system-ui, sans-serif">${n}</text></svg>`;
+      let seed = 0; for (const ch of String(id || a.src)) seed = (seed * 31 + ch.charCodeAt(0)) >>> 0;   // the same bars for the same recording
+      const bars = [...Array(56)].map((_, j) => { seed = (seed * 1103515245 + 12345) >>> 0; const r = (seed >>> 8) / 16777216, env = .55 + .45 * Math.sin(j / 55 * Math.PI); return `<i style="height:${Math.round(22 + 70 * r * env)}%"></i>`; }).join('');
+      return `<div class="xs-player xp" data-key="${esc(id || a.src)}" data-fallback="${esc(relay ? direct : '')}" data-title="${esc(`${audios.length > 1 ? `Recording ${i + 1}` : 'Recording'} · ${range}`)}">
         <audio preload="metadata" src="${esc(relay || direct)}" title="${esc(a.title || 'Recording')}"></audio>
-        <button type="button" class="xp-play" aria-label="Play the recording"><span class="xp-i-play">${I('<path d="M8 5.5v13l10.5-6.5z" fill="currentColor" stroke="none"/>')}</span><span class="xp-i-pause">${I('<path d="M8.5 5.5v13M15.5 5.5v13"/>', 3.2)}</span><span class="xp-spin" aria-hidden="true"></span></button>
-        <div class="xp-main"><div class="xp-top xs-play-top"><b>${audios.length > 1 ? `Recording ${i + 1}` : 'Recording'}</b><span>${esc(range)}${extra ? ` · ${esc(extra[1])}` : ''}</span></div>
-          <div class="xp-seekrow"><span class="xp-t">0:00</span><input type="range" class="xp-seek" min="0" max="1000" step="1" value="0" aria-label="Position in the recording"><span class="xp-d">--:--</span></div>
-          <div class="xp-ctrl"><button type="button" data-xp="-10" aria-label="Back 10 seconds">${I('<path d="M4 12a8 8 0 1 0 2.5-5.8M4 4v4.5h4.5"/>', 2)}<small>10</small></button>
-            <button type="button" data-xp="+10" aria-label="Forward 10 seconds">${I('<path d="M20 12a8 8 0 1 1-2.5-5.8M20 4v4.5h-4.5"/>', 2)}<small>10</small></button>
-            <button type="button" class="xp-speed" data-xp="speed" aria-label="Playback speed">1×</button>
-            <span class="xp-vol"><button type="button" data-xp="mute" aria-label="Mute">${I('<path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor"/><path class="xp-wave" d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/>', 2)}</button><input type="range" class="xp-volume" min="0" max="1" step="0.05" value="1" aria-label="Volume"></span></div>
-          <p class="xp-msg" hidden>This recording could not play here. ${id ? `<a href="https://drive.google.com/file/d/${id}/view" target="_blank" rel="noopener">Open it in Google Drive</a>` : ''}</p></div></div>`; };
+        <div class="xp-head xp-top xs-play-top"><b>${audios.length > 1 ? `Recording ${i + 1}` : 'Recording'}</b><span>${esc(range)}${extra ? ` · ${esc(extra[1])}` : ''}</span><em class="xp-state" aria-live="polite"></em></div>
+        <div class="xp-wave"><div class="xp-bars" aria-hidden="true">${bars}</div><div class="xp-bars is-on" aria-hidden="true">${bars}</div><input type="range" class="xp-seek" min="0" max="1000" step="1" value="0" aria-label="Position in the recording"></div>
+        <div class="xp-times"><span class="xp-t">0:00</span><span class="xp-d">--:--</span></div>
+        <div class="xp-ctrl">
+          <button type="button" class="xp-skip" data-xp="-10" aria-label="Back 10 seconds">${skip(false, 10)}</button>
+          <button type="button" class="xp-play" aria-label="Play the recording"><span class="xp-i-play">${I('<path d="M8 5.5v13l10.5-6.5z" fill="currentColor" stroke="none"/>')}</span><span class="xp-i-pause">${I('<path d="M8.5 5.5v13M15.5 5.5v13"/>', 3.4)}</span><span class="xp-i-again">${I('<path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3"/><path d="M4.2 3.8v3.6h3.6"/>', 2.6)}</span><span class="xp-spin" aria-hidden="true"></span></button>
+          <button type="button" class="xp-skip" data-xp="+10" aria-label="Forward 10 seconds">${skip(true, 10)}</button>
+          <span class="xp-extra"><button type="button" class="xp-speed" data-xp="speed" aria-label="Playback speed">1×</button>
+            <span class="xp-vol"><button type="button" class="xp-mute" data-xp="mute" aria-label="Mute">${I('<path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor"/><path class="xp-wv" d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/>', 2)}</button><input type="range" class="xp-volume" min="0" max="1" step="0.05" value="1" aria-label="Volume"></span></span>
+        </div>
+        <div class="xp-resume" hidden><span>You stopped at <b class="xp-rt">0:00</b></span><button type="button" data-xp="resume">Continue</button><button type="button" data-xp="restart">Start again</button></div>
+        <p class="xp-msg" hidden>This recording could not play here. ${id ? `<a href="https://drive.google.com/file/d/${id}/view" target="_blank" rel="noopener">Open it in Google Drive</a>` : ''}</p></div>`; };
 
     /* ── one answer field: typed, or a letter ── */
     const field = (k, n, ans, letters) => { const v = val(k);
