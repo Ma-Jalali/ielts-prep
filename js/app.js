@@ -1016,11 +1016,13 @@ function groupStats(w, groups) { let ready = 0, done = 0, total = 0; groups.forE
 function sectionPage(w, secId, grpId) {
   const S = secOf(w), remember = CLS.id + '-sec-' + w.n;
   const sec = S.find(x => x.id === secId) || S.find(x => x.id === lsGet(remember, '')) || S[0]; lsSet(remember, sec.id);
-  const head = `<header class="week-head">${partIcon(w, 'is-on week-art')}<div><span class="eyebrow">${esc(course.code)} · ${esc((partGroups().find(g => g.parts.includes(w)) || {}).title || UW)}</span><h1>${esc(w.theme)}</h1>${w.summary ? `<p>${esc(w.summary)}</p>` : ''}</div></header>`;
-  const tabs = `<nav class="sec-tabs" aria-label="${esc(w.theme)}: sections">${S.map((x, i) => { const st = groupStats(w, x.groups), on = x.id === sec.id;
-    const what = x.groups.length === 1 ? `${x.groups[0].size} ${x.groups[0].test ? 'tests' : x.groups[0].slots ? 'lessons' : 'exercises'}` : `${[...new Set(x.groups.map(g => g.by).filter(Boolean))].length > 1 ? 'By part · by question type' : `${x.groups.length} sets`}`;
-    return `<a class="sec-tab${on ? ' is-on' : ''}" href="#/skill/${w.n}/${x.id}" style="${partStyle(w)}"${on ? ' aria-current="page"' : ''}><span class="sec-n">${i + 1}</span><span class="sec-ic">${icon(x.icon || 'book')}</span><span class="sec-tx"><b>${esc(x.title)}</b><small>${esc(what)}</small></span>
-      <span class="sec-prog"><i style="width:${st.total ? Math.round(100 * st.done / st.total) : 0}%"></i></span><span class="sec-meta">${st.ready ? `${st.done} of ${st.ready} done` : 'Coming soon'}</span></a>`; }).join('')}</nav>`;
+  const all = groupStats(w, S.flatMap(x => x.groups)), art = window.IELTSSheetArt ? window.IELTSSheetArt(w.illus || ({ listening: 'headset', reading: 'books' })[w.art] || 'books', 'sk-art') : '';
+  const head = `<header class="sk-hero" style="${partStyle(w)}"><div class="sk-hero-tx"><span class="eyebrow">${esc(course.code)} · ${esc((partGroups().find(g => g.parts.includes(w)) || {}).title || UW)}</span>
+      <h1>${partIcon(w, 'is-on sk-ic')}${esc(w.theme)}</h1>${w.tag ? `<p class="sk-tag">${esc(w.tag)}</p>` : ''}${w.summary ? `<p>${esc(w.summary)}</p>` : ''}
+      <div class="sk-stats"><span><b>${all.ready}</b> ready</span><span><b>${all.done}</b> done</span>${all.ready ? `<span class="sk-bar" aria-label="${Math.round(100 * all.done / all.ready)}% done"><i style="width:${Math.round(100 * all.done / all.ready)}%"></i></span>` : ''}</div></div>${art}</header>`;
+  const tabs = `<nav class="sk-tabs" aria-label="${esc(w.theme)}: sections" style="${partStyle(w)}">${S.map(x => { const st = groupStats(w, x.groups), on = x.id === sec.id;
+    const what = st.ready ? `${st.done ? `${st.done}/` : ''}${st.ready} ${x.groups.some(g => g.test) ? 'tests' : x.groups.some(g => g.slots) ? 'lessons' : 'exercises'}` : 'Coming soon';
+    return `<a class="sk-tab${on ? ' is-on' : ''}${st.ready ? '' : ' is-soon'}" href="#/skill/${w.n}/${x.id}"${on ? ' aria-current="page"' : ''}><span class="sk-tab-ic">${icon(x.icon || 'book')}</span><b>${esc(x.title)}</b><small>${esc(what)}</small></a>`; }).join('')}</nav>`;
   let body = `<p class="sec-blurb">${esc(sec.blurb || '')}</p>`;
   if (sec.groups.length === 1 && sec.groups[0].map) {   // Learn: in order, on the road map
     const g = sec.groups[0], at = groupLessons(w, g); let next = false;
@@ -1035,16 +1037,26 @@ function sectionPage(w, secId, grpId) {
       const inner = `<span class="tc-n"><small>Test</small>${n}</span><span class="tc-tx"><b>${esc(d?.title || `Practice test ${n}`)}</b><small>4 parts · 40 questions · about 30 minutes</small></span>
         <span class="tc-parts">${[1, 2, 3, 4].map(k => `<i>Part ${k}</i>`).join('')}</span><span class="tc-st${done ? ' is-done' : a ? ' is-on' : ''}">${!ready ? 'Coming soon' : done ? `${icon('check')}Done` : a ? 'Continue' : `Start ${icon('arrow')}`}</span>`;
       return `<li>${ready ? `<a class="test-card" href="#/${d.id}" style="${partStyle(w)}">${inner}</a>` : `<div class="test-card is-soon" style="${partStyle(w)}">${inner}</div>`}</li>`; }).join('')}</ol>`;
-  } else {   // Practise: choose a set (by part, by question type), then its numbered exercises
+  } else {   // Practise: choose a part (one card each), then its exercises as a list (or a grid, the student's choice)
     const g = sec.groups.find(x => x.id === grpId) || sec.groups.find(x => x.id === lsGet(remember + '-grp', '')) || sec.groups[0]; lsSet(remember + '-grp', g.id);
-    const rows = [...new Set(sec.groups.map(x => x.by || ''))];
-    body += `<div class="set-pick">${rows.map(by => `<div class="set-row">${by ? `<span class="set-by">${esc(by)}</span>` : ''}<div class="set-chips">${sec.groups.filter(x => (x.by || '') === by).map(x => { const st = groupStats(w, [x]);
-      return `<a class="set-chip${x.id === g.id ? ' is-on' : ''}" href="#/skill/${w.n}/${sec.id}/${x.id}"${x.id === g.id ? ' aria-current="page"' : ''}><b>${esc(x.title)}</b><small>${st.ready ? `${st.done}/${st.ready}` : x.size}</small></a>`; }).join('')}</div></div>`).join('')}</div>`;
-    const at = groupLessons(w, g), st = groupStats(w, [g]);
-    body += `<section class="set-panel" style="${partStyle(w)}"><header><div><h2>${esc(g.title)}</h2>${g.sub ? `<p>${esc(g.sub)}</p>` : ''}</div><span class="set-count">${st.ready ? `<b>${st.done}</b> of ${st.ready} done` : `${g.size} exercises · coming soon`}</span></header>
-      <ol class="ex-grid">${[...Array(g.size)].map((_, i) => { const n = i + 1, d = at[n], ready = d?.status === 'ready', [a, b] = d ? dayProgress(d) : [0, 0], done = ready && b && a === b;
-        const inner = `<span class="ex-n">${done ? icon('check') : n}</span><span class="ex-t">${esc(ready ? d.title : 'Coming soon')}</span>${ready && a && !done ? `<span class="ex-bar"><i style="width:${Math.round(100 * a / b)}%"></i></span>` : ''}`;
-        return `<li>${ready ? `<a class="ex-tile${done ? ' is-done' : a ? ' is-on' : ''}" href="#/${d.id}" aria-label="Exercise ${n}: ${esc(d.title)}${done ? ', done' : ''}">${inner}</a>` : `<div class="ex-tile is-soon" aria-label="Exercise ${n}: coming soon">${inner}</div>`}</li>`; }).join('')}</ol></section>`;
+    const PI = { part1: '<path d="M4 6h10v7H8l-4 3z"/><path d="M14 9h6v7l-3-2h-6v-2"/>', part2: '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M8 21h8"/>', part3: '<circle cx="7" cy="8" r="2.5"/><circle cx="17" cy="8" r="2.5"/><circle cx="12" cy="6" r="2.5"/><path d="M3 18c0-3 2-5 4-5s4 2 4 5M13 18c0-3 2-5 4-5s4 2 4 5M8 15c1-3 2-4 4-4s3 1 4 4"/>', part4: '<rect x="3" y="4" width="18" height="11" rx="1.5"/><path d="M7 19l3-4M17 19l-3-4M7 9h6M7 12h9"/>' };
+    const pic = x => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${PI[x.id] || '<path d="M5 12h14"/>'}</svg>`;
+    body += `<ol class="sk-parts" style="${partStyle(w)}">${sec.groups.map(x => { const st = groupStats(w, [x]), on = x.id === g.id;
+      return `<li><a class="sk-part${on ? ' is-on' : ''}" href="#/skill/${w.n}/${sec.id}/${x.id}"${on ? ' aria-current="page"' : ''}><span class="sk-part-ic">${pic(x)}</span>
+        <span class="sk-part-tx"><b>${esc(x.title)}</b><small>${esc(x.sub || '')}</small></span><span class="sk-part-meta">${x.qs ? `<em>${esc(x.qs)}</em>` : ''}<span>${st.ready ? `${st.done} / ${st.ready}` : 'Coming soon'}</span></span>
+        <span class="sk-part-bar"><i style="width:${st.ready ? Math.round(100 * st.done / st.ready) : 0}%"></i></span></a></li>`; }).join('')}</ol>`;
+    const at = groupLessons(w, g), st = groupStats(w, [g]), view = lsGet(CLS.id + '-ex-view', 'list');
+    const status = (d, a, b, done) => !d || d.status !== 'ready' ? '<span class="sk-st is-soon">Coming soon</span>' : done ? `<span class="sk-st is-done">${icon('check')}Done</span>` : a ? `<span class="sk-st is-on">Continue ${icon('arrow')}</span>` : `<span class="sk-st">Start ${icon('arrow')}</span>`;
+    const items = [...Array(g.size)].map((_, i) => { const n = i + 1, d = at[n], ready = d?.status === 'ready', [a, b] = d ? dayProgress(d) : [0, 0], done = ready && b && a === b; return { n, d, ready, a, b, done }; });
+    const list = `<ol class="sk-list">${items.map(({ n, d, ready, a, b, done }) => { const inner = `<span class="sk-n${done ? ' is-done' : ''}">${done ? icon('check') : n}</span><span class="sk-row-tx"><b>${esc(ready ? d.title : `Exercise ${n}`)}</b>${ready && d.sub ? `<small>${esc(d.sub)}</small>` : ''}</span>${ready && a && !done ? `<span class="sk-row-bar"><i style="width:${Math.round(100 * a / b)}%"></i></span>` : ''}${status(d, a, b, done)}`;
+      return `<li>${ready ? `<a class="sk-row${done ? ' is-done' : ''}" href="#/${d.id}" aria-label="Exercise ${n}: ${esc(d.title)}${done ? ', done' : ''}">${inner}</a>` : `<div class="sk-row is-soon">${inner}</div>`}</li>`; }).join('')}</ol>`;
+    const grid = `<ol class="ex-grid">${items.map(({ n, d, ready, a, b, done }) => { const inner = `<span class="ex-n">${done ? icon('check') : n}</span><span class="ex-t">${esc(ready ? d.title : 'Coming soon')}</span>${ready && a && !done ? `<span class="ex-bar"><i style="width:${Math.round(100 * a / b)}%"></i></span>` : ''}`;
+      return `<li>${ready ? `<a class="ex-tile${done ? ' is-done' : a ? ' is-on' : ''}" href="#/${d.id}" aria-label="Exercise ${n}: ${esc(d.title)}${done ? ', done' : ''}">${inner}</a>` : `<div class="ex-tile is-soon" aria-label="Exercise ${n}: coming soon">${inner}</div>`}</li>`; }).join('')}</ol>`;
+    const vbtn = (v, label, path) => `<button type="button" class="sk-vbtn${view === v ? ' is-on' : ''}" data-ex-view="${v}" aria-pressed="${view === v}" title="${label}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true">${path}</svg><span>${label}</span></button>`;
+    body += `<section class="set-panel sk-panel" style="${partStyle(w)}"><header><div><h2>${esc(g.title)}${g.qs ? ` <small>${esc(g.qs)}</small>` : ''}</h2>${g.sub ? `<p>${esc(g.sub)}</p>` : ''}</div>
+      <div class="sk-panel-tools"><span class="set-count">${st.ready ? `<b>${st.done}</b> of ${st.ready} done` : `${g.size} exercises · coming soon`}</span>
+        <div class="sk-view" role="group" aria-label="Show exercises as">${vbtn('list', 'List', '<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/>')}${vbtn('grid', 'Grid', '<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/>')}</div></div></header>
+      ${view === 'grid' ? grid : list}</section>`;
   }
   return `<section class="week sec-page" aria-label="${esc(w.theme)}">${head}${tabs}${body}</section>`;
 }
@@ -1648,7 +1660,7 @@ function skillPanel(w, col, route) {
     return `<li><a class="wb-set${cur ? ' is-cur' : ''}${st.ready ? '' : ' is-soon'}" href="${href}"${cur ? ' aria-current="true"' : ''}><b>${esc(g.title)}</b><small>${st.ready ? `${st.done ? `${st.done}/` : ''}${st.ready} ${g.test ? 'tests' : g.slots ? 'lessons' : 'exercises'}` : 'Coming soon'}</small>${st.ready ? `<span class="wb-set-bar"><i style="width:${Math.round(100 * st.done / st.ready)}%"></i></span>` : ''}</a></li>`; };
   const secs = S.map(x => { const rows = [...new Set(x.groups.map(g => g.by || ''))];
     return `<section class="wb-sec"><a class="wb-sec-h" href="#/skill/${w.n}/${x.id}"><span class="wb-sec-ic">${icon(x.icon || 'book')}</span><b>${esc(x.title)}</b>${x.groups.length === 1 ? (() => { const g = x.groups[0], st = groupStats(w, [g]); return `<small class="wb-sec-n">${st.ready ? `${st.done ? `${st.done}/` : ''}${st.ready} ${g.test ? 'tests' : g.slots ? 'lessons' : 'exercises'}` : 'Coming soon'}</small>`; })() : ''}</a>
-      ${x.groups.length > 1 ? rows.map(by => `${by ? `<p class="wb-by">${esc(by)}</p>` : ''}<ul class="wb-sets">${x.groups.filter(g => (g.by || '') === by).map(g => setLink(x, g)).join('')}</ul>`).join('') : ''}</section>`; }).join('');
+      ${x.groups.length > 1 ? rows.map(by => `${by && rows.length > 1 ? `<p class="wb-by">${esc(by)}</p>` : ''}<ul class="wb-sets">${x.groups.filter(g => (g.by || '') === by).map(g => setLink(x, g)).join('')}</ul>`).join('') : ''}</section>`; }).join('');
   const d = here ? w.days.find(x => x.id === lesson.id) : w.days.find(x => x.status === 'ready' && !isDone(x)) || w.days.find(x => x.status === 'ready');
   const pl = d && place(w.n, d.day);
   const card = d ? `<a class="wb-here" href="#/${d.id}"><span class="wb-here-k">${here ? 'You are here' : 'Up next'}</span><b>${esc(d.title)}</b><small>${esc(pl ? [pl.s.title, pl.g.slots || pl.g.test ? null : pl.g.title, pl.name].filter(Boolean).join(' · ') : '')}</small><span class="wb-here-go">${here ? 'Back to it' : 'Start'} ${icon('arrow')}</span></a>` : '';
@@ -2372,6 +2384,7 @@ document.addEventListener('change', e => {
 document.addEventListener('click', e => {
   const t = e.target.closest('button,a,[data-week-tab]'); if (!t) return;
   const d = t.dataset;
+  if (d.exView) { lsSet(CLS.id + '-ex-view', d.exView); render(); return; }   // list or grid of exercises (a skill's Practise page)
   if (play && play.onClick(t, d)) return;
   if (kit && kit.onClick(t, d)) return;
   if (ielts && ielts.onClick(t, d)) return;
