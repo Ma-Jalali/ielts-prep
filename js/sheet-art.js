@@ -188,7 +188,44 @@
       ${person(74, 140, S, WD2, 1)}${person(246, 140, T, K, 1)}${person(160, 126, R, K, 1.2)}
       <path d="M126 44h68a10 10 0 0 1 10 10v18a10 10 0 0 1-10 10h-24l-10 10-10-10h-24a10 10 0 0 1-10-10V54a10 10 0 0 1 10-10z" fill="${W}" ${O}/><path d="M160 72s-14-8-14-16a7 7 0 0 1 14-2 7 7 0 0 1 14 2c0 8-14 16-14 16z" fill="${R}"/>
       <path d="M34 60l8-10 6 8 8-12 6 8" fill="none" stroke="${G}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-      ${[[40, 40, R], [270, 48, G], [292, 92, S], [26, 108, T]].map(([x, y, c]) => `<rect x="${x}" y="${y}" width="10" height="10" rx="2" fill="${c}" transform="rotate(25 ${x + 5} ${y + 5})"/>`).join('')}${spark(220, 34)}${dot(100, 40, S)}`
+      ${[[40, 40, R], [270, 48, G], [292, 92, S], [26, 108, T]].map(([x, y, c]) => `<rect x="${x}" y="${y}" width="10" height="10" rx="2" fill="${c}" transform="rotate(25 ${x + 5} ${y + 5})"/>`).join('')}${spark(220, 34)}${dot(100, 40, S)}`,
+    laptop: `${shadow(160, 186, 120)}
+      <rect x="80" y="54" width="160" height="104" rx="10" fill="${K}" ${O}/><rect x="90" y="64" width="140" height="84" rx="4" fill="${SB}"/>
+      <rect x="98" y="72" width="60" height="8" rx="4" fill="${W}"/><path d="M98 90h120M98 100h96M98 110h108" stroke="${W}" stroke-width="3" stroke-linecap="round" opacity=".85"/><rect x="98" y="120" width="44" height="20" rx="4" fill="${R}"/><rect x="150" y="120" width="44" height="20" rx="4" fill="${T}"/>
+      <path d="M60 158h200l-12 20H72z" fill="${GR}" ${O}/><rect x="140" y="162" width="40" height="5" rx="2.5" fill="${K}" opacity=".3"/>
+      <g transform="translate(268 74)"><circle r="20" fill="${W}" ${O}/><path d="M-8 0h16M0-8v16" stroke="${S}" stroke-width="2.4" stroke-linecap="round" opacity="0"/><path d="M-9-2a9 9 0 0 1 18 0M-5 2a5 5 0 0 1 10 0" fill="none" stroke="${S}" stroke-width="2.6" stroke-linecap="round"/><circle cy="7" r="2.6" fill="${S}"/></g>
+      ${bubble(28, 40, 56, 34, PK)}<path d="M40 52l6 6 10-10" fill="none" stroke="${R}" stroke-width="2.6" stroke-linecap="round"/>${spark(268, 136, G)}${dot(46, 150, T)}${plus(150, 34, R, .8)}`,
+    science: `${shadow(160, 188, 120)}
+      <rect x="40" y="168" width="240" height="12" rx="6" fill="${WD}" ${O}/>
+      <path d="M104 60h28M110 60v40l-30 56a8 8 0 0 0 7 12h70a8 8 0 0 0 7-12l-30-56V60" fill="${W}" ${O}/><path d="M92 136h80l12 22a6 6 0 0 1-5 9H85a6 6 0 0 1-5-9z" fill="${T}" opacity=".85"/><circle cx="112" cy="148" r="4" fill="${W}"/><circle cx="130" cy="140" r="3" fill="${W}"/><circle cx="146" cy="152" r="5" fill="${W}" opacity=".8"/>
+      <rect x="196" y="92" width="22" height="76" rx="11" fill="${W}" ${O}/><rect x="196" y="126" width="22" height="42" rx="11" fill="${R}" opacity=".85"/><rect x="230" y="110" width="22" height="58" rx="11" fill="${W}" ${O}/><rect x="230" y="140" width="22" height="28" rx="11" fill="${G}" opacity=".9"/><path d="M188 92h38M222 110h38" ${O}/>
+      <g transform="translate(250 54)"><circle r="7" fill="${S}" ${o(2)}/><circle cx="-22" cy="12" r="6" fill="${R}" ${o(2)}/><circle cx="18" cy="18" r="6" fill="${G}" ${o(2)}/><path d="M-5 4-17 9M6 4l8 9" ${o(2)}/></g>
+      <path d="M122 46c-6-8 4-14-2-22M138 50c-6-8 4-14-2-22" fill="none" stroke="${K}" stroke-width="2" stroke-linecap="round" opacity=".35"/>${spark(60, 60)}${plus(290, 120, T, .8)}${dot(44, 120, S)}`,
+    train: `${shadow(160, 182, 130)}<path d="M20 178h280" ${O}/>${[40, 80, 120, 160, 200, 240, 280].map(x => `<path d="M${x - 10} 184h20" stroke="${WD2}" stroke-width="4" stroke-linecap="round"/>`).join('')}
+      <rect x="150" y="70" width="110" height="86" rx="10" fill="${S}" ${O}/><rect x="164" y="84" width="34" height="30" rx="5" fill="${SB}" ${o(2)}/><rect x="210" y="84" width="34" height="30" rx="5" fill="${SB}" ${o(2)}/>
+      <path d="M60 104h90v52H48v-30a22 22 0 0 1 12-22z" fill="${R}" ${O}/><rect x="76" y="64" width="20" height="40" rx="3" fill="${K}" ${O}/><path d="M70 64h32" ${O}/><circle cx="56" cy="134" r="6" fill="${G}" ${o(2)}/><path d="M48 150l-14 6" ${O}/>
+      ${[[74, 160, 14], [122, 160, 14], [184, 160, 12], [228, 160, 12]].map(([x, y, r]) => `<circle cx="${x}" cy="${y}" r="${r}" fill="${K}"/><circle cx="${x}" cy="${y}" r="${r * .4}" fill="${GR}"/>`).join('')}<path d="M74 160h48" stroke="${GR}" stroke-width="3"/>
+      <path d="M92 52c-10-4-10-14 2-16 2-10 18-10 20 0 12 0 12 14 0 16" fill="${W}" ${o(2)}/><path d="M118 36c-6-6 0-14 8-12 4-8 18-6 18 4 10 2 8 14-2 14" fill="${W}" ${o(2)} opacity=".8"/>${spark(280, 50)}${dot(36, 60, T)}`,
+    watch: `${shadow(160, 190, 70)}
+      <path d="M134 40h52l-6 34h-40zM140 146h40l6 34h-52z" fill="${T}" ${O}/><path d="M138 52h44M136 168h48" stroke="${T2}" stroke-width="2.4"/>
+      <circle cx="160" cy="110" r="44" fill="${W}" ${O}/><circle cx="160" cy="110" r="36" fill="${SB}" stroke="${K}" stroke-width="2"/>${[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map(a => `<path d="M${160 + Math.cos(a * Math.PI / 180) * 30} ${110 + Math.sin(a * Math.PI / 180) * 30}l${Math.cos(a * Math.PI / 180) * 4} ${Math.sin(a * Math.PI / 180) * 4}" stroke="${K}" stroke-width="2" stroke-linecap="round"/>`).join('')}
+      <path d="M160 110V88M160 110l14 8" stroke="${K}" stroke-width="3.4" stroke-linecap="round"/><circle cx="160" cy="110" r="4" fill="${R}"/><rect x="204" y="102" width="10" height="16" rx="3" fill="${G}" ${o(2)}/>
+      ${waves(222, 72, 3, R)}<g transform="translate(70 132)"><path d="M-24 30 0-20l24 50z" fill="${MT}" ${O}/><path d="M0-20l-8 16 6 2 2-5 6 4z" fill="${W}" ${o(1.8)}/></g><path d="M268 150v-40l16 8-16 8" fill="${R}" ${o(2)}/><path d="M268 150v20" ${O}/>${spark(60, 50)}${dot(290, 60, S)}`,
+    family: `${shadow(160, 190, 130)}
+      ${person(96, 128, S, K, 1.15)}${person(224, 128, R, WD2, 1.15)}
+      <g transform="translate(160 150)"><path d="M-18 34c0-16 8-24 18-24s18 8 18 24z" fill="${G}" ${O}/><circle cy="-2" r="12" fill="#f2c9a5" ${O}/><path d="M-6-12c4-4 10-4 12 0" fill="none" stroke="${K}" stroke-width="2.4" stroke-linecap="round"/><circle cx="-4" cy="-2" r="1.5" fill="${K}"/><circle cx="4" cy="-2" r="1.5" fill="${K}"/><path d="M-3 4q3 2 6 0" fill="none" ${o(1.6)}/></g>
+      <path d="M160 70s-14-8-14-16a7 7 0 0 1 14-2 7 7 0 0 1 14 2c0 8-14 16-14 16z" fill="${R}" ${o(2)}/>
+      <g transform="translate(270 70)"><rect x="-14" y="-16" width="28" height="34" rx="6" fill="${W}" ${O}/><circle cy="-4" r="6" fill="${PK}"/><path d="M-6 12h12" ${o(2)}/></g>${spark(50, 52)}${plus(290, 150, T, .8)}${dot(40, 140, G)}`,
+    clothes: `${shadow(160, 188, 120)}
+      <path d="M40 50h240" ${O}/><path d="M80 50v8M240 50v8" ${O}/>
+      <g transform="translate(110 58)"><path d="M0 0l-10 10h20z" fill="none" ${o(2)}/><path d="M-36 10h72l6 116h-34l-8-80-8 80h-34z" fill="${S}" ${O}/><path d="M-36 24h72" stroke="${S2}" stroke-width="3"/><path d="M-28 34h14v14h-14zM14 34h14v14H14z" fill="none" stroke="${G}" stroke-width="2" stroke-dasharray="3 3"/><path d="M0 24v20" stroke="${G}" stroke-width="2" stroke-dasharray="3 3"/></g>
+      <g transform="translate(220 58)"><path d="M0 0l-10 10h20z" fill="none" ${o(2)}/><path d="M-20 10h40l26 22-12 14-10-8v64h-48V38l-10 8-12-14z" fill="${R}" ${O}/><path d="M-10 10q10 12 20 0" fill="none" ${o(2)}/><circle cx="0" cy="58" r="3" fill="${W}"/><circle cx="0" cy="74" r="3" fill="${W}"/></g>
+      <g transform="translate(46 150)"><path d="M0 26V0l18 26" fill="none" stroke="${WD2}" stroke-width="3"/><rect x="-14" y="-10" width="28" height="14" rx="4" fill="${G}" ${o(2)}/></g>${spark(290, 110)}${dot(160, 30, T)}`,
+    stamp: `${shadow(160, 188, 120)}
+      <rect x="58" y="70" width="170" height="108" rx="6" fill="${CR}" ${O}/><path d="M58 76l85 58 85-58" fill="none" ${O}/><path d="M74 156h60M74 166h40" stroke="${K}" stroke-width="2.2" stroke-linecap="round" opacity=".45"/>
+      <g transform="translate(196 72) rotate(8)"><path d="M-30-40h60v80h-60z" fill="${W}" stroke="${K}" stroke-width="2.4" stroke-dasharray="4 3"/><rect x="-24" y="-34" width="48" height="56" fill="${SB}"/><circle cx="0" cy="-12" r="12" fill="${G}"/><path d="M-24 22 0-4l24 26z" fill="${T}"/><path d="M-20 30h20" stroke="${K}" stroke-width="2.4" stroke-linecap="round"/><path d="M14 30h6" stroke="${R}" stroke-width="2.4" stroke-linecap="round"/></g>
+      <g transform="translate(120 96)"><circle r="22" fill="none" stroke="${R}" stroke-width="2.4"/><circle r="16" fill="none" stroke="${R}" stroke-width="1.6"/><path d="M26-8q12-6 24 0t24 0M26 0q12-6 24 0t24 0M26 8q12-6 24 0t24 0" fill="none" stroke="${R}" stroke-width="2" stroke-linecap="round"/></g>
+      ${spark(40, 54)}${plus(290, 150, S, .8)}${dot(276, 30, R)}`
   };
   A.phone = A.headset;
   window.IELTSSheetArt = (k, cls = '') => A[k] ? `<svg class="xs-art ${cls}" viewBox="0 0 320 220" aria-hidden="true" focusable="false">${['mountain', 'eco'].includes(k) ? '' : `<rect x="18" y="16" width="284" height="188" rx="44" fill="var(--xs-soft)"/><circle cx="270" cy="40" r="44" fill="#fff" opacity=".45"/>`}${A[k]}</svg>` : '';

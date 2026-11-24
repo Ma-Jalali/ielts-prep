@@ -3,7 +3,7 @@
    checked against the recording script (folder 22, Scr.20.pdf, Track 17). The key and the script are two files, so both are linked.
    Recordings stream from Google Drive. Ids (lesson, activities, blocks) are the keys of students' saved work: never rename them. */
 window.DEC15_LESSON = {
-  id: 'ieb2w1d322', week: 1, day: 322, sheet: true, illus: 'grad',
+  id: 'ieb2w1d322', week: 1, day: 322, sheet: true, illus: 'stamp',
   title: 'The history of postage stamps',
   duration: 'About 20 minutes',
   journey: 'Listen to two students talking about an economic history assignment on postage stamps. Answer multiple-choice questions, complete the notes and choose the right stamp.',

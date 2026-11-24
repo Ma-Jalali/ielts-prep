@@ -3,7 +3,7 @@
    there; the paper numbers the questions 31–40). The key has no recording script.
    Recordings stream from Google Drive. Ids (lesson, activities, blocks) are the keys of students' saved work: never rename them. */
 window.DEC15_LESSON = {
-  id: 'ieb2w1d423', week: 1, day: 423, sheet: true, illus: 'bus',
+  id: 'ieb2w1d423', week: 1, day: 423, sheet: true, illus: 'train',
   title: 'The first railways',
   duration: 'About 20 minutes',
   journey: 'Listen to a talk about the early history of the railways, from the first public railway to the Liverpool to Manchester line. Complete the table and choose three consequences of the new railway.',

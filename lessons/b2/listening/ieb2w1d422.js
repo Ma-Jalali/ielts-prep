@@ -3,7 +3,7 @@
    recording script in the same folder (Scr.17.pdf, Track 23).
    Recordings stream from Google Drive. Ids (lesson, activities, blocks) are the keys of students' saved work: never rename them. */
 window.DEC15_LESSON = {
-  id: 'ieb2w1d422', week: 1, day: 422, sheet: true, illus: 'robot',
+  id: 'ieb2w1d422', week: 1, day: 422, sheet: true, illus: 'laptop',
   title: 'Computer viruses',
   duration: 'About 20 minutes',
   journey: 'Listen to a lecture about computer viruses: where they came from, how they spread and how to protect your computer. Answer multiple-choice questions and list four ways of combating viruses.',

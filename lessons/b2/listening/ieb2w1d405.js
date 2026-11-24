@@ -2,7 +2,7 @@
    Source: Listening Section 4 Exercises (Practice No 5); answers and recording script from the teacher's key (folder 05, s4-5 a.pdf).
    Recordings stream from Google Drive. Ids (lesson, activities, blocks) are the keys of students' saved work: never rename them. */
 window.DEC15_LESSON = {
-  id: 'ieb2w1d405', week: 1, day: 405, sheet: true, illus: 'people',
+  id: 'ieb2w1d405', week: 1, day: 405, sheet: true, illus: 'family',
   title: 'Children and learning: baby talk',
   duration: 'About 20 minutes',
   journey: 'Listen to a talk about “motherese”, the way adults speak to babies, and a new theory of how human language began. Complete the sentences and choose the answers.',

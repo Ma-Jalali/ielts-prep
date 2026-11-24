@@ -2,7 +2,7 @@
    Source: Listening Section 4 Exercises (Practice No 18); answers from the teacher's key (folder 18, "Ans.8.docx" — answers only, no script).
    Recordings stream from Google Drive. Ids (lesson, activities, blocks) are the keys of students' saved work: never rename them. */
 window.DEC15_LESSON = {
-  id: 'ieb2w1d418', week: 1, day: 418, sheet: true, illus: 'arts',
+  id: 'ieb2w1d418', week: 1, day: 418, sheet: true, illus: 'clothes',
   title: 'The history of jeans',
   duration: 'About 20 minutes',
   journey: 'Listen to a talk about where jeans come from and how they became popular around the world. Complete the sentences.',

@@ -2,7 +2,7 @@
    Source: Listening Section 4 Exercises (Practice No 17); answers from the teacher's key (folder 17, "Ans.6.docx" — answers only, no script).
    Recordings stream from Google Drive. Ids (lesson, activities, blocks) are the keys of students' saved work: never rename them. */
 window.DEC15_LESSON = {
-  id: 'ieb2w1d417', week: 1, day: 417, sheet: true, illus: 'chat',
+  id: 'ieb2w1d417', week: 1, day: 417, sheet: true, illus: 'laptop',
   title: 'Blogs and blogging',
   duration: 'About 20 minutes',
   journey: 'Listen to a talk about the history of blogs and some advice on writing a good blog. Complete the summary and the flow chart.',

@@ -3,7 +3,7 @@
    (folder 24, Answers S3-24.pdf: Unit 5 Exam Practice, Listening, audioscript CD2 track 5).
    Recordings stream from Google Drive. Ids (lesson, activities, blocks) are the keys of students' saved work: never rename them. */
 window.DEC15_LESSON = {
-  id: 'ieb2w1d324', week: 1, day: 324, sheet: true, illus: 'grad',
+  id: 'ieb2w1d324', week: 1, day: 324, sheet: true, illus: 'science',
   title: 'Planning two science experiments',
   duration: 'About 20 minutes',
   journey: 'Listen to a student teacher, Josie, asking her colleague Al to explain two experiments that measure the speed of sound. Complete the sentences and the summary and answer two questions.',

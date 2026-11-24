@@ -2,7 +2,7 @@
    Source: Listening Section 3 Exercises (page 2, "S3-", Unit 7); answers from the teacher's key (folder 02, Answer Exerciase 2.pdf).
    Recordings stream from Google Drive. Ids (lesson, activities, blocks) are the keys of students' saved work: never rename them. */
 window.DEC15_LESSON = {
-  id: 'ieb2w1d302', week: 1, day: 302, sheet: true, illus: 'chat',
+  id: 'ieb2w1d302', week: 1, day: 302, sheet: true, illus: 'science',
   title: 'Ethics in science',
   duration: 'About 20 minutes',
   journey: 'Listen to a tutor and two students discussing the responsibilities of scientists and the ethical issues science raises. Answer two multiple-choice questions, then choose the right letters from each list.',

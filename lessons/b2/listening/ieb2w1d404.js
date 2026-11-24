@@ -2,7 +2,7 @@
    Source: Listening Section 4 Exercises (Practice No 04); answers and recording script from the teacher's key (folder 04, s4-4 a.pdf).
    Recordings stream from Google Drive. Ids (lesson, activities, blocks) are the keys of students' saved work: never rename them. */
 window.DEC15_LESSON = {
-  id: 'ieb2w1d404', week: 1, day: 404, sheet: true, illus: 'mountain',
+  id: 'ieb2w1d404', week: 1, day: 404, sheet: true, illus: 'watch',
   title: 'The Emergency Watch',
   duration: 'About 20 minutes',
   journey: 'Listen to a talk about a watch that can send an emergency signal: its story, what it can do and what is inside it. Answer the questions and label the parts of the watch.',
