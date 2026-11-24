@@ -109,7 +109,7 @@ body.side-open .m-mini, body.m-view-open .m-mini { display: none; }
 
   /* Learn · Practise · Test: one segmented control, sticky under the top bar */
   .sk-tabs { position: sticky; top: 57px; z-index: 31; display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; padding: 4px; margin: 0 0 10px; border-radius: 14px; border: 0;
-    background: rgba(233, 237, 245, .92); -webkit-backdrop-filter: saturate(1.4) blur(12px); backdrop-filter: saturate(1.4) blur(12px); box-shadow: 0 6px 14px -12px rgba(24, 33, 63, .5); }
+    background: #e6eaf3; box-shadow: 0 0 0 6px var(--paper, #f4f6fb), 0 6px 14px -12px rgba(24, 33, 63, .5); }
   .sk-tab { display: flex; justify-content: center; align-items: center; gap: 6px; padding: 9px 4px; border-radius: 11px; text-align: center; box-shadow: none !important; background: none; }
   .sk-tab-ic { width: auto; height: auto; background: none !important; color: inherit !important; }
   .sk-tab-ic .icon { width: 17px; height: 17px; }
@@ -119,19 +119,25 @@ body.side-open .m-mini, body.m-view-open .m-mini { display: none; }
   .sk-tab:not(.is-on) { color: #5a6382; }
   .sec-page .sec-blurb { display: none; }
 
-  /* Part 1–4: chips you swipe sideways, sticky under the control */
-  .sk-parts { position: sticky; top: 109px; z-index: 30; display: flex; gap: 8px; overflow-x: auto; scroll-snap-type: x proximity; scrollbar-width: none;
-    margin: 0 -16px 12px; padding: 4px 16px 10px; background: linear-gradient(var(--paper, #f4f6fb) 78%, rgba(244, 246, 251, 0)); }
-  .sk-parts::-webkit-scrollbar { display: none; }
-  .sk-parts li { flex: 0 0 auto; scroll-snap-align: start; }
-  .sk-part { display: flex; align-items: center; gap: 10px; height: auto; padding: 6px 14px 6px 6px; border-radius: 999px; transform: none !important; box-shadow: 0 1px 2px rgba(24, 33, 63, .06); }
-  .sk-part-ic { width: 36px; height: 36px; border-radius: 50%; } .sk-part-ic svg { width: 19px; height: 19px; }
-  .sk-part-tx { display: block; } .sk-part-tx b { font: 700 .95rem/1.1 var(--sans, system-ui); } .sk-part-tx small { display: none; }
-  .sk-part-meta { margin: 0; display: grid; gap: 2px; font-size: .68rem; line-height: 1.1; }
-  .sk-part-meta em { color: inherit; opacity: .8; }
-  .sk-part-bar { left: 18px; right: 18px; bottom: 3px; height: 2px; border-radius: 2px; overflow: hidden; }
-  .sk-part.is-on { box-shadow: 0 6px 14px -8px color-mix(in srgb, var(--accent) 80%, #000) !important; }
-  .sk-part.is-on .sk-part-meta, .sk-part.is-on .sk-part-meta em { color: color-mix(in srgb, var(--accent) 85%, #18213f); }
+  /* Part 1–4: four tiles in one row, each icon in a ring that fills with the student's progress; sticky under the control */
+  .sk-parts { position: sticky; top: 109px; z-index: 30; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; overflow: visible;
+    margin: 0 0 12px; padding: 2px 0 10px; isolation: isolate; }
+  .sec-page { overflow-x: clip; }
+  .sk-parts::before { content: ''; position: absolute; z-index: -1; inset: -16px -16px 0; background: linear-gradient(var(--paper, #f4f6fb) 86%, rgba(244, 246, 251, 0)); pointer-events: none; }   /* the backdrop reaches the screen edges without widening the page */
+  .sk-parts li { min-width: 0; }
+  .sk-part { display: flex !important; flex-direction: column; align-items: center; gap: 6px; height: 100%; padding: 10px 4px 9px; border-radius: 18px; text-align: center; transform: none !important;
+    background: #fff; border: 1px solid rgba(24, 33, 63, .08); box-shadow: 0 1px 2px rgba(24, 33, 63, .05); -webkit-tap-highlight-color: transparent; transition: background .2s, box-shadow .2s, transform .12s; }
+  .sk-part:active { transform: scale(.96) !important; }
+  .sk-part-ic { position: relative; width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; color: color-mix(in srgb, var(--accent) 85%, #18213f);
+    background: conic-gradient(var(--accent) var(--pp, 0%), color-mix(in srgb, var(--accent) 16%, #fff) 0); }
+  .sk-part-ic::before { content: ''; position: absolute; inset: 3px; border-radius: 50%; background: color-mix(in srgb, var(--accent) 9%, #fff); }
+  .sk-part-ic svg { position: relative; width: 21px; height: 21px; }
+  .sk-part-tx { display: block; } .sk-part-tx b { display: block; font: 750 .84rem/1.1 var(--sans, system-ui); white-space: nowrap; } .sk-part-tx small { display: none; }
+  .sk-part-meta, .sk-part-bar { display: none !important; }
+  .sk-part.is-on { background: linear-gradient(165deg, color-mix(in srgb, var(--accent) 88%, #fff), var(--accent)); border-color: transparent; color: #fff;
+    box-shadow: 0 10px 20px -10px color-mix(in srgb, var(--accent) 85%, #000) !important; }
+  .sk-part.is-on .sk-part-ic { color: var(--accent); background: conic-gradient(#fff var(--pp, 0%), rgba(255, 255, 255, .35) 0); }
+  .sk-part.is-on .sk-part-ic::before { background: #fff; }
 
   /* the chosen part's list */
   .sk-panel { padding: 14px 12px 12px; border-radius: 18px; }
@@ -143,9 +149,8 @@ body.side-open .m-mini, body.m-view-open .m-mini { display: none; }
 .sk-q-short { display: none; }
 @media (max-width: 720px) {
   .sk-q-long { display: none; } .sk-q-short { display: inline; }
-  .sk-part { display: grid; grid-template-columns: auto auto; grid-template-areas: "ic t" "ic m"; column-gap: 9px; row-gap: 1px; align-items: center; padding: 6px 16px 6px 6px; }
-  .sk-part-ic { grid-area: ic; } .sk-part-tx { grid-area: t; align-self: end; } .sk-part-meta { grid-area: m; align-self: start; display: flex; flex-direction: row; gap: 0; margin: 0; font-size: .7rem; font-weight: 700; white-space: nowrap; }
-  .sk-part-meta em::after { content: ' · '; white-space: pre; }
   #toast { bottom: calc(84px + env(safe-area-inset-bottom)) !important; }
   body.has-mini #toast { bottom: calc(150px + env(safe-area-inset-bottom)) !important; }
 }
+
+@media (max-width: 720px) { .masthead, .masthead .topbar { background: rgba(250, 249, 246, .985) !important; -webkit-backdrop-filter: none !important; backdrop-filter: none !important; } }   /* no text showing through the top bar */
