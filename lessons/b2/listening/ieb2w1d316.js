@@ -41,7 +41,7 @@ window.DEC15_LESSON = {
               ] },
             { type: 'ieGap', id: 'ieb2w1d316-q4', from: 9, layout: 'short', title: 'Which TWO aspects of communication does Beth emphasise in her conclusion?',
               instruction: 'Answer the question below. Write **NO MORE THAN TWO WORDS** for each answer.', rule: 'NO MORE THAN TWO WORDS', max: 2,
-              text: '[[listening skills|format language|formal language]]\n[[format language|formal language|listening skills]]' }
+              text: '[[listening skills|formal language|format language]]\n[[formal language|format language|listening skills]]' }
           ]
         }] },
       { id: 'script', short: 'Script and answers', minutes: 5, grouping: 'Alone',
