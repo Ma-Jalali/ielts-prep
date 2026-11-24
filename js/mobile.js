@@ -95,8 +95,19 @@
     view.querySelector('.m-view-pic').replaceChildren(c); setZoom(phone() ? 1.6 : 1); view.hidden = false; document.body.classList.add('m-view-open'); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && !view.hidden) { view.hidden = true; document.body.classList.remove('m-view-open'); } });
 
+  /* ── exercise progress strip: how many questions have an answer; "Answers" opens the key ── */
+  function answered() { const xs = document.querySelector('.xs'); if (!xs) return; const got = new Set();
+    xs.querySelectorAll('.xs-gap input, .xs-gap select').forEach(f => { const m = (f.getAttribute('aria-label') || '').match(/(\d+)/); if (m && String(f.value).trim()) got.add(+m[1]); });
+    xs.querySelectorAll('.xs-opts[role=radiogroup]').forEach(g => { const m = (g.getAttribute('aria-label') || '').match(/(\d+)/); if (m && g.querySelector('input:checked')) got.add(+m[1]); });
+    xs.querySelectorAll('.xs-mq.is-multi').forEach(g => { const from = +g.dataset.from || 1, n = +g.dataset.n || 1, c = Math.min(n, g.querySelectorAll('input:checked').length); for (let i = 0; i < c; i++) got.add(from + i); });
+    const total = +xs.dataset.total || 0, k = Math.min(total, got.size), strip = xs.querySelector('.xs-strip'); if (!strip) return;
+    strip.querySelector('.xs-strip-n b').textContent = k; strip.querySelector('.xs-strip-bar i').style.width = (total ? 100 * k / total : 0) + '%'; strip.classList.toggle('is-full', total && k >= total); }
+  document.addEventListener('input', e => { if (e.target.closest?.('.xs')) answered(); });
+  document.addEventListener('change', e => { if (e.target.closest?.('.xs')) answered(); });
+  document.addEventListener('click', e => { if (!e.target.closest?.('[data-xs-answers]')) return; const k = document.querySelector('.xs .xs-fold.is-key'); if (!k) return; k.open = true; k.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+
   /* the app redraws #main: wire the new page */
   const main = document.getElementById('main');
-  if (main) new MutationObserver(() => { hint(); watch(); }).observe(main, { childList: true });
-  hint(); watch();
+  if (main) new MutationObserver(() => { hint(); watch(); answered(); }).observe(main, { childList: true });
+  hint(); watch(); answered();
 })();
