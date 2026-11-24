@@ -245,7 +245,9 @@ mark.xs-hl.is-hl { background: #ffe680; box-shadow: 0 0 0 1px #ffe680; }
 mark.xs-hl.is-ul { text-decoration: underline 2.5px var(--brand, #d6283c); text-underline-offset: 3px; }
 mark.xs-hl { cursor: pointer; }
 mark.xs-hl.has-note.is-hl { background: #ffd65c; }
-.xs-hl-note-ic { display: inline-block; width: 14px; height: 14px; margin: 0 2px 0 1px; vertical-align: super; border-radius: 4px 4px 4px 1px; background: var(--gold, #f4a52e); cursor: pointer; }
+.xs-hl-note-ic { display: inline-grid; place-items: center; width: 20px; height: 20px; margin: 0 3px 0 2px; vertical-align: 2px; border-radius: 7px; background: var(--gold, #f4a52e); color: #fff; cursor: pointer; box-shadow: 0 2px 6px -2px rgba(212, 134, 15, .8); transition: transform .15s; }
+.xs-hl-note-ic:hover, .xs-hl-note-ic:focus-visible { transform: scale(1.12); outline: none; }
+.xs-hl-note-ic svg { width: 12px; height: 12px; }
 .xs-hl-bar { position: absolute; z-index: 90; display: inline-flex; gap: 2px; padding: 4px; border-radius: 12px; background: var(--ink, #18213f); box-shadow: 0 10px 24px -10px rgba(24, 33, 63, .7); animation: xsHlIn .14s ease-out; }
 .xs-hl-bar button { display: inline-flex; align-items: center; gap: 7px; height: 34px; padding: 0 12px; border: 0; border-radius: 9px; background: none; color: #fff; font: 600 .84rem/1 var(--sans, system-ui); cursor: pointer; }
 .xs-hl-bar button:hover, .xs-hl-bar button:focus-visible { background: rgba(255, 255, 255, .14); outline: none; }
@@ -261,3 +263,18 @@ mark.xs-hl.has-note.is-hl { background: #ffd65c; }
 .xs-hl-pop > div { display: flex; justify-content: space-between; gap: 8px; }
 .xs-hl-pop .btn, .xs-hl-pop .btn-quiet { height: 34px; padding: 0 14px; font-size: .82rem; }
 @keyframes xsHlIn { from { opacity: 0; transform: translateY(4px); } }
+
+/* the note card (js/highlight.js): opens on hover or tap over a noted word */
+.xs-note-card { position: absolute; z-index: 91; width: min(340px, calc(100vw - 16px)); border-radius: 18px; background: #fffdf5; border: 1px solid #f3dfa6; box-shadow: 0 22px 44px -18px rgba(24, 33, 63, .45), 0 2px 6px rgba(24, 33, 63, .06); overflow: hidden; animation: xsNoteIn .18s cubic-bezier(.2, .8, .2, 1); }
+.xs-note-card header { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: linear-gradient(120deg, #ffe9a8, #fff3cf); border-bottom: 1px solid #f3dfa6; }
+.xs-nc-ic { width: 30px; height: 30px; border-radius: 10px; display: grid; place-items: center; background: var(--gold, #f4a52e); color: #fff; box-shadow: 0 4px 10px -4px rgba(212, 134, 15, .9); }
+.xs-nc-ic svg { width: 16px; height: 16px; }
+.xs-note-card header b { font: 650 1rem/1.2 var(--serif, 'Outfit', sans-serif); color: #5b4100; }
+.xs-note-card header small { margin-left: auto; font-size: .75rem; font-weight: 600; color: #8a6a1c; }
+.xs-note-card blockquote { margin: 14px 16px 0; padding: 6px 10px; border-left: 3px solid var(--gold, #f4a52e); background: #fff6d8; border-radius: 0 8px 8px 0; font-size: .84rem; font-style: italic; color: #6b5420; }
+.xs-note-card p { margin: 10px 16px 4px; font-size: 1.02rem; line-height: 1.55; color: var(--ink, #18213f); white-space: normal; overflow-wrap: anywhere; }
+.xs-note-card footer { display: flex; justify-content: flex-end; gap: 6px; padding: 8px 12px 12px; }
+.xs-note-card footer button { height: 32px; padding: 0 12px; border-radius: 9px; border: 1px solid #ecd9a0; background: #fff; font: 700 .8rem/1 var(--sans, system-ui); color: #6b5420; cursor: pointer; }
+.xs-note-card footer button:hover { background: #fff3cf; }
+.xs-note-card footer button[data-nc="del"] { color: #a91d2f; }
+@keyframes xsNoteIn { from { opacity: 0; transform: translateY(6px) scale(.97); } }

@@ -17,9 +17,11 @@
 <meta property="og:image" content="https://ma-jalali.github.io/ielts-prep/assets/og-image.png">
 <meta name="twitter:card" content="summary_large_image">
 <title>IELTS Prep</title>
+<script>document.documentElement.classList.add('gate-on')</script>
+<style>html.gate-on body > :not(#gate) { visibility: hidden; } html.gate-on body { background: #f4f6fb; }</style>
 <link rel="preload" href="assets/fonts/manrope-normal-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/outfit-latin-wght.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="css/fonts.css?v=2.2">
+<link rel="stylesheet" href="css/fonts.css?v=2.3">
 <script>
 /* The page shows the side panel colour this viewer chose in Settings, before the page paints. */
 (function () { var r = document.documentElement, c = r.getAttribute('data-course'), s = null; if (!c) return;
@@ -32,37 +34,38 @@ window.addEventListener('error', function (e) {
   if (m && !m.children.length) m.innerHTML = '<div style="max-width:640px;margin:60px auto;padding:24px;border:2px solid #d6283c;border-radius:14px;background:#fff;font:16px/1.6 system-ui"><h1 style="font-size:22px;margin:0 0 8px">The lesson could not load</h1><p>Please reload the page without the cache: <b>Ctrl + Shift + R</b> (Windows) or <b>Cmd + Shift + R</b> (Mac). On a phone, close the tab and open the link again.</p><p style="color:#666;font-size:13px">Error: ' + String(msg).replace(/</g, '&lt;') + '</p></div>';
 }, true);
 </script>
-<link rel="stylesheet" href="css/dec15.css?v=2.2">
-<link rel="stylesheet" href="css/play.css?v=2.2">
-<link rel="stylesheet" href="css/kit.css?v=2.2">
-<link rel="stylesheet" href="css/guide.css?v=2.2">
-<link rel="stylesheet" href="css/lab.css?v=2.2">
-<link rel="stylesheet" href="css/library.css?v=2.2">
-<link rel="stylesheet" href="css/downloads.css?v=2.2">
-<link rel="stylesheet" href="css/picker.css?v=2.2">
-<link rel="stylesheet" href="css/dictionary.css?v=2.2">
-<link rel="stylesheet" href="css/polish.css?v=2.2">
-<link rel="stylesheet" href="css/glass.css?v=2.2">
-<link rel="stylesheet" href="css/fresh.css?v=2.2">
-<link rel="stylesheet" href="css/classroom.css?v=2.2">
-<link rel="stylesheet" href="css/forms.css?v=2.2">
-<link rel="stylesheet" href="css/chats.css?v=2.2">
-<link rel="stylesheet" href="css/menubar.css?v=2.2">
-<link rel="stylesheet" href="css/liquid.css?v=2.2">
-<link rel="stylesheet" href="css/board.css?v=2.2">
-<link rel="stylesheet" href="css/courses.css?v=2.2">
-<link rel="stylesheet" href="css/gloss.css?v=2.2">
-<link rel="stylesheet" href="css/detail.css?v=2.2">
-<link rel="stylesheet" href="css/depth.css?v=2.2">
-<link rel="stylesheet" href="css/workspace.css?v=2.2">
-<link rel="stylesheet" href="css/lesson.css?v=2.2">
-<link rel="stylesheet" href="css/finish.css?v=2.2">
-<link rel="stylesheet" href="css/precision.css?v=2.2">
-<link rel="stylesheet" href="css/studio.css?v=2.2">
-<link rel="stylesheet" href="css/skills.css?v=2.2">
-<link rel="stylesheet" href="css/ielts.css?v=2.2">
-<link rel="stylesheet" href="css/sheet.css?v=2.2">
-<link rel="stylesheet" href="css/theme.css?v=2.2">
+<link rel="stylesheet" href="css/dec15.css?v=2.3">
+<link rel="stylesheet" href="css/play.css?v=2.3">
+<link rel="stylesheet" href="css/kit.css?v=2.3">
+<link rel="stylesheet" href="css/guide.css?v=2.3">
+<link rel="stylesheet" href="css/lab.css?v=2.3">
+<link rel="stylesheet" href="css/library.css?v=2.3">
+<link rel="stylesheet" href="css/downloads.css?v=2.3">
+<link rel="stylesheet" href="css/picker.css?v=2.3">
+<link rel="stylesheet" href="css/dictionary.css?v=2.3">
+<link rel="stylesheet" href="css/polish.css?v=2.3">
+<link rel="stylesheet" href="css/glass.css?v=2.3">
+<link rel="stylesheet" href="css/fresh.css?v=2.3">
+<link rel="stylesheet" href="css/classroom.css?v=2.3">
+<link rel="stylesheet" href="css/forms.css?v=2.3">
+<link rel="stylesheet" href="css/chats.css?v=2.3">
+<link rel="stylesheet" href="css/menubar.css?v=2.3">
+<link rel="stylesheet" href="css/liquid.css?v=2.3">
+<link rel="stylesheet" href="css/board.css?v=2.3">
+<link rel="stylesheet" href="css/courses.css?v=2.3">
+<link rel="stylesheet" href="css/gloss.css?v=2.3">
+<link rel="stylesheet" href="css/detail.css?v=2.3">
+<link rel="stylesheet" href="css/depth.css?v=2.3">
+<link rel="stylesheet" href="css/workspace.css?v=2.3">
+<link rel="stylesheet" href="css/lesson.css?v=2.3">
+<link rel="stylesheet" href="css/finish.css?v=2.3">
+<link rel="stylesheet" href="css/precision.css?v=2.3">
+<link rel="stylesheet" href="css/studio.css?v=2.3">
+<link rel="stylesheet" href="css/skills.css?v=2.3">
+<link rel="stylesheet" href="css/ielts.css?v=2.3">
+<link rel="stylesheet" href="css/sheet.css?v=2.3">
+<link rel="stylesheet" href="css/gate.css?v=2.3">
+<link rel="stylesheet" href="css/theme.css?v=2.3">
 </head>
 <body>
 <a class="skip" href="#main">Skip to lesson</a>
@@ -75,6 +78,7 @@ window.addEventListener('error', function (e) {
     <a class="side-link t-cal" id="side-calendar" href="#/calendar" hidden><span class="side-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/><path d="M8 14h2M12 14h2M16 14h.5M8 17h2M12 17h2"/></svg></span><span class="side-tx">Course calendar</span></a>
     <a class="side-link t-assess" id="side-assess" href="#/assessments" hidden><span class="side-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.5 4.5H6.5a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-13a2 2 0 0 0-2-2h-2"/><rect x="8.5" y="3" width="7" height="3.5" rx="1.2"/><path d="m8.5 13 2.2 2.2 4.8-4.8"/></svg></span><span class="side-tx">Assessments</span></a>
     <a class="side-link t-band" id="side-band" href="#/band"><span class="side-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 7h8M8 11h2M12 11h2M16 11h0M8 15h2M12 15h2M8 18h2M12 18h4v-3"/></svg></span><span class="side-tx">Band calculator</span></a>
+    <a class="side-link t-band side-students" id="side-students" href="#/students"><span class="side-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3 19c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5"/><path d="M16 6.5a2.8 2.8 0 0 1 0 5.4M18 19c0-2.4-1-4.2-2.6-5"/></svg></span><span class="side-tx">Students</span></a>
     <a class="side-link t-lab" id="side-lab" href="#/lab" hidden><span class="side-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 3.5h5M10.5 3.5v5.2L5 18.2a1.8 1.8 0 0 0 1.6 2.8h10.8a1.8 1.8 0 0 0 1.6-2.8l-5.5-9.5V3.5"/><path d="M7.6 14.5h8.8"/><circle cx="10.5" cy="17.4" r=".9" fill="currentColor" stroke="none"/><circle cx="13.6" cy="18.3" r=".7" fill="currentColor" stroke="none"/></svg></span><span class="side-tx">Skills Lab</span></a>
     <a class="side-link t-dl" id="side-downloads" href="#/downloads" hidden><span class="side-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5v10.5"/><path d="m7.5 9.8 4.5 4.5 4.5-4.5"/><path d="M4 15.5v2.8a2.2 2.2 0 0 0 2.2 2.2h11.6a2.2 2.2 0 0 0 2.2-2.2v-2.8"/></svg></span><span class="side-tx">Downloads</span></a>
     <a class="side-link t-print" id="side-print" href="#/print" hidden title="Printable class activities — teachers only"><span class="side-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 8V3.5h10V8"/><rect x="3.5" y="8" width="17" height="8.5" rx="2"/><path d="M7 13.5h10v7H7z"/><path d="M9.5 16.5h5M9.5 18.5h3"/></svg></span><span class="side-tx">Photocopiables</span></a>
@@ -123,33 +127,34 @@ window.addEventListener('error', function (e) {
   <div id="resource-body"></div>
 </dialog>
 <div id="toast" role="status" aria-live="polite"></div>
-<script src="js/config.js?v=2.2"></script>
-<script src="lessons/course.js?v=2.2"></script>
-<script src="js/reader.js?v=2.2"></script>
-<script src="js/notes.js?v=2.2"></script>
-<script src="js/picker.js?v=2.2"></script>
-<script src="js/band.js?v=2.2"></script>
-<script src="js/part-icons.js?v=2.2"></script>
-<script src="js/ielts.js?v=2.2"></script>
-<script src="js/sheet-art.js?v=2.2"></script>
-<script src="js/sheet.js?v=2.2"></script>
-<script src="js/highlight.js?v=2.2"></script>
-<script src="js/campus.js?v=2.2"></script>
-<script src="js/library.js?v=2.2"></script>
-<script src="js/dictionary.js?v=2.2"></script>
-<script src="js/cloud.js?v=2.2"></script>
-<script src="js/notebook.js?v=2.2"></script>
-<script src="js/wall.js?v=2.2"></script>
-<script src="js/timer.js?v=2.2"></script>
-<script src="js/announce.js?v=2.2"></script>
-<script src="js/classroom.js?v=2.2"></script>
-<script src="js/chats.js?v=2.2"></script>
-<script src="js/play.js?v=2.2"></script>
-<script src="js/kit.js?v=2.2"></script>
-<script src="js/guide.js?v=2.2"></script>
-<script src="js/forms.js?v=2.2"></script>
-<script src="js/studio-blocks.js?v=2.2"></script>
-<script src="js/studio.js?v=2.2"></script>
-<script src="js/boot.js?v=2.2"></script>
+<script src="js/config.js?v=2.3"></script>
+<script src="lessons/course.js?v=2.3"></script>
+<script src="js/reader.js?v=2.3"></script>
+<script src="js/notes.js?v=2.3"></script>
+<script src="js/picker.js?v=2.3"></script>
+<script src="js/band.js?v=2.3"></script>
+<script src="js/part-icons.js?v=2.3"></script>
+<script src="js/ielts.js?v=2.3"></script>
+<script src="js/sheet-art.js?v=2.3"></script>
+<script src="js/sheet.js?v=2.3"></script>
+<script src="js/highlight.js?v=2.3"></script>
+<script src="js/campus.js?v=2.3"></script>
+<script src="js/library.js?v=2.3"></script>
+<script src="js/dictionary.js?v=2.3"></script>
+<script src="js/cloud.js?v=2.3"></script>
+<script src="js/notebook.js?v=2.3"></script>
+<script src="js/wall.js?v=2.3"></script>
+<script src="js/timer.js?v=2.3"></script>
+<script src="js/announce.js?v=2.3"></script>
+<script src="js/classroom.js?v=2.3"></script>
+<script src="js/chats.js?v=2.3"></script>
+<script src="js/play.js?v=2.3"></script>
+<script src="js/kit.js?v=2.3"></script>
+<script src="js/guide.js?v=2.3"></script>
+<script src="js/forms.js?v=2.3"></script>
+<script src="js/studio-blocks.js?v=2.3"></script>
+<script src="js/studio.js?v=2.3"></script>
+<script src="js/students.js?v=2.3"></script>
+<script src="js/gate.js?v=2.3"></script>
 </body>
 </html>

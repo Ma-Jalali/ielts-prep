@@ -911,6 +911,8 @@ const classToday = (() => { const G = window.DEC15_GUIDE; if (course.id !== 'iel
     if (i >= 0 && i < 5) { if (w.days?.[i]?.off) return null; const id = `${window.DEC15_COURSE.idPrefix || ''}w${w.n}d${i + 1}`, wk = course.weeks.find(x => x.n === w.n), d = wk?.days.find(x => x.id === id);
       return d ? { id, week: w.n, day: i + 1, d } : null; } }
   return null; })();
+const ME = () => window.IELTS_GATE?.firstName || '';   // the signed-in student's first name (js/gate.js)
+const MAP_NAME = () => ME() ? `${ME()}’s course map` : 'Course map';
 const GREET = () => { const h = new Date().getHours(); return h < 5 ? 'Working late' : h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening'; };
 const DAY_TINT = ['#1f8a7a', '#c2562f', '#7a4a8c', '#2f6db5', '#b07d12'], WEEKDAY = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 const dayHead = d => `<em class="day-n"><i class="day-n-num" aria-hidden="true">${d.day}</i><i class="day-n-txt">${DW} ${d.day}<small>${UNITS ? esc(d.sub || '') : WEEKDAY[d.day - 1] || ''}</small></i></em>`;
@@ -1019,7 +1021,7 @@ function sectionPage(w, secId, grpId) {
   const all = groupStats(w, S.flatMap(x => x.groups)), art = window.IELTSSheetArt ? window.IELTSSheetArt(w.illus || ({ listening: 'headset', reading: 'books' })[w.art] || 'books', 'sk-art') : '';
   const head = `<header class="sk-hero" style="${partStyle(w)}"><div class="sk-hero-tx"><span class="eyebrow">${esc(course.code)} · ${esc((partGroups().find(g => g.parts.includes(w)) || {}).title || UW)}</span>
       <h1>${partIcon(w, 'is-on sk-ic')}${esc(w.theme)}</h1>${w.tag ? `<p class="sk-tag">${esc(w.tag)}</p>` : ''}${w.summary ? `<p>${esc(w.summary)}</p>` : ''}
-      <div class="sk-stats"><span><b>${all.ready}</b> ready</span><span><b>${all.done}</b> done</span>${all.ready ? `<span class="sk-bar" aria-label="${Math.round(100 * all.done / all.ready)}% done"><i style="width:${Math.round(100 * all.done / all.ready)}%"></i></span>` : ''}</div></div>${art}</header>`;
+      <div class="sk-stats">${ME() ? `<span class="sk-me">${esc(ME())}’s progress</span>` : ''}<span><b>${all.ready}</b> ready</span><span><b>${all.done}</b> done</span>${all.ready ? `<span class="sk-bar" aria-label="${Math.round(100 * all.done / all.ready)}% done"><i style="width:${Math.round(100 * all.done / all.ready)}%"></i></span>` : ''}</div></div>${art}</header>`;
   const tabs = `<nav class="sk-tabs" aria-label="${esc(w.theme)}: sections" style="${partStyle(w)}">${S.map(x => { const st = groupStats(w, x.groups), on = x.id === sec.id;
     const what = st.ready ? `${st.done ? `${st.done}/` : ''}${st.ready} ${x.groups.some(g => g.test) ? 'tests' : x.groups.some(g => g.slots) ? 'lessons' : 'exercises'}` : 'Coming soon';
     return `<a class="sk-tab${on ? ' is-on' : ''}${st.ready ? '' : ' is-soon'}" href="#/skill/${w.n}/${x.id}"${on ? ' aria-current="page"' : ''}><span class="sk-tab-ic">${icon(x.icon || 'book')}</span><b>${esc(x.title)}</b><small>${esc(what)}</small></a>`; }).join('')}</nav>`;
@@ -1091,8 +1093,8 @@ function courseHome() {
   const n = nextUp(), done = coreActivities.filter(a => state.done[a.id]).length, pct = Math.round(100 * done / coreActivities.length);
   return `<header class="home-head">
       <span class="eyebrow">${esc(course.code)} · ${esc(course.topic)}</span>
-      <h1>Your course map</h1>
-      ${course.intro === '' ? '' : `<p>${esc(course.intro || 'Pick up where you left off, or open any lesson below.')}</p>`}
+      <h1>${ME() ? `${esc(ME())}’s course map` : 'Your course map'}</h1>
+      ${course.intro === '' ? '' : `<p>${ME() ? `<b class="home-hi">${GREET()}, ${esc(ME())}.</b> ` : ''}${esc(course.intro || 'Pick up where you left off, or open any lesson below.')}</p>`}
       ${classToday ? (() => { const { d, week, day } = classToday, ready = d.status === 'ready', inner = `<span class="ht-dot" aria-hidden="true"></span><span class="ht-hi">${GREET()}</span><span class="ht-txt">Today in class · ${WEEKDAY[day - 1]}, Week ${week}</span><b>${esc(d.title)}</b>${ready ? icon('arrow') : '<small>Coming soon</small>'}`;
         return ready ? `<a class="home-today" href="#/${d.id}">${inner}</a>` : `<span class="home-today is-soon">${inner}</span>`; })() : ''}
     </header>
@@ -1526,7 +1528,7 @@ let navLessonWeek = null;
 function paintNav(route = navRoute) {
   navRoute = route;
   if (route !== 'home' && lesson.week !== navLessonWeek) { navLessonWeek = lesson.week; navWeekOpen = null; }   // a lesson in another week opens its own week
-  [['side-lesson', 'overview'], ['side-readings', 'sources'], ['side-board', 'board'], ['side-chats', 'chats'], ['side-shared', 'shared'], ['side-calendar', 'calendar'], ['side-assess', 'assessments'], ['side-band', 'band'], ['side-studio', 'studio'], ['side-lab', 'lab'], ['side-downloads', 'downloads'], ['side-print', 'print'], ['side-pick', 'picker']].forEach(([id, r]) => { const el = $('#' + id); if (!el) return; el.classList.toggle('active', route === r); if (route === r) el.setAttribute('aria-current', 'page'); else el.removeAttribute('aria-current'); });
+  [['side-lesson', 'overview'], ['side-readings', 'sources'], ['side-board', 'board'], ['side-chats', 'chats'], ['side-shared', 'shared'], ['side-calendar', 'calendar'], ['side-assess', 'assessments'], ['side-band', 'band'], ['side-students', 'students'], ['side-studio', 'studio'], ['side-lab', 'lab'], ['side-downloads', 'downloads'], ['side-print', 'print'], ['side-pick', 'picker']].forEach(([id, r]) => { const el = $('#' + id); if (!el) return; el.classList.toggle('active', route === r); if (route === r) el.setAttribute('aria-current', 'page'); else el.removeAttribute('aria-current'); });
   paintLessonNav(route);
   paintSkillNav(route); paintMenus();
   $('#side-home').classList.toggle('active', route === 'home');
@@ -1779,6 +1781,7 @@ function parseRoute() {
   if (h === '/planner' || h.startsWith('/planner/') || h === '/workspace') return { page: 'planner' };   // My workspace
   if (h === '/board') return { page: 'board' };
   if (bandCalc && h === '/band') return { page: 'band' };
+  if (h === '/students' && window.IELTS_GATE?.isAdmin && window.IELTSStudents) return { page: 'students' };   // teacher only: who may sign in
   const sk = UNITS && h.match(/^\/skill\/(\d+)(?:\/([\w-]+))?(?:\/([\w-]+))?$/); if (sk && course.weeks.some(w => w.n === +sk[1])) return { page: 'skill', n: +sk[1], sec: sk[2] || '', grp: sk[3] || '' };   // a part's page (and its section, group)
   if (h === '/chats' || h.startsWith('/chats/')) return { page: 'chats' };
   if (h === '/shared' || h.startsWith('/shared/')) return { page: 'shared' };
@@ -1797,6 +1800,7 @@ function parseRoute() {
 }
 function render() {
   const r = parseRoute();
+  { const sh = $('#side-home .side-tx'); if (sh && ME()) sh.textContent = MAP_NAME(); }   // "Isla’s course map"
   if (r.other) {
     const d = days.find(x => x.id === r.other);
     if (d && d.status === 'ready') { location.reload(); return; }
@@ -1922,6 +1926,15 @@ function render() {
     paintNav(route); studio.afterRender(route);
     return;
   }
+  if (route === 'students') {   // Students (teacher only, js/students.js): add and remove who may sign in
+    document.body.dataset.page = 'students'; document.body.style.removeProperty('--accent'); document.body.style.removeProperty('--accent-bg');
+    $('#crumb').innerHTML = `<a href="#/" aria-label="${esc(MAP_NAME())}" title="${esc(MAP_NAME())}">${icon('home')}</a><i>/</i><b>Students</b>`;
+    document.title = `${course.code} · Students`; paintStatus();
+    const main = $('#main'), changed = main.dataset.route !== route; main.dataset.route = route;
+    if (changed || !main.querySelector('.stu-page')) { main.innerHTML = '<div class="stu-root"></div>'; window.scrollTo(0, 0); }
+    window.IELTSStudents.mount(main.querySelector('.stu-root'));
+    return;
+  }
   if (route === 'band') {   // Band score calculator (js/band.js)
     document.body.dataset.page = 'band'; document.body.style.removeProperty('--accent'); document.body.style.removeProperty('--accent-bg');
     $('#crumb').innerHTML = `<a href="#/" aria-label="${esc(course.code)} course map" title="Course map">${icon('home')}</a><i>/</i><b>Band calculator</b>`;
@@ -1967,7 +1980,7 @@ function render() {
   if (s) { document.body.style.setProperty('--accent', TONES[s.tone][0]); document.body.style.setProperty('--accent-bg', TONES[s.tone][1]); }
   else { document.body.style.removeProperty('--accent'); document.body.style.removeProperty('--accent-bg'); }
   const pageName = route === 'home' ? '' : s ? s.title : pageNames[route];
-  $('#crumb').innerHTML = route === 'home' ? `<a href="#/" aria-label="${esc(course.code)} course map" title="Course map">${icon('home')}</a><i>/</i><b>Course map</b>`
+  $('#crumb').innerHTML = route === 'home' ? `<a href="#/" aria-label="${esc(MAP_NAME())}" title="${esc(MAP_NAME())}">${icon('home')}</a><i>/</i><b>${esc(MAP_NAME())}</b>`
     : sheet ? `<a href="#/" aria-label="${esc(course.code)} course map" title="Course map">${icon('home')}</a><i>/</i>${lessonTrail()}<b>${esc(crumbName())}</b>`
     : labHere && s ? `<a href="#/" aria-label="${esc(course.code)} course map" title="Course map">${icon('home')}</a><i>/</i><a href="#/lab">${LABT}</a><i>/</i><b>${esc(lesson.title)}</b>`
     : `<a href="#/" aria-label="${esc(course.code)} course map" title="Course map">${icon('home')}</a><i>/</i>${labHere ? `<a href="#/lab">${LABT}</a><i>/</i>` : ''}${lessonTrail()}${route === 'overview' ? `<b>${esc(labHere ? lesson.title : crumbName())}</b>` : `<a href="${L('overview')}">${esc(labHere ? lesson.title : crumbName())}</a><i>/</i><b>${esc(pageName)}</b>`}`;
@@ -2370,7 +2383,7 @@ document.addEventListener('change', e => {
   if (forms && forms.onChange(t)) return;
   if (guide && guide.onChange(t, () => rerender())) return;
   if (t.matches?.('[data-ws-lesson]')) { if (t.value && t.value !== lesson.id) location.hash = '#/' + t.value + '/notebook'; return; }
-  if (t.matches?.('[data-sheet-done]')) { lesson.sections.forEach(x => x.activities.forEach(a => { state.done[a.id] = t.checked; })); save(); rerender(); if (t.checked) toast('Exercise finished. Nice work.'); return; }
+  if (t.matches?.('[data-sheet-done]')) { lesson.sections.forEach(x => x.activities.forEach(a => { state.done[a.id] = t.checked; })); save(); rerender(); if (t.checked) toast(ME() ? `Exercise finished. Well done, ${ME()}!` : 'Exercise finished. Nice work.'); return; }
   if (t.dataset.done) {
     state.done[t.dataset.done] = t.checked; save(); rerender(); clearTimeout(klass?._ct); if (klass) klass._ct = setTimeout(() => klass.loadCounts(), 4000);
     if (t.checked) {
