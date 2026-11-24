@@ -60,7 +60,7 @@
             const m = l.match(/^([^:[\]]{1,60}):\s*(.*)$/);
             return m ? `<div class="xs-row"><span class="xs-k">${esc(m[1])}</span><span class="xs-v">${fill(m[2])}</span></div>` : `<p class="xs-line">${fill(l)}</p>`; }).join('')}</div></div>`;
         else if (Lt === 'summary') body = `<div class="xs-paper">${b.title ? `<h3 class="xs-paper-t">${esc(b.title)}</h3>` : ''}${String(b.text || '').split(/\n\s*\n/).map(p => `<p class="xs-line">${fill(p.replace(/\n/g, ' '))}</p>`).join('')}</div>`;
-        else if (Lt === 'flow') body = `<div class="xs-flow">${lines.map((l, i) => `<div class="xs-fbox">${fill(l)}</div>${i < lines.length - 1 ? '<span class="xs-farrow" aria-hidden="true"></span>' : ''}`).join('')}</div>`;
+        else if (Lt === 'flow') body = `${b.title ? `<h3 class="xs-flow-t">${esc(b.title)}</h3>` : ''}<div class="xs-flow">${lines.map((l, i) => `<div class="xs-fbox">${fill(l)}</div>${i < lines.length - 1 ? '<span class="xs-farrow" aria-hidden="true"></span>' : ''}`).join('')}</div>`;
         else body = `<div class="xs-paper is-plain">${b.title ? `<h3 class="xs-paper-t">${esc(b.title)}</h3>` : ''}<ul class="xs-sent${Lt === 'short' ? ' is-short' : ''}">${lines.map(l => `<li>${fill(l)}</li>`).join('')}</ul></div>`;
         return `${rubric(b)}${b.bank && b.bankFirst ? box(b.bankTitle, b.bank, b.bank.map((_, j) => LET[j])) : ''}${body}${b.bank && !b.bankFirst ? box(b.bankTitle, b.bank, b.bank.map((_, j) => LET[j])) : ''}`; },
       ieTable(b) { const c = { i: 0 }, fill = filler(b, c), cols = b.columns || [];
