@@ -46,13 +46,23 @@ window.createIELTSBand = function ({ esc, target = [6.5, 7] }) {
           <div class="bc-tasks"><label><span>Task 1 <i>⅓</i></span>${sel('w1', halves, v.w1, 'Writing Task 1 band', fmt)}</label><label><span>Task 2 <i>⅔</i></span>${sel('w2', halves, v.w2, 'Writing Task 2 band', fmt)}</label></div>
           <span class="bc-band"><small>Band</small><b data-band-of="wri">–</b></span></div>
         ${row('spe', 'Speaking', 'Your band (0–9)', sel('spe', halves, v.spe, 'Speaking band', fmt), 'spe')}
-        <div class="bc-actions"><button type="button" class="btn bc-go" data-band-go>Calculate my band</button><button type="button" class="btn-quiet bc-clear" data-band-clear>Clear</button></div></section>
+        <div class="bc-actions"><button type="button" class="btn-quiet bc-clear" data-band-clear>Clear</button></div></section>
       <section class="bc-card bc-out" data-band-out aria-live="polite"></section></div>
-      <details class="bc-how"><summary>How the bands are worked out</summary>
-        <p><b>Listening and Reading:</b> your number of correct answers out of 40 is converted to a band. Academic and General Training Reading use different tables: General Training needs more correct answers for the same band (for example, 30 correct is about 7.0 in Academic and 6.0 in General Training).</p>
-        <p><b>Writing:</b> Task 2 counts twice as much as Task 1. The Writing band is (Task 1 + 2 × Task 2) ÷ 3, rounded to the nearest half band. For example, Task 1 = 6.0 and Task 2 = 7.0 gives 6.67, so 6.5.</p>
-        <p><b>Overall:</b> the four bands are averaged. An average ending in .25 rounds up to the half band, and one ending in .75 rounds up to the next whole band: 6.25 → 6.5, 6.75 → 7.0, 6.1 → 6.0.</p>
-        <p>These are the commonly published conversions. The official tables can change by a mark from one test to another, so treat the result as an estimate.</p></details></div>`;
+      <details class="bc-how"><summary><span class="bh-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.3a2.5 2.5 0 1 1 3.4 2.3c-.6.3-1 .8-1 1.5v.6"/><circle cx="12" cy="16.9" r=".6" fill="currentColor" stroke="none"/></svg></span>
+        <span class="bh-tx"><b>How the bands are worked out</b><small>Listening and Reading tables, the Writing weighting and the IELTS rounding rule</small></span><span class="bh-chev" aria-hidden="true"></span></summary>
+        <div class="bh-body">
+          <section class="bh-card" style="--c:#2b67d1"><header><span class="bh-k">1</span><h4>Listening and Reading</h4></header>
+            <p>Your number of correct answers out of 40 becomes a band. Academic and General Training Reading use different tables: General Training needs more correct answers for the same band.</p>
+            <div class="bh-eg"><span class="bh-chip"><small>Academic</small><b>30 / 40</b><i>→</i><b>7.0</b></span><span class="bh-chip"><small>General Training</small><b>30 / 40</b><i>→</i><b>6.0</b></span></div></section>
+          <section class="bh-card" style="--c:#e2552f"><header><span class="bh-k">2</span><h4>Writing</h4></header>
+            <p>Task 2 counts twice as much as Task 1. The result is rounded to the nearest half band.</p>
+            <div class="bh-formula"><span>Writing</span><i>=</i><span class="bh-frac"><span>Task 1 + 2 × Task 2</span><span>3</span></span></div>
+            <div class="bh-eg"><span class="bh-chip"><small>Example</small><b>6.0</b><i>+</i><b>2 × 7.0</b><i>→</i><b>6.67</b><i>→</i><b>6.5</b></span></div></section>
+          <section class="bh-card" style="--c:#7a4fd0"><header><span class="bh-k">3</span><h4>Overall band</h4></header>
+            <p>The four bands are averaged. An average ending in .25 rounds up to the half band, and one ending in .75 rounds up to the next whole band.</p>
+            <div class="bh-eg">${[['6.25', '6.5'], ['6.75', '7.0'], ['6.1', '6.0']].map(([a, b]) => `<span class="bh-chip"><b>${a}</b><i>→</i><b>${b}</b></span>`).join('')}</div></section>
+          <aside class="bh-note"><b>An estimate.</b> These are the commonly published conversion tables. The official tables can change by a mark from one test to another.</aside>
+        </div></details></div>`;
   }
   /* the results come from the menus on the page (not from storage, which Safari's private browsing blocks) */
   function readPage(root) { const v = { mod: mod || load().mod }; root.querySelectorAll('[data-band]').forEach(x => { v[x.dataset.band] = x.value; }); return v; }

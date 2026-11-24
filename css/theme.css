@@ -97,9 +97,6 @@
 .bc-o-bar { position: relative; display: block; height: 10px; margin-top: 6px; border-radius: 10px; background: var(--paper-2); }
 .bc-o-bar i { position: absolute; inset: 0 auto 0 0; width: calc(var(--p) * 100%); border-radius: inherit; background: linear-gradient(90deg, var(--gold), var(--brand)); transition: width .4s var(--ease, ease); }
 .bc-o-bar em { position: absolute; top: -4px; bottom: -4px; left: calc(var(--t) * 100%); width: 2px; background: var(--ink); border-radius: 2px; }
-.bc-how { margin-top: 18px; padding: 14px 18px; border-radius: 16px; background: #fff; box-shadow: 0 0 0 1px var(--line); }
-.bc-how summary { cursor: pointer; font-weight: 700; }
-.bc-how p { color: var(--ink-2); margin: 10px 0 0; }
 @media (max-width: 760px) { .bc-grid { grid-template-columns: 1fr; } .bc-out { position: static; order: -1; } .bc-row, .bc-row.is-writing { grid-template-columns: 1fr 56px; } .bc-row > select, .bc-tasks { grid-column: 1 / -1; grid-row: 2; } .bc-band { grid-row: 1; grid-column: 2; } }
 [data-course="ielts"] .sidebar .side-link.t-band { --tc: #d6283c; }
 /* The page area takes focus when a page opens (so screen readers start there): no ring around it, ever. */
@@ -136,3 +133,42 @@
 .bc-out.is-flash { animation: bcFlash .7s ease; }
 @keyframes bcFlash { 30% { transform: scale(1.02); box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand) 35%, transparent), 0 24px 40px -24px rgba(24, 33, 63, .4); } }
 @media (prefers-reduced-motion: reduce) { .bc-out.is-flash { animation: none; } }
+/* Band calculator · "How the bands are worked out": a fold with an icon, a subtitle and an arrow; inside, one card per rule */
+.bc-how { margin-top: 18px; border-radius: 22px; background: #fff; box-shadow: 0 0 0 1px var(--line), 0 14px 32px -24px rgba(24, 33, 63, .4); overflow: hidden; }
+.bc-how summary { display: flex; align-items: center; gap: 14px; padding: 16px 20px; cursor: pointer; list-style: none; transition: background .2s ease; }
+.bc-how summary::-webkit-details-marker { display: none; }
+.bc-how summary:hover { background: #f8f9fc; }
+.bh-ic { flex: none; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 13px; background: linear-gradient(160deg, #fde8ea, #fbf1f2); color: var(--brand); box-shadow: inset 0 0 0 1px rgba(214, 40, 60, .14); }
+.bh-ic svg { width: 24px; height: 24px; }
+.bh-tx { flex: 1; min-width: 0; }
+.bh-tx b { display: block; font: 700 1.08rem/1.3 var(--serif); color: var(--ink); }
+.bh-tx small { display: block; margin-top: 2px; color: var(--muted); font-size: .86rem; }
+.bh-chev { flex: none; width: 34px; height: 34px; border-radius: 50%; background: var(--paper-2); position: relative; transition: transform .3s var(--ease, ease), background .2s ease; }
+.bh-chev::before { content: ""; position: absolute; left: 50%; top: 45%; width: 8px; height: 8px; border-right: 2px solid var(--ink); border-bottom: 2px solid var(--ink); transform: translate(-50%, -50%) rotate(45deg); }
+.bc-how[open] .bh-chev { transform: rotate(180deg); background: var(--ink); }
+.bc-how[open] .bh-chev::before { border-color: #fff; }
+.bc-how[open] summary { border-bottom: 1px solid var(--line); }
+.bh-body { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; padding: 18px 20px 20px; background: linear-gradient(180deg, #fbfcfe, #fff); }
+.bc-how[open] .bh-body { animation: bhIn .35s var(--ease, ease); }
+@keyframes bhIn { from { opacity: 0; transform: translateY(-6px); } }
+.bh-card { position: relative; display: grid; align-content: start; gap: 10px; padding: 16px; border-radius: 18px; background: #fff; box-shadow: 0 0 0 1px var(--line); overflow: hidden; }
+.bh-card::before { content: ""; position: absolute; inset: 0 0 auto; height: 4px; background: var(--c); }
+.bh-card header { display: flex; align-items: center; gap: 10px; }
+.bh-k { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 9px; background: color-mix(in srgb, var(--c) 12%, #fff); color: var(--c); font: 800 .9rem/1 var(--sans); }
+.bh-card h4 { margin: 0; font-size: 1.02rem; }
+.bh-card p { margin: 0; color: var(--ink-2); font-size: .93rem; line-height: 1.55; }
+.bh-eg { display: flex; flex-wrap: wrap; gap: 6px; }
+.bh-chip { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 12px; background: color-mix(in srgb, var(--c) 8%, #fff); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--c) 18%, transparent); font-size: .88rem; }
+.bh-chip small { font-size: .68rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.bh-chip b { font-variant-numeric: tabular-nums; color: var(--ink); }
+.bh-chip b:last-child { color: var(--c); }
+.bh-chip i { font-style: normal; color: var(--faint); }
+.bh-formula { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 12px; background: #f6f8fc; font-weight: 700; color: var(--ink); }
+.bh-formula > i { font-style: normal; color: var(--faint); }
+.bh-frac { display: inline-grid; text-align: center; font-size: .9rem; }
+.bh-frac span:first-child { padding: 0 4px 3px; border-bottom: 1.5px solid var(--ink); }
+.bh-frac span:last-child { padding-top: 3px; }
+.bh-note { grid-column: 1 / -1; display: flex; gap: 8px; align-items: baseline; padding: 10px 14px; border-radius: 12px; background: #fff8e8; color: #7a5a12; font-size: .88rem; }
+.bh-note b { color: #5c4309; }
+@media (max-width: 900px) { .bh-body { grid-template-columns: 1fr; } }
+@media (prefers-reduced-motion: reduce) { .bh-chev, .bc-how summary { transition: none; } .bc-how[open] .bh-body { animation: none; } }
