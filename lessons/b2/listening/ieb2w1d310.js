@@ -31,13 +31,19 @@ window.DEC15_LESSON = {
               instruction: 'Label the pie chart. Write **NO MORE THAN THREE WORDS** for each answer.', rule: 'NO MORE THAN THREE WORDS', max: 3,
               src: 'assets/lessons/listening/part3/ex10-pie.jpg', alt: 'A pie chart in three parts: part 4 (green) is about a quarter, part 5 (blue) is just under half, part 6 (red) is about 30 per cent.',
               labels: [
-                { x: 31.1, y: 37.3, answer: 'transportation' },
-                { x: 72.4, y: 50.6, answer: 'industry' },
-                { x: 36.5, y: 76.3, answer: 'buildings' }
+                { x: 42.2, y: 37.3, answer: 'transportation' },
+                { x: 59.2, y: 50.6, answer: 'industry' },
+                { x: 44.4, y: 76.3, answer: 'buildings' }
               ] },
-            { type: 'ieGap', id: 'ieb2w1d310-q3', from: 7, layout: 'short', title: 'Countries: Great Britain · Canada · Germany · India · Japan · Mexico · Saudi Arabia · South Korea · former Soviet Union · USA',
-              instruction: 'Tick the relevant boxes in each column: for each question, write **all** the countries from the list that answer it, in any order.',
-              text: 'Which countries are producing less oil now than in the past? [[Mexico, former Soviet Union|former Soviet Union, Mexico]]\nWhich countries use the most gasoline per head? [[Canada, Germany, Japan, USA]]\nWhich countries are increasing their gasoline use most rapidly? [[India, South Korea|South Korea, India]]' }
+            { type: 'ieMulti', id: 'ieb2w1d310-q3', from: 7, pick: 2, numbers: 1,   // one tick-box column on the paper: one mark
+              instruction: 'Tick the relevant countries for each question. You need all the right countries for the mark.', q: 'Which countries are producing less oil now than in the past?',
+              options: ['Great Britain', 'Canada', 'Germany', 'India', 'Japan', 'Mexico', 'Saudi Arabia', 'South Korea', 'former Soviet Union', 'USA'], answers: ['F', 'I'] },
+            { type: 'ieMulti', id: 'ieb2w1d310-q4', from: 8, pick: 4, numbers: 1,   // one tick-box column on the paper: one mark
+              instruction: '', q: 'Which countries use the most gasoline per head?',
+              options: ['Great Britain', 'Canada', 'Germany', 'India', 'Japan', 'Mexico', 'Saudi Arabia', 'South Korea', 'former Soviet Union', 'USA'], answers: ['B', 'C', 'E', 'J'] },
+            { type: 'ieMulti', id: 'ieb2w1d310-q5', from: 9, pick: 2, numbers: 1,   // one tick-box column on the paper: one mark
+              instruction: '', q: 'Which countries are increasing their gasoline use most rapidly?',
+              options: ['Great Britain', 'Canada', 'Germany', 'India', 'Japan', 'Mexico', 'Saudi Arabia', 'South Korea', 'former Soviet Union', 'USA'], answers: ['D', 'H'] }
           ]
         }] },
       { id: 'script', short: 'Script and answers', minutes: 5, grouping: 'Alone',

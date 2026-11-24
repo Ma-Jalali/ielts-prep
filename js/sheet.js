@@ -15,10 +15,10 @@
   const GAP = /\[\[(.+?)\]\]/g;
   const gapsIn = t => [...String(t || '').matchAll(GAP)].map(m => m[1]);
   const isQ = b => /^ie(Gap|Table|Diagram|Choice|Multi|Match|TFNG)$/.test(b.type);
-  const count = b => b.type === 'ieChoice' || b.type === 'ieMatch' || b.type === 'ieTFNG' ? (b.items || []).length : b.type === 'ieMulti' ? Number(b.pick) || (b.answers || []).length
+  const count = b => b.type === 'ieChoice' || b.type === 'ieMatch' || b.type === 'ieTFNG' ? (b.items || []).length : b.type === 'ieMulti' ? Number(b.numbers) || Number(b.pick) || (b.answers || []).length
     : b.type === 'ieTable' ? (b.rows || []).flat().flatMap(gapsIn).length : b.type === 'ieDiagram' ? (b.labels || []).length : gapsIn(b.text).length;
   const KINDS = { form: 'Form completion', notes: 'Note completion', sentences: 'Sentence completion', short: 'Short answers', summary: 'Summary completion', flow: 'Flow chart' };
-  const kindOf = b => b.type === 'ieGap' ? KINDS[b.layout] || 'Completion' : b.type === 'ieTable' ? 'Table completion' : b.type === 'ieDiagram' ? (/map/i.test(b.title || b.alt || '') ? 'Map labelling' : 'Plan labelling')
+  const kindOf = b => b.type === 'ieGap' ? KINDS[b.layout] || 'Completion' : b.type === 'ieTable' ? 'Table completion' : b.type === 'ieDiagram' ? (/\bmap\b/i.test(`${b.title || ''} ${b.alt || ''}`) ? 'Map labelling' : /\bplan\b|floor|layout/i.test(`${b.title || ''} ${b.alt || ''}`) ? 'Plan labelling' : 'Diagram labelling')
     : b.type === 'ieChoice' || b.type === 'ieMulti' ? 'Multiple choice' : b.type === 'ieMatch' ? 'Matching' : '';
 
   function page(L, ctx) {
@@ -77,7 +77,7 @@
           return `<li class="xs-mq"><div class="xs-mq-q"><span class="xs-qn">${f + i}</span><p>${fmt(it.q)}</p></div><div class="xs-opts" role="radiogroup" aria-label="Question ${f + i}">${(it.options || []).map((o, j) =>
             `<label class="xs-opt"><input type="radio" name="${esc(k)}" value="${LET[j]}" data-save="${esc(k)}"${v === LET[j] ? ' checked' : ''}><span class="xs-let">${LET[j]}</span><span class="xs-ot">${fmt(o)}</span></label>`).join('')}</div></li>`; }).join('')}</ol>`; },
       ieMulti(b) { const pick = Number(b.pick) || (b.answers || []).length || 2;
-        return `${rubric(b)}<div class="xs-mq is-multi"><div class="xs-mq-q"><span class="xs-qn is-wide">${range(b).replace('Questions ', '')}</span><p>${fmt(b.q)}<small>Choose ${['', 'ONE', 'TWO', 'THREE', 'FOUR'][pick] || pick} letters.</small></p></div>
+        return `${rubric(b)}<div class="xs-mq is-multi"><div class="xs-mq-q"><span class="xs-qn is-wide">${range(b).replace('Questions ', '')}</span><p>${fmt(b.q)}<small>Choose ${['', 'ONE', 'TWO', 'THREE', 'FOUR'][pick] || pick} letters.${Number(b.numbers) === 1 ? ` You need ${pick === 2 ? 'both' : 'all of them'} for the mark.` : ''}</small></p></div>
           <div class="xs-opts">${(b.options || []).map((o, j) => { const k = `${b.id}-${LET[j]}`; return `<label class="xs-opt is-check"><input type="checkbox" data-save="${esc(k)}"${val(k) === true ? ' checked' : ''}><span class="xs-let">${LET[j]}</span><span class="xs-ot">${fmt(o)}</span></label>`; }).join('')}</div></div>`; },
       ieMatch(b) { const f = Number(b.from) || 1, keys = (b.options || []).map((_, j) => b.numbering === 'roman' ? ROM[j] : LET[j]);
         return `${rubric(b)}<div class="xs-match">${box(b.boxTitle, b.options || [], keys)}<ol class="xs-mlist">${(b.items || []).map((it, i) => `<li><span class="xs-mq-t">${fmt(it.q)}</span>${field(`${b.id}-${i}`, f + i, it.answer, keys)}</li>`).join('')}</ol></div>`; },
@@ -128,6 +128,7 @@
       'Multiple choice': ['All three options will be mentioned', 'You usually hear something about every option. Listen for the one that really answers the question; the words are often paraphrased.'],
       'Matching': ['Use the box', 'Read the options in the box before you play. An option can sometimes be used more than once.'],
       'Map labelling': ['Find where you start', 'Find the starting point on the map first, then follow the directions: left, right, opposite, next to, at the end of.'],
+      'Diagram labelling': ['Follow the description', 'Look at the parts already labelled and follow the speaker from one part to the next: on top of, below, inside, attached to.'],
       'Plan labelling': ['Find where you start', 'Find the starting point on the plan first, then follow the directions: left, right, opposite, next to, at the end of.']
     };
     const ICON = {

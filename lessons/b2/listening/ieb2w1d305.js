@@ -24,9 +24,11 @@ window.DEC15_LESSON = {
             { title: 'Recording 2 · Questions 6–10', src: 'https://drive.google.com/file/d/1GUhdVGnbdJNiQIdDUTNfvR7Nx1zavvel/view', note: 'They discuss what helps captive animals survive when they are released.' }
           ],
           blocks: [
-            { type: 'ieGap', id: 'ieb2w1d305-q1', from: 1, layout: 'form', title: 'What were the TWO main problems with the first part of Eliot’s essay?',
-              instruction: 'Choose **TWO** letters, **A–F**. Write both letters in the box: you need both for the mark.',
-              text: 'A: insufficient research\nB: lack of organisation\nC: lack of concrete examples\nD: narrow focus\nE: inclusion of irrelevant material\nF: insufficient supporting evidence\nYour TWO letters: [[B and E|E and B|B, E|E, B|B,E|E,B|B E|E B|BE|EB|B & E|E & B]]' },
+            { type: 'ieMulti', id: 'ieb2w1d305-q1', from: 1, pick: 2, numbers: 1,   // the paper counts this choose-TWO item as one question (both letters for one mark)
+              instruction: 'Choose **TWO** letters, **A–F**.',
+              q: 'What were the TWO main problems with the first part of Eliot’s essay?',
+              options: ['insufficient research', 'lack of organisation', 'lack of concrete examples', 'narrow focus', 'inclusion of irrelevant material', 'insufficient supporting evidence'],
+              answers: ['B', 'E'] },
             { type: 'ieGap', id: 'ieb2w1d305-q2', from: 2, layout: 'notes', title: 'Captive breeding',
               instruction: 'Complete the notes below. Write **NO MORE THAN THREE WORDS** for each answer.', rule: 'NO MORE THAN THREE WORDS', max: 3,
               text: '# Introduction\n- a [[definition]] of captive breeding\n# Advantages of captive breeding programmes\n- allow preservation of species from extinction\n- could give new function for [[zoos]] in future\n- allow reintroduction of species into wild\n# Disadvantages of captive breeding programmes\n- captive breeding is [[expensive|very expensive]]\n- psychological effects of captivity\n- danger of [[disease]] for captive animals\n- poor success in reintroduction to wild' },
