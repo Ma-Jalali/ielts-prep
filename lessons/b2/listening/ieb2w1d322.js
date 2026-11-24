@@ -30,7 +30,7 @@ window.DEC15_LESSON = {
             ] },
             { type: 'ieGap', id: 'ieb2w1d322-q2', from: 6, layout: 'summary',
               instruction: 'Complete the notes below. Write **NO MORE THAN THREE WORDS AND/OR A NUMBER** for each answer.', rule: 'NO MORE THAN THREE WORDS AND/OR A NUMBER', max: 3,
-              text: 'Stamps must represent aspects of national interest, for example pictures of people from [[books]], or specific examples of wildlife such as Australian [[kangaroo|kangaroos|the kangaroo]]. There are no [[living people]] on Australian or British stamps.\nA favorite topic in Britain is [[kings and queens]].' },
+              text: 'Stamps must represent aspects of national interest, for example pictures of people from [[books]], or specific examples of wildlife such as Australian [[kangaroo|kangaroos|the kangaroo]]. There are no [[living people]] on Australian or British stamps.\n\nA favorite topic in Britain is [[kings and queens]].' },
             { type: 'figure', src: 'assets/lessons/listening/part3/ex22-stamps.jpg', alt: 'Three stamps shaped like coffee cups. A: people sitting at tables inside a busy café. B: the inside of a modern coffee shop with high stools. C: people sitting at tables outside a café on the pavement, under umbrellas.', caption: 'Question 10 · Pictures A, B and C' },
             { type: 'ieChoice', id: 'ieb2w1d322-q3', from: 10, instruction: 'Choose the correct letter, **A, B or C**.', items: [
               { q: 'Which picture shows the New Zealand stamp worth $1.50?', options: ['Picture A', 'Picture B', 'Picture C'], answer: 'C' }

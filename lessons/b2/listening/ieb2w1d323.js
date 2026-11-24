@@ -1,6 +1,7 @@
 /* IELTS · Listening · Practise · Part 3 · Exercise 23 — John Gould and his bird prints.
    Source: Listening Section 3 Exercises (Practice No 23); answers from the teacher's key (folder 23, Answer Keys.txt).
-   The folder has no recording script, so the split between the two tracks (Questions 1–6 / 7–10) could not be checked.
+   The folder has no recording script; the answers and the split between the tracks (Track 10: Questions 1–6, Track 11:
+   Questions 7–10, as the narrator announces) were checked by listening to the recordings.
    Questions 1–3 may be answered in any order, so each of those gaps accepts any of the three professions.
    Recordings stream from Google Drive. Ids (lesson, activities, blocks) are the keys of students' saved work: never rename them. */
 window.DEC15_LESSON = {
