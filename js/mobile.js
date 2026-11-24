@@ -50,22 +50,32 @@
   const hint = () => document.querySelectorAll('.xs input[type=text]').forEach(x => { x.enterKeyHint = 'next'; x.setAttribute('autocapitalize', 'off'); x.setAttribute('autocorrect', 'off'); });
 
   /* ── mini player: the recording stays within reach while the student answers ── */
-  const mini = document.createElement('div'); mini.className = 'm-mini'; mini.hidden = true;
-  mini.innerHTML = `<button type="button" class="m-mini-play" aria-label="Play">${ic(I.play)}</button><div class="m-mini-tx"><b></b><span class="m-mini-bar"><i></i></span></div><button type="button" class="m-mini-rew" aria-label="Back 5 seconds">${ic(I.rew)}<small>5</small></button><span class="m-mini-t">0:00</span>`;
+  const skipIc = (fwd, n) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${fwd ? '<path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3"/><path d="M19.8 3.8v3.6h-3.6"/>' : '<path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3"/><path d="M4.2 3.8v3.6h3.6"/>'}<text x="12" y="15.6" text-anchor="middle" font-size="7.6" font-weight="800" fill="currentColor" stroke="none" font-family="system-ui, sans-serif">${n}</text></svg>`;
+  const mini = document.createElement('div'); mini.className = 'm-mini'; mini.hidden = true; mini.setAttribute('role', 'region'); mini.setAttribute('aria-label', 'Recording');
+  mini.innerHTML = `<button type="button" class="m-mini-play" aria-label="Play">${ic(I.play)}</button>
+    <div class="m-mini-tx"><div class="m-mini-top"><b></b><span class="m-mini-t">0:00</span></div><div class="m-mini-bar"><i></i><input type="range" min="0" max="1000" value="0" aria-label="Position in the recording"></div></div>
+    <button type="button" class="m-mini-skip" data-s="-10" aria-label="Back 10 seconds">${skipIc(false, 10)}</button><button type="button" class="m-mini-skip" data-s="10" aria-label="Forward 10 seconds">${skipIc(true, 10)}</button>`;
   document.body.appendChild(mini);
-  let cur = null, seen = new Map(), io = null;
+  let cur = null, seen = new Map(), io = null, dragging = false;
   const fmt = s => isFinite(s) ? `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}` : '0:00';
-  const label = a => { const p = a.closest('.xs-player'); return p ? `${p.querySelector('.xs-play-top b')?.textContent || 'Recording'} · ${p.querySelector('.xs-play-top span')?.textContent || ''}` : 'Recording'; };
-  function paintMini() { if (!cur || !document.contains(cur)) { mini.hidden = true; return; }
+  const label = a => (a.closest('.xp')?.dataset.title || 'Recording').replace(/Questions? /, 'Q ');
+  function paintMini() { if (!cur || !document.contains(cur)) { mini.hidden = true; document.body.classList.remove('has-mini'); return; }
     const offscreen = seen.get(cur) === false, started = cur.currentTime > 0 || !cur.paused;
     mini.hidden = !(offscreen && started);
     mini.querySelector('b').textContent = label(cur);
     mini.querySelector('.m-mini-play').innerHTML = ic(cur.paused ? I.play : I.pause); mini.querySelector('.m-mini-play').setAttribute('aria-label', cur.paused ? 'Play' : 'Pause');
-    mini.querySelector('.m-mini-bar i').style.width = (cur.duration ? 100 * cur.currentTime / cur.duration : 0) + '%';
+    mini.classList.toggle('is-playing', !cur.paused);
+    const pct = cur.duration ? 100 * cur.currentTime / cur.duration : 0;
+    mini.querySelector('.m-mini-bar i').style.width = pct + '%'; if (!dragging) mini.querySelector('.m-mini-bar input').value = Math.round(pct * 10);
     mini.querySelector('.m-mini-t').textContent = fmt(cur.currentTime) + (cur.duration ? ' / ' + fmt(cur.duration) : '');
     document.body.classList.toggle('has-mini', !mini.hidden); }
-  mini.addEventListener('click', e => { if (!cur) return; if (e.target.closest('.m-mini-play')) cur.paused ? cur.play() : cur.pause(); else if (e.target.closest('.m-mini-rew')) cur.currentTime = Math.max(0, cur.currentTime - 5);
-    else if (e.target.closest('.m-mini-tx')) cur.closest('.xs-player')?.scrollIntoView({ block: 'center', behavior: 'smooth' }); paintMini(); });
+  mini.addEventListener('click', e => { if (!cur) return;
+    if (e.target.closest('.m-mini-play')) { cur.paused ? cur.closest('.xp')?.querySelector('.xp-play')?.click() : cur.pause(); }
+    else if (e.target.closest('[data-s]')) cur.currentTime = Math.max(0, Math.min((cur.duration || 1e9) - .1, cur.currentTime + +e.target.closest('[data-s]').dataset.s));
+    else if (e.target.closest('.m-mini-top')) cur.closest('.xs-player')?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    paintMini(); });
+  mini.addEventListener('input', e => { if (!cur || !e.target.matches('input[type=range]') || !cur.duration) return; dragging = true; cur.currentTime = cur.duration * e.target.value / 1000; mini.querySelector('.m-mini-bar i').style.width = e.target.value / 10 + '%'; });
+  mini.addEventListener('change', () => { dragging = false; paintMini(); });
   ['play', 'pause', 'timeupdate', 'ended', 'loadedmetadata'].forEach(ev => document.addEventListener(ev, e => { if (!(e.target instanceof HTMLAudioElement) || !e.target.closest('.xs')) return;
     if (ev === 'play') { cur = e.target; document.querySelectorAll('.xs audio').forEach(a => { if (a !== cur && !a.paused) a.pause(); }); }   // one recording at a time
     if (e.target === cur) paintMini(); }, true));

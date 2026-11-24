@@ -2,20 +2,24 @@
 .m-bar, .m-head { display: none; }
 
 /* ── mini player ── */
-.m-mini { position: fixed; z-index: 70; left: 50%; bottom: 18px; transform: translateX(-50%); width: min(560px, calc(100vw - 20px)); display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: center; gap: 10px;
-  padding: 8px 14px 8px 8px; border-radius: 18px; background: linear-gradient(120deg, #18213f, #2a3563); color: #fff; box-shadow: 0 18px 36px -14px rgba(24, 33, 63, .7); animation: mMini .22s ease-out; }
+.m-mini { position: fixed; z-index: 70; left: 50%; bottom: 18px; transform: translateX(-50%); width: min(560px, calc(100vw - 16px)); display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: center; gap: 8px;
+  padding: 8px 8px 8px 8px; border-radius: 20px; background: radial-gradient(120% 160% at 0% 0%, #34407a, #1a2248 60%); color: #fff; box-shadow: 0 18px 36px -14px rgba(24, 33, 63, .75), inset 0 1px 0 rgba(255, 255, 255, .08); animation: mMini .22s ease-out; }
 .m-mini[hidden] { display: none; }
 @keyframes mMini { from { opacity: 0; transform: translate(-50%, 12px); } }
-.m-mini button { border: 0; background: none; color: inherit; cursor: pointer; display: grid; place-items: center; }
-.m-mini-play { width: 44px; height: 44px; border-radius: 13px; background: var(--brand, #d6283c) !important; box-shadow: 0 6px 14px -6px rgba(214, 40, 60, .9); }
-.m-mini-play svg { width: 22px; height: 22px; }
-.m-mini-tx { display: grid; gap: 6px; min-width: 0; cursor: pointer; }
-.m-mini-tx b { font: 650 .86rem/1.2 var(--sans, system-ui); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.m-mini-bar { height: 4px; border-radius: 99px; background: rgba(255, 255, 255, .2); overflow: hidden; }
-.m-mini-bar i { display: block; height: 100%; background: #fff; border-radius: 99px; transition: width .25s linear; }
-.m-mini-rew { position: relative; width: 38px; height: 38px; border-radius: 12px; background: rgba(255, 255, 255, .12) !important; }
-.m-mini-rew svg { width: 18px; height: 18px; } .m-mini-rew small { position: absolute; right: 3px; bottom: 1px; font: 800 .58rem/1 var(--sans, system-ui); }
-.m-mini-t { font: 600 .76rem/1 var(--sans, system-ui); color: rgba(255, 255, 255, .75); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.m-mini button { border: 0; background: none; color: inherit; cursor: pointer; display: grid; place-items: center; -webkit-tap-highlight-color: transparent; }
+.m-mini button:active { transform: scale(.94); }
+.m-mini-play { width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(160deg, #ec3a50, #c21d33) !important; box-shadow: 0 6px 14px -6px rgba(214, 40, 60, .95); }
+.m-mini-play svg { width: 22px; height: 22px; } .m-mini:not(.is-playing) .m-mini-play svg { margin-left: 3px; }
+.m-mini-tx { display: grid; gap: 7px; min-width: 0; padding: 0 2px; }
+.m-mini-top { display: flex; align-items: baseline; gap: 8px; min-width: 0; cursor: pointer; }
+.m-mini-top b { flex: 1; min-width: 0; font: 700 .86rem/1.2 var(--sans, system-ui); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.m-mini-t { flex: none; font: 600 .74rem/1 var(--sans, system-ui); color: rgba(255, 255, 255, .72); font-variant-numeric: tabular-nums; }
+.m-mini-bar { position: relative; height: 6px; border-radius: 99px; background: rgba(255, 255, 255, .2); }
+.m-mini-bar i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 99px; background: linear-gradient(90deg, #ff8a98, #fff); }
+.m-mini-bar i::after { content: ''; position: absolute; right: -6px; top: 50%; width: 12px; height: 12px; margin-top: -6px; border-radius: 50%; background: #fff; box-shadow: 0 1px 4px rgba(0, 0, 0, .4); }
+.m-mini-bar input { position: absolute; left: 0; right: 0; top: -12px; bottom: -12px; width: 100%; height: auto; margin: 0; opacity: 0; cursor: pointer; }
+.m-mini-skip { width: 42px; height: 42px; border-radius: 50%; background: rgba(255, 255, 255, .1) !important; }
+.m-mini-skip svg { width: 25px; height: 25px; }
 body.has-mini .to-top, body.has-mini .dx-fab { opacity: 0; pointer-events: none; }
 
 /* ── picture viewer ── */
