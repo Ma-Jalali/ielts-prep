@@ -38,7 +38,7 @@
       const src = id ? `https://drive.google.com/uc?export=download&id=${id}` : a.src;
       return `<div class="xs-player">
         <span class="xs-play-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 10v4M8 7v10M12 4v16M16 8v8M20 11v2" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" fill="none"/></svg></span>
-        <div class="xs-play-main"><div class="xs-play-top"><b>${audios.length > 1 ? `Recording ${i + 1}` : 'Recording'}</b><span>${esc(range)}${extra ? ` · ${esc(extra[1])}` : ''}</span></div>
+        <div class="xs-play-main"><div class="xs-play-top"><b>${audios.length > 1 ? `Recording ${i + 1}` : 'Recording'}</b><span>${esc(range)}${extra ? ` · ${esc(extra[1])}` : ''}</span><i class="xs-wave" aria-hidden="true">${[...Array(28)].map((_, j) => `<b style="height:${4 + Math.round(Math.abs(Math.sin((j + 1) * (i + 2) * 1.7)) * 18)}px"></b>`).join('')}</i></div>
           <audio controls preload="none" src="${esc(src)}"${id ? ` data-ie-drive="https://drive.google.com/file/d/${id}/preview"` : ''} title="${esc(a.title || 'Recording')}"></audio>
           ${id ? `<a class="xs-drive" href="https://drive.google.com/file/d/${id}/view" target="_blank" rel="noopener">Not playing? Open it in Google Drive</a>` : ''}</div></div>`; };
 
@@ -116,8 +116,36 @@
       else if (b.type === 'text') scr.push({ title: 'Script and answer key', link: true, html: `<div class="xs-script is-link">${b.text}</div>` }); });
     const scriptHTML = scr.length ? scr.map(s => `<details class="xs-fold is-script"><summary><span class="xs-fold-ic">${icon('book')}</span><span class="xs-fold-tx"><b>Recording script</b><small>${esc(s.link ? 'In the teacher’s key on Google Drive' : s.title)}</small></span><i class="xs-chev" aria-hidden="true"></i></summary>${s.html}</details>`).join('') : '';
 
-    /* ── the page ── */
     const kinds = [...new Set(qs.map(kindOf).filter(Boolean))];
+    /* ── before you play: three steps, and tips for the question types in this exercise ── */
+    const TIPS = {
+      'Form completion': ['Names and numbers', 'Names are often spelled out letter by letter, and numbers said in groups. Write them exactly as you hear them.'],
+      'Note completion': ['Keep to the word limit', 'Check the instruction: if it says NO MORE THAN TWO WORDS, an answer of three words is wrong, even if the words are right.'],
+      'Table completion': ['Read the table both ways', 'Read across each row and down each column. The headings tell you what kind of word is missing.'],
+      'Sentence completion': ['The sentence must still work', 'Your answer has to fit the sentence: check the grammar, singular or plural, and the word limit.'],
+      'Short answers': ['Answer the question asked', 'Write only the words that answer the question, not a whole sentence.'],
+      'Multiple choice': ['All three options will be mentioned', 'You usually hear something about every option. Listen for the one that really answers the question; the words are often paraphrased.'],
+      'Matching': ['Use the box', 'Read the options in the box before you play. An option can sometimes be used more than once.'],
+      'Map labelling': ['Find where you start', 'Find the starting point on the map first, then follow the directions: left, right, opposite, next to, at the end of.'],
+      'Plan labelling': ['Find where you start', 'Find the starting point on the plan first, then follow the directions: left, right, opposite, next to, at the end of.']
+    };
+    const ICON = {
+      read: '<path d="M4 6.5C6.5 5 9 5 12 6.5 15 5 17.5 5 20 6.5V18c-2.5-1.5-5-1.5-8 0-3-1.5-5.5-1.5-8 0z"/><path d="M12 6.5V18"/>',
+      think: '<path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V16h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z"/>',
+      listen: '<path d="M4 14v-2a8 8 0 0 1 16 0v2"/><rect x="3" y="13" width="4" height="7" rx="1.6"/><rect x="17" y="13" width="4" height="7" rx="1.6"/>',
+      check: '<path d="M20 6 9 17l-5-5"/>'
+    };
+    const ic = k => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[k]}</svg>`;
+    function prep() { const first = parts[0]?.blocks.filter(isQ) || [], r = partRange(parts[0] || { blocks: [] });
+      const steps = [['read', 'Read first', `Read ${r || 'the questions'} before you play, and underline the key words.`],
+        ['think', 'Predict', 'Decide what each answer needs: a number, a name, a date, a place or a thing.'],
+        ['listen', 'Listen', audios.length > 1 ? 'Play each recording once, as in the test, and answer as you listen.' : 'Play the recording once, as in the test, and answer as you listen.'],
+        ['check', 'Check', 'Check your spelling and the word limit, then open the answers at the bottom.']];
+      const tips = kinds.map(k => TIPS[k]).filter(Boolean).filter((t, i, a) => a.findIndex(x => x[0] === t[0]) === i).slice(0, 3);
+      return `<section class="xs-prep" aria-label="Before you play"><header><span class="xs-prep-k">Before you play</span><h2>How to do this exercise</h2></header>
+        <ol class="xs-steps">${steps.map(([k, t, d], i) => `<li><span class="xs-step-ic">${ic(k)}<i>${i + 1}</i></span><b>${t}</b><span>${esc(d)}</span></li>`).join('')}</ol>
+        ${tips.length ? `<div class="xs-tips">${tips.map(([t, d]) => `<p><b>${esc(t)}</b>${esc(d)}</p>`).join('')}</div>` : ''}</section>`; }
+    /* ── the page ── */
     const sec = (L.sections || [])[0] || {}, doneAll = acts.length && acts.every(a => ctx.done(a.id));
     const crumbs = (ctx.trail || []).map(t => `<a href="${esc(t.href)}">${esc(t.label)}</a><span aria-hidden="true">›</span>`).join('');
     return `<article class="xs" style="--xs-soft:${ctx.soft || '#e6f3f1'}${ctx.acc ? `;--xs-acc:${ctx.acc}` : ''}">
@@ -125,7 +153,7 @@
       <header class="xs-hero"><div class="xs-hero-tx"><span class="xs-eyebrow">${esc(ctx.eyebrow || 'Listening')}</span><h1>${esc(L.title)}</h1>${L.journey ? `<p>${esc(L.journey)}</p>` : ''}
         <ul class="xs-facts"><li><b>${total}</b> questions</li><li><b>${audios.length || 1}</b> recording${audios.length === 1 ? '' : 's'}</li>${kinds.map(k => `<li>${esc(k)}</li>`).join('')}</ul></div>
         ${window.IELTSSheetArt ? window.IELTSSheetArt(L.illus) : ''}</header>
-      <aside class="xs-tip"><b>Before you play</b><span>Read the questions first and think about what kind of answer goes in each gap: a number, a name, a date or a place.</span></aside>
+      ${prep()}
       ${body}
       <section class="xs-end" aria-label="Answers">
         <details class="xs-fold is-key"${ctx.open ? ' open' : ''}><summary><span class="xs-fold-ic">${icon('check')}</span><span class="xs-fold-tx"><b>Check your answers</b><small>Open the answer key when you have finished</small></span><i class="xs-chev" aria-hidden="true"></i></summary>
