@@ -15,10 +15,10 @@
   const GAP = /\[\[(.+?)\]\]/g;
   const gapsIn = t => [...String(t || '').matchAll(GAP)].map(m => m[1]);
   const isQ = b => /^ie(Gap|Table|Diagram|Choice|Multi|Match|TFNG)$/.test(b.type);
-  const count = b => b.type === 'ieChoice' || b.type === 'ieMatch' || b.type === 'ieTFNG' ? (b.items || []).length : b.type === 'ieMulti' ? Number(b.pick) || (b.answers || []).length
+  const count = b => b.type === 'ieChoice' || b.type === 'ieMatch' || b.type === 'ieTFNG' ? (b.items || []).length : b.type === 'ieMulti' ? Number(b.numbers) || Number(b.pick) || (b.answers || []).length
     : b.type === 'ieTable' ? (b.rows || []).flat().flatMap(gapsIn).length : b.type === 'ieDiagram' ? (b.labels || []).length : gapsIn(b.text).length;
   const KINDS = { form: 'Form completion', notes: 'Note completion', sentences: 'Sentence completion', short: 'Short answers', summary: 'Summary completion', flow: 'Flow chart' };
-  const kindOf = b => b.type === 'ieGap' ? KINDS[b.layout] || 'Completion' : b.type === 'ieTable' ? 'Table completion' : b.type === 'ieDiagram' ? (/map/i.test(b.title || b.alt || '') ? 'Map labelling' : 'Plan labelling')
+  const kindOf = b => b.type === 'ieGap' ? KINDS[b.layout] || 'Completion' : b.type === 'ieTable' ? 'Table completion' : b.type === 'ieDiagram' ? (/\bmap\b/i.test(`${b.title || ''} ${b.alt || ''}`) ? 'Map labelling' : /\bplan\b|floor|layout/i.test(`${b.title || ''} ${b.alt || ''}`) ? 'Plan labelling' : 'Diagram labelling')
     : b.type === 'ieChoice' || b.type === 'ieMulti' ? 'Multiple choice' : b.type === 'ieMatch' ? 'Matching' : '';
 
   function page(L, ctx) {
@@ -60,7 +60,7 @@
             const m = l.match(/^([^:[\]]{1,60}):\s*(.*)$/);
             return m ? `<div class="xs-row"><span class="xs-k">${esc(m[1])}</span><span class="xs-v">${fill(m[2])}</span></div>` : `<p class="xs-line">${fill(l)}</p>`; }).join('')}</div></div>`;
         else if (Lt === 'summary') body = `<div class="xs-paper">${b.title ? `<h3 class="xs-paper-t">${esc(b.title)}</h3>` : ''}${String(b.text || '').split(/\n\s*\n/).map(p => `<p class="xs-line">${fill(p.replace(/\n/g, ' '))}</p>`).join('')}</div>`;
-        else if (Lt === 'flow') body = `<div class="xs-flow">${lines.map((l, i) => `<div class="xs-fbox">${fill(l)}</div>${i < lines.length - 1 ? '<span class="xs-farrow" aria-hidden="true"></span>' : ''}`).join('')}</div>`;
+        else if (Lt === 'flow') body = `${b.title ? `<h3 class="xs-flow-t">${esc(b.title)}</h3>` : ''}<div class="xs-flow">${lines.map((l, i) => `<div class="xs-fbox">${fill(l)}</div>${i < lines.length - 1 ? '<span class="xs-farrow" aria-hidden="true"></span>' : ''}`).join('')}</div>`;
         else body = `<div class="xs-paper is-plain">${b.title ? `<h3 class="xs-paper-t">${esc(b.title)}</h3>` : ''}<ul class="xs-sent${Lt === 'short' ? ' is-short' : ''}">${lines.map(l => `<li>${fill(l)}</li>`).join('')}</ul></div>`;
         return `${rubric(b)}${b.bank && b.bankFirst ? box(b.bankTitle, b.bank, b.bank.map((_, j) => LET[j])) : ''}${body}${b.bank && !b.bankFirst ? box(b.bankTitle, b.bank, b.bank.map((_, j) => LET[j])) : ''}`; },
       ieTable(b) { const c = { i: 0 }, fill = filler(b, c), cols = b.columns || [];
@@ -77,7 +77,7 @@
           return `<li class="xs-mq"><div class="xs-mq-q"><span class="xs-qn">${f + i}</span><p>${fmt(it.q)}</p></div><div class="xs-opts" role="radiogroup" aria-label="Question ${f + i}">${(it.options || []).map((o, j) =>
             `<label class="xs-opt"><input type="radio" name="${esc(k)}" value="${LET[j]}" data-save="${esc(k)}"${v === LET[j] ? ' checked' : ''}><span class="xs-let">${LET[j]}</span><span class="xs-ot">${fmt(o)}</span></label>`).join('')}</div></li>`; }).join('')}</ol>`; },
       ieMulti(b) { const pick = Number(b.pick) || (b.answers || []).length || 2;
-        return `${rubric(b)}<div class="xs-mq is-multi"><div class="xs-mq-q"><span class="xs-qn is-wide">${range(b).replace('Questions ', '')}</span><p>${fmt(b.q)}<small>Choose ${['', 'ONE', 'TWO', 'THREE', 'FOUR'][pick] || pick} letters.</small></p></div>
+        return `${rubric(b)}<div class="xs-mq is-multi"><div class="xs-mq-q"><span class="xs-qn is-wide">${range(b).replace('Questions ', '')}</span><p>${fmt(b.q)}<small>Choose ${['', 'ONE', 'TWO', 'THREE', 'FOUR'][pick] || pick} letters.${Number(b.numbers) === 1 ? ` You need ${pick === 2 ? 'both' : 'all of them'} for the mark.` : ''}</small></p></div>
           <div class="xs-opts">${(b.options || []).map((o, j) => { const k = `${b.id}-${LET[j]}`; return `<label class="xs-opt is-check"><input type="checkbox" data-save="${esc(k)}"${val(k) === true ? ' checked' : ''}><span class="xs-let">${LET[j]}</span><span class="xs-ot">${fmt(o)}</span></label>`; }).join('')}</div></div>`; },
       ieMatch(b) { const f = Number(b.from) || 1, keys = (b.options || []).map((_, j) => b.numbering === 'roman' ? ROM[j] : LET[j]);
         return `${rubric(b)}<div class="xs-match">${box(b.boxTitle, b.options || [], keys)}<ol class="xs-mlist">${(b.items || []).map((it, i) => `<li><span class="xs-mq-t">${fmt(it.q)}</span>${field(`${b.id}-${i}`, f + i, it.answer, keys)}</li>`).join('')}</ol></div>`; },
@@ -89,7 +89,8 @@
     const queue = audios.map((a, i) => ({ a, i, at: startOf(a) })), parts = [];
     let cur = null;
     blocks.forEach(b => { const f = isQ(b) ? Number(b.from) || 1 : null, due = f == null ? [] : queue.filter(q => !q.done && q.at <= f + count(b) - 1);
-      if (due.length || !cur) { cur = { audios: due, blocks: [] }; parts.push(cur); due.forEach(q => { q.done = true; }); }
+      if (due.length && cur && !cur.audios.length && !cur.blocks.some(isQ)) { cur.audios = due; due.forEach(q => { q.done = true; }); }   // a picture before the first questions stays below that recording
+      else if (due.length || !cur) { cur = { audios: due, blocks: [] }; parts.push(cur); due.forEach(q => { q.done = true; }); }
       cur.blocks.push(b); });
     queue.filter(q => !q.done).forEach(q => (parts[0] || (parts[0] = { audios: [], blocks: [] })).audios.push(q));   // a recording no question block claims goes at the top
     const partRange = p => { const q = p.blocks.filter(isQ); if (!q.length) return ''; const a = Number(q[0].from) || 1, z = Math.max(...q.map(b => (Number(b.from) || 1) + count(b) - 1)); return a === z ? `Question ${a}` : `Questions ${a}–${z}`; };
@@ -118,33 +119,35 @@
 
     const kinds = [...new Set(qs.map(kindOf).filter(Boolean))];
     /* ── before you play: three steps, and tips for the question types in this exercise ── */
+    /* ── before you play: four short tips — three for every exercise, one for its main question type ── */
     const TIPS = {
-      'Form completion': ['Names and numbers', 'Names are often spelled out letter by letter, and numbers said in groups. Write them exactly as you hear them.'],
-      'Note completion': ['Keep to the word limit', 'Check the instruction: if it says NO MORE THAN TWO WORDS, an answer of three words is wrong, even if the words are right.'],
-      'Table completion': ['Read the table both ways', 'Read across each row and down each column. The headings tell you what kind of word is missing.'],
-      'Sentence completion': ['The sentence must still work', 'Your answer has to fit the sentence: check the grammar, singular or plural, and the word limit.'],
-      'Short answers': ['Answer the question asked', 'Write only the words that answer the question, not a whole sentence.'],
-      'Multiple choice': ['All three options will be mentioned', 'You usually hear something about every option. Listen for the one that really answers the question; the words are often paraphrased.'],
-      'Matching': ['Use the box', 'Read the options in the box before you play. An option can sometimes be used more than once.'],
-      'Map labelling': ['Find where you start', 'Find the starting point on the map first, then follow the directions: left, right, opposite, next to, at the end of.'],
-      'Plan labelling': ['Find where you start', 'Find the starting point on the plan first, then follow the directions: left, right, opposite, next to, at the end of.']
+      'Form completion': 'Names are often spelled out letter by letter.',
+      'Note completion': 'Keep to the word limit in the instructions.',
+      'Table completion': 'Read across the rows and down the columns.',
+      'Sentence completion': 'Your answer must fit the sentence.',
+      'Summary completion': 'Your answer must fit the sentence.',
+      'Short answers': 'Write only the words that answer the question.',
+      'Flow chart': 'Follow the steps in order, top to bottom.',
+      'Multiple choice': 'All options may be mentioned. Pick the one that answers.',
+      'Matching': 'Read the box first. A letter may be used more than once.',
+      'Map labelling': 'Find where you start, then follow the directions.',
+      'Plan labelling': 'Find where you start, then follow the directions.',
+      'Diagram labelling': 'Follow the speaker from one part to the next.'
     };
     const ICON = {
       read: '<path d="M4 6.5C6.5 5 9 5 12 6.5 15 5 17.5 5 20 6.5V18c-2.5-1.5-5-1.5-8 0-3-1.5-5.5-1.5-8 0z"/><path d="M12 6.5V18"/>',
-      think: '<path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V16h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z"/>',
       listen: '<path d="M4 14v-2a8 8 0 0 1 16 0v2"/><rect x="3" y="13" width="4" height="7" rx="1.6"/><rect x="17" y="13" width="4" height="7" rx="1.6"/>',
-      check: '<path d="M20 6 9 17l-5-5"/>'
+      check: '<path d="M20 6 9 17l-5-5"/>',
+      tip: '<path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V16h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z"/>'
     };
     const ic = k => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[k]}</svg>`;
-    function prep() { const first = parts[0]?.blocks.filter(isQ) || [], r = partRange(parts[0] || { blocks: [] });
-      const steps = [['read', 'Read first', `Read ${r || 'the questions'} before you play, and underline the key words.`],
-        ['think', 'Predict', 'Decide what each answer needs: a number, a name, a date, a place or a thing.'],
-        ['listen', 'Listen', audios.length > 1 ? 'Play each recording once, as in the test, and answer as you listen.' : 'Play the recording once, as in the test, and answer as you listen.'],
-        ['check', 'Check', 'Check your spelling and the word limit, then open the answers at the bottom.']];
-      const tips = kinds.map(k => TIPS[k]).filter(Boolean).filter((t, i, a) => a.findIndex(x => x[0] === t[0]) === i).slice(0, 3);
-      return `<section class="xs-prep" aria-label="Before you play"><header><span class="xs-prep-k">Before you play</span><h2>How to do this exercise</h2></header>
-        <ol class="xs-steps">${steps.map(([k, t, d], i) => `<li><span class="xs-step-ic">${ic(k)}<i>${i + 1}</i></span><b>${t}</b><span>${esc(d)}</span></li>`).join('')}</ol>
-        ${tips.length ? `<div class="xs-tips">${tips.map(([t, d]) => `<p><b>${esc(t)}</b>${esc(d)}</p>`).join('')}</div>` : ''}</section>`; }
+    function prep() { const r = partRange(parts[0] || { blocks: [] }), main = kinds.find(k => TIPS[k]);
+      const items = [['read', 'Read first', `Read ${r || 'the questions'} before you play.`],
+        ['listen', 'Listen once', 'Write your answers as you listen.'],
+        ['check', 'Check', 'Spelling and word limit, then see the answers.']];
+      if (main) items.push(['tip', main, TIPS[main]]);
+      return `<section class="xs-prep" aria-label="Before you play"><span class="xs-prep-k">Before you play</span>
+        <ul class="xs-tips4">${items.map(([k, t, d]) => `<li class="${k === 'tip' ? 'is-tip' : ''}"><span class="xs-t4-ic">${ic(k)}</span><span><b>${esc(t)}</b>${esc(d)}</span></li>`).join('')}</ul></section>`; }
     /* ── the page ── */
     const sec = (L.sections || [])[0] || {}, doneAll = acts.length && acts.every(a => ctx.done(a.id));
     const crumbs = (ctx.trail || []).map(t => `<a href="${esc(t.href)}">${esc(t.label)}</a><span aria-hidden="true">›</span>`).join('');

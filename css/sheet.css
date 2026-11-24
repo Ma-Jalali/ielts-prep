@@ -223,3 +223,17 @@
   .xs-script p { grid-template-columns: 1fr; gap: 0; }
 }
 @media (prefers-reduced-motion: reduce) { .xs * { transition: none !important; } }
+.xs-flow-t { margin: 0 0 4px; text-align: center; font-family: var(--serif, "Outfit", sans-serif); font-size: 1.08rem; font-weight: 650; }
+
+/* before you play: one strip of four short tips */
+.xs-prep { display: grid; gap: 12px; padding: 18px 22px 20px; }
+.xs-tips4 { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.xs-tips4 li { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border-radius: 14px; background: #f8f9fc; border: 1px solid var(--xs-line); font-size: .86rem; line-height: 1.4; color: var(--ink-2, #39436a); }
+.xs-tips4 b { display: block; color: var(--xs-ink); font-size: .9rem; margin-bottom: 1px; }
+.xs-t4-ic { flex: none; width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center; background: var(--xs-soft); color: var(--xs-acc); }
+.xs-t4-ic svg { width: 18px; height: 18px; }
+.xs-tips4 li.is-tip { background: #fff8eb; border-color: #f6dfb2; color: #5b4618; }
+.xs-tips4 li.is-tip b { color: #7a4f00; }
+.xs-tips4 li.is-tip .xs-t4-ic { background: var(--gold, #f4a52e); color: #fff; }
+@media (max-width: 1100px) { .xs-tips4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .xs-tips4 { grid-template-columns: 1fr; } }

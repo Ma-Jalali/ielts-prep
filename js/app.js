@@ -1624,6 +1624,7 @@ function weekPanel(n, route) {
     <figure class="wb-pic">${w?.image ? `<img src="${esc(w.image)}" alt="" width="300" height="200" loading="lazy">` : `<span class="wb-pic-num" aria-hidden="true">${n}</span>`}</figure>
     <div class="wb-intro-tx"><p class="wb-eyebrow">${UNITS ? `${UW} ${n}` : `Week ${n}`}</p><h2>${esc(w?.theme || m.label)}</h2><p class="wb-sum">${esc(w?.summary || m.sub || '')}</p>
     ${w && w.days.length ? `<div class="wb-prog"><ol class="wb-route" aria-hidden="true">${w.days.map(d => { const [a, b] = dayProgress(d); return `<li class="${d.status !== 'ready' ? 'soon' : b && a === b ? 'done' : a ? 'some' : ''}${d.id === lesson.id && route !== 'home' ? ' here' : ''}" style="--p:${b ? (a / b).toFixed(3) : 0}"><i></i></li>`; }).join('')}</ol><small>${started ? `${started} of ${ready.length} lessons started` : `${ready.length} lessons`}</small></div>` : ''}</div></div>`;
+  if (secOf(w)) return skillPanel(w, col, route);   // a skill with sections: its sets of exercises, not every exercise
   if (!w || !w.days.length) return `<div class="wb-grid is-empty">${intro}<div class="wb-soon"><img src="${artSrc('reading')}" alt="" width="120" height="120"><b>Coming soon</b><p>The lessons for ${esc(unitName(n))} will appear here.</p></div></div>`;
   let sel = w.days.find(d => d.id === wbDay) || w.days.find(d => d.id === lesson.id) || ready[0] || w.days[0]; wbDay = sel.id;
   const days = `<ol class="wb-days"><li class="wb-dhl" aria-hidden="true"></li>${w.days.map(d => {
@@ -1632,6 +1633,26 @@ function weekPanel(n, route) {
     return `<li class="wb-dli${tot2 && dn2 === tot2 ? ' is-done' : ''}"><button type="button" class="wb-day${d.id === sel.id ? ' sel' : ''}${soon ? ' is-soon' : ''}${here ? ' is-here' : ''}" data-wb-day="${d.id}" aria-pressed="${d.id === sel.id}">${ring(p, d.day, tot && p === 1)}
       <span class="wb-dtx"><b>${esc(d.title)}</b><small>${here ? '<em>You are here</em>' : soon ? 'Coming soon' : `${DW} ${d.day}`}${!soon && dn ? ` · ${dn} of ${tot} done` : ''}</small></span></button></li>`; }).join('')}</ol>`;
   return `<div class="wb-grid">${intro}<div class="wb-col"><p class="wb-h">Lessons</p>${days}</div><div class="wb-col wb-parts-col">${dayParts(w, sel, route)}</div></div>`;
+}
+/* The top menu for a skill with sections (Listening: Learn · Practise · Test). A set can hold 25 exercises, so the
+   menu lists the sets (Part 1, Part 2, Maps …) with their progress; the exercises themselves are on the set's page. */
+function skillPanel(w, col, route) {
+  const S = secOf(w), here = lesson.week === w.n && route !== 'home' && UNITS ? place(lesson.week, lesson.day) : null;
+  const all = groupStats(w, S.flatMap(x => x.groups)), grp = (partGroups().find(g => g.parts.includes(w)) || {}).title || UW;
+  const intro = `<div class="wb-intro" style="--wk:${col}">
+    <figure class="wb-pic"><span class="wb-pic-ic" style="--tc:${partColor(w)}">${partSvg(w)}</span></figure>
+    <div class="wb-intro-tx"><p class="wb-eyebrow">${esc(grp)}</p><h2>${esc(w.theme)}</h2><p class="wb-sum">${esc(w.summary || '')}</p>
+      <div class="wb-sk-prog"><span><i style="width:${all.ready ? Math.round(100 * all.done / all.ready) : 0}%"></i></span><small>${all.ready ? `<b>${all.done}</b> of ${all.ready} done` : 'Coming soon'}</small></div>
+      <a class="wb-sk-all" href="#/skill/${w.n}">Open ${esc(w.theme)} ${icon('arrow')}</a></div></div>`;
+  const setLink = (x, g) => { const st = groupStats(w, [g]), cur = here && here.g === g, href = `#/skill/${w.n}/${x.id}${x.groups.length > 1 ? '/' + g.id : ''}`;
+    return `<li><a class="wb-set${cur ? ' is-cur' : ''}${st.ready ? '' : ' is-soon'}" href="${href}"${cur ? ' aria-current="true"' : ''}><b>${esc(g.title)}</b><small>${st.ready ? `${st.done ? `${st.done}/` : ''}${st.ready} ${g.test ? 'tests' : g.slots ? 'lessons' : 'exercises'}` : 'Coming soon'}</small>${st.ready ? `<span class="wb-set-bar"><i style="width:${Math.round(100 * st.done / st.ready)}%"></i></span>` : ''}</a></li>`; };
+  const secs = S.map(x => { const rows = [...new Set(x.groups.map(g => g.by || ''))];
+    return `<section class="wb-sec"><a class="wb-sec-h" href="#/skill/${w.n}/${x.id}"><span class="wb-sec-ic">${icon(x.icon || 'book')}</span><b>${esc(x.title)}</b>${x.groups.length === 1 ? (() => { const g = x.groups[0], st = groupStats(w, [g]); return `<small class="wb-sec-n">${st.ready ? `${st.done ? `${st.done}/` : ''}${st.ready} ${g.test ? 'tests' : g.slots ? 'lessons' : 'exercises'}` : 'Coming soon'}</small>`; })() : ''}</a>
+      ${x.groups.length > 1 ? rows.map(by => `${by ? `<p class="wb-by">${esc(by)}</p>` : ''}<ul class="wb-sets">${x.groups.filter(g => (g.by || '') === by).map(g => setLink(x, g)).join('')}</ul>`).join('') : ''}</section>`; }).join('');
+  const d = here ? w.days.find(x => x.id === lesson.id) : w.days.find(x => x.status === 'ready' && !isDone(x)) || w.days.find(x => x.status === 'ready');
+  const pl = d && place(w.n, d.day);
+  const card = d ? `<a class="wb-here" href="#/${d.id}"><span class="wb-here-k">${here ? 'You are here' : 'Up next'}</span><b>${esc(d.title)}</b><small>${esc(pl ? [pl.s.title, pl.g.slots || pl.g.test ? null : pl.g.title, pl.name].filter(Boolean).join(' · ') : '')}</small><span class="wb-here-go">${here ? 'Back to it' : 'Start'} ${icon('arrow')}</span></a>` : '';
+  return `<div class="wb-grid is-skill">${intro}<div class="wb-col wb-secs">${secs}</div><div class="wb-col wb-parts-col">${card}</div></div>`;
 }
 function dayParts(w, d, route) {
   const head = `<header class="wb-dhead"><img class="wb-dart" src="${esc(dayArt(w, d))}" data-fallback="${esc(artSrc(d.art || 'reading'))}" alt="" width="96" height="64" loading="lazy" onerror="if(this.dataset.fallback){this.src=this.dataset.fallback;delete this.dataset.fallback}"><div><p class="wb-h">${DW} ${d.day}</p><h3>${esc(d.title)}</h3></div></header>`;

@@ -216,3 +216,44 @@ body[data-page="stage"] .weekbar::after, body[data-page="extra"] .weekbar::after
 .wb-dtx small, .wb-prog small, .wb-go { font-variant-numeric: tabular-nums; }
 @media (max-width: 900px) { .wb-panel::before { display: none; } .wb-panel > .wb-grid { max-height: 76vh; } }
 @media (prefers-reduced-motion: reduce) { .wb-dhl, .wb-panel::before, .wb-part::before { transition: none !important; } }
+
+/* ── a skill with sections (Listening): its sets, not every exercise (app.js skillPanel) ── */
+.wb-grid.is-skill { grid-template-columns: 232px minmax(0, 1.7fr) minmax(220px, .8fr); min-height: 0; }
+.wb-pic-ic { width: 72px; height: 72px; border-radius: 20px; display: grid; place-items: center; background: color-mix(in srgb, var(--tc) 14%, #fff); color: var(--tc); }
+.wb-pic-ic svg { width: 40px; height: 40px; }
+.wb-sk-prog { margin-top: 14px; display: grid; gap: 6px; }
+.wb-sk-prog span { display: block; height: 6px; border-radius: 99px; background: #18213f12; overflow: hidden; }
+.wb-sk-prog i { display: block; height: 100%; border-radius: 99px; background: var(--wk); }
+.wb-sk-prog small { font: 600 .74rem/1.2 var(--sans); color: var(--muted); }
+.wb-sk-prog b { color: var(--ink); }
+.wb-sk-all { margin-top: 14px; display: inline-flex; align-items: center; gap: 6px; font: 700 .8rem/1 var(--sans); color: var(--ink); text-decoration: none; }
+.wb-sk-all:hover { color: color-mix(in srgb, var(--wk) 80%, #18213f); }
+.wb-sk-all .icon { width: 15px; height: 15px; }
+.wb-secs { display: grid; gap: 10px; align-content: start; padding: 14px 14px 16px; }
+.wb-sec { display: grid; gap: 6px; }
+.wb-sec + .wb-sec { padding-top: 10px; border-top: 1px solid var(--line); }
+.wb-sec-h { display: flex; align-items: center; gap: 10px; padding: 6px 8px; border-radius: 12px; color: var(--ink); text-decoration: none; }
+.wb-sec-h:hover { background: #18213f07; }
+.wb-sec-h b { font: 650 .98rem/1.2 var(--serif); }
+.wb-sec-ic { width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; background: color-mix(in srgb, var(--wk) 16%, #fff); color: color-mix(in srgb, var(--wk) 80%, #18213f); }
+.wb-sec-ic .icon { width: 17px; height: 17px; }
+.wb-sec-n { margin-left: auto; font: 600 .74rem/1 var(--sans); color: var(--muted); }
+.wb-by { margin: 2px 0 0 10px; font: 800 .62rem/1.3 var(--sans); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.wb-sets { list-style: none; margin: 0; padding: 0 0 0 4px; display: grid; grid-template-columns: repeat(auto-fill, minmax(128px, 1fr)); gap: 6px; }
+.wb-set { position: relative; display: grid; gap: 2px; padding: 8px 10px 10px; border-radius: 11px; border: 1px solid var(--line); background: #fff; color: var(--ink); text-decoration: none; overflow: hidden; transition: border-color .15s, box-shadow .15s, transform .15s; }
+.wb-set:hover { border-color: color-mix(in srgb, var(--wk) 55%, transparent); box-shadow: 0 6px 14px -10px #18213f66; transform: translateY(-1px); }
+.wb-set b { font: 700 .84rem/1.2 var(--sans); }
+.wb-set small { font: 600 .7rem/1.2 var(--sans); color: var(--muted); }
+.wb-set.is-soon { background: #f7f8fb; }
+.wb-set.is-soon b { color: var(--muted); }
+.wb-set.is-cur { border-color: var(--wk); background: color-mix(in srgb, var(--wk) 9%, #fff); }
+.wb-set-bar { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: #18213f0d; }
+.wb-set-bar i { display: block; height: 100%; background: var(--wk); }
+.wb-here { display: grid; gap: 4px; padding: 16px; border-radius: 16px; background: linear-gradient(160deg, color-mix(in srgb, var(--wk) 12%, #fff), #fff); border: 1px solid var(--line); color: var(--ink); text-decoration: none; }
+.wb-here:hover { border-color: color-mix(in srgb, var(--wk) 55%, transparent); }
+.wb-here-k { font: 800 .64rem/1.3 var(--sans); letter-spacing: .12em; text-transform: uppercase; color: color-mix(in srgb, var(--wk) 80%, #18213f); }
+.wb-here b { font: 650 1.02rem/1.25 var(--serif); }
+.wb-here small { font: 600 .76rem/1.3 var(--sans); color: var(--muted); }
+.wb-here-go { margin-top: 8px; display: inline-flex; align-items: center; gap: 6px; font: 700 .8rem/1 var(--sans); }
+.wb-here-go .icon { width: 15px; height: 15px; }
+@media (max-width: 900px) { .wb-grid.is-skill { grid-template-columns: 1fr; } .wb-grid.is-skill .wb-pic { display: none; } }
