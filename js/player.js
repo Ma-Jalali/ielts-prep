@@ -18,12 +18,13 @@
     const ended = a.ended || (a.duration && a.currentTime >= a.duration - .05 && a.paused);
     p.classList.toggle('is-playing', !a.paused); p.classList.toggle('is-ended', !!ended && a.paused);
     p.querySelector('.xp-play').setAttribute('aria-label', !a.paused ? 'Pause the recording' : ended ? 'Play the recording again' : 'Play the recording');
-    p.querySelector('.xp-t').textContent = fmt(a.currentTime); p.querySelector('.xp-d').textContent = fmt(a.duration);
+    p.querySelector('.xp-t').textContent = fmt(a.currentTime); p.querySelector('.xp-d').textContent = a.duration && a.currentTime > .5 && !ended ? '−' + fmt(a.duration - a.currentTime) : fmt(a.duration);   // the time left, once it has started
     const pct = a.duration ? 100 * a.currentTime / a.duration : 0, seek = p.querySelector('.xp-seek');
     if (!p.classList.contains('is-seeking')) seek.value = Math.round(pct * 10);
     p.style.setProperty('--p', pct + '%');
     p.querySelector('.xp-speed').textContent = (a.playbackRate || 1) + '×';
     p.classList.toggle('is-muted', a.muted || a.volume === 0);
+    p.querySelector('.xp-volume')?.style.setProperty('--v', (a.muted ? 0 : a.volume) * 100 + '%');
     p.querySelector('.xp-state').textContent = p.classList.contains('is-broken') ? '' : p.classList.contains('is-loading') ? 'Loading…' : !a.paused ? (a.playbackRate !== 1 ? `Playing · ${a.playbackRate}×` : 'Playing') : ended ? 'Finished' : a.currentTime > 0 ? 'Paused' : ''; }
 
   function play(p) { const a = p.querySelector('audio'); p.dataset.wantPlay = '1';
@@ -57,6 +58,11 @@
     if (e.target.matches('.xp-seek')) { p.classList.add('is-seeking'); p.style.setProperty('--p', e.target.value / 10 + '%'); if (a.duration) { const t = a.duration * e.target.value / 1000; p.querySelector('.xp-t').textContent = fmt(t); a.currentTime = t; } }
     if (e.target.matches('.xp-volume')) { a.volume = +e.target.value; a.muted = false; paint(p); } });
   document.addEventListener('change', e => { const p = box(e.target); if (p && e.target.matches('.xp-seek')) { p.classList.remove('is-seeking'); paint(p); } });
+
+  /* hovering the waveform (computer): a line and the time at that point */
+  document.addEventListener('pointermove', e => { if (e.pointerType !== 'mouse') return; const w = e.target.closest?.('.xp-wave'); if (!w) return; const p = box(w), a = p.querySelector('audio'), r = w.getBoundingClientRect(), x = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
+    p.style.setProperty('--h', x * 100 + '%'); p.classList.add('is-hover'); p.querySelector('.xp-tip').textContent = a.duration ? fmt(a.duration * x) : '--:--'; });
+  document.addEventListener('pointerout', e => { const w = e.target.closest?.('.xp-wave'); if (w && !w.contains(e.relatedTarget)) box(w).classList.remove('is-hover'); });
 
   /* keyboard, when the player has focus (not while typing an answer) */
   document.addEventListener('keydown', e => { const p = e.target.closest?.('.xp'); if (!p || e.target.matches('input.xp-volume')) return; const a = p.querySelector('audio');

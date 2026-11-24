@@ -74,9 +74,12 @@ body.m-view-open { overflow: hidden; }
   .xs-facts { margin-top: 12px; gap: 6px; } .xs-facts li { height: 28px; font-size: .78rem; padding: 0 10px; }
   .xs-prep { padding: 14px 0 14px 14px; border-radius: 18px; }
   .xs-prep-k { padding-left: 2px; }
-  .xs-tips4 { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 8px; padding: 0 14px 4px 0; scrollbar-width: none; }
-  .xs-tips4::-webkit-scrollbar { display: none; }
-  .xs-tips4 li { flex: 0 0 72%; scroll-snap-align: start; }
+  /* before you play: a compact list (no cards cut off at the edge) */
+  .xs-tips4 { display: grid; grid-template-columns: 1fr; gap: 0; }
+  .xs-tips4 li { padding: 10px 0; border: 0; border-radius: 0; background: none; align-items: center; }
+  .xs-tips4 li + li { border-top: 1px solid var(--xs-line); }
+  .xs-tips4 li.is-tip { margin-top: 6px; padding: 10px 12px; border: 1px solid #f6dfb2; border-radius: 12px; background: #fff8eb; }
+  .xs-tips4 li.is-tip + li, .xs-tips4 li + li.is-tip { border-top: 1px solid #f6dfb2; }
   .xs-part { padding: 16px 12px 18px; gap: 20px; }
   .xs-paper { padding: 14px 12px; } .xs-paper-t { margin: -14px -12px 12px; padding: 10px 12px; font-size: 1rem; }
   .xs-player { padding: 12px; border-radius: 16px; }
@@ -252,3 +255,15 @@ body.side-open .m-mini, body.m-view-open .m-mini { display: none; }
   .hm-next .hm-art { display: block !important; }
   .hm-ring b { display: flex; align-items: center; justify-content: center; gap: 0; }
 }
+
+/* ───────── the mini player matches the recording player: a light, frosted bar ───────── */
+.m-mini { --mm-acc: var(--xs-acc, #12807c); background: rgba(255, 255, 255, .92) !important; color: #18213f !important; border: 1px solid rgba(24, 33, 63, .1) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(1.4); backdrop-filter: blur(16px) saturate(1.4); box-shadow: 0 14px 36px -14px rgba(24, 33, 63, .45), 0 1px 2px rgba(24, 33, 63, .06) !important; }
+.m-mini .m-mini-play { background: #18213f !important; color: #fff; box-shadow: 0 8px 18px -8px rgba(24, 33, 63, .7) !important; }
+.m-mini.is-playing .m-mini-play { background: var(--mm-acc) !important; }
+.m-mini-t { color: #6a7391 !important; }
+.m-mini-bar { background: #e3e6ef !important; }
+.m-mini-bar i { background: var(--mm-acc) !important; }
+.m-mini-bar i::after { border: 2.5px solid var(--mm-acc); box-shadow: 0 1px 4px rgba(24, 33, 63, .25) !important; }
+.m-mini-skip { background: transparent !important; color: #18213f; }
+.m-mini-skip:active { background: #f1f3f8 !important; }
