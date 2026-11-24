@@ -23,13 +23,13 @@ window.DEC15_LESSON = {
           blocks: [
             { type: 'ieGap', id: 'ieb2w1d324-q1', from: 1, layout: 'sentences',
               instruction: 'Complete the sentences below. Write **NO MORE THAN THREE WORDS AND/OR A NUMBER** for each answer.', rule: 'NO MORE THAN THREE WORDS AND/OR A NUMBER', max: 3,
-              text: 'Josie is concerned about her [[teaching practice]] later this week.\nThe purpose of the experiments is to measure the [[speed of sound]].\nThe first experiment needs to be done [[outside|outdoors]] because of the distances involved.\nIn this experiment, some pupils have a stopwatch and the others have a [[loud sound source|sound source]], such as a bell.\nThe result of this experiment should be accurate to within approximately [[20%|20 %|twenty per cent|20 per cent|twenty percent|20 percent]].' },
+              text: 'Josie is concerned about her [[teaching practice]] later this week.\nThe purpose of the experiments is to measure the [[speed of sound]].\nThe first experiment needs to be done [[outside]] because of the distances involved.\nIn this experiment, some pupils have a stopwatch and the others have a [[loud sound source]], such as a bell.\nThe result of this experiment should be accurate to within approximately [[20%|20 %|twenty per cent|20 per cent|twenty percent|20 percent]].' },
             { type: 'ieGap', id: 'ieb2w1d324-q2', from: 6, layout: 'summary',
               instruction: 'Complete the summary below. Write **NO MORE THAN TWO WORDS** for each answer.', rule: 'NO MORE THAN TWO WORDS', max: 2,
               text: 'In preparation for the second experiment, pupils should understand the fundamental ideas of frequency and [[wavelength]]. This can be done using water as an analogy. Pupils then hit a tuning fork near the end of a [[long tube|tube]] immersed in a barrel of water. At some point, the sound [[gets louder]] due to the resonance of the wave. This means there are a whole number of waves and pupils measure the length of the column of air.' },
             { type: 'ieGap', id: 'ieb2w1d324-q3', from: 9, layout: 'short',
               instruction: 'Answer the questions below. Write **NO MORE THAN THREE WORDS** for each answer.', rule: 'NO MORE THAN THREE WORDS', max: 3,
-              text: 'What should pupils do with their results to increase the accuracy of the experiment? [[take an average|take average|an average|average]]\nWhat should Josie encourage her pupils to do during the experiments? [[keep good records|good records]]' }
+              text: 'What should pupils do with their results to increase the accuracy of the experiment? [[take an average]]\nWhat should Josie encourage her pupils to do during the experiments? [[keep good records]]' }
           ]
         }] },
       { id: 'script', short: 'Script and answers', minutes: 5, grouping: 'Alone',

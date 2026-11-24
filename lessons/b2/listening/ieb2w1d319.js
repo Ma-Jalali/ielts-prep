@@ -25,7 +25,7 @@ window.DEC15_LESSON = {
               instruction: 'Complete the gaps in the flow chart. Write **NO MORE THAN TWO WORDS AND/OR A NUMBER** for each answer.', rule: 'NO MORE THAN TWO WORDS AND/OR A NUMBER', max: 2,
               src: 'assets/lessons/listening/part3/ex19-flowchart.jpg', alt: 'Flow chart: a customer complains about a malfunction; if the machine is inside the guarantee period, the customer fills in a form and the shop replaces the machine; if not, the customer fills in a form, the product is sent away to be fixed, and the shop receives details of cost and time before the repair is arranged.',
               labels: [
-                { x: 75.6, y: 48.9, answer: 'repair centre|repair center|repair centres' },
+                { x: 75.6, y: 48.9, answer: 'repair centre|repair center' },
                 { x: 75.5, y: 60.0, answer: 'an estimate|estimate' },
                 { x: 86.9, y: 67.0, answer: 'accept|agree|accept estimate|accept it' },
                 { x: 81.5, y: 80.5, answer: 'collect' },

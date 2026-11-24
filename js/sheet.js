@@ -89,7 +89,8 @@
     const queue = audios.map((a, i) => ({ a, i, at: startOf(a) })), parts = [];
     let cur = null;
     blocks.forEach(b => { const f = isQ(b) ? Number(b.from) || 1 : null, due = f == null ? [] : queue.filter(q => !q.done && q.at <= f + count(b) - 1);
-      if (due.length || !cur) { cur = { audios: due, blocks: [] }; parts.push(cur); due.forEach(q => { q.done = true; }); }
+      if (due.length && cur && !cur.audios.length && !cur.blocks.some(isQ)) { cur.audios = due; due.forEach(q => { q.done = true; }); }   // a picture before the first questions stays below that recording
+      else if (due.length || !cur) { cur = { audios: due, blocks: [] }; parts.push(cur); due.forEach(q => { q.done = true; }); }
       cur.blocks.push(b); });
     queue.filter(q => !q.done).forEach(q => (parts[0] || (parts[0] = { audios: [], blocks: [] })).audios.push(q));   // a recording no question block claims goes at the top
     const partRange = p => { const q = p.blocks.filter(isQ); if (!q.length) return ''; const a = Number(q[0].from) || 1, z = Math.max(...q.map(b => (Number(b.from) || 1) + count(b) - 1)); return a === z ? `Question ${a}` : `Questions ${a}–${z}`; };
