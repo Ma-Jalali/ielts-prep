@@ -547,3 +547,127 @@ mark.xs-hl.has-note.is-hl { background: #ffd65c; }
   .xl-pi { grid-row: 1 / span 5; width: 40px; height: 40px; margin: 0; }
   .xl-pq { padding-top: 6px; } .xl-level { top: 16px; right: 14px; }
 }
+
+/* ───────── Learn pages: tabs, folds, cards, steps, chips, notes, reveal, dialogues, exercises ───────── */
+.xl-sub + .xl-sub, .xl-sub + .xl-note, .xl-note + .xl-sub, .xl-note + .xl-note { margin-top: 18px; }
+.xl-sh { margin-bottom: 10px; } .xl-sh h3 { margin: 0; font: 650 1.02rem/1.3 var(--serif, 'Outfit', sans-serif); letter-spacing: -.005em; } .xl-sh p { margin: 4px 0 0; font-size: .92rem; line-height: 1.5; color: #4a5372; }
+.xl-lead { margin: 0 0 14px; font-size: .96rem; line-height: 1.55; color: #3a4466; }
+.xl-text p { margin: 0 0 8px; max-width: 72ch; font-size: .96rem; line-height: 1.6; color: #2f3858; }
+
+/* on this page */
+.xl-jump { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding: 2px; }
+.xl-jump::-webkit-scrollbar { display: none; }
+.xl-jump a { flex: none; display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 16px 0 12px; border-radius: 999px; background: #fff; border: 1px solid var(--xs-line); font: 650 .88rem var(--sans, system-ui); color: var(--xs-ink); text-decoration: none; box-shadow: 0 1px 2px rgba(24, 33, 63, .04); }
+.xl-jump a:hover { border-color: var(--xs-acc); color: var(--xs-acc); } .xl-jump svg { width: 17px; height: 17px; color: var(--xs-acc); }
+
+/* tabs */
+.xl-tabbar { display: flex; gap: 4px; padding: 4px; border-radius: 14px; background: #f1f3f8; overflow-x: auto; scrollbar-width: none; scroll-snap-type: x proximity; }
+.xl-tabbar::-webkit-scrollbar { display: none; }
+.xl-tabbar button { flex: 1 0 auto; scroll-snap-align: start; display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 40px; padding: 0 14px; border: 0; border-radius: 10px; background: transparent; font: 650 .88rem var(--sans, system-ui); color: #4a5372; cursor: pointer; white-space: nowrap; transition: background .15s, color .15s, box-shadow .15s; }
+.xl-tabbar button svg { width: 16px; height: 16px; opacity: .8; }
+.xl-tabbar button:hover { color: var(--xs-ink); }
+.xl-tabbar button[aria-selected="true"] { background: #fff; color: var(--xs-acc); box-shadow: 0 1px 3px rgba(24, 33, 63, .12); }
+.xl-tabbar button:focus-visible { outline: 2px solid var(--xs-acc); outline-offset: 1px; }
+.xl-panel { padding-top: 18px; animation: xlIn .2s ease-out; } @keyframes xlIn { from { opacity: 0; transform: translateY(4px); } }
+
+/* folds */
+.xl-folds { border: 1px solid var(--xs-line); border-radius: 16px; overflow: hidden; background: #fff; }
+.xl-fold + .xl-fold { border-top: 1px solid var(--xs-line); }
+.xl-fold > summary { list-style: none; display: flex; align-items: center; gap: 12px; padding: 13px 16px; cursor: pointer; }
+.xl-fold > summary::-webkit-details-marker { display: none; }
+.xl-fold > summary:hover { background: #f8f9fc; }
+.xl-fold-ic { flex: none; width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; background: var(--xs-soft); color: var(--xs-acc); } .xl-fold-ic svg { width: 18px; height: 18px; }
+.xl-fold-tx { flex: 1; min-width: 0; display: grid; gap: 1px; } .xl-fold-tx b { font: 650 .98rem/1.3 var(--serif, 'Outfit', sans-serif); } .xl-fold-tx small { font-size: .82rem; color: var(--muted, #6a7391); line-height: 1.35; }
+.xl-fold[open] > summary { background: #fafbfd; } .xl-fold[open] > summary .xs-chev { transform: rotate(180deg); } .xl-fold[open] .xl-fold-tx b { color: var(--xs-acc); }
+.xl-fold-in { padding: 6px 16px 18px; animation: xlIn .2s ease-out; }
+
+/* cards, steps */
+.xl-cards { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; }
+.xl-cards.is-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.xl-cards li { display: flex; gap: 12px; align-items: flex-start; padding: 14px; border-radius: 14px; background: #f8f9fc; border: 1px solid var(--xs-line); }
+.xl-card-ic { flex: none; width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; background: #fff; color: var(--xs-acc); box-shadow: 0 1px 2px rgba(24, 33, 63, .08); } .xl-card-ic svg { width: 18px; height: 18px; }
+.xl-cards li > span:last-child > b { display: block; margin-bottom: 2px; font-size: .95rem; line-height: 1.3; } .xl-cards li > span:last-child > span { display: block; font-size: .88rem; line-height: 1.5; color: #4a5372; }
+.xl-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; counter-reset: s; }
+.xl-steps > li { position: relative; display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 14px; padding: 0 0 18px; }
+.xl-steps > li:not(:last-child)::before { content: ''; position: absolute; left: 17px; top: 38px; bottom: 4px; width: 2px; background: var(--xs-line); }
+.xl-step-n { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; background: var(--xs-ink); color: #fff; font: 750 .85rem/1 var(--sans, system-ui); }
+.xl-steps > li > div > b { display: block; padding-top: 7px; font: 650 1rem/1.3 var(--serif, 'Outfit', sans-serif); }
+.xl-step-d { margin-top: 4px; font-size: .92rem; line-height: 1.55; color: #3a4466; } .xl-step-d p { margin: 0 0 6px; } .xl-step-d ul { margin: 2px 0 0; padding-left: 18px; } .xl-step-d li { margin: 3px 0; }
+
+/* chips */
+.xl-chipg + .xl-chipg { margin-top: 12px; }
+.xl-chipl { display: block; margin-bottom: 6px; font: 750 .7rem/1.3 var(--sans, system-ui); letter-spacing: .08em; text-transform: uppercase; color: var(--muted, #6a7391); }
+.xl-chips { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.xl-chips li { padding: 5px 11px; border-radius: 999px; background: #fff; border: 1px solid var(--xs-line-2); font-size: .88rem; line-height: 1.35; color: #2a3354; }
+.xl-chips li b { color: var(--xs-acc); }
+.xl-chips.is-warn li { background: #fff8eb; border-color: #f1dcae; }
+
+/* notes */
+.xl-note { display: flex; gap: 12px; align-items: flex-start; padding: 13px 16px; border-radius: 14px; border: 1px solid; }
+.xl-note-ic { flex: none; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; } .xl-note-ic svg { width: 16px; height: 16px; }
+.xl-note > div > b { display: block; margin-bottom: 2px; font-size: .92rem; } .xl-note p { margin: 0 0 4px; font-size: .9rem; line-height: 1.55; } .xl-note p:last-child { margin-bottom: 0; }
+.xl-note.is-tip { background: #fff8eb; border-color: #f3e0b6; color: #5b4618; } .xl-note.is-tip .xl-note-ic { background: #f4a52e; color: #fff; }
+.xl-note.is-warn { background: #fdf1f2; border-color: #f2ccd2; color: #6d1f2b; } .xl-note.is-warn .xl-note-ic { background: #d6283c; color: #fff; }
+.xl-note.is-info { background: color-mix(in srgb, var(--xs-acc) 7%, #fff); border-color: color-mix(in srgb, var(--xs-acc) 22%, #fff); color: #23304f; } .xl-note.is-info .xl-note-ic { background: var(--xs-acc); color: #fff; }
+.xl-band > .xl-note { margin-bottom: 0; } section.xl-band + .xl-note, .xl-note + section.xl-band { margin-top: 0; }
+
+/* reveal */
+.xl-reveal { list-style: none; margin: 0; padding: 0; display: grid; }
+.xl-reveal > li { display: flex; gap: 12px; padding: 12px 0; } .xl-reveal > li + li { border-top: 1px solid var(--xs-line); }
+.xl-reveal p { margin: 3px 0 6px; font-size: .96rem; line-height: 1.5; }
+.xl-show { height: 32px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--xs-line-2); background: #fff; font: 700 .8rem/1 var(--sans, system-ui); color: var(--xs-acc); cursor: pointer; } .xl-show:hover { background: #f4f6fa; }
+.xl-ans { margin: 0 !important; padding: 8px 12px; border-radius: 10px; background: #eef8f2; color: #1d5c3d; font-size: .92rem !important; } .xl-ans[hidden] { display: none; }
+
+/* short dialogues */
+.xl-spot { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.xl-spot > li { padding: 14px 16px; border-radius: 16px; border: 1px solid var(--xs-line); background: #fff; }
+.xl-talk { display: grid; gap: 8px; margin-bottom: 12px; }
+.xl-talk p { margin: 0; max-width: 88%; padding: 9px 12px; border-radius: 14px; font-size: .92rem; line-height: 1.5; }
+.xl-talk p > b { display: block; font-size: .72rem; letter-spacing: .05em; text-transform: uppercase; color: var(--muted, #6a7391); margin-bottom: 1px; }
+.xl-talk p.is-a { justify-self: start; background: #f1f3f8; border-bottom-left-radius: 4px; }
+.xl-talk p.is-b { justify-self: end; background: var(--xs-soft); border-bottom-right-radius: 4px; }
+.xl-spot-q { display: flex; gap: 10px; align-items: flex-start; margin: 0 0 10px; font-weight: 650; font-size: .96rem; line-height: 1.45; }
+.xl-opts { display: grid; gap: 6px; }
+.xl-opts button { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 12px; border: 1px solid var(--xs-line); background: #fff; font: inherit; font-size: .92rem; text-align: left; color: var(--xs-ink); cursor: pointer; }
+.xl-opts button:hover { background: #f8f9fc; }
+.xl-opts button.is-ans { border-color: #1f8a5b; background: #eef8f2; } .xl-opts button.is-ans .xs-let { background: #1f8a5b; border-color: #1f8a5b; color: #fff; }
+.xl-opts button.is-pick:not(.is-ans) { border-color: #e3a1aa; background: #fdf1f2; }
+.xl-spot .xl-why { margin-top: 10px; } .xl-spot li.is-right .xl-verdict { color: #1f7a4f; } .xl-spot li.is-wrong .xl-verdict { color: #a91d2f; }
+
+/* exercises inside a Learn page */
+.xl-exs { display: grid; gap: 10px; }
+.xl-ex { border-radius: 18px; border: 1px solid var(--xs-line); background: #fff; transition: border-color .2s, box-shadow .2s; }
+.xl-ex > summary { list-style: none; display: flex; align-items: center; gap: 14px; padding: 14px 16px; cursor: pointer; border-radius: 18px; }
+.xl-ex > summary::-webkit-details-marker { display: none; }
+.xl-ex > summary:hover { background: #fafbfd; }
+.xl-ex-n { flex: none; width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: var(--xs-soft); color: var(--xs-acc); font: 750 .98rem/1 var(--serif, 'Outfit', sans-serif); }
+.xl-ex-tx { flex: 1; min-width: 0; display: grid; gap: 2px; } .xl-ex-tx b { font: 650 1.02rem/1.3 var(--serif, 'Outfit', sans-serif); } .xl-ex-tx small { font-size: .8rem; line-height: 1.4; color: var(--muted, #6a7391); }
+.xl-ex-go { flex: none; display: inline-flex; align-items: center; height: 34px; padding: 0 14px; border-radius: 999px; background: var(--xs-ink); color: #fff; font: 700 .8rem/1 var(--sans, system-ui); }
+.xl-ex-close, .xl-ex[open] .xl-ex-open { display: none; } .xl-ex[open] .xl-ex-close { display: inline; }
+.xl-ex[open] { border-color: color-mix(in srgb, var(--xs-acc) 35%, var(--xs-line)); box-shadow: 0 18px 40px -30px rgba(24, 33, 63, .45); }
+.xl-ex[open] > summary { border-bottom: 1px solid var(--xs-line); border-radius: 18px 18px 0 0; background: #fafbfd; position: sticky; top: 0; z-index: 3; }
+.xl-ex[open] .xl-ex-n { background: var(--xs-acc); color: #fff; } .xl-ex[open] .xl-ex-go { background: #fff; color: var(--xs-ink); border: 1px solid var(--xs-line-2); }
+.xl-ex-in { padding: 18px 18px 20px; display: grid; gap: 18px; animation: xlIn .22s ease-out; }
+.xl-exbody { display: grid; gap: 20px; }
+.xl-exbody > .xs-part { padding: 0; border: 0; box-shadow: none; background: none; border-radius: 0; gap: 20px; }
+.xl-exbody > .xs-part:only-of-type > .xs-part-h { display: none; }
+.xl-exbody > .xs-part + .xs-part { padding-top: 20px; border-top: 1px dashed var(--xs-line-2); }
+.xl-key { margin: 0; }
+
+@media (max-width: 720px) {
+  .xl-cards, .xl-cards.is-2 { grid-template-columns: 1fr; }
+  .xl-tabbar { margin: 0 -6px; border-radius: 12px; } .xl-tabbar button { min-height: 38px; padding: 0 12px; font-size: .84rem; flex: 0 0 auto; }
+  .xl-fold > summary { padding: 12px 12px; } .xl-fold-in { padding: 4px 12px 16px; }
+  .xl-ex > summary { padding: 12px; gap: 12px; } .xl-ex-n { width: 36px; height: 36px; } .xl-ex-go { padding: 0 12px; }
+  .xl-ex-in { padding: 14px 12px 16px; }
+  .xl-ex[open] > summary { top: 57px; }
+  .xl-talk p { max-width: 94%; }
+  .xl-table { max-width: 100%; } .xl-table th, .xl-table td { padding: 9px 12px; }
+}
+@media (min-width: 721px) { .xl-ex[open] > summary { top: 0; } }
+/* the Learn page column never grows wider than the screen (the tab bar scrolls instead) */
+.xs.xl { grid-template-columns: minmax(0, 1fr); }
+.xl-band, .xl-tabs, .xl-panel, .xl-sub, .xl-fold-in, .xl-ex-in, .xl-exbody { min-width: 0; }
+.xl-table.is-wide { max-width: none; }
+.xl-table tbody th { width: 40%; } .xl-table.is-wide tbody th { width: auto; }
+.xl-cn.is-eg { width: auto; padding: 0 7px; background: var(--xs-acc); }

@@ -86,6 +86,10 @@ window.DEC15_COURSE = {
       ],
       days: [
         { id: 'ieb2w1d1', day: 1, status: 'ready', title: 'Listening overview', sub: 'Two videos, the four parts, the day of the test and the marking', art: 'listening', parts: ['Lesson 1'], stages: ['learn'], tones: ['teal'], scripts: ['lessons/b2/listening/ieb2w1d1.js'] },
+        { id: 'ieb2w1d2', day: 2, status: 'ready', title: 'Part 1: everyday conversation', sub: 'Tips, answer types and five in-class exercises', art: 'listening', parts: ['Lesson 2'], stages: ['learn'], tones: ['teal'], scripts: ['lessons/b2/listening/ieb2w1d2.js'] },
+        { id: 'ieb2w1d3', day: 3, status: 'ready', title: 'Part 2: everyday monologue', sub: 'Tips, maps and four in-class exercises', art: 'listening', parts: ['Lesson 3'], stages: ['learn'], tones: ['teal'], scripts: ['lessons/b2/listening/ieb2w1d3.js'] },
+        { id: 'ieb2w1d4', day: 4, status: 'ready', title: 'Part 3: academic discussion', sub: 'Tips, speakers and opinions, and six in-class exercises', art: 'listening', parts: ['Lesson 4'], stages: ['learn'], tones: ['teal'], scripts: ['lessons/b2/listening/ieb2w1d4.js'] },
+        { id: 'ieb2w1d5', day: 5, status: 'ready', title: 'Part 4: academic lecture', sub: 'Tips, signpost words and five in-class exercises', art: 'listening', parts: ['Lesson 5'], stages: ['learn'], tones: ['teal'], scripts: ['lessons/b2/listening/ieb2w1d5.js'] },
         { id: 'ieb2w1d101', day: 101, status: 'ready', title: 'A university course enquiry', sub: 'Note and form completion', art: 'listening', parts: ['Exercise 1'], stages: ['ex'], tones: ['teal'], scripts: ['lessons/b2/listening/ieb2w1d101.js'] },
         { id: 'ieb2w1d102', day: 102, status: 'ready', title: 'A job at a call centre', sub: 'Multiple choice and map labelling', art: 'listening', parts: ['Exercise 2'], stages: ['ex'], tones: ['teal'], scripts: ['lessons/b2/listening/ieb2w1d102.js'] },
         { id: 'ieb2w1d103', day: 103, status: 'ready', title: 'Volunteering abroad', sub: 'Note completion and short-answer questions', art: 'listening', parts: ['Exercise 3'], stages: ['ex'], tones: ['teal'], scripts: ['lessons/b2/listening/ieb2w1d103.js'] },
