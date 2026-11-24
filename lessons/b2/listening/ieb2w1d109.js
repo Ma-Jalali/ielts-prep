@@ -3,7 +3,7 @@
    The paper numbers the "choose TWO" item as Question 1 only; here it counts as Questions 1–2 (as in the real test), so the rest move up by one.
    Recordings stream from Google Drive. Ids (lesson, activities, blocks) are the keys of students' saved work: never rename them. */
 window.DEC15_LESSON = {
-  id: 'ieb2w1d109', week: 1, day: 109,
+  id: 'ieb2w1d109', week: 1, day: 109, sheet: true, illus: 'music',
   title: 'A music festival',
   duration: 'About 20 minutes',
   journey: 'Listen to two students planning a trip to an international music festival. Choose the answers and complete the booking form.',

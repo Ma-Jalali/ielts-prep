@@ -2,7 +2,7 @@
    Source: Listening Section 1 Exercises (Practice No 7); answers from the teacher's key and recording script (folder 07).
    Recordings stream from Google Drive. Ids (lesson, activities, blocks) are the keys of students' saved work: never rename them. */
 window.DEC15_LESSON = {
-  id: 'ieb2w1d107', week: 1, day: 107,
+  id: 'ieb2w1d107', week: 1, day: 107, sheet: true, illus: 'food',
   title: 'A survey on eating habits',
   duration: 'About 20 minutes',
   journey: 'Listen to someone from the Students’ Union asking a student about the food he eats. Choose the right answers, then complete the form.',

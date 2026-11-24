@@ -2,7 +2,7 @@
    Source: Listening Section 1 Exercises (Practice No 20); answers from the teacher's key (folder 20). The folder has no recording script.
    Recordings stream from Google Drive. Ids (lesson, activities, blocks) are the keys of students' saved work: never rename them. */
 window.DEC15_LESSON = {
-  id: 'ieb2w1d120', week: 1, day: 120,
+  id: 'ieb2w1d120', week: 1, day: 120, sheet: true, illus: 'robot',
   title: 'Tickets for a robot exhibition',
   duration: 'About 20 minutes',
   journey: 'Listen to a caller booking tickets for an exhibition about robots. Complete the notes on tickets, food, hotels and transport.',

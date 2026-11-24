@@ -2,7 +2,7 @@
    Source: Listening Section 1 Exercises (Practice No 19); answers from the teacher's key (folder 19). The key has no script for this conversation.
    Recordings stream from Google Drive. Ids (lesson, activities, blocks) are the keys of students' saved work: never rename them. */
 window.DEC15_LESSON = {
-  id: 'ieb2w1d119', week: 1, day: 119,
+  id: 'ieb2w1d119', week: 1, day: 119, sheet: true, illus: 'mountain',
   title: 'A school trip to Peru',
   duration: 'About 20 minutes',
   journey: 'Listen to someone asking about a school trip abroad organised by a friendship club. Complete the notes.',

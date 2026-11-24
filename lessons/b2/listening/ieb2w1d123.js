@@ -2,7 +2,7 @@
    Source: Listening Section 1 Exercises (Practice No 23); answers from the teacher's key (folder 23). The folder has no recording script.
    Recordings stream from Google Drive. Ids (lesson, activities, blocks) are the keys of students' saved work: never rename them. */
 window.DEC15_LESSON = {
-  id: 'ieb2w1d123', week: 1, day: 123,
+  id: 'ieb2w1d123', week: 1, day: 123, sheet: true, illus: 'home',
   title: 'Renting a room in a new house',
   duration: 'About 20 minutes',
   journey: 'Listen to a new tenant finding out about a house: the rent, the house rules and the local area. Complete the notes and label the map.',

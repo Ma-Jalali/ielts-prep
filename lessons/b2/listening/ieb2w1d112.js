@@ -3,7 +3,7 @@
    Question 1 allows "18th to 20th October" (three words and two numbers), so the word limit here is 4.
    Recordings stream from Google Drive. Ids (lesson, activities, blocks) are the keys of students' saved work: never rename them. */
 window.DEC15_LESSON = {
-  id: 'ieb2w1d112', week: 1, day: 112,
+  id: 'ieb2w1d112', week: 1, day: 112, sheet: true, illus: 'conference',
   title: 'Registering for a conference',
   duration: 'About 20 minutes',
   journey: 'Listen to an architecture student phoning about a conference and then talking to the organiser about giving a talk. Complete the notes.',

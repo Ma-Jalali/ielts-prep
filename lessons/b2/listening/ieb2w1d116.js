@@ -2,7 +2,7 @@
    Source: Listening Section 1 Exercises (Practice No 16); answers and recording script from the teacher's key (folder 16).
    Recordings stream from Google Drive. Ids (lesson, activities, blocks) are the keys of students' saved work: never rename them. */
 window.DEC15_LESSON = {
-  id: 'ieb2w1d116', week: 1, day: 116,
+  id: 'ieb2w1d116', week: 1, day: 116, sheet: true, illus: 'arts',
   title: 'Friends of the Arts Centre',
   duration: 'About 20 minutes',
   journey: 'Listen to a woman phoning an arts centre about its membership scheme and then answering a short survey. Choose the answers and complete the sentences.',
@@ -17,7 +17,7 @@ window.DEC15_LESSON = {
         blocks: [{
           type: 'ieTest', id: 'ieb2w1d116-test', title: 'Part 1 · Exercise 16',
           audios: [
-            { title: 'Recording 1 · Questions 1–10', src: 'https://drive.google.com/file/d/1H7yO86o0vJg6ONMngytXIWcQU2Zw_2sM/view', note: 'A woman phones Laverton Arts Centre about becoming a Friend, then answers a short survey.' }
+            { title: 'Recording 1 · Questions 1–10', src: 'https://drive.google.com/file/d/1cR49Sk3aQsire4QgMPaFt4uE92e2tZmB/view', note: 'A woman phones Laverton Arts Centre about becoming a Friend, then answers a short survey.' }
           ],
           blocks: [
             { type: 'ieChoice', id: 'ieb2w1d116-q1', from: 1,

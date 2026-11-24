@@ -2,7 +2,7 @@
    Source: Listening Section 1 Exercises (Practice No 3); answers and recording script from the teacher's key (folder 03).
    Recordings stream from Google Drive. Ids (lesson, activities, blocks) are the keys of students' saved work: never rename them. */
 window.DEC15_LESSON = {
-  id: 'ieb2w1d103', week: 1, day: 103,
+  id: 'ieb2w1d103', week: 1, day: 103, sheet: true, illus: 'globe',
   title: 'Volunteering abroad',
   duration: 'About 20 minutes',
   journey: 'Listen to a young teacher phoning a volunteer organisation about working abroad. Complete the notes, then answer the questions.',

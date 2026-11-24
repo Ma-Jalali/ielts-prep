@@ -3,7 +3,7 @@
    Questions 4–6 may be answered in any order, so each of those gaps accepts any of the three sections.
    Recordings stream from Google Drive. Ids (lesson, activities, blocks) are the keys of students' saved work: never rename them. */
 window.DEC15_LESSON = {
-  id: 'ieb2w1d110', week: 1, day: 110,
+  id: 'ieb2w1d110', week: 1, day: 110, sheet: true, illus: 'survey',
   title: 'A media survey',
   duration: 'About 20 minutes',
   journey: 'Listen to a student answering survey questions about newspapers, TV, radio, computers and the internet. Complete the form, the list and the multiple-choice questions.',

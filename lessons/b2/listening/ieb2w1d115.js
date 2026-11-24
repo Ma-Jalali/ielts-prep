@@ -2,7 +2,7 @@
    Source: Listening Section 1 Exercises (Practice No 15); answers from the teacher's key (folder 15). The key has no script for this conversation.
    Recordings stream from Google Drive. Ids (lesson, activities, blocks) are the keys of students' saved work: never rename them. */
 window.DEC15_LESSON = {
-  id: 'ieb2w1d115', week: 1, day: 115,
+  id: 'ieb2w1d115', week: 1, day: 115, sheet: true, illus: 'books',
   title: 'Joining the university library',
   duration: 'About 20 minutes',
   journey: 'Listen to a student joining the university library and finding out about its rooms and the group study booking system. Complete the form, the plan and the notes.',

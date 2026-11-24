@@ -2,7 +2,7 @@
    Source: Listening Section 1 Exercises (Practice No 21); answers from the teacher's key (folder 21). The key's script is only partly legible, so it is not shown.
    Recordings stream from Google Drive. Ids (lesson, activities, blocks) are the keys of students' saved work: never rename them. */
 window.DEC15_LESSON = {
-  id: 'ieb2w1d121', week: 1, day: 121,
+  id: 'ieb2w1d121', week: 1, day: 121, sheet: true, illus: 'radio',
   title: 'Buying a radio and a store card',
   duration: 'About 20 minutes',
   journey: 'Listen to a customer in a shop comparing analogue and digital radios, then two store cards. Complete both tables.',
