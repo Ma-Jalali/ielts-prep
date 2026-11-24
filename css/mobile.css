@@ -63,7 +63,7 @@ body.m-view-open { overflow: hidden; }
   .xs-gap input, .xs-gap select { height: 40px; }
   .xs-gn { min-width: 26px; height: 26px; }
   .xs-opt { padding: 12px 14px; min-height: 48px; }
-  .xs-mlist li { padding: 10px 12px; }
+  .xs-mrow { padding: 10px 12px; gap: 10px; }
 
   /* exercise page: tighter top, tips you can swipe, one back link */
   .xs { gap: 14px; padding-bottom: 24px; }
@@ -216,6 +216,7 @@ body.side-open .m-mini, body.m-view-open .m-mini { display: none; }
   .hm-pic { flex: none; width: 58px; height: 58px; border-radius: 50%; box-shadow: 0 0 0 3px #fff, 0 8px 18px -10px rgba(24, 33, 63, .5); }
   .hm-pic svg { display: block; }
   .hm-hi-tx { flex: 1; min-width: 0; display: grid; }
+  .hm-l1 { font: 700 .92rem/1.25 var(--serif, 'Outfit', sans-serif); font-style: normal; color: #1f9d8b; }
   .hm-hi-tx span { font: 600 .86rem/1.2 var(--sans, system-ui); color: var(--muted, #5a6382); }
   .hm-hi-tx b { font: 700 1.6rem/1.15 var(--serif, 'Outfit', sans-serif); letter-spacing: -.01em; color: var(--ink, #18213f); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .hm-ring { flex: none; width: 54px; height: 54px; border-radius: 50%; display: grid; place-items: center; background: conic-gradient(var(--brand, #d6283c) calc(var(--p) * 1%), rgba(24, 33, 63, .08) 0); }

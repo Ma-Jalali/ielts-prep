@@ -50,13 +50,13 @@
     const { data } = await G.client.auth.getSession(), user = data.session?.user;
     if (!user) { page(); return; }
     let row = null, offline = false;
-    try { const r = await G.client.from('ielts_members').select('first_name, role, email, gender').eq('user_id', user.id).maybeSingle(); if (r.error) throw r.error; row = r.data; }
+    try { const r = await G.client.from('ielts_members').select('first_name, role, email, gender, avatar, first_language').eq('user_id', user.id).maybeSingle(); if (r.error) throw r.error; row = r.data; }
     catch (e) { offline = true; const c = cache.get(); if (c && c.id === user.id) row = c; }
     if (!row) { cache.set(null); if (!offline) await G.client.auth.signOut(); page(offline ? 'You are offline. Connect to the internet and sign in.' : 'This account does not have access to IELTS Preparation. If you think it should, ask your teacher.', 'is-err'); return; }
-    G.member = { id: user.id, email: user.email, first_name: row.first_name || '', role: row.role, gender: row.gender || 'unspecified' }; G.firstName = G.member.first_name; G.isAdmin = row.role === 'admin';
+    G.member = { id: user.id, email: user.email, first_name: row.first_name || '', role: row.role, gender: row.gender || 'unspecified', avatar: row.avatar || {}, lang: row.first_language || '' }; G.firstName = G.member.first_name; G.isAdmin = row.role === 'admin';
     cache.set(G.member);
     root.classList.toggle('is-ielts-admin', G.isAdmin);
-    if (fresh) { const el = document.getElementById('gate'); el.innerHTML = `<div class="gate-hello"><span class="gate-wave" aria-hidden="true">👋</span><h1>Welcome back${G.firstName ? ', ' + esc(G.firstName) : ''}</h1><p>Opening your course…</p></div>`; await new Promise(r => setTimeout(r, 900)); }
+    if (fresh) { const el = document.getElementById('gate'); el.innerHTML = `<div class="gate-hello">${window.IELTSCharacter ? '' : '<span class="gate-wave" aria-hidden="true">👋</span>'}${window.IELTSCharacter ? `<span class="gate-av">${window.IELTSCharacter.portrait(G.member.gender, 84, G.member.avatar)}</span>` : ''}${window.IELTSCharacter?.hello(G.member.lang, G.firstName) ? `<p class="gate-l1">${window.IELTSCharacter.hello(G.member.lang, G.firstName)}</p>` : ''}<h1>Welcome back${G.firstName ? ', ' + esc(G.firstName) : ''}</h1><p>Opening your course…</p></div>`; await new Promise(r => setTimeout(r, 900)); }
     open();
   }
 
