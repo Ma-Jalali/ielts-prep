@@ -95,7 +95,7 @@
     queue.filter(q => !q.done).forEach(q => (parts[0] || (parts[0] = { audios: [], blocks: [] })).audios.push(q));   // a recording no question block claims goes at the top
     const partRange = p => { const q = p.blocks.filter(isQ); if (!q.length) return ''; const a = Number(q[0].from) || 1, z = Math.max(...q.map(b => (Number(b.from) || 1) + count(b) - 1)); return a === z ? `Question ${a}` : `Questions ${a}–${z}`; };
     const body = parts.map(p => `<section class="xs-part">${p.audios.length ? `<div class="xs-listen">${p.audios.map(q => player(q.a, q.i)).join('')}</div>` : ''}
-      ${p.blocks.map(b => `<div class="xs-q">${(R[b.type] || (() => ''))(b)}</div>`).join('')}</section>`).join('');
+      ${p.blocks.map((b, j) => `<div class="xs-q" data-hl="${esc(b.id || `fig-${j}-${String(b.src || '').split('/').pop()}`)}">${(R[b.type] || (() => ''))(b)}</div>`).join('')}</section>`).join('');
 
     /* ── the answer key ── */
     const alts = a => String(a).split('|').map(s => s.trim()).filter(Boolean);
@@ -142,7 +142,7 @@
     };
     const ic = k => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[k]}</svg>`;
     function prep() { const r = partRange(parts[0] || { blocks: [] }), main = kinds.find(k => TIPS[k]);
-      const items = [['read', 'Read first', `Read ${r || 'the questions'} before you play.`],
+      const items = [['read', 'Read first', `Read ${r || 'the questions'} first. Select words to highlight them.`],
         ['listen', 'Listen once', 'Write your answers as you listen.'],
         ['check', 'Check', 'Spelling and word limit, then see the answers.']];
       if (main) items.push(['tip', main, TIPS[main]]);
