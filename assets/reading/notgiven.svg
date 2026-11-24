@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 330" font-family="Manrope, system-ui, sans-serif">
+  <title>Not Given and True: the question and the passage as circles</title>
+  <rect width="760" height="330" rx="22" fill="#fff"/>
+  <!-- NOT GIVEN -->
+  <rect x="16" y="16" width="356" height="298" rx="18" fill="#fff7f8" stroke="#f2cfd5"/>
+  <circle cx="200" cy="160" r="92" fill="#2b67d1" opacity=".16" stroke="#2b67d1" stroke-width="2.5"/>
+  <circle cx="128" cy="104" r="44" fill="#e0475b" opacity=".85"/>
+  <text x="128" y="110" text-anchor="middle" font-size="17" font-weight="800" fill="#fff">Q</text>
+  <text x="222" y="178" text-anchor="middle" font-size="17" font-weight="800" fill="#2b67d1">P</text>
+  <text x="194" y="286" text-anchor="middle" font-size="22" font-weight="800" fill="#b3263a">NOT GIVEN</text>
+  <text x="194" y="44" text-anchor="middle" font-size="13" font-weight="700" fill="#7a3340">Part of the question is outside the passage</text>
+  <text x="300" y="104" text-anchor="middle" font-size="14" font-weight="700" fill="#18213f">Q = ax + <tspan fill="#e0475b" font-weight="800">b</tspan></text>
+  <text x="300" y="126" text-anchor="middle" font-size="14" font-weight="700" fill="#18213f">P = ax</text>
+  <!-- TRUE -->
+  <rect x="388" y="16" width="356" height="298" rx="18" fill="#f4fbf7" stroke="#c9e8d6"/>
+  <circle cx="566" cy="160" r="92" fill="#2b67d1" opacity=".16" stroke="#2b67d1" stroke-width="2.5"/>
+  <circle cx="540" cy="146" r="38" fill="#e0475b" opacity=".85"/>
+  <text x="540" y="152" text-anchor="middle" font-size="17" font-weight="800" fill="#fff">Q</text>
+  <text x="604" y="208" text-anchor="middle" font-size="17" font-weight="800" fill="#2b67d1">P</text>
+  <text x="566" y="286" text-anchor="middle" font-size="22" font-weight="800" fill="#1f7a4f">TRUE / YES</text>
+  <text x="566" y="44" text-anchor="middle" font-size="13" font-weight="700" fill="#245a3f">All of the question is inside the passage</text>
+  <text x="694" y="104" text-anchor="middle" font-size="14" font-weight="700" fill="#18213f">Q = ax</text>
+  <text x="694" y="126" text-anchor="middle" font-size="14" font-weight="700" fill="#18213f">P = ax + b</text>
+</svg>

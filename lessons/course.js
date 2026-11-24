@@ -191,7 +191,29 @@ window.DEC15_COURSE = {
         { id: 'ieb2w1d424', day: 424, status: 'ready', title: 'Early human migrations', sub: 'Note completion', art: 'listening', parts: ['Exercise 24'], stages: ['ex'], tones: ['teal'], scripts: ['lessons/b2/listening/ieb2w1d424.js'] },
         { id: 'ieb2w1d425', day: 425, status: 'ready', title: 'A company training scheme', sub: 'Multiple choice and sentence completion', art: 'listening', parts: ['Exercise 25'], stages: ['ex'], tones: ['teal'], scripts: ['lessons/b2/listening/ieb2w1d425.js'] }
       ] },
-    { n: 2, theme: 'Reading', color: '#2b67d1', group: 'skills', art: 'reading', short: 'Reading', tag: '3 passages · 60 minutes', tone: 'blue', folder: 'lessons/b2/reading', summary: '', days: [] },
+    { n: 2, theme: 'Reading', color: '#2b67d1', group: 'skills', art: 'reading', short: 'Reading', tag: '3 passages · 60 minutes', tone: 'blue', folder: 'lessons/b2/reading', summary: '',
+      /* Learn · Practise · Test, as in Listening. Learn: the teacher's training notes ("Reading", RAD TIME), one lesson per
+         question family, each with its exercises. Never change a base once students have started. */
+      sections: [
+        { id: 'learn', title: 'Learn', icon: 'book', blurb: 'Training lessons: how the Reading test works and how to answer each type of question. Start here, in order.', groups: [
+          { id: 'learn', title: 'Training lessons', base: 0, size: 10, map: true, slots: ['Reading overview', 'Completion tasks: the method', 'Short answers, notes and tables', 'True, False, Not Given', 'Sentence completion', 'Summary completion', 'Matching information', 'Matching headings', 'Multiple choice', 'Labelling a diagram'] }] },
+        { id: 'practise', title: 'Practise', icon: 'target', blurb: 'Controlled practice, one type of question at a time.', groups: [
+          { id: 'practice', title: 'Exercises', base: 100, size: 99, open: true, noun: 'Exercise' }] },
+        { id: 'test', title: 'Test', icon: 'clock', blurb: 'Full practice tests: three passages, 40 questions, 60 minutes, under test conditions.', groups: [
+          { id: 'tests', title: 'Practice tests', base: 2000, size: 10, test: true }] }
+      ],
+      days: [
+        { id: 'ieb2w2d1', day: 1, status: 'ready', title: 'Reading overview', sub: 'The test, the scores and how to improve', art: 'reading', parts: ['Lesson 1'], stages: ['learn'], tones: ['blue'], scripts: ['lessons/b2/reading/ieb2w2d1.js'] },
+        { id: 'ieb2w2d2', day: 2, status: 'ready', title: 'Completion tasks: the method', sub: 'The golden rules and four steps for every gap', art: 'reading', parts: ['Lesson 2'], stages: ['learn'], tones: ['blue'], scripts: ['lessons/b2/reading/ieb2w2d2.js'] },
+        { id: 'ieb2w2d3', day: 3, status: 'ready', title: 'Short answers, notes and tables', sub: 'Question types 1 and 2, with three exercises', art: 'reading', parts: ['Lesson 3'], stages: ['learn'], tones: ['blue'], scripts: ['lessons/b2/reading/ieb2w2d3.js'] },
+        { id: 'ieb2w2d4', day: 4, status: 'ready', title: 'True, False, Not Given', sub: 'How the statements are built, with an exercise', art: 'reading', parts: ['Lesson 4'], stages: ['learn'], tones: ['blue'], scripts: ['lessons/b2/reading/ieb2w2d4.js'] },
+        { id: 'ieb2w2d5', day: 5, status: 'ready', title: 'Sentence completion', sub: 'With and without a box, with two exercises', art: 'reading', parts: ['Lesson 5'], stages: ['learn'], tones: ['blue'], scripts: ['lessons/b2/reading/ieb2w2d5.js'] },
+        { id: 'ieb2w2d6', day: 6, status: 'ready', title: 'Summary completion', sub: 'With and without a box, with two exercises', art: 'reading', parts: ['Lesson 6'], stages: ['learn'], tones: ['blue'], scripts: ['lessons/b2/reading/ieb2w2d6.js'] },
+        { id: 'ieb2w2d7', day: 7, status: 'ready', title: 'Matching information', sub: 'Names, classification and paragraphs, with two exercises', art: 'reading', parts: ['Lesson 7'], stages: ['learn'], tones: ['blue'], scripts: ['lessons/b2/reading/ieb2w2d7.js'] },
+        { id: 'ieb2w2d8', day: 8, status: 'ready', title: 'Matching headings', sub: 'Topic sentences and wrong options, with an exercise', art: 'reading', parts: ['Lesson 8'], stages: ['learn'], tones: ['blue'], scripts: ['lessons/b2/reading/ieb2w2d8.js'] },
+        { id: 'ieb2w2d9', day: 9, status: 'ready', title: 'Multiple choice', sub: 'One answer and several answers, with two exercises', art: 'reading', parts: ['Lesson 9'], stages: ['learn'], tones: ['blue'], scripts: ['lessons/b2/reading/ieb2w2d9.js'] },
+        { id: 'ieb2w2d10', day: 10, status: 'ready', title: 'Labelling a diagram', sub: 'Shapes and places, with an exercise', art: 'reading', parts: ['Lesson 10'], stages: ['learn'], tones: ['blue'], scripts: ['lessons/b2/reading/ieb2w2d10.js'] }
+      ] },
     { n: 3, theme: 'Writing Task 1 (Academic)', color: '#e2552f', group: 'skills', art: 'chart', short: 'Writing Task 1', tag: '150+ words · about 20 minutes', tone: 'clay', folder: 'lessons/b2/writing-task1', summary: '', 
       /* pages are built in Studio and published online (table ielts_pages): an open group lists only the pages that exist */
       sections: [
