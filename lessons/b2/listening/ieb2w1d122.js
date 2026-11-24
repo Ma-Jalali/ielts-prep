@@ -1,7 +1,8 @@
 /* IELTS · Listening · Practise · Part 1 · Exercise 22 — A police report and Emma Darwin.
    Replaces the earlier Exercise 22 (its recordings did not match its questions).
    Source: the teacher's folder "Sec1 insight wb" (Insight into IELTS workbook, Listening: predicting the answers from the
-   given information, tasks A and B); recordings Track 03 (task A) and Track 04 (task B); answers from its Answer Keys.pdf.
+   given information, tasks A and B); recordings Track 03 (task A) and Track 04 (task B); answers from its Answer Keys.pdf. There is no recording script, so
+   the page has no script section (the answers are in the page's own answer key).
    New block ids (a1, b1), so nothing written for the old exercise is shown here.
    Recordings stream from Google Drive. Ids (lesson, activities, blocks) are the keys of students' saved work: never rename them. */
 window.DEC15_LESSON = {
@@ -31,12 +32,7 @@ window.DEC15_LESSON = {
               instruction: 'Complete the notes below. Write **NO MORE THAN TWO WORDS** for each answer. (Question 8 has two things: write both.)', rule: 'NO MORE THAN TWO WORDS',
               text: '- [[wife]] of Charles Darwin\n- Good dancer. Spoke many languages\n- Played [[piano|the piano]] well\n- Born into the Wedgwood family, famous for [[plates and china|plates, china|china and plates]]\n- Happily married, with [[ten children|10 children]] born between 1839 and 1856\n- Now the subject of a [[biography|book]]' }
           ]
-        }] },
-      { id: 'script', short: 'Script and answers', minutes: 5, grouping: 'Alone',
-        title: 'Check the answers', goal: 'After you check your answers, look back at your predictions: was each answer the type of information you expected?',
-        blocks: [
-          { type: 'text', title: 'Answer key', text: 'The answer key for this exercise is in the teacher’s folder. <a href="https://drive.google.com/file/d/1dm1HtM-yz5xf8q-NuzVboEDILTjfNaP1/view" target="_blank" rel="noopener">Open the answer key (Google Drive)</a>' }
-        ] }
+        }] }
     ]
   }],
   extras: [],
