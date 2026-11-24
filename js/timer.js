@@ -7,6 +7,8 @@
    The column cannot be empty, so a stopped timer is saved as { state: 'off' }. A finished timer hides itself for
    everyone 3 minutes after the end, so it can never stay on screen. */
 window.createDEC15Timer = function ({ getDb, isTeacher, esc, toast }) {
+  let own = false, classVal = null;   // students: a personal timer, only on this device (never shared)
+  const personal = () => !isTeacher();
   let t = null, dock = null, timerId = 0, popEl = null, lastPhase = '', doneSeen = '', hideT = 0;
   const LIVE = ['running', 'paused', 'done'], DONE_FOR = 3 * 60 * 1000;
   const norm = v => (v && LIVE.includes(v.state) ? v : null);   // 'off', null or anything unknown = no timer
@@ -25,13 +27,14 @@ window.createDEC15Timer = function ({ getDb, isTeacher, esc, toast }) {
 
   /* ───────── saving (teacher only) ───────── */
   async function save(v) {
+    if (personal()) { const n = norm(v); own = !!n; LS('ielts-my-timer', JSON.stringify(n || { state: 'off' })); t = n || norm(classVal); render(); return true; }   // a student's own timer
     const c = getDb(); if (!c || !isTeacher()) return false;
     const before = t; t = norm(v); render();
     const { error } = await c.from('class_settings').upsert({ key: window.DEC15_CLASS.key('class_timer'), value: v, updated_at: new Date().toISOString() });
     if (error) { t = before; render(); toast('The timer could not be shared. Check your internet.'); return false; }
     return true;
   }
-  const start = (mins, label) => { const total = Math.round(mins * 60); closePop(); return save({ state: 'running', total, endsAt: new Date(Date.now() + total * 1000).toISOString(), label: (label || '').trim().slice(0, 60) }).then(ok => ok && toast(`Timer started for everyone: ${mins} min.`)); };
+  const start = (mins, label) => { const total = Math.round(mins * 60); closePop(); return save({ state: 'running', total, endsAt: new Date(Date.now() + total * 1000).toISOString(), label: (label || '').trim().slice(0, 60) }).then(ok => ok && toast(personal() ? `Your timer is running: ${mins} min.` : `Timer started for everyone: ${mins} min.`)); };
   const pause = () => t && save({ ...t, state: 'paused', left: left(), endsAt: null });
   const resume = () => t && save({ ...t, state: 'running', endsAt: new Date(Date.now() + left() * 1000).toISOString(), left: null });
   const add = secs => { if (!t) return; const s = left() + secs, total = (t.total || 0) + secs;
@@ -51,15 +54,15 @@ window.createDEC15Timer = function ({ getDb, isTeacher, esc, toast }) {
     const doneAgo = t?.state === 'done' ? Date.now() - (Date.parse(t.endsAt) || 0) : 0;
     if (!t || doneAgo > DONE_FOR) { d.innerHTML = ''; d.hidden = true; paintButton(); return; }
     if (t.state === 'done') hideT = setTimeout(render, DONE_FOR - doneAgo + 500);
-    if (t.state === 'done' && !isTeacher() && doneSeen === t.endsAt + t.total) { d.innerHTML = ''; d.hidden = true; paintButton(); return; }
-    d.hidden = false; const teach = isTeacher();
+    if (t.state === 'done' && !isTeacher() && !own && doneSeen === t.endsAt + t.total) { d.innerHTML = ''; d.hidden = true; paintButton(); return; }
+    d.hidden = false; const teach = isTeacher() || own;
     d.innerHTML = `<section class="ct${mini ? ' mini' : ''}" role="timer" aria-live="off" aria-label="Class timer">
       <span class="ct-ring" aria-hidden="true"><svg viewBox="0 0 64 64"><defs><linearGradient id="ct-grad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" class="ct-g1"/><stop offset="1" class="ct-g2"/></linearGradient></defs>
         <circle class="ct-track" cx="32" cy="32" r="${R}"/><circle class="ct-arc" cx="32" cy="32" r="${R}" style="stroke-dasharray:${C.toFixed(2)}"/><circle class="ct-tip" cx="32" cy="${32 - R}" r="3.4"/></svg>
         <span class="ct-glyph">${GLYPH}${DONE}</span></span>
-      <span class="ct-body"><span class="ct-eyebrow">${esc(t.label || 'Class timer')}</span><b class="ct-time" aria-hidden="true">--:--</b><span class="ct-words"></span><span class="sr-only ct-sr" aria-live="polite"></span></span>
-      <span class="ct-ctrl">${teach ? `${t.state === 'running' ? `<button type="button" data-ct="pause" title="Pause for everyone" aria-label="Pause">${I.pause}</button>` : t.state === 'paused' ? `<button type="button" data-ct="resume" title="Continue" aria-label="Continue">${I.play}</button>` : ''}
-          <button type="button" data-ct="add" title="Add 1 minute" aria-label="Add 1 minute">+1 min</button><button type="button" data-ct="stop" title="Stop and hide the timer for everyone" aria-label="Stop the timer">${I.x}</button>`
+      <span class="ct-body"><span class="ct-eyebrow">${esc(t.label || (own ? 'My timer' : 'Class timer'))}</span><b class="ct-time" aria-hidden="true">--:--</b><span class="ct-words"></span><span class="sr-only ct-sr" aria-live="polite"></span></span>
+      <span class="ct-ctrl">${teach ? `${t.state === 'running' ? `<button type="button" data-ct="pause" title="${own ? 'Pause' : 'Pause for everyone'}" aria-label="Pause">${I.pause}</button>` : t.state === 'paused' ? `<button type="button" data-ct="resume" title="Continue" aria-label="Continue">${I.play}</button>` : ''}
+          <button type="button" data-ct="add" title="Add 1 minute" aria-label="Add 1 minute">+1 min</button><button type="button" data-ct="stop" title="${own ? 'Stop the timer' : 'Stop and hide the timer for everyone'}" aria-label="Stop the timer">${I.x}</button>`
         : t.state === 'done' ? `<button type="button" data-ct="hide" title="Hide" aria-label="Hide the timer">${I.x}</button>` : ''}
         <button type="button" data-ct="mini" class="ct-min" title="${mini ? 'Make it bigger' : 'Make it smaller'}" aria-label="${mini ? 'Make the timer bigger' : 'Make the timer smaller'}">${mini ? I.grow : I.shrink}</button></span>
       <i class="ct-bar" aria-hidden="true"><i></i></i></section>`;
@@ -70,7 +73,7 @@ window.createDEC15Timer = function ({ getDb, isTeacher, esc, toast }) {
   function tickNow(first) {
     const card = dock?.querySelector('.ct'); if (!card || !t) return;
     const s = left(), total = Math.max(1, t.total || 1), ph = phaseOf(s, total), p = ph === 'done' ? 1 : Math.min(1, Math.max(0, s / total));   // a finished timer shows a full, quiet ring
-    if (t.state === 'running' && s <= 0) { clearInterval(timerId); timerId = 0; if (isTeacher()) save({ ...t, state: 'done', endsAt: t.endsAt }); else { t = { ...t, state: 'done' }; render(); } return; }
+    if (t.state === 'running' && s <= 0) { clearInterval(timerId); timerId = 0; if (isTeacher() || own) save({ ...t, state: 'done', endsAt: t.endsAt }); else { t = { ...t, state: 'done' }; render(); } return; }
     card.dataset.phase = ph; card.classList.toggle('paused', t.state === 'paused');
     card.querySelector('.ct-time').textContent = ph === 'done' ? '00:00' : fmt(s);
     card.querySelector('.ct-arc').style.strokeDashoffset = (C * (1 - p)).toFixed(2);
@@ -85,33 +88,33 @@ window.createDEC15Timer = function ({ getDb, isTeacher, esc, toast }) {
   function onClick(e) {
     const b = e.target.closest('[data-ct]'); if (!b) return; const a = b.dataset.ct;
     if (a === 'mini') { mini = !mini; LS('dec15-timer-mini', mini ? '1' : '0'); render(); return; }
-    if (a === 'hide') { doneSeen = t.endsAt + t.total; render(); return; }
-    if (!isTeacher()) return;
+    if (a === 'hide') { if (own) { save({ state: 'off' }); return; } doneSeen = t.endsAt + t.total; render(); return; }
+    if (!isTeacher() && !own) return;
     if (a === 'pause') pause(); if (a === 'resume') resume(); if (a === 'add') add(60); if (a === 'stop') stop();
   }
 
   /* ───────── the teacher's "Timer" button and its start panel ───────── */
   function paintButton() {
     const btn = document.getElementById('timer-btn'); if (!btn) return;
-    btn.hidden = !isTeacher() || !getDb(); if (btn.hidden) return;
+    btn.hidden = isTeacher() && !getDb(); if (btn.hidden) return;   // students have their own timer
     const on = t && (t.state === 'running' || t.state === 'paused');
     btn.classList.toggle('on', !!on);
     btn.innerHTML = `${I.watch}<span class="tb-tx">${on ? `<span class="tb-left">${fmt(left())}</span>` : 'Timer'}</span>`;
-    btn.setAttribute('aria-label', on ? 'Class timer running. Start a new one' : 'Start a class timer');
+    btn.setAttribute('aria-label', personal() ? (on ? 'Your timer is running. Start a new one' : 'Start a timer for yourself') : on ? 'Class timer running. Start a new one' : 'Start a class timer');
   }
   function closePop() { popEl?.remove(); popEl = null; document.getElementById('timer-btn')?.setAttribute('aria-expanded', 'false'); }
   function openPop(btn) {
     if (popEl) { closePop(); return; }
-    popEl = document.createElement('div'); popEl.className = 'ct-pop'; popEl.setAttribute('role', 'dialog'); popEl.setAttribute('aria-label', 'Start a class timer');
+    popEl = document.createElement('div'); popEl.className = 'ct-pop'; popEl.setAttribute('role', 'dialog'); popEl.setAttribute('aria-label', personal() ? 'Start a timer' : 'Start a class timer');
     let mins = +(LS('dec15-timer-last') || 10);
     popEl.innerHTML = `<form novalidate>
-      <div class="ct-pop-head">${I.watch}<div><b>Class timer</b><small>Everyone in the class sees it at the top of their page.</small></div></div>
+      <div class="ct-pop-head">${I.watch}<div><b>${personal() ? 'My timer' : 'Class timer'}</b><small>${personal() ? 'Only you see it, on this device.' : 'Everyone in the class sees it at the top of their page.'}</small></div></div>
       <p class="ct-pop-l">How long?</p>
       <div class="ct-chips" role="radiogroup" aria-label="Minutes">${PRESETS.map(m => `<button type="button" role="radio" data-min="${m}" aria-checked="${m === mins}">${m}<small>min</small></button>`).join('')}</div>
       <label class="ct-own">Or type minutes <input name="m" type="number" min="0.5" max="180" step="0.5" inputmode="decimal" value="${mins}"></label>
       <p class="ct-pop-l">What is it for? <small>(optional)</small></p>
       <input class="ct-label" name="l" maxlength="60" placeholder="e.g. Pair discussion" list="ct-labels" value="${esc(LS('dec15-timer-label') || '')}"><datalist id="ct-labels">${LABELS.map(l => `<option value="${l}">`).join('')}</datalist>
-      <div class="ct-pop-act">${t ? '<button type="button" class="btn-quiet btn-sm" data-pop="stop">Stop timer</button>' : '<span></span>'}<button class="btn btn-sm" type="submit">${I.play}Start for everyone</button></div></form>`;
+      <div class="ct-pop-act">${t ? '<button type="button" class="btn-quiet btn-sm" data-pop="stop">Stop timer</button>' : '<span></span>'}<button class="btn btn-sm" type="submit">${I.play}${personal() ? 'Start' : 'Start for everyone'}</button></div></form>`;
     document.body.append(popEl);
     const r = btn.getBoundingClientRect(); popEl.style.top = (r.bottom + 8) + 'px'; popEl.style.left = Math.max(8, Math.min(r.left + r.width / 2 - popEl.offsetWidth / 2, innerWidth - popEl.offsetWidth - 8)) + 'px';
     btn.setAttribute('aria-expanded', 'true');
@@ -134,6 +137,8 @@ window.createDEC15Timer = function ({ getDb, isTeacher, esc, toast }) {
   const GLYPH = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3.5h10M7 20.5h10M8 3.5c0 4.2 4 5.3 4 8.5s-4 4.3-4 8.5M16 3.5c0 4.2-4 5.3-4 8.5s4 4.3 4 8.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path class="ct-sand" d="M9.6 19.2c.7-1.8 1.7-2.6 2.4-2.6s1.7.8 2.4 2.6z" fill="currentColor"/></svg>`;
 
   const DONE = `<svg class="ct-check" viewBox="0 0 24 24" aria-hidden="true"><path d="m6.5 12.5 3.6 3.6 7.4-8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-  return { set(v) { const was = t; t = norm(v); if (!was || !t || was.endsAt !== t.endsAt || was.state !== t.state || was.total !== t.total || was.label !== t.label) { if (t && (!was || was.endsAt !== t.endsAt)) lastPhase = ''; render(); } },
+  /* a student's own timer comes back after a reload (until 3 minutes after it ends) */
+  setTimeout(() => { if (!personal()) return; let v = null; try { v = JSON.parse(LS('ielts-my-timer') || 'null'); } catch (e) { v = null; } const n = norm(v); if (n && !(n.state !== 'paused' && Date.now() - Date.parse(n.endsAt) > DONE_FOR)) { own = true; t = n; render(); } else paintButton(); }, 0);
+  return { set(v) { classVal = v; if (own && personal()) return; const was = t; t = norm(v); if (!was || !t || was.endsAt !== t.endsAt || was.state !== t.state || was.total !== t.total || was.label !== t.label) { if (t && (!was || was.endsAt !== t.endsAt)) lastPhase = ''; render(); } },
     paintButton, get value() { return t; } };
 };
