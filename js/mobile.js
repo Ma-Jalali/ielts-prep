@@ -98,13 +98,13 @@
   /* ── exercise progress strip: how many questions have an answer; "Answers" opens the key ── */
   function answered() { const xs = document.querySelector('.xs'); if (!xs) return; const got = new Set();
     xs.querySelectorAll('.xs-gap input, .xs-gap select').forEach(f => { const m = (f.getAttribute('aria-label') || '').match(/(\d+)/); if (m && String(f.value).trim()) got.add(+m[1]); });
-    xs.querySelectorAll('.xs-opts[role=radiogroup]').forEach(g => { const m = (g.getAttribute('aria-label') || '').match(/(\d+)/); if (m && g.querySelector('input:checked')) got.add(+m[1]); });
+    xs.querySelectorAll('.xs-opts[role=radiogroup], .xs-tf-o[role=radiogroup]').forEach(g => { const m = (g.getAttribute('aria-label') || '').match(/(\d+)/); if (m && g.querySelector('input:checked')) got.add(+m[1]); });
     xs.querySelectorAll('.xs-mq.is-multi').forEach(g => { const from = +g.dataset.from || 1, n = +g.dataset.n || 1, c = Math.min(n, g.querySelectorAll('input:checked').length); for (let i = 0; i < c; i++) got.add(from + i); });
-    const total = +xs.dataset.total || 0, k = Math.min(total, got.size), strip = xs.querySelector('.xs-strip'); if (!strip) return;
+    const total = +xs.dataset.total || 0, k = Math.min(total, got.size), strip = xs.querySelector('.xs-bar, .xs-strip'); if (!strip) return;
     strip.querySelector('.xs-strip-n b').textContent = k; strip.querySelector('.xs-strip-bar i').style.width = (total ? 100 * k / total : 0) + '%'; strip.classList.toggle('is-full', total && k >= total); }
   document.addEventListener('input', e => { if (e.target.closest?.('.xs')) answered(); });
   document.addEventListener('change', e => { if (e.target.closest?.('.xs')) answered(); });
-  document.addEventListener('click', e => { if (!e.target.closest?.('[data-xs-answers]')) return; const k = document.querySelector('.xs .xs-fold.is-key'); if (!k) return; k.open = true; k.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+  document.addEventListener('click', e => { if (!e.target.closest?.('[data-xs-answers]')) return; const k = document.querySelector('.xs .xs-fold.is-key'); if (!k) return; k.open = true; const bar = document.querySelector('[data-xs-nav]'); scrollTo({ top: k.getBoundingClientRect().top + scrollY - (document.querySelector('.masthead')?.offsetHeight || 0) - (bar?.offsetHeight || 0) - 14, behavior: 'smooth' }); });
 
   /* the app redraws #main: wire the new page */
   const main = document.getElementById('main');
