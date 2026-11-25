@@ -11,8 +11,9 @@ window.DEC15_LESSON = {
   finish: { title: 'Well done', text: 'You have finished the Reading training lessons.' },
   learn: {
     tags: ['Question type 15'],
-    jump: [['xl-tips', 'Tips', 'tip'], ['xl-words', 'Useful words', 'abc'], ['xl-ex', 'Exercise', 'pen']],
+    jump: [['xl-tips', 'Tips', 'tip'], ['xl-words', 'Useful words', 'abc'], ['xl-ex', 'Exercise', 'pen'], ['xl-sum', 'Remember', 'ok']],
     blocks: [
+      { type: 'key', title: 'The strategy', text: 'Treat the passage like **directions on a map**: find where you are, then follow it from part to part.' },
       { type: 'cards', anchor: 'xl-tips', kicker: 'Tips', title: 'Follow the passage like a map',
         items: [
           { icon: 'map', t: 'A small area', d: 'The answers are usually in **one or two paragraphs**. Find that part first.' },
@@ -47,6 +48,8 @@ window.DEC15_LESSON = {
               src: 'assets/reading/zinacantan.svg', alt: 'A plan of a house: a large room with a row of beds along the top wall, chairs in the middle and a television on the bottom wall; a kitchen with a fire, a bench and two round bins in the corner; herbs, fruit trees and, on the far right, sugar cane.',
               labels: [{ x: 27, y: 20, answer: 'beds|row of beds|a row of beds' }, { x: 27, y: 87, answer: 'television|the television' }, { x: 73, y: 54, answer: 'storage bins|large storage bins|bins' }, { x: 92, y: 50, answer: 'sugar cane' }] }] }
         ] },
+      { type: 'recap', anchor: 'xl-sum', title: 'Remember',
+        items: ['Find the **small part** of the passage that describes the diagram.', 'The numbers may **not** be in passage order.', 'Use the labels that are **already there** to find your way.', 'Learn the **position words**: *beyond*, *opposite*, *along*, *leading off* …', 'Answers are usually **nouns**: copy them exactly.'] },
       { type: 'note', tone: 'tip', title: 'You have finished the training', text: 'You now know all the main types of Reading question. Next, practise them one at a time in **Practise**, then put everything together in a full **Test**.' }
     ]
   },

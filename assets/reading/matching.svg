@@ -12,7 +12,7 @@
   <path d="M286 252c34-6 52-34 54-70" fill="none" stroke="#e0475b" stroke-width="2" stroke-dasharray="4 5"/>
   <rect x="378" y="40" width="240" height="150" rx="16" fill="#fff8e1" stroke="#f0d78a"/>
   <text x="398" y="70" font-size="13" font-weight="800" fill="#8a6d16" letter-spacing="1.5">LIST OF NAMES</text>
-  <g font-size="16" font-weight="700" fill="#18213f"><text x="398" y="102">A  Iran</text><text x="398" y="128">B  Japan</text><text x="398" y="154">C  France</text><text x="398" y="180">D  Italy</text></g>
+  <g font-size="16" font-weight="700" fill="#18213f"><text x="398" y="102">A  Brazil</text><text x="398" y="128">B  Japan</text><text x="398" y="154">C  France</text><text x="398" y="180">D  Italy</text></g>
   <text x="378" y="226" font-size="13.5" font-weight="700" fill="#b3263a">A name can appear more than once:</text>
   <text x="378" y="248" font-size="13.5" font-weight="700" fill="#b3263a">find and circle every one.</text>
 </svg>

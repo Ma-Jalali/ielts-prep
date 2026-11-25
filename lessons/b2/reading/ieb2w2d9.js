@@ -11,8 +11,9 @@ window.DEC15_LESSON = {
   finish: { title: 'Next', text: 'Labelling a diagram' },
   learn: {
     tags: ['Question types 13 and 14'],
-    jump: [['xl-tips', 'Tips', 'tip'], ['xl-options', 'Four kinds of option', 'list'], ['xl-ex', 'Exercises', 'pen']],
+    jump: [['xl-tips', 'Tips', 'tip'], ['xl-options', 'Four kinds of option', 'list'], ['xl-ex', 'Exercises', 'pen'], ['xl-sum', 'Remember', 'ok']],
     blocks: [
+      { type: 'key', title: 'The strategy', text: 'Do not look for the right option. **Remove the wrong ones**, and the right one is what is left.' },
       { type: 'tabs', anchor: 'xl-tips', kicker: 'Tips', title: 'Two kinds of multiple choice',
         items: [
           { label: 'One answer', icon: 'target', lead: 'A question or an unfinished sentence, and three or four options. You choose **one**.', blocks: [
@@ -56,7 +57,9 @@ window.DEC15_LESSON = {
               options: ['Females can choose a mate more easily.', 'More eggs can be laid.', 'Eggs are more likely to survive.', 'There are more adults available to protect the young.', 'Individuals can develop skills for later use.', 'The young are likely to be healthier.', 'Individuals can eat food that others have found.', 'The group is more likely to live close to a source of food.'],
               answers: ['C', 'D', 'E', 'F', 'G'],
               why: 'C: a predator can only eat a limited number of eggs. D: adult elephants surround the young. E: the ‘aunts’ learn to raise their own young. F: antibodies increase resistance to disease. G: others may join an animal that has found food. A is wrong: it is easier for the **males**. B is wrong: eggs are laid at the same time, not in greater numbers.' }] }
-        ] }
+        ] },
+      { type: 'recap', anchor: 'xl-sum', title: 'Remember',
+        items: ['The answers are **in passage order**.', 'Find the place with the **question’s** key words, not the options’.', '**Remove** wrong options: different, extra, or not there.', 'Beware of options that **copy words** from the passage.', 'Several answers: choose **exactly** the number asked for.'] }
     ]
   },
   sections: [{

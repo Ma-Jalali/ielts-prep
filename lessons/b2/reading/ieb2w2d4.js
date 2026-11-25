@@ -1,6 +1,6 @@
 /* IELTS · Reading · Learn · Lesson 4 — True, False, Not Given (and Yes, No, Not Given): question type 3.
    Source: the teacher's training notes "Reading" (RAD TIME), pages 6–10. The Persian examples are translated into
-   English; a few examples are replaced where the original answer could be argued (the languages of Iran, "few"
+   English; a few examples are replaced where the original answer could be argued (the languages of a country, "few"
    companies) or used violence (the cause-and-effect example). "Welcome to Australia" is adapted (rewritten).
    Ids (lesson, activities, exercises, blocks) are the keys of students' saved work: never rename them. */
 window.DEC15_LESSON = {
@@ -11,8 +11,14 @@ window.DEC15_LESSON = {
   finish: { title: 'Next', text: 'Sentence completion' },
   learn: {
     tags: ['Question type 3'],
-    jump: [['xl-basics', 'The basics', 'info'], ['xl-built', 'How they are built', 'list'], ['xl-ex', 'Exercise', 'pen']],
+    jump: [['xl-decide', 'How to decide', 'target'], ['xl-basics', 'The basics', 'info'], ['xl-built', 'Five patterns', 'list'], ['xl-ex', 'Exercise', 'pen'], ['xl-sum', 'Remember', 'ok']],
     blocks: [
+      { type: 'key', title: 'The difference that matters', text: '**FALSE**: the passage says the **opposite**. **NOT GIVEN**: the passage **does not say**.' },
+      { type: 'steps', anchor: 'xl-decide', kicker: 'How to decide', title: 'Three steps for every statement',
+        items: [
+          { t: 'Find the place', d: 'Choose a word you can trust in the statement (a name, a number, a key noun) and find the sentence in the passage that talks about it.' },
+          { t: 'Compare word by word', d: 'Read the passage sentence from **beginning to end**. Check **every** part of the statement: who, what, when, how much, how sure.' },
+          { t: 'Decide', d: ['Everything in the statement is in the passage → **TRUE**', 'Something in the statement is the opposite of the passage → **FALSE**', 'Something in the statement is not in the passage at all → **NOT GIVEN**'] }] },
       { type: 'tabs', anchor: 'xl-basics', kicker: 'The basics', title: 'Three answers, one careful reader',
         items: [
           { label: 'Tips', icon: 'tip', blocks: [
@@ -22,8 +28,8 @@ window.DEC15_LESSON = {
               'When you find the place of the answer, read the sentence in the passage **from the beginning to the end**.',
               'Do **not** use your general knowledge. Only the passage counts, even if you know the statement is true in real life.'] },
             { type: 'text', title: 'Every word counts', text: 'Look at how much information there is in one short statement:' },
-            { type: 'table', wide: true, head: ['Statement', 'Who?', 'Does what?', 'When / where?'], rows: [['Ali eats flatbread on Friday mornings.', 'Ali', 'eats flatbread', 'on *Friday mornings*'], ['Ali walks in the park in autumn.', 'Ali', 'walks in the park', 'in *autumn*']] },
-            { type: 'note', tone: 'tip', text: 'If the passage only says *Ali eats flatbread*, the answer to the first statement is **NOT GIVEN**: the passage says nothing about Friday mornings.' }] },
+            { type: 'table', wide: true, head: ['Statement', 'Who?', 'Does what?', 'When / where?'], rows: [['Emma eats pancakes on Sunday mornings.', 'Emma', 'eats pancakes', 'on ==Sunday mornings=='], ['Jack walks in the park in autumn.', 'Jack', 'walks in the park', 'in ==autumn==']] },
+            { type: 'note', tone: 'tip', text: 'If the passage only says *Emma eats pancakes*, the answer to the first statement is **NOT GIVEN**: the passage says nothing about **Sunday mornings**.' }] },
           { label: 'False or Not Given?', icon: 'target', blocks: [
             { type: 'cards', cols: 2, items: [
               { icon: 'no', t: 'FALSE / NO', d: 'The easiest to recognise: a word in the statement is the **opposite** of the information in the passage. The passage **contradicts** it.' },
@@ -43,7 +49,7 @@ window.DEC15_LESSON = {
           { icon: 'repeat', title: '1 · Comparison', sub: 'bigger, the best, more, similar, prefer', blocks: [
             { type: 'text', text: 'When a statement **compares** two or more things, find the same comparison in the passage. If there is **no** comparison, or a **different** one, the answer is NOT GIVEN. If the same comparison is there, decide between TRUE and FALSE.' },
             { type: 'chips', title: 'Watch out for', groups: [{ items: ['-er / more … than', 'the -est / the most', 'less / fewer', 'similar', 'identical', 'the same', 'different', 'prefer', 'rather than', 'unlike'] }] },
-            { type: 'note', tone: 'tip', text: 'Statement: *Russia is bigger than Iran.* Passage: *Russia is a bigger producer of gas than Iran.* → **NOT GIVEN**. The statement compares **size**; the passage compares **gas production**.' },
+            { type: 'note', tone: 'tip', text: 'Statement: *Russia is bigger than Canada.* Passage: *Russia is a bigger producer of gas than Canada.* → **NOT GIVEN**. The statement compares **size**; the passage compares **gas production**.' },
             { type: 'versus', items: [
               { q: 'Dr Smith is **the best** doctor in the area.', p: 'Dr Smith is a professional doctor in this area.', answer: 'NOT GIVEN', why: 'The passage does not compare Dr Smith with other doctors.' },
               { q: 'Egypt is **the most popular** tourist country in Africa.', p: 'Egypt is one of the popular tourist countries in Africa.', answer: 'NOT GIVEN', why: '*One of the popular* countries does not tell us whether it is **the most** popular.' },
@@ -104,6 +110,8 @@ window.DEC15_LESSON = {
                 { q: 'English lessons are free for **all** new residents.', answer: 'FALSE', why: 'New residents **may be** entitled to free lessons, so not all of them are.' },
                 { q: 'Whether you need to take an Australian practical driving test depends on which country you come from.', answer: 'TRUE', why: 'Licences from some countries do not need a practical test.' }] }] }
         ] },
+      { type: 'recap', anchor: 'xl-sum', title: 'Remember',
+        items: ['The answers are **in passage order**.', 'Check **every** word of the statement: who, what, when, how much, how sure.', '**FALSE** = the passage says the opposite. **NOT GIVEN** = the passage does not say.', 'Watch the five patterns: **comparison**, **time**, **quantity**, **who did it**, **certainty**.', 'Never use your **general knowledge**: only the passage counts.'] },
       { type: 'check', kicker: 'Check yourself', title: 'True or false?', intro: 'Tap True or False to see the answer.',
         items: [
           { s: 'If you know from real life that a statement is true, you should answer TRUE.', answer: false, why: 'Only the passage counts.' },
