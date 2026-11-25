@@ -12,11 +12,12 @@ window.DEC15_LESSON = {
   finish: { title: 'Next', text: 'Practise: Part 1 exercises' },
   learn: {
     tags: ['Questions 31–40', 'One speaker'],
-    jump: [['xl-tips', 'Tips', 'tip'], ['xl-ex', 'Exercises', 'pen'], ['xl-check', 'Check yourself', 'ok']],
+    jump: [['xl-glance', 'At a glance', 'info'], ['xl-tips', 'Tips', 'tip'], ['xl-ex', 'Exercises', 'pen'], ['xl-sum', 'Remember', 'star'], ['xl-check', 'Check yourself', 'ok']],
     blocks: [
-      { type: 'facts', kicker: 'Part 4 at a glance', title: 'A lecture on an academic subject',
+      { type: 'facts', anchor: 'xl-glance', kicker: 'Part 4 at a glance', title: 'A lecture on an academic subject',
         items: [['31–40', 'questions, all in one go'], ['1', 'speaker: a lecturer or a student giving a talk'], ['No break', 'read all ten questions before it starts'], ['Hardest', 'part: formal language and academic words']] },
-      { type: 'tabs', anchor: 'xl-tips', kicker: 'Tips', title: 'How to do well in Part 4',
+      { type: 'key', title: 'The big idea', text: 'No break, ten questions, one speaker. **Read all ten questions first**, and let the **signpost words** tell you where you are in the lecture.' },
+      { type: 'tabs', anchor: 'xl-tips', kicker: 'Tips', title: 'How to do well in Part 4', intro: 'Four tabs. Read them in order: each one ends with a button to the next.',
         items: [
           { label: 'How it works', icon: 'info', blocks: [
             { type: 'cards', items: [
@@ -80,6 +81,8 @@ window.DEC15_LESSON = {
               { type: 'ieTable', id: 'ieb2w1d5-e5-q4', from: 39, title: 'Customer satisfaction', instruction: 'Complete the table below. Write **NO MORE THAN THREE WORDS** for each answer.',
                 columns: ['Product performance', 'Customers are'], rows: [['poor', 'unhappy'], ['good', '[[satisfied]]'], ['[[better than expected]]', 'delighted']] }] }
         ] },
+      { type: 'recap', anchor: 'xl-sum', title: 'Remember',
+        items: ['**Read all ten questions** before the lecture starts: there is no break.', '**Signpost words** (*firstly, however, to sum up*) tell you what comes next.', 'Notes and flow charts follow the **order** of the lecture.', 'Answers are often **academic words**: spell them carefully.', 'If you miss an answer, **move on**: do not lose the next one too.'] },
       { type: 'check', anchor: 'xl-check', kicker: 'Check yourself', title: 'True or false?', intro: 'Tap True or False to see the answer.',
         items: [
           { s: 'Part 4 has a short break in the middle.', answer: false, why: 'Part 4 plays without a break. Read all ten questions first.' },

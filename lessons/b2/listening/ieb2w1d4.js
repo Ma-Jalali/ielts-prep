@@ -12,11 +12,12 @@ window.DEC15_LESSON = {
   finish: { title: 'Next', text: 'Part 4: academic lecture' },
   learn: {
     tags: ['Questions 21–30', 'Two to four speakers'],
-    jump: [['xl-tips', 'Tips', 'tip'], ['xl-ex', 'Exercises', 'pen'], ['xl-check', 'Check yourself', 'ok']],
+    jump: [['xl-glance', 'At a glance', 'info'], ['xl-tips', 'Tips', 'tip'], ['xl-ex', 'Exercises', 'pen'], ['xl-sum', 'Remember', 'star'], ['xl-check', 'Check yourself', 'ok']],
     blocks: [
-      { type: 'facts', kicker: 'Part 3 at a glance', title: 'A discussion about study',
+      { type: 'facts', anchor: 'xl-glance', kicker: 'Part 3 at a glance', title: 'A discussion about study',
         items: [['21–30', 'questions, usually in two sets'], ['2–4', 'speakers: students, a tutor, a lecturer'], ['Opinions', 'you follow ideas, reasons and views, not just facts'], ['Harder', 'than Parts 1 and 2: the speakers interrupt and change their minds']] },
-      { type: 'tabs', anchor: 'xl-tips', kicker: 'Tips', title: 'How to do well in Part 3',
+      { type: 'key', title: 'The big idea', text: 'Part 3 is about **opinions**. The right answer is usually what the speakers **agree on in the end**, not the first thing you hear.' },
+      { type: 'tabs', anchor: 'xl-tips', kicker: 'Tips', title: 'How to do well in Part 3', intro: 'Five tabs. Read them in order: each one ends with a button to the next.',
         items: [
           { label: 'How it works', icon: 'info', blocks: [
             { type: 'cards', items: [
@@ -97,6 +98,8 @@ window.DEC15_LESSON = {
               bank: ['writing', 'note-taking', 'working with numbers', 'reading', 'videos', 'exam preparation'],
               text: '# What Rachel found most useful in the book\n[[C]]\n[[E]]\n[[F]]\n# What Paul needs\n[[A]]\n[[B]]\n[[F]]' }] }
         ] },
+      { type: 'recap', anchor: 'xl-sum', title: 'Remember',
+        items: ['Two to four speakers: know **who** says what.', 'Listen for **agreement** and **disagreement**: speakers change their minds.', 'Multiple choice: all the options may be **mentioned**. Choose the one that **answers** the question.', 'Matching: read the **box** first. A letter may be used more than once.', 'Beware of **distractors**: words that match an option but do not answer the question.'] },
       { type: 'check', anchor: 'xl-check', kicker: 'Check yourself', title: 'True or false?', intro: 'Tap True or False to see the answer.',
         items: [
           { s: 'Part 3 can have up to four speakers.', answer: true, why: 'Usually two or three: students and a tutor.' },

@@ -12,11 +12,12 @@ window.DEC15_LESSON = {
   finish: { title: 'Next', text: 'Part 2: everyday monologue' },
   learn: {
     tags: ['Questions 1–10', 'Two speakers'],
-    jump: [['xl-tips', 'Tips', 'tip'], ['xl-ex', 'Exercises', 'pen'], ['xl-check', 'Check yourself', 'ok']],
+    jump: [['xl-glance', 'At a glance', 'info'], ['xl-tips', 'Tips', 'tip'], ['xl-ex', 'Exercises', 'pen'], ['xl-sum', 'Remember', 'star'], ['xl-check', 'Check yourself', 'ok']],
     blocks: [
-      { type: 'facts', kicker: 'Part 1 at a glance', title: 'A conversation about everyday life',
+      { type: 'facts', anchor: 'xl-glance', kicker: 'Part 1 at a glance', title: 'A conversation about everyday life',
         items: [['1–10', 'questions: the first part of the test'], ['2', 'speakers: one asks for information, one gives it'], ['Phone', 'or **face to face**: both are common'], ['Easiest', 'part of the test: aim for **9 or 10** out of 10']] },
-      { type: 'tabs', anchor: 'xl-tips', kicker: 'Tips', title: 'How to do well in Part 1',
+      { type: 'key', title: 'The big idea', text: 'Part 1 is about **facts**: names, numbers, dates and addresses. Catch **every letter and number**, and always listen **to the end** of the sentence.' },
+      { type: 'tabs', anchor: 'xl-tips', kicker: 'Tips', title: 'How to do well in Part 1', intro: 'Four tabs. Read them in order: each one ends with a button to the next.',
         items: [
           { label: 'How it works', icon: 'info', blocks: [
             { type: 'cards', items: [
@@ -104,6 +105,8 @@ window.DEC15_LESSON = {
             blocks: [{ type: 'ieGap', id: 'ieb2w1d2-e5-q1', from: 1, layout: 'form', title: 'School trip information', instruction: 'Complete the notes below. Write **NO MORE THAN THREE WORDS AND/OR A NUMBER** for each answer.',
               text: 'Name of club: International Friendship Club (example)\nCountry: [[Peru]]\nAccommodation: students stay with families [[in pairs]]\nCost: £495\nDuration: [[15|fifteen]] days\nThe price does not include presents for the host family or [[spending money]]\nTakes place during the spring [[holiday|holidays]]\nAdvert released on: [[29 September|September 29]]\nAfter the application is received, [[an interview|interview]] is necessary\nNumber of students on the trip: [[20|twenty]]\nTotal number of adults: six, including [[2|two]] parents\nDeposit: £[[100|one hundred]]' }] }
         ] },
+      { type: 'recap', anchor: 'xl-sum', title: 'Remember',
+        items: ['One person asks, the other answers: the answers are **facts**.', 'Before you listen, predict the **type** of each answer: a name, a number, a date …', 'Write names and numbers **exactly**: spelling counts.', 'Speakers **correct themselves**: listen for *sorry*, *actually*, *no, wait*.', 'Keep to the **word limit**, and do not repeat words already on the form.'] },
       { type: 'check', anchor: 'xl-check', kicker: 'Check yourself', title: 'True or false?', intro: 'Tap True or False to see the answer.',
         items: [
           { s: 'In Part 1 one speaker usually asks the other for information.', answer: true, why: 'A customer, a caller or a new member asks; the other person answers.' },

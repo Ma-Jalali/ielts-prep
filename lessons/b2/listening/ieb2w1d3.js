@@ -12,11 +12,12 @@ window.DEC15_LESSON = {
   finish: { title: 'Next', text: 'Part 3: academic discussion' },
   learn: {
     tags: ['Questions 11–20', 'One speaker'],
-    jump: [['xl-tips', 'Tips', 'tip'], ['xl-ex', 'Exercises', 'pen'], ['xl-check', 'Check yourself', 'ok']],
+    jump: [['xl-glance', 'At a glance', 'info'], ['xl-tips', 'Tips', 'tip'], ['xl-ex', 'Exercises', 'pen'], ['xl-sum', 'Remember', 'star'], ['xl-check', 'Check yourself', 'ok']],
     blocks: [
-      { type: 'facts', kicker: 'Part 2 at a glance', title: 'One speaker, an everyday topic',
+      { type: 'facts', anchor: 'xl-glance', kicker: 'Part 2 at a glance', title: 'One speaker, an everyday topic',
         items: [['11–20', 'questions, usually in two sets'], ['1', 'speaker: a guide, a presenter, a manager'], ['Maps', 'and plans are common in this part'], ['Order', 'the answers follow the talk, in order']] },
-      { type: 'tabs', anchor: 'xl-tips', kicker: 'Tips', title: 'How to do well in Part 2',
+      { type: 'key', title: 'The big idea', text: 'One speaker, one topic. **Predict** every gap before you listen, then **follow the talk like a map**: the answers come in order.' },
+      { type: 'tabs', anchor: 'xl-tips', kicker: 'Tips', title: 'How to do well in Part 2', intro: 'Five tabs. Read them in order: each one ends with a button to the next.',
         items: [
           { label: 'How it works', icon: 'info', blocks: [
             { type: 'cards', items: [
@@ -30,14 +31,14 @@ window.DEC15_LESSON = {
               'The words in the questions are often **paraphrased** in the talk: *built* may become *constructed*; *most popular* may become *what people like best*.',
               'In multiple choice, **all the options** may be mentioned. Choose the one that answers the question exactly.'] }] },
           { label: 'Predict', icon: 'eye', lead: 'Before you listen, decide what kind of word fits each gap: a noun, a verb, an adjective, a number, a time? Then tap to check.', blocks: [
-            { type: 'reveal', items: [
-              { n: 'e.g.', q: 'Lectures begin at ________ in the morning.', a: 'A **number / time**: "at" + a time, and "in the morning" tells you it is a clock time (e.g. *9.30*).' },
-              { q: 'A ________ can carry up to 350 passengers.', a: 'A **means of transport** (a singular noun after "A"): e.g. *ferry*, *plane*.' },
-              { q: '________ are in danger of becoming extinct.', a: 'An **animal or plant species** (a plural noun before "are"): e.g. *tigers*.' },
-              { q: 'The Rosetta Stone was discovered in Egypt in the ________ .', a: 'A **period of time** after "in the": a century (*18th century*), a season (*summer*) or a decade (*1790s*). Not a single year: we say *in 1799*, not *in the 1799*.' },
-              { q: 'The tower is made of ________ .', a: 'A **material** (a noun after "made of"): e.g. *stone*, *steel*.' },
-              { q: 'Aboriginal art is extremely ________ these days.', a: 'An **adjective** (after "extremely"): e.g. *popular*, *valuable*.' },
-              { q: 'Research shows that cigarette smoking is ________ .', a: 'An **adjective** (after "is"): e.g. *harmful*, *addictive*.' }] },
+            { type: 'examples', hide: true, qLabel: 'The gap', aLabel: 'Predict', items: [
+              { label: 'Example', q: 'Lectures begin at ________ in the morning.', a: 'a number: a clock time', why: '*At* + a time, and *in the morning* tells you it is a clock time, e.g. *9.30*.', hide: false },
+              { q: 'A ________ can carry up to 350 passengers.', a: 'a means of transport', why: 'A **singular** noun after *A*: e.g. *ferry*, *plane*.' },
+              { q: '________ are in danger of becoming extinct.', a: 'an animal or plant species', why: 'A **plural** noun before *are*: e.g. *tigers*.' },
+              { q: 'The Rosetta Stone was discovered in Egypt in the ________ .', a: 'a period of time', why: 'After *in the*: a century (*18th century*), a season (*summer*) or a decade (*1790s*). Not a single year: we say *in 1799*, not *in the 1799*.' },
+              { q: 'The tower is made of ________ .', a: 'a material', why: 'A noun after *made of*: e.g. *stone*, *steel*.' },
+              { q: 'Aboriginal art is extremely ________ these days.', a: 'an adjective', why: 'After *extremely*: e.g. *popular*, *valuable*.' },
+              { q: 'Research shows that cigarette smoking is ________ .', a: 'an adjective', why: 'After *is*: e.g. *harmful*, *addictive*.' }] },
             { type: 'note', tone: 'info', title: 'Grammar and meaning', text: '**Grammar:** is it a verb, an adjective, or a noun (singular, plural or uncountable)?\n\n**Meaning:** is it a person, a place, an animal, a thing, a number, a time?' }] },
           { label: 'Maps', icon: 'map', lead: 'Map and plan labelling is common in Part 2. The answers are places, and sometimes you choose letters from a box.', blocks: [
             { type: 'steps', items: [
@@ -110,6 +111,8 @@ window.DEC15_LESSON = {
               { type: 'ieGap', id: 'ieb2w1d3-e4-q3', from: 19, layout: 'short', instruction: 'Answer the questions below. Write **NO MORE THAN THREE WORDS AND/OR A NUMBER** for each answer.',
                 text: 'How long is the tunnel? [[2.3 km|2.3 kilometres|2.3 kilometers|2.3 kms]]\nName ONE thing the tunnel can withstand. [[a ship|ship|an earthquake|earthquake]]' }] }
         ] },
+      { type: 'recap', anchor: 'xl-sum', title: 'Remember',
+        items: ['One speaker, an everyday topic. The answers come **in order**.', 'Before you listen, predict the **grammar** and the **meaning** of every gap.', 'Maps and plans: find **where you start**, then follow the directions.', 'Prepositions (*at, in, on, opposite*) often come just **before** an answer.', 'Learn to spell common **materials** and **places**.'] },
       { type: 'check', anchor: 'xl-check', kicker: 'Check yourself', title: 'True or false?', intro: 'Tap True or False to see the answer.',
         items: [
           { s: 'Part 2 is a conversation between two people.', answer: false, why: 'Part 2 has one speaker.' },
