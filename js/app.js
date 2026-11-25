@@ -1029,6 +1029,17 @@ const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch (e) { /* ign
 const isDone = d => { const [a, b] = dayProgress(d); return !!b && a === b; };
 function groupLessons(w, g) { const at = {}; w.days.forEach(d => { if (d.day > g.base && d.day < g.base + 100) at[d.day - g.base] = d; }); return at; }
 function groupStats(w, groups) { let ready = 0, done = 0, total = 0; groups.forEach(g => { const at = groupLessons(w, g); total += g.size; Object.values(at).forEach(d => { if (d.status === 'ready') { ready++; if (isDone(d)) done++; } }); }); return { ready, done, total }; }
+/* Learn lessons as a clean list: a coloured number, the lesson, one line about it, and where you are.
+   One column for a short list, two (filled down the columns: 1–5, then 6–10) for a longer one. */
+function learnList(g, at) {
+  let next = false; const n = g.size, two = n > 6;
+  const rows = [...Array(n)].map((_, i) => { const k = i + 1, d = at[k], ready = d?.status === 'ready', [a, b] = ready ? dayProgress(d) : [0, 0], done = ready && b && a === b, now = ready && !done && !next ? (next = true) : false;
+    const st = !ready ? '<span class="ll-st is-soon">Coming soon</span>' : done ? `<span class="ll-st is-done">${icon('check')}Complete</span>` : a ? `<span class="ll-st is-on">In progress <small>${a}/${b}</small></span>` : now ? '<span class="ll-st is-next">Up next</span>' : '';
+    const go = !ready ? '' : `<span class="ll-go${now || (a && !done) ? ' is-main' : ''}">${done ? 'Review' : a ? 'Continue' : 'Start'}${icon('arrow')}</span>`;
+    const inner = `<span class="ll-n" aria-hidden="true">${done ? icon('check') : k}</span><span class="ll-tx"><span class="ll-k">Lesson ${k}${st}</span><b>${esc(ready ? d.title : g.slots?.[i] || `Lesson ${k}`)}</b>${ready && d.sub ? `<small>${esc(d.sub)}</small>` : ''}${ready && a && !done ? `<span class="ll-bar"><i style="width:${Math.round(100 * a / b)}%"></i></span>` : ''}</span>${go}`;
+    return `<li class="${done ? 'is-done' : ''}${now ? ' is-now' : ''}${ready ? '' : ' is-soon'}" style="--dc:${DAY_TINT[i % 5]}">${ready ? `<a href="#/${d.id}">${inner}</a>` : `<div>${inner}</div>`}</li>`; }).join('');
+  return `<ol class="ll-list${two ? ' is-two' : ''}" style="--rows:${Math.ceil(n / 2)}">${rows}</ol>`;
+}
 function sectionPage(w, secId, grpId) {
   const S = secOf(w), remember = CLS.id + '-sec-' + w.n;
   const sec = S.find(x => x.id === secId) || S.find(x => x.id === lsGet(remember, '')) || S[0]; lsSet(remember, sec.id);
@@ -1046,7 +1057,7 @@ function sectionPage(w, secId, grpId) {
       const st = done ? 'past' : ready && !next ? (next = true, 'now') : 'next';
       return { n, label: name.length > 24 ? name.slice(0, 22).trim() + '…' : name, sub: '', st, go: ready ? '#/' + d.id : '', aria: `${name}${ready ? '' : ' (coming soon)'}` }; });
     body += `<section class="course-map skill-map" aria-label="${esc(g.title)} in order">${courseMapRich(0, stops, { nowText: 'Up next' })}</section>
-      <ol class="day-grid many">${[...Array(g.size)].map((_, i) => { const n = i + 1, d = at[n]; return dayCard(d ? { ...d, day: n, parts: d.parts } : { id: '', day: n, status: 'soon', title: g.slots?.[i] || `Lesson ${n}` }); }).join('')}</ol>`;
+      ${learnList(g, at)}`;
   } else if (sec.groups.some(g => g.test)) {   // Test: one card per practice test
     const g = sec.groups[0], at = groupLessons(w, g);
     body += `<ol class="test-grid">${[...Array(g.size)].map((_, i) => { const n = i + 1, d = at[n], ready = d?.status === 'ready', [a, b] = d ? dayProgress(d) : [0, 0], done = ready && b && a === b;
