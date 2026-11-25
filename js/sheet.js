@@ -208,6 +208,11 @@
     const scriptAct = acts.find(a => a.id === 'script'), qs = blocks.filter(isQ);
     /* a reading passage: paragraphs split by a blank line; "A  " (a letter and two spaces) labels a paragraph, "### " is a heading inside it */
     const P = test.passage, pfmt = t => fmt(t).replace(/_(.+?)_/g, '<i>$1</i>');
+    const READ = !!(P && P.text && !audios.length);   // a reading exercise: the passage beside the questions
+    const readTips = () => `<section class="xs-rtips" aria-label="Before you read"><span class="xs-rtips-k">How to do it</span><ol>
+      <li><b>Skim</b><span>Read the title and the first lines of each paragraph: about one minute.</span></li>
+      <li><b>One question at a time</b><span>Predict the answer, then find the place in the passage.</span></li>
+      <li><b>Check</b><span>Word limit, spelling and grammar. Then open the answers and mark yourself.</span></li></ol></section>`;
     const passageHTML = P && P.text ? `<article class="xs-text${P.scroll === false ? '' : ' is-scroll'}"><header class="xs-text-h"><span class="xs-text-k">${esc(P.label || 'Reading passage')}</span>${P.title ? `<h3>${esc(P.title)}</h3>` : ''}${P.subtitle ? `<p>${esc(P.subtitle)}</p>` : ''}</header>
       <div class="xs-text-b" tabindex="0" role="region" aria-label="${esc(P.title || 'The passage')}">${String(P.text).split(/\n\s*\n/).map(par => { const t = par.trim(); if (t.startsWith('### ')) { const [h, ...rest] = t.slice(4).split('\n'); return `<h4>${pfmt(h)}</h4>${rest.join(' ').trim() ? `<p>${pfmt(rest.join('\n')).replace(/\n/g, '<br>')}</p>` : ''}`; } if (t.startsWith('* ')) return `<p class="xs-text-fn">${pfmt(t.slice(2))}</p>`;
         const m = t.match(/^([A-Z])\s{2,}([\s\S]*)$/); return m ? `<p class="has-l"><span class="xs-text-l">${m[1]}</span>${pfmt(m[2]).replace(/\n/g, '<br>')}</p>` : `<p>${pfmt(t).replace(/\n/g, '<br>')}</p>`; }).join('')}</div></article>` : '';
@@ -373,13 +378,13 @@
 
       <nav class="xs-trail" aria-label="Where you are">${ctx.back ? `<a class="xs-back" href="${esc(ctx.back.href)}">${icon('left')}<span>${esc(ctx.back.label)}</span></a>` : ''}<span class="xs-crumbs">${crumbs}<b>${esc(ctx.name || '')}</b></span></nav>
       <header class="xs-hero"><div class="xs-hero-tx"><span class="xs-eyebrow">${esc(ctx.eyebrow || 'Listening')}</span><h1>${esc(L.title)}</h1>${L.journey ? `<p>${esc(L.journey)}</p>` : ''}
-        <ul class="xs-facts"><li><b>${total}</b> questions</li><li><b>${audios.length || 1}</b> recording${audios.length === 1 ? '' : 's'}</li>${kinds.map(k => `<li>${esc(k)}</li>`).join('')}</ul></div>
+        <ul class="xs-facts"><li><b>${total}</b> questions</li>${READ ? `<li><b>1</b> passage</li>${L.duration ? `<li>${esc(L.duration)}</li>` : ''}` : `<li><b>${audios.length || 1}</b> recording${audios.length === 1 ? '' : 's'}</li>`}${kinds.map(k => `<li>${esc(k)}</li>`).join('')}</ul></div>
         ${window.IELTSSheetArt ? window.IELTSSheetArt(L.illus) : ''}</header>
       <div class="xs-bar" data-xs-nav aria-label="Your progress in this exercise"><b class="xs-bar-t">${esc(L.title)}</b>
-        <nav class="xs-bar-in" aria-label="Parts of this exercise">${parts.map((p, k) => partRange(p) ? `<a href="#xs-p${k + 1}" data-xs-jump><i>${k + 1}</i><span>${partRange(p).replace('Questions ', 'Q ').replace('Question ', 'Q ')}</span></a>` : '').join('')}${scriptHTML ? `<a href="#xs-script" data-xs-jump><i>${parts.length + 1}</i><span>Script</span></a>` : ''}</nav>
+        <nav class="xs-bar-in" aria-label="Parts of this exercise">${READ ? '<a href="#xs-passage" data-xs-jump class="is-passage"><i>P</i><span>Passage</span></a>' : ''}${parts.map((p, k) => partRange(p) ? `<a href="#xs-p${k + 1}" data-xs-jump><i>${k + 1}</i><span>${partRange(p).replace('Questions ', 'Q ').replace('Question ', 'Q ')}</span></a>` : '').join('')}${scriptHTML ? `<a href="#xs-script" data-xs-jump><i>${parts.length + 1}</i><span>Script</span></a>` : ''}</nav>
         <span class="xs-strip-n xs-bar-n"><b>0</b> / ${total}<small> answered</small></span><button type="button" class="xs-bar-go" data-xs-answers>Answers</button><span class="xs-strip-bar xs-bar-line" aria-hidden="true"><i></i></span></div>
-      ${passageHTML ? passageHTML : prep()}
-      ${body}
+      ${READ ? `${readTips()}<div class="xs-read"><div class="xs-read-p" id="xs-passage">${passageHTML}</div><div class="xs-read-q">${body}</div></div>` : `${passageHTML ? passageHTML : prep()}
+      ${body}`}
       <section class="xs-end" aria-label="Answers">
         <details id="xs-key" class="xs-fold is-key"${ctx.open ? ' open' : ''}><summary><span class="xs-fold-ic">${icon('check')}</span><span class="xs-fold-tx"><b>Check your answers</b><small>Open the answer key when you have finished</small></span><i class="xs-chev" aria-hidden="true"></i></summary>
           ${(() => { const m = window.IELTS_GATE?.member, L = m && m.lang && m.lang !== 'en' && window.IELTSCharacter?.lang(m.lang); return L ? `<p class="xs-l1"><bdi lang="${L.code}" dir="${L.rtl ? 'rtl' : 'ltr'}">${esc(L.done)}</bdi> <span>Time to check your answers.</span></p>` : ''; })()}<p class="xs-key-note">Compare each answer with yours. Spelling counts; capital letters do not. Where more than one answer is right, the others are shown underneath.</p>${keyHTML}</details>

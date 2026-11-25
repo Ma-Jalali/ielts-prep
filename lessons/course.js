@@ -197,8 +197,19 @@ window.DEC15_COURSE = {
       sections: [
         { id: 'learn', title: 'Learn', icon: 'book', blurb: 'Training lessons: how the Reading test works and how to answer each type of question. Start here, in order.', groups: [
           { id: 'learn', title: 'Training lessons', base: 0, size: 10, map: true, slots: ['Reading overview', 'Completion tasks: the method', 'Short answers, notes and tables', 'True, False, Not Given', 'Sentence completion', 'Summary completion', 'Matching information', 'Matching headings', 'Multiple choice', 'Labelling a diagram'] }] },
-        { id: 'practise', title: 'Practise', icon: 'target', blurb: 'Controlled practice, one type of question at a time.', groups: [
-          { id: 'practice', title: 'Exercises', base: 100, size: 99, open: true, noun: 'Exercise' }] },
+        { id: 'practise', title: 'Practise', icon: 'target', blurb: 'Exercises by type of question: choose a type, then an exercise. Each one has a passage, the questions and the answers.', groups: [
+          { id: 'short', title: 'Short answers', sub: 'Answer each question in a few words', base: 100, size: 99, open: true, noun: 'Exercise' },
+          { id: 'notes', title: 'Notes and tables', sub: 'Notes, tables, flow charts and diagrams', base: 200, size: 99, open: true, noun: 'Exercise' },
+          { id: 'tfng', title: 'True / False / Not Given', sub: 'And Yes / No / Not Given', base: 300, size: 99, open: true, noun: 'Exercise' },
+          { id: 'sent', title: 'Sentence completion', sub: 'Complete sentences with words from the passage', base: 400, size: 99, open: true, noun: 'Exercise' },
+          { id: 'ends', title: 'Sentence endings', sub: 'Choose the right ending from a box', base: 500, size: 99, open: true, noun: 'Exercise' },
+          { id: 'sum', title: 'Summary completion', sub: 'Complete a summary with words from the passage', base: 600, size: 99, open: true, noun: 'Exercise' },
+          { id: 'sumbox', title: 'Summary with a box', sub: 'Complete a summary from a list of words', base: 700, size: 99, open: true, noun: 'Exercise' },
+          { id: 'match', title: 'Matching', sub: 'Match statements to people, places or things', base: 800, size: 99, open: true, noun: 'Exercise' },
+          { id: 'class', title: 'Classification', sub: 'Sort statements into groups', base: 900, size: 99, open: true, noun: 'Exercise' },
+          { id: 'para', title: 'Which paragraph?', sub: 'Find the paragraph that contains the information', base: 1000, size: 99, open: true, noun: 'Exercise' },
+          { id: 'head', title: 'Headings', sub: 'Choose a heading for each paragraph', base: 1100, size: 99, open: true, noun: 'Exercise' },
+          { id: 'mcq', title: 'Multiple choice', sub: 'One answer, or several from a list', base: 1200, size: 99, open: true, noun: 'Exercise' }] },
         { id: 'test', title: 'Test', icon: 'clock', blurb: 'Full practice tests: three passages, 40 questions, 60 minutes, under test conditions.', groups: [
           { id: 'tests', title: 'Practice tests', base: 2000, size: 10, test: true }] }
       ],
@@ -212,7 +223,13 @@ window.DEC15_COURSE = {
         { id: 'ieb2w2d7', day: 7, status: 'ready', title: 'Matching information', sub: 'Names, classification and paragraphs, with two exercises', art: 'reading', parts: ['Lesson 7'], stages: ['learn'], tones: ['blue'], scripts: ['lessons/b2/reading/ieb2w2d7.js'] },
         { id: 'ieb2w2d8', day: 8, status: 'ready', title: 'Matching headings', sub: 'Topic sentences and wrong options, with an exercise', art: 'reading', parts: ['Lesson 8'], stages: ['learn'], tones: ['blue'], scripts: ['lessons/b2/reading/ieb2w2d8.js'] },
         { id: 'ieb2w2d9', day: 9, status: 'ready', title: 'Multiple choice', sub: 'One answer and several answers, with two exercises', art: 'reading', parts: ['Lesson 9'], stages: ['learn'], tones: ['blue'], scripts: ['lessons/b2/reading/ieb2w2d9.js'] },
-        { id: 'ieb2w2d10', day: 10, status: 'ready', title: 'Labelling a diagram', sub: 'Shapes and places, with an exercise', art: 'reading', parts: ['Lesson 10'], stages: ['learn'], tones: ['blue'], scripts: ['lessons/b2/reading/ieb2w2d10.js'] }
+        { id: 'ieb2w2d10', day: 10, status: 'ready', title: 'Labelling a diagram', sub: 'Shapes and places, with an exercise', art: 'reading', parts: ['Lesson 10'], stages: ['learn'], tones: ['blue'], scripts: ['lessons/b2/reading/ieb2w2d10.js'] },
+        { id: 'ieb2w2d101', day: 101, status: 'ready', title: 'Coral reefs', sub: 'Short answers', art: 'reading', parts: ['Exercise 1'], stages: ['ex'], tones: ['blue'], scripts: ['lessons/b2/reading/ieb2w2d101.js'] },
+        { id: 'ieb2w2d102', day: 102, status: 'ready', title: 'Smashing stereotypes', sub: 'Short answers', art: 'reading', parts: ['Exercise 2'], stages: ['ex'], tones: ['blue'], scripts: ['lessons/b2/reading/ieb2w2d102.js'] },
+        { id: 'ieb2w2d103', day: 103, status: 'ready', title: 'Food trivia', sub: 'Short answers', art: 'reading', parts: ['Exercise 3'], stages: ['ex'], tones: ['blue'], scripts: ['lessons/b2/reading/ieb2w2d103.js'] },
+        { id: 'ieb2w2d104', day: 104, status: 'ready', title: 'Fruitful drinking', sub: 'Short answers', art: 'reading', parts: ['Exercise 4'], stages: ['ex'], tones: ['blue'], scripts: ['lessons/b2/reading/ieb2w2d104.js'] },
+        { id: 'ieb2w2d105', day: 105, status: 'ready', title: 'Tower of strength', sub: 'Short answers', art: 'reading', parts: ['Exercise 5'], stages: ['ex'], tones: ['blue'], scripts: ['lessons/b2/reading/ieb2w2d105.js'] },
+        { id: 'ieb2w2d106', day: 106, status: 'ready', title: 'Face', sub: 'Short answers', art: 'reading', parts: ['Exercise 6'], stages: ['ex'], tones: ['blue'], scripts: ['lessons/b2/reading/ieb2w2d106.js'] }
       ] },
     { n: 3, theme: 'Writing Task 1 (Academic)', color: '#e2552f', group: 'skills', art: 'chart', short: 'Writing Task 1', tag: '150+ words · about 20 minutes', tone: 'clay', folder: 'lessons/b2/writing-task1', summary: '', 
       /* pages are built in Studio and published online (table ielts_pages): an open group lists only the pages that exist */

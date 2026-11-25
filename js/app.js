@@ -1030,7 +1030,7 @@ const isDone = d => { const [a, b] = dayProgress(d); return !!b && a === b; };
 function groupLessons(w, g) { const at = {}; w.days.forEach(d => { if (d.day > g.base && d.day < g.base + 100) at[d.day - g.base] = d; }); return at; }
 function groupStats(w, groups) { let ready = 0, done = 0, total = 0; groups.forEach(g => { const at = groupLessons(w, g); total += g.size; Object.values(at).forEach(d => { if (d.status === 'ready') { ready++; if (isDone(d)) done++; } }); }); return { ready, done, total }; }
 /* Practise: each part has its own colour; each exercise shows its question types as coloured chips */
-const PART_TINT = ['#1f8a7a', '#c2562f', '#7a4a8c', '#2f6db5', '#b07d12'];
+const PART_TINT = ['#1f8a7a', '#c2562f', '#7a4a8c', '#2f6db5', '#b07d12', '#2e7d4f', '#c0396f', '#4652c0', '#cf6519', '#1b8aa6', '#6c7f1d', '#b8363b'];
 const partTint = i => { const c = PART_TINT[i % PART_TINT.length]; return `--accent:${c};--accent-bg:color-mix(in srgb, ${c} 9%, #fff);--pc:${c}`; };
 const QTYPES = [['mc', 'Multiple choice', /multiple|multiple-answer/i], ['match', 'Matching', /match|classif/i], ['label', 'Labelling', /label/i], ['short', 'Short answers', /short/i], ['list', 'Listing', /^listing$/i], ['fill', 'Completion', /complet|timetable|correct|fact sheet|flow chart/i]];
 const qparts = sub => String(sub || '').split(/,\s*|\s+and\s+/).map(x => x.trim().replace(/^an?\s+/i, '')).filter(Boolean)
@@ -1073,10 +1073,18 @@ function sectionPage(w, secId, grpId) {
       return `<li>${ready ? `<a class="test-card" href="#/${d.id}" style="${partStyle(w)}">${inner}</a>` : `<div class="test-card is-soon" style="${partStyle(w)}">${inner}</div>`}</li>`; }).join('')}</ol>`;
   } else {   // Practise: choose a part (one card each), then its exercises as a list (or a grid, the student's choice)
     const g = sec.groups.find(x => x.id === grpId) || sec.groups.find(x => x.id === lsGet(remember + '-grp', '')) || sec.groups[0]; lsSet(remember + '-grp', g.id);
-    const PI = { part1: '<path d="M4 6h10v7H8l-4 3z"/><path d="M14 9h6v7l-3-2h-6v-2"/>', part2: '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M8 21h8"/>', part3: '<circle cx="7" cy="8" r="2.5"/><circle cx="17" cy="8" r="2.5"/><circle cx="12" cy="6" r="2.5"/><path d="M3 18c0-3 2-5 4-5s4 2 4 5M13 18c0-3 2-5 4-5s4 2 4 5M8 15c1-3 2-4 4-4s3 1 4 4"/>', part4: '<rect x="3" y="4" width="18" height="11" rx="1.5"/><path d="M7 19l3-4M17 19l-3-4M7 9h6M7 12h9"/>' };
+    const PI = { part1: '<path d="M4 6h10v7H8l-4 3z"/><path d="M14 9h6v7l-3-2h-6v-2"/>', part2: '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M8 21h8"/>', part3: '<circle cx="7" cy="8" r="2.5"/><circle cx="17" cy="8" r="2.5"/><circle cx="12" cy="6" r="2.5"/><path d="M3 18c0-3 2-5 4-5s4 2 4 5M13 18c0-3 2-5 4-5s4 2 4 5M8 15c1-3 2-4 4-4s3 1 4 4"/>', part4: '<rect x="3" y="4" width="18" height="11" rx="1.5"/><path d="M7 19l3-4M17 19l-3-4M7 9h6M7 12h9"/>',
+      /* Reading: one icon per type of question */
+      short: '<path d="M4 5h16v11H9l-5 4z"/><path d="M8 9h8M8 12h5"/>', notes: '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/>',
+      tfng: '<path d="M3.5 12l3 3 5-6"/><path d="M15 9l5 5M20 9l-5 5"/>', sent: '<path d="M4 6h16M4 12h16M4 18h8"/><path d="M15 18h5" stroke-dasharray="1.5 2.5"/>',
+      ends: '<path d="M3 12h7M7 9l3 3-3 3"/><rect x="13" y="6" width="8" height="12" rx="1.5"/>', sum: '<path d="M4 6h16M4 10h16M4 14h10M4 18h13"/>',
+      sumbox: '<path d="M4 6h9M4 10h9M4 14h6M4 18h8"/><rect x="15.5" y="5" width="5.5" height="14" rx="1.5"/>', match: '<circle cx="6" cy="7" r="2"/><circle cx="6" cy="17" r="2"/><circle cx="18" cy="12" r="2"/><path d="M8 7.8l8 3.4M8 16.2l8-3.4"/>',
+      class: '<rect x="3" y="4" width="8" height="7" rx="1.5"/><rect x="13" y="4" width="8" height="7" rx="1.5"/><rect x="3" y="13" width="8" height="7" rx="1.5"/><rect x="13" y="13" width="8" height="7" rx="1.5"/>',
+      para: '<path d="M4 6h10M4 10h8M4 14h5"/><circle cx="15.5" cy="14.5" r="3.5"/><path d="M18 17l3 3"/>', head: '<path d="M5 5v14M12 5v14M5 12h7"/><path d="M16 8h5M16 12h5M16 16h3"/>',
+      mcq: '<circle cx="5.5" cy="7" r="1.8"/><circle cx="5.5" cy="12" r="1.8" fill="currentColor"/><circle cx="5.5" cy="17" r="1.8"/><path d="M10 7h10M10 12h10M10 17h10"/>' };
     const pic = x => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${PI[x.id] || '<path d="M5 12h14"/>'}</svg>`;
     const gi = sec.groups.indexOf(g);
-    body += `<ol class="sk-parts" style="${partStyle(w)}">${sec.groups.map((x, xi) => { const st = groupStats(w, [x]), on = x.id === g.id;
+    body += `<ol class="sk-parts${sec.groups.length > 4 ? ' is-many' : ''}" style="${partStyle(w)}">${sec.groups.map((x, xi) => { const st = groupStats(w, [x]), on = x.id === g.id;
       return `<li style="${partTint(xi)}"><a class="sk-part${on ? ' is-on' : ''}" href="#/skill/${w.n}/${sec.id}/${x.id}"${on ? ' aria-current="page"' : ''} style="--pp:${st.ready ? Math.round(100 * st.done / st.ready) : 0}%" aria-label="${esc(x.title)}${x.qs ? `, ${esc(x.qs)}` : ''}, ${st.done} of ${st.ready || x.size} done"><span class="sk-part-ic">${pic(x)}</span>
         <span class="sk-part-tx"><b>${esc(x.title)}</b><small>${esc(x.sub || '')}</small></span><span class="sk-part-meta">${x.qs ? `<em><span class="sk-q-long">${esc(x.qs)}</span><span class="sk-q-short">${esc(x.qs.replace(/^Questions\s*/, 'Q '))}</span></em>` : ''}<span>${st.ready ? `${st.done} / ${st.ready}` : 'Coming soon'}</span></span>
         <span class="sk-part-bar"><i style="width:${st.ready ? Math.round(100 * st.done / st.ready) : 0}%"></i></span></a></li>`; }).join('')}</ol>`;
