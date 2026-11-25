@@ -8,7 +8,7 @@ window.DEC15_LESSON = {
   title: 'Completion tasks: the method',
   duration: 'About 45 minutes',
   journey: 'Half of the Reading test asks you to complete gaps with words from the passage. Learn the golden rules for copying an answer, the three mistakes that lose most marks, and a four-step method that works for every completion task.',
-  finish: { title: 'Next', text: 'Short answers, notes and tables' },
+  finish: { title: 'Next', text: 'Short-answer questions' },
   learn: {
     tags: ['Completion tasks', 'The four steps'],
     jump: [['xl-rules', 'The rules', 'list'], ['xl-limit', 'Word limits', 'hash'], ['xl-mistakes', 'Three mistakes', 'warn'], ['xl-steps', 'Four steps', 'target'], ['xl-try', 'Try it', 'pen'], ['xl-sum', 'Remember', 'ok']],

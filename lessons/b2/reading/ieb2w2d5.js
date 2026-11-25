@@ -1,91 +1,753 @@
-/* IELTS · Reading · Learn · Lesson 5 — Sentence completion, with and without a box (question types 4 and 5).
-   Source: the teacher's training notes "Reading" (RAD TIME), pages 11–13. "Medicine for the healthy" and "Work
-   experience and internships" are adapted (rewritten); the internship exercise has two new questions (4 and 5).
-   Ids (lesson, activities, exercises, blocks) are the keys of students' saved work: never rename them. */
+/* IELTS · Reading · Learn · Lesson 5 — True / False / Not Given.
+   One lesson per type of question, in the same order and with the same name as Reading → Practise (the teacher's booklet
+   "Reading Exercises"). Built from the old lesson 4 of the teacher's training notes "Reading" (RAD TIME).
+   Ids (lesson, activities, exercise blocks) are the keys of students' saved work: never rename them. */
 window.DEC15_LESSON = {
-  id: 'ieb2w2d5', week: 2, day: 5, sheet: true, illus: 'health',
-  title: 'Sentence completion',
-  duration: 'About 55 minutes',
-  journey: 'Sentences with a gap: sometimes you copy words from the passage, sometimes you choose an ending from a box. Either way, the finished sentence must be true to the passage, grammatically correct and make sense.',
-  finish: { title: 'Next', text: 'Summary completion' },
-  learn: {
-    tags: ['Question types 4 and 5'],
-    jump: [['xl-tips', 'Tips', 'tip'], ['xl-ex', 'Exercises', 'pen'], ['xl-sum', 'Remember', 'ok']],
-    blocks: [
-      { type: 'key', title: 'The test of a good answer', text: 'Read the sentence **with your answer in it**. It must be **true** to the passage, **grammatically correct** and make **sense**.' },
-      { type: 'tabs', anchor: 'xl-tips', kicker: 'Tips', title: 'Two kinds of sentence completion', intro: 'Four tabs: the method, two short practices, then the version with a box.',
-        items: [
-          { label: 'Without a box', icon: 'pen', lead: 'You complete each sentence with words from the passage, for example **NO MORE THAN THREE WORDS AND/OR A NUMBER**.', blocks: [
-            { type: 'list', items: [
-              'The answers are **all in passage order**.',
-              'Your answer must make the sentence **grammatically correct** and **meaningful**.',
-              'Check every answer: **grammar**, **meaning**, **no repeated words**, **not too general**, **spelling**.'] },
-            { type: 'note', tone: 'tip', title: 'Meaning comes first', text: 'When you find the place of the answer (usually one sentence), look for words that make sense in the gap. Then use the question to decide which of them fit best.' },
-            { type: 'steps', title: 'What to do', items: [
-              { t: 'Check the word limit', d: 'Read the instructions: how many words can you use?' },
-              { t: 'Read ONE sentence carefully', d: ['**Understand** it.', '**Predict** the answer. *Grammar:* a noun (singular, plural or uncountable), an adjective, a verb. *Meaning:* a person, a place, a number, a date, an object …', '**Choose words you can trust**, to find the place faster.'] },
-              { t: 'Find the PLACE of the answer', d: 'Scan the passage for your trusted words.' },
-              { t: 'Find the ANSWER', d: 'Read that sentence from the beginning to the end, several times if necessary, and use **grammar**, **meaning** and **the question** to find the answer.' }] },
-            ] },
-          { label: 'Try the steps', icon: 'pen', lead: 'Predict the answer first, then tap to check.', blocks: [
-            { type: 'examples', hide: true, cols: 1, items: [
-              { p: 'On the desk you can see some beautiful pencils, a blue ==handkerchief== and a pleasant-smelling Japanese pen.', q: 'There is a **blue** ______ on the desk.', a: 'handkerchief', why: '*A* needs a **singular** noun, and the blue thing is the handkerchief. Do not repeat *blue*.' },
-              { p: 'The interview is next week, on Monday ==morning== at 9 o’clock.', q: 'The interview is **in the** ______.', a: 'morning', why: '*In the* + a part of the day: *in the morning*.' },
-              { p: 'The first step is to ==complete the application== form by describing yourself and your abilities.', q: '**First**, you should ______ by describing yourself and your abilities.', a: 'complete the application', why: '*Should* needs a **verb**. (*complete the application form* is right if four words are allowed.)' }] }] },
-          { label: 'Spot the mistake', icon: 'warn', lead: 'Each answer loses the mark. Can you say why? Tap to check.', blocks: [
-            { type: 'examples', hide: true, qLabel: 'Answer given', aLabel: 'The problem', items: [
-              { q: '==Japanese student== go on a trip every year.', a: 'Grammar', why: '*Go* needs a plural subject: *Japanese students*.' },
-              { q: 'Those ==mice== who do research need to have health insurance.', a: 'Meaning', why: 'Mice do not do research. (The passage meant *scientists*.)' },
-              { q: 'Living in Australia is really ==phantastic==.', a: 'Spelling', why: 'It is spelled *fantastic*.' },
-              { q: 'You need to get ==over 7== in IELTS or above.', a: 'An extra word', why: '*Or above* already means *over*. Write *7*.' },
-              { q: '==Birds== are becoming extinct.', a: 'Too general', why: 'Which birds? *North African birds*.' }] }] },
-          { label: 'With a box', icon: 'list', lead: 'You choose the best ending for each sentence from a box of options. (This type is also called *matching sentence endings*.)', blocks: [
-            { type: 'list', items: [
-              'The answers are **in passage order**.',
-              'There are **more endings than sentences**.',
-              'Choose the **closest possible** ending: the one that matches the passage, not just one that sounds right.',
-              'Read **all** the options for each question.',
-              'Spend more time on the **sentence beginnings**, and analyse them before you go to the passage.'] },
-            { type: 'steps', title: 'What to do', items: [
-              { t: 'Read ONE sentence beginning carefully', d: 'Underline its key words.' },
-              { t: 'Find the right place in the passage', d: 'Be careful not to choose the wrong area: a word from the question may appear in several places.' },
-              { t: 'Read that part very carefully', d: 'Then come to the box and read **all** the endings.' },
-              { t: 'Choose the closest ending', d: ['Do **not** cross out an ending as soon as you use it: if a later sentence fits it better, you can still change your mind.', 'If two endings seem possible, write both and come back later.'] }] },
-            { type: 'note', tone: 'tip', text: 'Grammar helps here too: the beginning and the ending must make one correct sentence. *By winning the scholarship, you have the chance to …* needs a **verb**.' }] }
-        ] },
-      { type: 'exercises', anchor: 'xl-ex', kicker: 'Exercises', title: 'Try them', intro: 'Open an exercise, read the passage and answer the questions. The answers, with the reasons, are folded at the bottom.',
-        items: [
-          { id: 'ieb2w2d5-e1', title: 'Medicine for the healthy', kind: 'Sentence completion', go: 'Read',
-            tip: 'The six answers come in passage order, about one in each paragraph from B to D. Predict the grammar of each gap first.',
-            passage: { title: 'Medicine for the healthy', text: 'A  The main purpose of medicine has always been to treat illness. But recent medical advances now promise to change the lives of healthy people too. We are entering a new age of medicine, in which drugs and biotechnology designed for the sick may soon make people’s minds and bodies much more powerful.\n\nB  Students have long used caffeine, in the form of coffee, to stay awake and think clearly while they study. However, one in ten students at the University of Cambridge has now admitted taking medication to help them work for longer. The pills most commonly used are Ritalin, a medicine used to treat the brain condition ADHD (attention deficit hyperactivity disorder), which stops people concentrating, and Modafinil, which treats narcolepsy, the ‘sudden sleep’ disorder. Both medicines work by stimulating brain activity in patients, but some healthy students take them to stay alert and focused for longer. Although the short-term side effects can seem small, regular use is likely to be dangerous. One student, for example, took Modafinil for four days to help her revise for an exam. She passed the exam, but then collapsed, lost her sight for a short time and spent the night in hospital.\n\nC  There is another way of boosting brain activity. TDCS (transcranial direct current stimulation) involves sending small electrical currents into the brain. This therapy has been used especially to treat people who have lost their memories after strokes. Research at the University of Oxford suggests that TDCS can also help healthy people do better in maths tests. Surprisingly, the effects seem to last for up to six months. Scientists are now discussing a battery-powered cap (nicknamed ‘the Zap Cap’) that people could buy to stimulate the brain in the same way. It may turn out to be quite cheap, but its effects cannot be guaranteed.\n\nD  Of course, it is not only the healthy brain that could benefit from medical advances. For many years, some sportspeople have illegally improved their all-round physical power by using anabolic steroids, drugs first designed to stop muscles wasting away. However, new research promises far more powerful forms of enhancement. Scientists have become increasingly skilled at reproducing parts of the body that have stopped working. They can now put new retinas into the eyes of blind people, for example, or give robotic limbs, controlled by the brain, to people who have lost arms or legs. So how could healthy people benefit from this technology? Some have suggested that security guards could have eye implants to help them see in the dark, or that soldiers might wear extra legs or ‘smart trousers’ to help them cross difficult ground. In fact, the first wearable robot to go on sale has already been launched, so soon people may be able to run 20 miles to school or work without feeling tired.\n\nE  It seems likely, then, that medical innovation could create a society divided into three groups: the sick, the healthy and the super-human. The question is: do we want to live in a society in which some people compete and succeed by using medication? It is a decision that needs to be made in the coming decades.' },
-            blocks: [{ type: 'ieGap', id: 'ieb2w2d5-e1-q1', from: 1, layout: 'sentences', instruction: 'Complete each sentence with **NO MORE THAN THREE WORDS AND/OR A NUMBER** from the passage.', rule: 'NO MORE THAN THREE WORDS AND/OR A NUMBER', max: 3,
-              text: 'Ritalin is [[used to treat]] ADHD.\nTaking Modafinil regularly is likely to be [[dangerous]].\nReceiving small electrical currents is a treatment for people who have lost their [[memories]].\nDrugs have made it possible for athletes to improve their [[all-round physical power|physical power]].\nScientists can now produce body parts such as retinas and [[robotic]] arms and legs.\n[[Wearable]] robots may help us run long distances without feeling tired.',
-              why: ['Paragraph B: *a medicine used to treat the brain condition ADHD*. The gap needs a verb phrase before *ADHD*.', 'Paragraph B: *regular use is likely to be dangerous*. The gap needs an adjective.', 'Paragraph C: *people who have lost their memories after strokes*.', 'Paragraph D: *improved their all-round physical power*. *All-round* has a hyphen, so it counts as one word.', 'Paragraph D: *robotic limbs* = robotic arms and legs. The gap needs an adjective.', 'Paragraph D: *the first wearable robot*.'] }] },
-          { id: 'ieb2w2d5-e2', title: 'Work experience and internships', kind: 'Sentence endings (with a box)', go: 'Read',
-            tip: 'Two programmes are described: the **work experience programme** (paragraphs 1–2) and the **internship programme** (paragraph 3). Find the right one before you choose.',
-            passage: { title: 'Work experience and internships', subtitle: 'A guide from the education authority', text: 'Through our student work experience programme, the education authority offers more than 9,000 work experience placements to young people every year. The programme is designed to give students job opportunities that will enrich their studies and help them gain useful work skills, which improves their chances of finding a good job after they graduate. A placement does not have to be related to a particular field of study, so participants may even discover areas of work they had never thought about before.\n\nAll secondary and post-secondary students in full-time education are eligible to apply for the programme. Individual case managers decide the minimum level of academic achievement needed for each job. During the academic term, a student may work part-time. During the summer holidays, a student may work full-time or part-time. The education authority recruits all the students on the programme. Applicants must apply in person at our office, and we then refer them to the right department.\n\nOur internship programme is designed especially for post-secondary students, whether they study part-time or full-time. Interns are given an assignment related to their area of research, which gives them the chance to use their academic knowledge in a real workplace. The college or university plays an important part in placing students on this programme, and it decides how long each assignment will last. Assignments traditionally last four months, but they may vary from 4 to 18 months. Students on this programme normally work full-time.' },
-            blocks: [{ type: 'ieMatch', id: 'ieb2w2d5-e2-q1', from: 1, kindName: 'Matching sentence endings', boxTitle: 'Endings', instruction: 'Complete each sentence with the correct ending, **A–H**, from the box.',
-              options: ['if you have high marks at your school or college.', 'if you are a full-time student.', 'outside normal term time.', 'when you have graduated from university.', 'if you have finished secondary education.', 'is decided by your college or university.', 'is always four months.', 'apply in person.'],
-              items: [
-                { q: 'You can apply for the work experience programme …', answer: 'B', why: '*All secondary and post-secondary students in full-time education are eligible.* High marks (A) are decided job by job.' },
-                { q: 'You can work full-time on the work experience programme …', answer: 'C', why: 'In term time you may work part-time; in the summer holidays you may work full-time.' },
-                { q: 'You can only join the internship programme …', answer: 'E', why: 'It is *designed especially for post-secondary students*, so you must have finished secondary education. It is not after university (D).' },
-                { q: 'The length of an internship …', answer: 'F', why: 'The college or university *decides how long each assignment will last*. Four months is usual, not always (G).' },
-                { q: 'Students who want to join the work experience programme must …', answer: 'H', why: '*Applicants must apply in person at our office.*' }] }] }
-        ] },
-      { type: 'recap', anchor: 'xl-sum', title: 'Remember',
-        items: ['Sentence completion answers are **in passage order**.', 'Predict the **grammar** of the gap before you read: noun, verb, adjective?', 'Read the finished sentence: **true**, **correct** and **sensible**?', 'With a box: read **all** the endings and choose the **closest** one.', 'Check for the five mistakes: **grammar**, **meaning**, **spelling**, **extra words**, **too general**.'] }
+ "id": "ieb2w2d5",
+ "week": 2,
+ "day": 5,
+ "sheet": true,
+ "illus": "map",
+ "title": "True / False / Not Given",
+ "duration": "About 60 minutes",
+ "journey": "The question type students fear most, and the one that rewards careful reading most. Learn the difference between FALSE and NOT GIVEN, the five ways statements are built, and Yes / No / Not Given, then try an exercise.",
+ "finish": {
+  "title": "Next",
+  "text": "Sentence completion"
+ },
+ "learn": {
+  "tags": [],
+  "jump": [
+   [
+    "xl-decide",
+    "How to decide",
+    "target"
+   ],
+   [
+    "xl-basics",
+    "The basics",
+    "info"
+   ],
+   [
+    "xl-built",
+    "Five patterns",
+    "list"
+   ],
+   [
+    "xl-ex",
+    "Try it",
+    "pen"
+   ],
+   [
+    "xl-sum",
+    "Remember",
+    "ok"
+   ]
+  ],
+  "blocks": [
+   {
+    "type": "key",
+    "title": "The difference that matters",
+    "text": "**FALSE**: the passage says the **opposite**. **NOT GIVEN**: the passage **does not say**."
+   },
+   {
+    "type": "steps",
+    "anchor": "xl-decide",
+    "kicker": "How to decide",
+    "title": "Three steps for every statement",
+    "items": [
+     {
+      "t": "Find the place",
+      "d": "Choose a word you can trust in the statement (a name, a number, a key noun) and find the sentence in the passage that talks about it."
+     },
+     {
+      "t": "Compare word by word",
+      "d": "Read the passage sentence from **beginning to end**. Check **every** part of the statement: who, what, when, how much, how sure."
+     },
+     {
+      "t": "Decide",
+      "d": [
+       "Everything in the statement is in the passage → **TRUE**",
+       "Something in the statement is the opposite of the passage → **FALSE**",
+       "Something in the statement is not in the passage at all → **NOT GIVEN**"
+      ]
+     }
     ]
-  },
-  sections: [{
-    id: 'learn', number: '05', minutes: 55, tone: 'blue', art: 'reading',
-    title: 'Sentence completion', subtitle: 'Question types 4 and 5',
-    outcome: 'Complete sentences with words from the passage, or with the right ending from a box.',
-    activities: [
-      { id: 'tips', short: 'Tips', minutes: 20, grouping: 'Alone', title: 'Read the tips', goal: 'Read the tips for both kinds of sentence completion.', blocks: [{ type: 'text', title: 'Tips', text: 'Sentence completion with and without a box.' }] },
-      { id: 'practise', short: 'Exercises', minutes: 35, grouping: 'Alone', title: 'Do the exercises', goal: 'Do the two exercises and check your answers.', blocks: [{ type: 'text', title: 'Exercises', text: 'Two exercises.' }] }
+   },
+   {
+    "type": "tabs",
+    "anchor": "xl-basics",
+    "kicker": "The basics",
+    "title": "Three answers, one careful reader",
+    "items": [
+     {
+      "label": "Tips",
+      "icon": "tip",
+      "blocks": [
+       {
+        "type": "list",
+        "items": [
+         "The answers are **all in passage order**.",
+         "Read each statement **very** carefully: every word counts.",
+         "When you find the place of the answer, read the sentence in the passage **from the beginning to the end**.",
+         "Do **not** use your general knowledge. Only the passage counts, even if you know the statement is true in real life."
+        ]
+       },
+       {
+        "type": "text",
+        "title": "Every word counts",
+        "text": "Look at how much information there is in one short statement:"
+       },
+       {
+        "type": "table",
+        "wide": true,
+        "head": [
+         "Statement",
+         "Who?",
+         "Does what?",
+         "When / where?"
+        ],
+        "rows": [
+         [
+          "Emma eats pancakes on Sunday mornings.",
+          "Emma",
+          "eats pancakes",
+          "on ==Sunday mornings=="
+         ],
+         [
+          "Jack walks in the park in autumn.",
+          "Jack",
+          "walks in the park",
+          "in ==autumn=="
+         ]
+        ]
+       },
+       {
+        "type": "note",
+        "tone": "tip",
+        "text": "If the passage only says *Emma eats pancakes*, the answer to the first statement is **NOT GIVEN**: the passage says nothing about **Sunday mornings**."
+       }
+      ]
+     },
+     {
+      "label": "False or Not Given?",
+      "icon": "target",
+      "blocks": [
+       {
+        "type": "cards",
+        "cols": 2,
+        "items": [
+         {
+          "icon": "no",
+          "t": "FALSE / NO",
+          "d": "The easiest to recognise: a word in the statement is the **opposite** of the information in the passage. The passage **contradicts** it."
+         },
+         {
+          "icon": "eye",
+          "t": "NOT GIVEN",
+          "d": "Either there is **no information** about it in the passage, or there is information but it is **not enough** to say true or false."
+         }
+        ]
+       },
+       {
+        "type": "image",
+        "src": "assets/reading/notgiven.svg",
+        "alt": "Two diagrams. Not Given: the question circle is partly outside the passage circle. True: the question circle is completely inside the passage circle.",
+        "caption": "If any part of the question (**b**) is not in the passage, the answer is NOT GIVEN. If everything in the question is in the passage, the answer is TRUE, even when the passage says more."
+       },
+       {
+        "type": "versus",
+        "items": [
+         {
+          "q": "French people like to eat toast **in the morning**.",
+          "p": "French people like to eat toast.",
+          "answer": "NOT GIVEN",
+          "why": "The passage says nothing about **when** they eat it. Q = ax + b, P = ax."
+         },
+         {
+          "q": "French people like to eat toast.",
+          "p": "French people like to eat toast in the morning, in the afternoon and in the evening.",
+          "answer": "TRUE",
+          "why": "Everything in the statement is in the passage. The passage simply says more. Q = ax, P = ax + b."
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "label": "Yes / No / Not Given",
+      "icon": "chat",
+      "blocks": [
+       {
+        "type": "cards",
+        "cols": 2,
+        "items": [
+         {
+          "icon": "book",
+          "t": "TRUE / FALSE / NOT GIVEN",
+          "d": "Asks about **facts**: does the statement agree with the **information** in the passage?"
+         },
+         {
+          "icon": "chat",
+          "t": "YES / NO / NOT GIVEN",
+          "d": "Asks about **opinions**: does the statement agree with the **views or claims of the writer**?"
+         }
+        ]
+       },
+       {
+        "type": "note",
+        "tone": "info",
+        "text": "The method is exactly the same. Only the words change: YES = TRUE and NO = FALSE. With YES / NO, look for opinion words: *I believe*, *surprisingly*, *unfortunately*, *it is clear that*, *I doubt*."
+       }
+      ]
+     }
     ]
-  }],
-  extras: [],
-  glossary: []
+   },
+   {
+    "type": "folds",
+    "anchor": "xl-built",
+    "kicker": "How they are built",
+    "title": "Five ways examiners build a statement",
+    "intro": "Most statements test one of these five things. Learn to notice them and you will know where to look.",
+    "items": [
+     {
+      "icon": "repeat",
+      "title": "1 · Comparison",
+      "sub": "bigger, the best, more, similar, prefer",
+      "blocks": [
+       {
+        "type": "text",
+        "text": "When a statement **compares** two or more things, find the same comparison in the passage. If there is **no** comparison, or a **different** one, the answer is NOT GIVEN. If the same comparison is there, decide between TRUE and FALSE."
+       },
+       {
+        "type": "chips",
+        "title": "Watch out for",
+        "groups": [
+         {
+          "items": [
+           "-er / more … than",
+           "the -est / the most",
+           "less / fewer",
+           "similar",
+           "identical",
+           "the same",
+           "different",
+           "prefer",
+           "rather than",
+           "unlike"
+          ]
+         }
+        ]
+       },
+       {
+        "type": "note",
+        "tone": "tip",
+        "text": "Statement: *Russia is bigger than Canada.* Passage: *Russia is a bigger producer of gas than Canada.* → **NOT GIVEN**. The statement compares **size**; the passage compares **gas production**."
+       },
+       {
+        "type": "versus",
+        "items": [
+         {
+          "q": "Dr Smith is **the best** doctor in the area.",
+          "p": "Dr Smith is a professional doctor in this area.",
+          "answer": "NOT GIVEN",
+          "why": "The passage does not compare Dr Smith with other doctors."
+         },
+         {
+          "q": "Egypt is **the most popular** tourist country in Africa.",
+          "p": "Egypt is one of the popular tourist countries in Africa.",
+          "answer": "NOT GIVEN",
+          "why": "*One of the popular* countries does not tell us whether it is **the most** popular."
+         },
+         {
+          "q": "Egypt is one of the popular tourist countries in Africa.",
+          "p": "Egypt is the most popular tourist country in Africa.",
+          "answer": "TRUE",
+          "why": "If it is the most popular, it is certainly one of the popular ones."
+         },
+         {
+          "q": "We need **more** money to do this research.",
+          "p": "Doing this research costs a great deal of money.",
+          "answer": "NOT GIVEN",
+          "why": "The research is expensive, but the passage does not say we need **more** money than we have."
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "icon": "clock",
+      "title": "2 · Time",
+      "sub": "already, soon, originally, always, before",
+      "blocks": [
+       {
+        "type": "chips",
+        "title": "Watch out for",
+        "groups": [
+         {
+          "items": [
+           "already",
+           "soon",
+           "early",
+           "late",
+           "recently",
+           "originally",
+           "used to",
+           "no longer",
+           "still",
+           "yet",
+           "permanent",
+           "temporary",
+           "for good (= forever)",
+           "in no time (= very quickly)",
+           "so far (= until now)",
+           "before",
+           "after",
+           "always",
+           "at any time"
+          ]
+         }
+        ]
+       },
+       {
+        "type": "versus",
+        "items": [
+         {
+          "q": "Nylon has **already** been used in parachutes.",
+          "p": "Scientists hope to use nylon in parachutes.",
+          "answer": "FALSE",
+          "why": "*Hope to use* = it has **not** been used yet."
+         },
+         {
+          "q": "This system will **soon** be used in many hotels.",
+          "p": "Many hotel managers would like to have this system in their hotels, but I doubt it will happen in the near future.",
+          "options": [
+           "YES",
+           "NO",
+           "NOT GIVEN"
+          ],
+          "answer": "NO",
+          "why": "This is the writer’s view: *I doubt it will happen in the near future* = not soon."
+         },
+         {
+          "q": "This tower **is** covered with limestone slabs.",
+          "p": "This tower was **originally** covered with limestone slabs, all of which have been stolen over the years.",
+          "answer": "FALSE",
+          "why": "It **was** covered, but the slabs have gone."
+         },
+         {
+          "q": "John Harris broke the record **before** Roger Anderson.",
+          "p": "Roger Anderson was the first person to break the record.",
+          "answer": "FALSE",
+          "why": "If Roger was **first**, John cannot have been before him."
+         },
+         {
+          "q": "John Harris broke the record **before** Roger Anderson.",
+          "p": "Record breakers: John Harris 1985 · Roger Anderson 1956",
+          "answer": "FALSE",
+          "why": "Roger: 1956. John: 1985, almost thirty years later."
+         },
+         {
+          "q": "You can call this centre **at any time**.",
+          "p": "The centre is open from 6 am to 11 pm, and during this time you can call whenever you wish.",
+          "answer": "FALSE",
+          "why": "Only between 6 am and 11 pm, not at **any** time."
+         },
+         {
+          "q": "The **ultimate goal of the founder** of the Olympic Games was to bring countries together, whatever their wars or political problems.",
+          "p": "The purpose of the Olympic Games has always been to bring countries together without considering political problems.",
+          "answer": "NOT GIVEN",
+          "why": "The passage talks about the purpose of **the Games**, not about the goal of **the founder**."
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "icon": "hash",
+      "title": "3 · Quantity",
+      "sub": "all, most, half, a few, few, only, enough",
+      "blocks": [
+       {
+        "type": "scale",
+        "items": [
+         {
+          "v": "100%",
+          "p": 100,
+          "words": [
+           "all",
+           "every",
+           "each",
+           "the whole",
+           "entire"
+          ]
+         },
+         {
+          "v": "60–70%",
+          "p": 66,
+          "words": [
+           "most",
+           "the majority of",
+           "many",
+           "much",
+           "quite a few (≈ many)",
+           "quite a bit of (≈ much)"
+          ]
+         },
+         {
+          "v": "50%",
+          "p": 50,
+          "words": [
+           "half"
+          ]
+         },
+         {
+          "v": "Some",
+          "p": 25,
+          "words": [
+           "some",
+           "several",
+           "a few",
+           "a little"
+          ],
+          "note": "*A few* and *a little* are positive: = some."
+         },
+         {
+          "v": "≈ 0",
+          "p": 6,
+          "words": [
+           "few",
+           "little",
+           "hardly any"
+          ],
+          "note": "*Few* and *little* (without *a*) are negative: = almost none."
+         },
+         {
+          "v": "0%",
+          "p": 0,
+          "words": [
+           "no",
+           "none",
+           "not any",
+           "never"
+          ]
+         }
+        ]
+       },
+       {
+        "type": "note",
+        "tone": "warn",
+        "title": "Two small words, big changes",
+        "text": "**Only** means *nothing else*: *This disease can only be cured by herbal medicine*.\n\n**Enough** means *as much as is needed*: *There is enough water for the city*."
+       },
+       {
+        "type": "versus",
+        "items": [
+         {
+          "q": "**All** the students passed the exam.",
+          "p": "**Most** of the students passed the exam.",
+          "answer": "FALSE",
+          "why": "*Most* means some students did **not** pass."
+         },
+         {
+          "q": "The **whole** city was destroyed in the earthquake.",
+          "p": "The earthquake destroyed **most of** the city.",
+          "answer": "FALSE",
+          "why": "*Most of* is not *the whole*."
+         },
+         {
+          "q": "**Few** people visited the museum last year.",
+          "p": "The museum had more than two million visitors last year.",
+          "answer": "FALSE",
+          "why": "*Few* = almost none, but two million is a lot."
+         },
+         {
+          "q": "This disease can be cured **only** by herbal medicine.",
+          "p": "**One of the ways** to cure this illness is herbal medicine.",
+          "answer": "FALSE",
+          "why": "*One of the ways* means there are other ways too."
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "icon": "signpost",
+      "title": "4 · Who did it?",
+      "sub": "one agent or more than one",
+      "blocks": [
+       {
+        "type": "text",
+        "text": "A statement often says that **A** did something to **B** (A → B), but the passage names someone else."
+       },
+       {
+        "type": "cards",
+        "cols": 2,
+        "items": [
+         {
+          "icon": "no",
+          "t": "Only ONE person can do it → FALSE",
+          "d": "Statement: *Tom won the race.* Passage: *Sara won the race.* A race has one winner, so it cannot be Tom. (The word **only** often does the same job.)"
+         },
+         {
+          "icon": "eye",
+          "t": "MORE THAN ONE can do it → NOT GIVEN",
+          "d": "Statement: *Tom loves Anna.* Passage: *Sam loves Anna.* Many people can love Anna, so we do not know about Tom."
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "icon": "star",
+      "title": "5 · Certainty",
+      "sub": "definitely, probably, may, might",
+      "blocks": [
+       {
+        "type": "scale",
+        "items": [
+         {
+          "v": "100%",
+          "p": 100,
+          "words": [
+           "certainly",
+           "definitely",
+           "for sure",
+           "always",
+           "on all occasions",
+           "must",
+           "vital",
+           "crucial",
+           "essential"
+          ]
+         },
+         {
+          "v": "Likely",
+          "p": 70,
+          "words": [
+           "be likely to",
+           "will probably",
+           "probably"
+          ]
+         },
+         {
+          "v": "Possible",
+          "p": 40,
+          "words": [
+           "may",
+           "might",
+           "could",
+           "possibly",
+           "perhaps"
+          ]
+         }
+        ]
+       },
+       {
+        "type": "table",
+        "wide": true,
+        "head": [
+         "Statement",
+         "Passage",
+         "Answer"
+        ],
+        "rows": [
+         [
+          "It will *definitely* happen.",
+          "It *might* happen.",
+          "FALSE"
+         ],
+         [
+          "It *might* happen.",
+          "It will *definitely* happen.",
+          "TRUE"
+         ]
+        ]
+       },
+       {
+        "type": "note",
+        "tone": "warn",
+        "title": "*May* has two meanings",
+        "text": "*May* can mean **possibly**, or it can mean **are allowed to**:\n\n*You **may** drink water during the test.* (= you are allowed to)\n*You **may not** use your phone in the exam room.* (= you are **not** allowed to)"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "type": "exercises",
+    "anchor": "xl-ex",
+    "kicker": "In class",
+    "title": "Try it",
+    "intro": "Read the passage and decide on each statement. The answers, with the reasons, are folded at the bottom.",
+    "items": [
+     {
+      "id": "ieb2w2d4-e1",
+      "title": "Welcome to Australia",
+      "kind": "True / False / Not Given",
+      "go": "Read",
+      "tip": "Before you read, underline the small words that change everything: **only**, **all**, **free**, **possible**, **the most**, **if**.",
+      "passage": {
+       "title": "Welcome to Australia",
+       "subtitle": "Information for new residents",
+       "text": "### Apply for a Tax File Number\nEveryone who receives any income in Australia needs a Tax File Number. Income includes wages or a salary from a job, money earned from investments, and government payments.\n\n### Register with Medicare\nThe Australian Government helps with medical costs through a scheme called Medicare. You may be able to join Medicare and get immediate access to health services and programmes such as free care in public hospitals, help with the cost of care outside hospital, and cheaper medicines.\n\nTo register with Medicare, wait about ten working days after you arrive in Australia, and then go to a Medicare office with your passport or travel documents. If you need to see a doctor urgently, you can register with Medicare without waiting ten days.\n\nMedicare has a Welcome Kit, which has been translated into 16 languages. It explains Medicare and other government health services, and who can receive benefits and payments. You can get the booklet from Medicare offices or read it on the internet.\n\n### Open a bank account\nPeople in Australia usually keep their money in a bank, a building society or a credit union. It is a good idea to open a bank account within six weeks of your arrival, because during this time you usually need only your passport as identification. After six weeks, you will need more identification to open an account.\n\n### Register with Centrelink\nNew residents can register with the government agency Centrelink to get help with looking for work, having their overseas skills recognised and finding suitable courses. Centrelink also has an application form for Tax File Numbers and can help you send your application to the Tax Office, so that there is no delay in any payments.\n\n### Register for English classes\nEnglish courses for new arrivals are provided under the Adult Migrant English Program. As a new resident, you may be entitled to up to 510 hours of free English lessons.\n\n### Get a driver’s licence\nIf you hold a permanent resident visa and a current driver’s licence from another country, in English or with an official translation, you may drive for your first three months in Australia. After that, you will need an Australian licence. To get one, you usually have to pass a knowledge test, a practical test and an eyesight test. Licences from some countries do not need a practical test."
+      },
+      "blocks": [
+       {
+        "type": "ieTFNG",
+        "id": "ieb2w2d4-e1-q1",
+        "from": 1,
+        "kind": "tfng",
+        "instruction": "Do the following statements agree with the information given in the reading passage? Choose **TRUE**, **FALSE** or **NOT GIVEN**.",
+        "items": [
+         {
+          "q": "A Tax File Number is **only** needed by people who are working.",
+          "answer": "FALSE",
+          "why": "Income also includes investments and government payments."
+         },
+         {
+          "q": "**All** healthcare services are free for people registered with Medicare.",
+          "answer": "FALSE",
+          "why": "Only some are free (public hospital care); for others Medicare only helps with the cost."
+         },
+         {
+          "q": "In certain cases, it is possible to register with Medicare less than ten days after arriving in Australia.",
+          "answer": "TRUE",
+          "why": "If you need to see a doctor urgently, you can register without waiting ten days."
+         },
+         {
+          "q": "There is a charge for Welcome Kit booklets from Medicare offices.",
+          "answer": "NOT GIVEN",
+          "why": "The passage says where to get the booklet, but not whether it costs anything."
+         },
+         {
+          "q": "Banks are **the most** commonly used type of financial institution.",
+          "answer": "NOT GIVEN",
+          "why": "Banks, building societies and credit unions are listed, but not compared."
+         },
+         {
+          "q": "**If** you open a bank account in your first six weeks in Australia, you will probably need fewer documents than later on.",
+          "answer": "TRUE",
+          "why": "In the first six weeks you usually need only your passport; after that, more identification."
+         },
+         {
+          "q": "Centrelink can help you to get your qualifications accepted officially.",
+          "answer": "TRUE",
+          "why": "*Having their overseas skills recognised* = getting qualifications accepted."
+         },
+         {
+          "q": "Centrelink can lend money to new arrivals if necessary.",
+          "answer": "NOT GIVEN",
+          "why": "Payments are mentioned, but nothing about lending money."
+         },
+         {
+          "q": "English lessons are free for **all** new residents.",
+          "answer": "FALSE",
+          "why": "New residents **may be** entitled to free lessons, so not all of them are."
+         },
+         {
+          "q": "Whether you need to take an Australian practical driving test depends on which country you come from.",
+          "answer": "TRUE",
+          "why": "Licences from some countries do not need a practical test."
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "type": "note",
+    "tone": "info",
+    "title": "More practice",
+    "text": "When you are ready, go to **Practise → True / False / Not Given** for more exercises of this type: [open the exercises](#/skill/2/practise/tfng)."
+   },
+   {
+    "type": "recap",
+    "anchor": "xl-sum",
+    "title": "Remember",
+    "items": [
+     "The answers are **in passage order**.",
+     "Check **every** word of the statement: who, what, when, how much, how sure.",
+     "**FALSE** = the passage says the opposite. **NOT GIVEN** = the passage does not say.",
+     "Watch the five patterns: **comparison**, **time**, **quantity**, **who did it**, **certainty**.",
+     "Never use your **general knowledge**: only the passage counts."
+    ]
+   },
+   {
+    "type": "check",
+    "kicker": "Check yourself",
+    "title": "True or false?",
+    "intro": "Tap True or False to see the answer.",
+    "items": [
+     {
+      "s": "If you know from real life that a statement is true, you should answer TRUE.",
+      "answer": false,
+      "why": "Only the passage counts."
+     },
+     {
+      "s": "NOT GIVEN can mean that there is some information, but not enough.",
+      "answer": true,
+      "why": "That is the harder kind of NOT GIVEN: Q = ax + b, P = ax."
+     },
+     {
+      "s": "TRUE / FALSE / NOT GIVEN answers are in passage order.",
+      "answer": true,
+      "why": "So the answer to Question 3 comes after the answer to Question 2."
+     },
+     {
+      "s": "*Few people came* and *a few people came* mean the same.",
+      "answer": false,
+      "why": "*Few* = almost nobody; *a few* = some."
+     }
+    ]
+   }
+  ]
+ },
+ "sections": [
+  {
+   "id": "learn",
+   "number": "05",
+   "minutes": 60,
+   "tone": "blue",
+   "art": "reading",
+   "title": "True / False / Not Given",
+   "subtitle": "Question type 3",
+   "outcome": "Tell FALSE from NOT GIVEN, and recognise the five ways statements are built.",
+   "activities": [
+    {
+     "id": "tips",
+     "short": "Tips",
+     "minutes": 35,
+     "grouping": "Alone",
+     "title": "Learn how the statements work",
+     "goal": "Read the basics and the five ways statements are built.",
+     "blocks": [
+      {
+       "type": "text",
+       "title": "Tips",
+       "text": "The basics and the five ways statements are built."
+      }
+     ]
+    },
+    {
+     "id": "practise",
+     "short": "Exercise",
+     "minutes": 25,
+     "grouping": "Alone",
+     "title": "Do the exercise",
+     "goal": "Do the exercise and check your answers.",
+     "blocks": [
+      {
+       "type": "text",
+       "title": "Exercise",
+       "text": "Welcome to Australia."
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "extras": [],
+ "glossary": []
 };

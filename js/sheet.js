@@ -17,8 +17,8 @@
   const isQ = b => /^ie(Gap|Table|Diagram|Choice|Multi|Match|TFNG)$/.test(b.type);
   const count = b => b.type === 'ieChoice' || b.type === 'ieMatch' || b.type === 'ieTFNG' ? (b.items || []).length : b.type === 'ieMulti' ? Number(b.numbers) || Number(b.pick) || (b.answers || []).length
     : b.type === 'ieTable' ? (b.rows || []).flat().flatMap(gapsIn).length : b.type === 'ieDiagram' ? (b.labels || []).length : gapsIn(b.text).length;
-  const KINDS = { form: 'Form completion', notes: 'Note completion', sentences: 'Sentence completion', short: 'Short answers', summary: 'Summary completion', flow: 'Flow chart' };
-  const kindOf = b => b.kindName ? b.kindName : b.type === 'ieTFNG' ? (b.kind === 'ynng' ? 'Yes / No / Not Given' : 'True / False / Not Given') : b.type === 'ieGap' ? KINDS[b.layout] || 'Completion' : b.type === 'ieTable' ? 'Table completion' : b.type === 'ieDiagram' ? (/\bmap\b/i.test(`${b.title || ''} ${b.alt || ''}`) ? 'Map labelling' : /\bplan\b|floor|layout/i.test(`${b.title || ''} ${b.alt || ''}`) ? 'Plan labelling' : 'Diagram labelling')
+  const KINDS = { form: 'Form completion', notes: 'Note completion', sentences: 'Sentence completion', short: 'Short-answer questions', summary: 'Summary completion', flow: 'Flow chart' };
+  const kindOf = b => b.kindName ? b.kindName : b.type === 'ieGap' && b.layout === 'summary' && b.bank ? 'Summary completion with a box' : b.type === 'ieMulti' ? 'Pick from a list' : b.type === 'ieTFNG' ? (b.kind === 'ynng' ? 'Yes / No / Not Given' : 'True / False / Not Given') : b.type === 'ieGap' ? KINDS[b.layout] || 'Completion' : b.type === 'ieTable' ? 'Table completion' : b.type === 'ieDiagram' ? (/\bmap\b/i.test(`${b.title || ''} ${b.alt || ''}`) ? 'Map labelling' : /\bplan\b|floor|layout/i.test(`${b.title || ''} ${b.alt || ''}`) ? 'Plan labelling' : 'Diagram labelling')
     : b.type === 'ieChoice' || b.type === 'ieMulti' ? 'Multiple choice' : b.type === 'ieMatch' ? 'Matching' : '';
 
   /* ───────── a Learn lesson (strategy lesson) on one page ─────────
@@ -57,7 +57,7 @@
   window.IELTSSheetIcon = k => sv(k, 1.9);
   function learnPage(L, ctx) {
     const { esc, icon } = ctx, ED = !!ctx.edit, UI = ctx.builder?.ui || { tab: () => 0, open: () => false };
-    const fmt = t => esc(String(t ?? '')).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/\*(.+?)\*/g, '<i>$1</i>').replace(/==(.+?)==/g, '<mark>$1</mark>').replace(/~~(.+?)~~/g, '<s>$1</s>').replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');   // **bold**, *italic*, [link](https://…)
+    const fmt = t => esc(String(t ?? '')).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/\*(.+?)\*/g, '<i>$1</i>').replace(/==(.+?)==/g, '<mark>$1</mark>').replace(/~~(.+?)~~/g, '<s>$1</s>').replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>').replace(/\[([^\]]+)\]\((#\/[^\s)]+)\)/g, '<a href="$2">$1</a>');   // **bold**, *italic*, [link](https://…) or (#/… inside the site)
     const paras = t => String(t ?? '').split(/\n\s*\n/).map(p => `<p>${fmt(p).replace(/\n/g, '<br>')}</p>`).join('');
     const drive = s => { const m = String(s || '').match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?.*id=)([\w-]{10,})/); return m && m[1]; };
     /* the video streams from Google Drive through the 'ielts-audio' relay (?kind=video: byte ranges, so it plays and seeks on iPhones too) */
@@ -139,7 +139,7 @@
     return `<article class="xs xl" style="--xs-soft:${ctx.soft || '#e6f3f1'}${ctx.acc ? `;--xs-acc:${ctx.acc}` : ''}">
       <nav class="xs-trail" aria-label="Where you are">${ctx.back ? `<a class="xs-back" href="${esc(ctx.back.href)}">${icon('left')}<span>${esc(ctx.back.label)}</span></a>` : ''}<span class="xs-crumbs">${crumbs}<b>${esc(ctx.name || '')}</b></span></nav>
       <header class="xs-hero"><div class="xs-hero-tx"><span class="xs-eyebrow">${esc(ctx.eyebrow || 'Learn')}</span><h1>${esc(L.title)}</h1>${L.journey ? `<p>${esc(L.journey)}</p>` : ''}
-        <ul class="xs-facts">${nVid ? `<li><b>${nVid}</b> video${nVid === 1 ? '' : 's'}</li>` : ''}${nEx ? `<li><b>${nEx}</b> exercise${nEx === 1 ? '' : 's'}</li>` : ''}${L.duration ? `<li>${esc(L.duration)}</li>` : ''}${(L.learn.tags || []).map(t => `<li>${esc(t)}</li>`).join('')}</ul></div>
+        <ul class="xs-facts">${nVid ? `<li><b>${nVid}</b> video${nVid === 1 ? '' : 's'}</li>` : ''}${L.duration ? `<li>${esc(L.duration)}</li>` : ''}${(L.learn.tags || []).map(t => `<li>${esc(t)}</li>`).join('')}</ul></div>
         ${window.IELTSSheetArt ? window.IELTSSheetArt(L.illus) : ''}</header>
       ${ED ? ctx.builder.barHTML() : ''}${jump}
       ${many(blocks, true, 'blocks')}

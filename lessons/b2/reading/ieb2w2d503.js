@@ -46,7 +46,7 @@ window.DEC15_LESSON = {
        "blocks": [
         {
          "type": "ieMatch",
-         "kindName": "Matching sentence endings",
+         "kindName": "Sentence completion with a box",
          "boxTitle": "Endings",
          "instruction": "Complete each sentence with the correct ending, **A–F**, from the box. There are more endings than sentences, so you will not use them all.",
          "options": [

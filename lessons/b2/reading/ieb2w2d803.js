@@ -46,7 +46,7 @@ window.DEC15_LESSON = {
        "blocks": [
         {
          "type": "ieMatch",
-         "kindName": "Matching names",
+         "kindName": "Matching",
          "reuse": true,
          "boxTitle": "List of people",
          "instruction": "Match each statement (Questions 1–5) with the correct person, **A–C**. You may use any letter more than once.",
