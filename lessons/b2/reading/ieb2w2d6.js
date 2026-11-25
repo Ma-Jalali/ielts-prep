@@ -10,8 +10,9 @@ window.DEC15_LESSON = {
   finish: { title: 'Next', text: 'Matching information' },
   learn: {
     tags: ['Question types 6 and 7'],
-    jump: [['xl-tips', 'Tips', 'tip'], ['xl-ex', 'Exercises', 'pen']],
+    jump: [['xl-tips', 'Tips', 'tip'], ['xl-ex', 'Exercises', 'pen'], ['xl-sum', 'Remember', 'ok']],
     blocks: [
+      { type: 'key', title: 'Think of it like this', text: 'A summary is the passage **in fewer words**. Your job is to find **which detail** each gap is talking about.' },
       { type: 'cards', kicker: 'What it is', title: 'Sentences or a summary?', cols: 2,
         items: [
           { icon: 'list', t: 'Sentence completion', d: 'Separate sentences, each about a different point.' },
@@ -59,7 +60,9 @@ window.DEC15_LESSON = {
               bank: ['smaller', 'risen', 'more', 'remained constant', 'older', 'decrease', 'fewer', 'fluctuate', 'a third', 'half', 'larger', 'fallen', 'a quarter', 'increase', 'drop'],
               text: 'In Britain, convenience meals are now the most popular type of food. Fruit and vegetable consumption has [[B]], and consumption of meat and fish has [[D]], but the traditional Sunday dinner is eaten by [[G]] people. Despite this, almost [[J]] the population are ‘traditionalists’ in their eating habits. Just over [[M]] are ‘convenience seekers’, while almost [[I]] are ‘casual diners’. The number of casual diners is likely to [[N]] as households become [[A]].',
               why: ['Spending has *gone up by only six per cent*: a small rise, but a rise. *Has* needs a past participle.', '*This sector has not grown at all.*', 'The proportion who eat it *has fallen*: fewer people. (*Less* would not fit *people*.)', '46 per cent = almost half.', '27 per cent = just over a quarter.', '31 per cent = almost a third.', '*More people are expected to become casual diners.* *Is likely to* needs a verb.', '*As households become smaller.*'] }] }
-        ] }
+        ] },
+      { type: 'recap', anchor: 'xl-sum', title: 'Remember',
+        items: ['A summary is **general**; the passage has the **detail**. Expect paraphrase.', 'Find which part of the passage the summary covers **first**.', 'Answers are **mostly** in order.', 'With a box: sort the words by **grammar**, then by **meaning**.', 'Read the whole summary again with your answers in it.'] }
     ]
   },
   sections: [{

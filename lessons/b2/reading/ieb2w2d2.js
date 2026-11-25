@@ -11,67 +11,59 @@ window.DEC15_LESSON = {
   finish: { title: 'Next', text: 'Short answers, notes and tables' },
   learn: {
     tags: ['Completion tasks', 'The four steps'],
-    jump: [['xl-rules', 'The rules', 'list'], ['xl-mistakes', 'Three mistakes', 'warn'], ['xl-steps', 'Four steps', 'target'], ['xl-try', 'Try it', 'pen']],
+    jump: [['xl-rules', 'The rules', 'list'], ['xl-limit', 'Word limits', 'hash'], ['xl-mistakes', 'Three mistakes', 'warn'], ['xl-steps', 'Four steps', 'target'], ['xl-try', 'Try it', 'pen'], ['xl-sum', 'Remember', 'ok']],
     blocks: [
-      { type: 'note', tone: 'info', title: 'Find answers. Do not make them.', text: 'In a completion task, every answer is **already written in the passage**. Your job is to find the right words and copy them exactly: you may leave words out, but you may not change them.' },
-      { type: 'table', anchor: 'xl-rules', kicker: 'The golden rules', title: 'Copy the words exactly', intro: 'Each row shows a word in the passage and an answer that loses the mark.', wide: true,
+      { type: 'key', title: 'The golden rule', text: '**Find** answers. Do not **make** them.', sub: 'Every answer is already written in the passage. Copy the words exactly: you may **leave words out**, but you may **never change** them.' },
+      { type: 'table', anchor: 'xl-rules', kicker: 'The rules', title: 'Copy the words exactly', intro: 'Each row shows the words in the passage, an answer that **loses the mark**, and the rule it breaks.', wide: true,
         head: ['In the passage', 'Wrong answer', 'The rule'],
         rows: [
           ['TV', '~~television~~', 'Do not change the word.'],
-          ['by the river', '~~near the river~~', 'Do not use a synonym, even with the same meaning.'],
+          ['by the river', '~~near the river~~', 'Do not use a synonym, even one with the same meaning.'],
           ['car', '~~cars~~', 'Do not change the grammar.'],
           ['development', '~~develop~~', 'Do not change the part of speech.'],
-          ['a great sunny day', '~~a sunny great day~~', 'Do not change the order.']],
-        foot: 'One exception: **numbers**. You can write *three* or *3*, and both are right.' },
-      { type: 'tabs', kicker: 'Leaving words out', title: 'How many words can you take?',
+          ['a great sunny day', '~~a sunny great day~~', 'Do not change the order.']] },
+      { type: 'note', tone: 'info', title: 'One exception: numbers', text: 'You can write a number as a word or as figures: *three* and *3* are both right.' },
+      { type: 'examples', anchor: 'xl-limit', kicker: 'Word limits', title: 'How many words can you take?', intro: 'The instructions say **NO MORE THAN THREE WORDS AND/OR A NUMBER**. Read the passage, think about each question, then tap to check.', hide: true, cols: 1,
         items: [
-          { label: 'The passage', icon: 'book', blocks: [
-            { type: 'text', text: '*Yesterday Jack bought a **really beautiful modern car**, two Japanese **scooters** and an **iPhone**.*' },
-            { type: 'note', tone: 'tip', text: 'The instructions say **NO MORE THAN THREE WORDS AND/OR A NUMBER**. Open each question to see which answers work.' }] },
-          { label: 'Question 1', icon: 'pen', blocks: [
-            { type: 'text', text: 'Jack bought a ______ yesterday.' },
-            { type: 'reveal', items: [{ q: 'Which answers are right?', a: '*car*, *modern car* and *beautiful modern car* are all right. *really beautiful modern car* is wrong: it has **four** words.' }] }] },
-          { label: 'Question 2', icon: 'pen', blocks: [
-            { type: 'text', text: 'Jack bought a **nice** ______ yesterday.' },
-            { type: 'reveal', items: [{ q: 'Which answers are right?', a: '*car* or *modern car*. Not *beautiful modern car*: *nice* already means *beautiful*, so you would say it twice.' }] }] },
-          { label: 'Question 3', icon: 'pen', blocks: [
-            { type: 'text', text: 'Jack bought a **high-tech** ______ yesterday.' },
-            { type: 'reveal', items: [{ q: 'Which answer is right?', a: 'Only *car*. *High-tech* already means *modern*.' }] }] }
-        ] },
-      { type: 'tabs', anchor: 'xl-mistakes', kicker: 'Three mistakes', title: 'The mistakes that lose most marks',
+          { label: 'Question 1', p: 'Yesterday Jack bought a ==really beautiful modern car==, two Japanese scooters and an iPhone.', q: 'Jack bought a ______ yesterday.', a: 'car · modern car · beautiful modern car', why: 'All three are right. *really beautiful modern car* is wrong: it has **four** words.' },
+          { label: 'Question 2', p: 'Yesterday Jack bought a really ==beautiful== modern car, two Japanese scooters and an iPhone.', q: 'Jack bought a **nice** ______ yesterday.', a: 'car · modern car', why: 'Not *beautiful modern car*: *nice* already means *beautiful*, so you would say it twice.' },
+          { label: 'Question 3', p: 'Yesterday Jack bought a really beautiful ==modern== car, two Japanese scooters and an iPhone.', q: 'Jack bought a **high-tech** ______ yesterday.', a: 'car', why: '*High-tech* already means *modern*, so only *car* is left.' }] },
+      { type: 'tabs', anchor: 'xl-mistakes', kicker: 'Three mistakes', title: 'The mistakes that lose most marks', intro: 'Your answer can contain the right information and **still** lose the mark. These are the three reasons why.',
         items: [
           { label: 'Too general', icon: 'warn', lead: 'An answer must be **specific**. Copy the words that make it exact.', blocks: [
-            { type: 'table', wide: true, head: ['Too general', 'Specific: right'], rows: [
+            { type: 'table', wide: true, head: ['Too general: wrong', 'Specific: right'], rows: [
               ['… ~~birds~~ are becoming extinct.', '… ==North African birds== are becoming extinct.'],
-              ['Scientists are doing research on a bird in a ~~tunnel~~.', 'Scientists are doing research on a bird in a ==wind tunnel==.'],
+              ['Scientists are studying a bird in a ~~tunnel~~.', 'Scientists are studying a bird in a ==wind tunnel==.'],
               ['To succeed on this course, you need to ~~study~~.', 'To succeed on this course, you need to ==study regularly==.']] }] },
           { label: 'Repeated words', icon: 'repeat', lead: 'Do **not** write words that are already in the question.', blocks: [
             { type: 'table', wide: true, head: ['Question', 'Wrong', 'Right'], rows: [['$ ______', '~~$15~~', '15'], ['______ percent', '~~33%~~', '33'], ['that ______', '~~that book~~', 'book']] },
-            { type: 'reveal', title: 'Find the problem', intro: 'Each answer has the right information but loses the mark. Why? (NO MORE THAN FOUR WORDS AND/OR A NUMBER)', items: [
-              { q: 'This bird can have an hourly flight speed of **50 km per hour**.', a: '*hourly* already means *per hour*. Write only **50 km**.' },
-              { q: 'A **local business** in this area is looking for new employees.', a: '*in this area* already means *local*. Write only **business**.' },
-              { q: 'You need to achieve **over 7.0** in IELTS or above.', a: '*or above* already means *over*. Write only **7.0**.' }] }] },
+            { type: 'examples', title: 'Find the problem', intro: 'Each answer has the right information but loses the mark. Why? Tap to check.', hide: true, aLabel: 'Write only', qLabel: 'Answer given',
+              items: [
+                { q: 'This bird can have an **hourly** flight speed of ==50 km per hour==.', a: '50 km', why: '*Hourly* already means *per hour*.' },
+                { q: 'A ==local business== **in this area** is looking for new employees.', a: 'business', why: '*In this area* already means *local*.' },
+                { q: 'You need to achieve ==over 7.0== in IELTS **or above**.', a: '7.0', why: '*Or above* already means *over*.' }] }] },
           { label: 'Wrong grammar', icon: 'abc', lead: 'The finished sentence must be **grammatically correct**. The words around the gap tell you what kind of word you need.', blocks: [
-            { type: 'text', text: '*Passage: Although the council spent less **money** last year, its high **costs** remain alarming.*' },
-            { type: 'reveal', items: [
-              { q: 'The council’s ______ **are** still alarming.', a: '**costs** (or *high costs*): *are* needs a plural noun.' },
-              { q: 'The **amount of** ______ the council spent went down.', a: '**money**: *amount of* needs an uncountable noun.' }] }] }
+            { type: 'examples', hide: true, items: [
+              { p: 'Although the council spent less ==money== last year, its high ==costs== remain alarming.', q: 'The council’s ______ **are** still alarming.', a: 'costs (or high costs)', why: '*Are* needs a **plural** noun.' },
+              { p: 'Although the council spent less ==money== last year, its high ==costs== remain alarming.', q: 'The **amount of** ______ the council spent went down.', a: 'money', why: '*Amount of* needs an **uncountable** noun.' }] }] }
         ] },
-      { type: 'steps', anchor: 'xl-steps', kicker: 'The method', title: 'Four steps for every completion task',
+      { type: 'steps', anchor: 'xl-steps', kicker: 'The method', title: 'Four steps for every completion task', intro: 'Use these four steps for **every** gap-fill question in the test.',
         items: [
-          { t: 'Find out what the passage is about (30 seconds to 1 minute)', d: 'Look at the title, any pictures and a few of the questions. Get a general picture of the topic. Do **not** read the whole passage yet.' },
-          { t: 'Read ONE question carefully', d: ['**Understand** it: what exactly is it asking?', '**Predict** the answer. *Grammar:* a noun (singular or plural?), an adjective, a verb, a phrase. *Meaning:* a place, a number, a time, a person, an animal, an object …', '**Choose words you can trust**: words that cannot change, such as names, numbers and dates, are easy to find in the passage. Words whose meaning cannot change much are also useful.'] },
+          { t: 'Find out what the passage is about · 30 seconds to 1 minute', d: 'Look at the **title**, any **pictures** and a **few of the questions**. Get a general picture of the topic. Do **not** read the whole passage yet.' },
+          { t: 'Read ONE question carefully', d: ['**Understand** it: what exactly is it asking?', '**Predict** the answer. *Grammar:* a noun (singular or plural?), an adjective, a verb, a phrase. *Meaning:* a place, a number, a time, a person, an object …', '**Choose words you can trust.** Names, numbers and dates cannot change, so they are easy to find in the passage.'] },
           { t: 'Find the PLACE of the answer', d: 'Scan the passage for your trusted words. The answer is almost always in **one sentence**, so find that sentence first.' },
-          { t: 'Find the ANSWER carefully', d: 'Read that sentence from the **beginning to the end**, more than once if you need to. Use **grammar**, **meaning** and **the question** to choose the words. Then check: the word limit, the grammar, no repeated words, not too general, and the spelling.' }] },
-      { type: 'note', tone: 'tip', title: 'Most answers come in passage order', text: 'In most completion tasks, the answer to Question 2 comes after the answer to Question 1. If you cannot find an answer, look between the answers before and after it.' },
-      { type: 'chips', kicker: 'Predict', title: 'What kind of answer?', intro: 'Before you look at the passage, decide what the gap needs.',
-        groups: [{ label: 'Grammar', items: ['noun (singular)', 'noun (plural)', 'uncountable noun', 'adjective', 'verb', 'phrase'] }, { label: 'Meaning', items: ['a place', 'a number', 'a time or date', 'a person', 'an animal', 'an object', 'a reason', 'an amount'] }] },
-      { type: 'reveal', anchor: 'xl-try', kicker: 'Try it', title: 'Predict, find and copy', intro: 'Complete each sentence with **NO MORE THAN THREE WORDS AND/OR A NUMBER** from the passage. Think first, then tap.',
+          { t: 'Find the ANSWER carefully', d: 'Read that sentence from the **beginning to the end**, more than once if you need to. Use **grammar**, **meaning** and **the question** to choose the words.' }] },
+      { type: 'chips', kicker: 'Before you go to the passage', title: 'Predict: what kind of answer?', intro: 'Look at the words around the gap and decide **two** things.',
+        groups: [{ label: '1 · Grammar: what kind of word?', items: ['noun (singular)', 'noun (plural)', 'uncountable noun', 'adjective', 'verb', 'phrase'] }, { label: '2 · Meaning: what kind of thing?', items: ['a place', 'a number', 'a time or date', 'a person', 'an animal', 'an object', 'a reason', 'an amount'] }] },
+      { type: 'note', tone: 'tip', title: 'Most answers come in passage order', text: 'In most completion tasks, the answer to Question 2 comes **after** the answer to Question 1. If you cannot find an answer, look **between** the answers before and after it.' },
+      { type: 'examples', anchor: 'xl-try', kicker: 'Try it', title: 'Predict, find and copy', intro: 'Use **NO MORE THAN THREE WORDS AND/OR A NUMBER** from the passage. Predict the answer first, then tap to check.', hide: true,
         items: [
-          { q: 'The meeting is in the ______.\n*Passage: Our meeting is next week on Monday evening, beginning at around 7 pm.*', a: '**evening**. *In the* needs a part of the day: *in the evening*.' },
-          { q: 'Somebody has broken the window on ______.\n*Passage: I don’t know whether the window was broken by accident or whether somebody had a particular purpose in breaking it.*', a: '**purpose**. *On purpose* means deliberately; *on accident* is not correct English.' },
-          { q: 'Dr Anderson lives in a ______ near the lake.\n*Passage: Dr Anderson’s home is a small stone cottage close to the lake.*', a: '**small stone cottage** (or *cottage*, *stone cottage*). *Near* = *close to*.' },
-          { q: 'Every summer, the family goes on a ______ abroad.\n*Passage: Each year the Browns take a two-week trip to another country in July.*', a: '**two-week trip** (or *trip*). *Two-week* has a hyphen, so it counts as one word.' }] }
+          { p: 'Our meeting is next week on Monday ==evening==, beginning at around 7 pm.', q: 'The meeting is in the ______.', a: 'evening', why: '*In the* needs a part of the day: *in the evening*.' },
+          { p: 'I don’t know whether the window was broken by accident, or whether somebody had a particular ==purpose== in breaking it.', q: 'Somebody broke the window on ______.', a: 'purpose', why: '*On purpose* = deliberately. (*On accident* is not correct English.)' },
+          { p: 'Dr Anderson’s home is a ==small stone cottage== close to the lake.', q: 'Dr Anderson lives in a ______ near the lake.', a: 'small stone cottage', why: '*Near* = *close to*. *Cottage* and *stone cottage* are also right.' },
+          { p: 'Each year the Browns take a ==two-week trip== to another country in July.', q: 'Every summer, the family goes on a ______ abroad.', a: 'two-week trip', why: '*Two-week* has a hyphen, so it counts as **one** word. *Trip* is also right.' }] },
+      { type: 'recap', anchor: 'xl-sum', title: 'The checklist for every gap',
+        items: ['Copy the words **exactly**: no synonyms, no new grammar, no new order.', 'Keep to the **word limit**. A hyphenated word counts as one.', 'Be **specific**: keep the words that make the answer exact.', 'Do **not** repeat words that are already in the question.', 'The sentence must be **grammatically correct** with your answer in it.', 'Check your **spelling**.'] }
     ]
   },
   sections: [{

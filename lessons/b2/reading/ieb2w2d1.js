@@ -11,10 +11,11 @@ window.DEC15_LESSON = {
   finish: { title: 'Next', text: 'Completion tasks: the method' },
   learn: {
     tags: ['40 questions', '60 minutes'],
-    jump: [['xl-test', 'The test', 'list'], ['xl-types', 'Question types', 'hash'], ['xl-score', 'Scores', 'star'], ['xl-better', 'Improve', 'target'], ['xl-check', 'Check yourself', 'ok']],
+    jump: [['xl-test', 'The test', 'list'], ['xl-types', 'Question types', 'hash'], ['xl-score', 'Scores', 'star'], ['xl-better', 'Improve', 'target'], ['xl-tips', 'Test day', 'clock'], ['xl-sum', 'Remember', 'ok'], ['xl-check', 'Check yourself', 'ok']],
     blocks: [
       { type: 'facts', kicker: 'At a glance', title: 'The test in five numbers',
         items: [['60', 'minutes for everything, **including** writing your answers'], ['40', 'questions: one mark each, and **no** minus marks'], ['3', 'passages, each a little harder than the one before'], ['0', 'extra minutes to copy answers: write them as you go'], ['20', 'minutes for each passage is a good plan']] },
+      { type: 'key', title: 'The big idea', text: 'Every answer is **in the passage**. Reading is not a test of what you know: it is a test of how well you **find** and **understand** information.', sub: 'That is good news. With the right method for each type of question, your score can grow quickly.' },
       { type: 'tabs', anchor: 'xl-test', kicker: 'The test', title: 'Academic or General Training?', intro: 'Both versions have 40 questions in 60 minutes and the same types of question. The texts are different.',
         items: [
           { label: 'Academic', icon: 'book', blocks: [
@@ -62,7 +63,7 @@ window.DEC15_LESSON = {
           { t: 'Learn the question types', d: 'There are about 14 types of question, and each one has its own strategy. That is what these training lessons are for.' },
           { t: 'Grow your vocabulary', d: 'The questions **paraphrase** the passage: they say the same thing in other words. Learn synonyms and word families (*develop, development, developed*).' },
           { t: 'Be your own doctor', d: 'After every practice test, look at **your time** and **your mistakes**. Find out why you lost each mark, then fix that problem first.' }] },
-      { type: 'folds', kicker: 'Good to know', title: 'Before the test',
+      { type: 'folds', anchor: 'xl-tips', kicker: 'Good to know', title: 'Before the test', intro: 'Four short guides. Open each one in turn.',
         items: [
           { icon: 'clock', title: 'Plan your time', sub: 'About 20 minutes per passage', blocks: [
             { type: 'table', head: ['Passage', 'Minutes', 'Why'], rows: [['1', '17–18', 'The easiest: save time here'], ['2', '20', 'A little harder'], ['3', '22–23', 'The longest and hardest']] },
@@ -83,6 +84,8 @@ window.DEC15_LESSON = {
             { type: 'text', text: 'After each practice, write down every mistake and **why** it happened. After a few tests, you will see your biggest problem.' },
             { type: 'table', head: ['Why I lost the mark', 'What to do next time'], rows: [['I could not find the place', 'Choose better key words; trust names, numbers and dates'], ['I did not know a word', 'Learn it with its synonyms'], ['My answer was too general', 'Copy the words that make it specific'], ['My answer did not fit the grammar', 'Check singular / plural and the part of speech'], ['I ran out of time', 'Keep to 20 minutes a passage; guess and move on']] }] }
         ] },
+      { type: 'recap', anchor: 'xl-sum', title: 'Five things to take away',
+        items: ['**60 minutes, 40 questions, 3 passages.** No extra time to copy answers.', 'About **20 minutes per passage**: less for Passage 1, more for Passage 3.', 'Two families: **completion** (you copy words) and **selection** (you choose).', 'Band 7 = about **30 of 40** in Academic Reading.', 'Never leave a gap: there are **no minus marks**.'] },
       { type: 'check', anchor: 'xl-check', kicker: 'Check yourself', title: 'True or false?', intro: 'Tap True or False to see the answer.',
         items: [
           { s: 'You get 10 extra minutes at the end to copy your answers onto the answer sheet.', answer: false, why: 'That happens in Listening (on paper), not in Reading. Write your answers as you go.' },

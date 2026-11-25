@@ -12,9 +12,10 @@ window.DEC15_LESSON = {
   finish: { title: 'Next', text: 'True, False, Not Given' },
   learn: {
     tags: ['Question types 1 and 2'],
-    jump: [['xl-tips', 'Tips', 'tip'], ['xl-ex', 'Exercises', 'pen']],
+    jump: [['xl-tips', 'Tips', 'tip'], ['xl-ex', 'Exercises', 'pen'], ['xl-sum', 'Remember', 'ok']],
     blocks: [
-      { type: 'tabs', anchor: 'xl-tips', kicker: 'Tips', title: 'How to answer them',
+      { type: 'key', title: 'In one sentence', text: 'Write **exactly** what the question asks for: **not too much**, and **not too little**.', sub: 'Too much: extra words, or words already in the question. Too little: an answer that is too general. Use the four steps from Lesson 2 for every gap.' },
+      { type: 'tabs', anchor: 'xl-tips', kicker: 'Tips', title: 'How to answer them', intro: 'Three short tabs: read them in order.',
         items: [
           { label: 'Short answers', icon: 'chat', lead: 'You answer each question with words from the passage.', blocks: [
             { type: 'list', items: [
@@ -22,11 +23,11 @@ window.DEC15_LESSON = {
               'Your answer must be **to the point**: only the words that answer the question.',
               'But it must not be **too general** either: keep the words that make it exact.',
               'Keep to the **word limit** in the instructions.'] },
-            { type: 'table', title: 'The question word tells you what to look for', head: ['Question word', 'Look for …'], rows: [
+            { type: 'table', title: 'The question word tells you what to look for', intro: 'Underline the question word **first**: it tells you the type of answer before you even look at the passage.', head: ['Question word', 'Look for …'], rows: [
               ['Where', 'a place'], ['When · What time', 'a time, a day, a date or a year'], ['How many', 'a number'], ['How much', 'an amount or a price'],
               ['How often', 'a frequency: *monthly*, *twice a week*'], ['How long', 'a length of time or a distance'], ['What proportion', 'a part: *two-thirds*, *10 per cent*'],
               ['Why', 'a reason'], ['What … for / at / to?', 'a noun that fits the preposition']] }] },
-          { label: 'Which answer?', icon: 'target', lead: 'Which option answers the question best?', blocks: [
+          { label: 'Which answer?', icon: 'target', lead: 'Three answers, one question: which answer is **exactly** right? Tap one to check.', blocks: [
             { type: 'versus', items: [
               { q: 'What colour are ostriches’ eggs?', p: 'Ostriches have white-shelled eggs.', options: ['white', 'white-shelled', 'white-shelled eggs'], answer: 0, why: 'The question asks for a **colour**. *Shelled* and *eggs* are not part of it, and *eggs* is already in the question.' },
               { q: 'How often are the meetings held?', p: 'The meetings are held on a monthly basis.', options: ['monthly', 'monthly basis', 'a monthly basis'], answer: 0, why: '*How often?* → *monthly*. The other answers do not fit the question.' },
@@ -37,6 +38,9 @@ window.DEC15_LESSON = {
               { icon: 'hash', t: 'Tables', d: 'Read across the rows and down the columns: the column heading tells you the type of answer.' },
               { icon: 'repeat', t: 'Flow charts', d: 'Steps in a process, in order. Look for words of sequence: *first, then, after, finally*.' },
               { icon: 'eye', t: 'Some information is given', d: 'Use the parts that are already complete: they show you where you are in the passage.' }] },
+            { type: 'examples', title: 'What does the table tell you?', items: [
+              { label: 'A column heading', q: '**Starting time** | 10.00 am | 10.45 am | ______', a: 'a time', why: 'The heading tells you the type of answer: here, a time such as *1 pm*.' },
+              { label: 'A note heading', q: '**People with poor hearing**\n– construction workers\n– ______', a: 'a group of people', why: 'Look for another job or group of people in the passage.' }] },
             { type: 'note', tone: 'warn', title: 'Not always in order', text: 'Notes and tables may **not** follow the order of the passage. A table may also take its answers from different parts of the text.' }] }
         ] },
       { type: 'exercises', anchor: 'xl-ex', kicker: 'Exercises', title: 'Try them', intro: 'Open an exercise, read the passage and answer the questions. The answers, with the reasons, are folded at the bottom.',
@@ -59,7 +63,9 @@ window.DEC15_LESSON = {
             blocks: [{ type: 'ieTable', id: 'ieb2w2d3-e3-q1', from: 1, title: 'Monday’s activities', instruction: 'Complete the table below. Choose **NO MORE THAN THREE WORDS AND/OR A NUMBER** from the passage for each answer.', rule: 'NO MORE THAN THREE WORDS AND/OR A NUMBER', max: 3,
               columns: ['Activity', 'Starting time', 'Need to bring'],
               rows: [['Pre-school swimming', '10.00 am', '[[warm clothes|some warm clothes]]'], ['[[women’s aerobics|aerobics]]', '10.45 am', 'tracksuit'], ['Yoga', '[[1 pm|1pm|1.00 pm|1 o’clock]]', '[[own mat|your own mat|mat]]']] }] }
-        ] }
+        ] },
+      { type: 'recap', anchor: 'xl-sum', title: 'Remember',
+        items: ['Short answers are **in passage order**; notes and tables **may not be**.', 'The **question word** (*where, how often, how many …*) tells you the type of answer.', 'Write **only** the words that answer the question.', 'Do not be **too general**: keep the words that make the answer exact.', 'Use the **headings** of notes and tables to find your place in the passage.'] }
     ]
   },
   sections: [{

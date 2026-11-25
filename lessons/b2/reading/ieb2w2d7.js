@@ -11,8 +11,9 @@ window.DEC15_LESSON = {
   finish: { title: 'Next', text: 'Matching headings' },
   learn: {
     tags: ['Question types 8, 9 and 10'],
-    jump: [['xl-tips', 'Tips', 'tip'], ['xl-ex', 'Exercises', 'pen']],
+    jump: [['xl-tips', 'Tips', 'tip'], ['xl-ex', 'Exercises', 'pen'], ['xl-sum', 'Remember', 'ok']],
     blocks: [
+      { type: 'key', title: 'The secret', text: 'The answers are **not in order**, so do not search for each question. **Read the passage once** and match as you go.' },
       { type: 'tabs', anchor: 'xl-tips', kicker: 'Tips', title: 'Names, groups and paragraphs',
         items: [
           { label: 'Matching names', icon: 'people', lead: 'You match each statement to a **name** in a list: people, countries, cities, companies, languages, and sometimes years.', blocks: [
@@ -76,7 +77,9 @@ window.DEC15_LESSON = {
                 { q: 'an area with high status', answer: 'B', why: '*The most fashionable and expensive district in London.*' },
                 { q: 'a modern theatre', answer: 'D', why: 'The *new* Globe is a modern copy of Shakespeare’s theatre. Sadler’s Wells (C) is *historic*.' },
                 { q: 'the meanings of some street names', answer: 'E', why: '*How Stinking Lane and Turnagain Lane got their names.*' }] }] }
-        ] }
+        ] },
+      { type: 'recap', anchor: 'xl-sum', title: 'Remember',
+        items: ['These answers are **not** in passage order.', 'Find and circle **every** name, even the repeated ones.', 'Read **once**, carefully, and match as you go.', 'A letter can be used **more than once**, or not at all.', 'Which paragraph? Look for the **kind** of information: *a comparison*, *a reason*, *an example* …'] }
     ]
   },
   sections: [{

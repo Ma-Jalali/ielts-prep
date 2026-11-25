@@ -11,8 +11,9 @@ window.DEC15_LESSON = {
   finish: { title: 'Next', text: 'Multiple choice' },
   learn: {
     tags: ['Question type 12'],
-    jump: [['xl-tips', 'Tips', 'tip'], ['xl-wrong', 'Wrong headings', 'warn'], ['xl-ex', 'Exercise', 'pen']],
+    jump: [['xl-tips', 'Tips', 'tip'], ['xl-wrong', 'Wrong headings', 'warn'], ['xl-ex', 'Exercise', 'pen'], ['xl-sum', 'Remember', 'ok']],
     blocks: [
+      { type: 'key', title: 'The right heading', text: 'A heading is the **main idea of the whole paragraph**, not one sentence, one example or one word.' },
       { type: 'tabs', anchor: 'xl-tips', kicker: 'Tips', title: 'Find the main idea',
         items: [
           { label: 'Tips', icon: 'tip', blocks: [
@@ -54,7 +55,9 @@ window.DEC15_LESSON = {
                 { q: 'Paragraph D', answer: 'viii', why: 'Casual clothes are common. (Dressing *a little* more formally helps, but only an interview needs more.)' },
                 { q: 'Paragraph E', answer: 'iii', why: 'Do your written work on your own; no cheating or plagiarism.' },
                 { q: 'Paragraph F', answer: 'i', why: 'Grades come from tests, quizzes, assignments and taking part in discussions.' }] }] }
-        ] }
+        ] },
+      { type: 'recap', anchor: 'xl-sum', title: 'Remember',
+        items: ['There are **more headings** than paragraphs, and each is used **once**.', 'Read the **beginning** of each paragraph carefully: the topic sentence.', 'The right heading covers the **whole** paragraph.', 'Two traps: a heading about **only part** (Y), or one that **adds** something (XYZ + M).', 'Do not choose a heading just because it shares a **word** with the paragraph.'] }
     ]
   },
   sections: [{

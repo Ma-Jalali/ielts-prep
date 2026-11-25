@@ -63,14 +63,15 @@
     /* the video streams from Google Drive through the 'ielts-audio' relay (?kind=video: byte ranges, so it plays and seeks on iPhones too) */
     const cfg = window.DEC15_CONFIG || {}, relay = id => cfg.supabaseUrl ? `${cfg.supabaseUrl.replace(/\/$/, '')}/functions/v1/ielts-audio?kind=video&id=${id}` : `https://drive.usercontent.google.com/download?id=${id}&export=download`;
     let vn = 0, tn = 0;
-    const head = (b, k, top) => b.title || b.intro ? (top ? `<header class="xl-h"><span class="xl-k">${esc(b.kicker || k)}</span>${b.title ? `<h2>${esc(b.title)}</h2>` : ''}${b.intro ? `<p>${fmt(b.intro)}</p>` : ''}</header>`
+    const JUMP = (L.learn.jump || []).map(j => j[0]), num = b => { const i = b.anchor ? JUMP.indexOf(b.anchor) : -1; return i < 0 ? '' : `<i class="xl-kn">${String(i + 1).padStart(2, '0')}</i>`; };
+    const head = (b, k, top) => b.title || b.intro ? (top ? `<header class="xl-h"><span class="xl-k">${num(b)}${esc(b.kicker || k)}</span>${b.title ? `<h2>${esc(b.title)}</h2>` : ''}${b.intro ? `<p>${fmt(b.intro)}</p>` : ''}</header>`
       : `<header class="xl-sh">${b.title ? `<h3>${esc(b.title)}</h3>` : ''}${b.intro ? `<p>${fmt(b.intro)}</p>` : ''}</header>`) : '';
     const inner = (b, top, path) => (R[b.type] || (() => ED ? `<p class="pb-unknown">Unknown element: ${esc(b.type)}</p>` : ''))(b, top, path);
     /* a list of blocks; in Studio (ED) each block gets its toolbar and the list an "Add" button (js/pagebuilder.js) */
     const many = (blocks, top, base) => (blocks || []).map((x, i) => draw(x, top, `${base}.${i}`)).join('') + (ED ? ctx.builder.addHTML(base, top) : '');
-    const KICK = { versus: 'Try it', scale: 'Reference', videos: 'Watch', parts: 'The test', facts: 'At a glance', list: 'Remember', faq: 'Questions', check: 'Check yourself', table: 'Reference', tabs: 'Tips', folds: 'Tips', cards: 'Tips', steps: 'Method', chips: 'Words', note: '', text: '', reveal: 'Try it', spot: 'Try it', exercises: 'In-class exercises', image: '', model: 'Model answer', write: 'Your turn' };
+    const KICK = { examples: 'Examples', recap: 'Summary', versus: 'Try it', scale: 'Reference', videos: 'Watch', parts: 'The test', facts: 'At a glance', list: 'Remember', faq: 'Questions', check: 'Check yourself', table: 'Reference', tabs: 'Tips', folds: 'Tips', cards: 'Tips', steps: 'Method', chips: 'Words', note: '', text: '', reveal: 'Try it', spot: 'Try it', exercises: 'In-class exercises', image: '', model: 'Model answer', write: 'Your turn' };
     function draw(b, top, path) {
-      const out = b.type === 'note' ? R.note(b) : b.type === 'divider' ? R.divider(b)
+      const out = b.type === 'note' ? R.note(b) : b.type === 'divider' ? R.divider(b) : b.type === 'key' ? `<div${b.anchor ? ` id="${esc(b.anchor)}"` : ''}>${R.key(b)}</div>`
         : top ? `<section class="xl-band${b.tone ? ' is-' + esc(b.tone) : ''} is-${esc(b.type)}"${b.anchor ? ` id="${esc(b.anchor)}"` : ''}>${head(b, KICK[b.type] || '', true)}${inner(b, true, path)}</section>`
         : `<div class="xl-sub is-${esc(b.type)}${b.tone ? ' is-' + esc(b.tone) : ''}">${head(b, '', false)}${inner(b, false, path)}</div>`;
       return ED ? ctx.builder.wrap(b, path, out, top) : out;
@@ -92,7 +93,7 @@
           <div class="xl-tf"><button type="button" data-xl-tf="T">True</button><button type="button" data-xl-tf="F">False</button></div><p class="xl-why" hidden><b class="xl-verdict"></b> ${fmt(c.why)}</p></div></li>`).join('')}</ol>`,
       tabs: (b, top, path) => { const id = `xlt${++tn}`, sel = Math.min(UI.tab(path), Math.max(0, (b.items || []).length - 1));
         return `<div class="xl-tabs" data-xl-tabs><div class="xl-tabbar" role="tablist" aria-label="${esc(b.title || 'Topics')}">${(b.items || []).map((t, i) => `<button type="button" role="tab" id="${id}-t${i}" aria-controls="${id}-p${i}" aria-selected="${i === sel}" tabindex="${i === sel ? 0 : -1}" data-xl-tab="${i}" data-xl-path="${esc(path || '')}">${t.icon ? sv(t.icon, 1.9) : ''}<span>${esc(t.label)}</span></button>`).join('')}</div>
-          ${(b.items || []).map((t, i) => `<div class="xl-panel" role="tabpanel" id="${id}-p${i}" aria-labelledby="${id}-t${i}"${i === sel ? '' : ' hidden'}>${t.lead ? `<p class="xl-lead">${fmt(t.lead)}</p>` : ''}${many(t.blocks, false, `${path}.items.${i}.blocks`)}</div>`).join('')}</div>`; },
+          ${(b.items || []).map((t, i) => `<div class="xl-panel" role="tabpanel" id="${id}-p${i}" aria-labelledby="${id}-t${i}"${i === sel ? '' : ' hidden'}>${t.lead ? `<p class="xl-lead">${fmt(t.lead)}</p>` : ''}${many(t.blocks, false, `${path}.items.${i}.blocks`)}${i < b.items.length - 1 && b.next !== false ? `<div class="xl-tabnext"><span>${i + 1} of ${b.items.length}</span><button type="button" data-xl-tabgo="${i + 1}">Next: ${esc(b.items[i + 1].label)}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button></div>` : ''}</div>`).join('')}</div>`; },
       folds: (b, top, path) => `<div class="xl-folds" data-xl-folds>${(b.items || []).map((f, i) => `<details class="xl-fold"${(ED ? UI.open(`${path}.items.${i}`) : b.open === i) ? ' open' : ''} data-xl-path="${esc(`${path}.items.${i}`)}"><summary>${f.icon ? `<span class="xl-fold-ic">${sv(f.icon, 1.9)}</span>` : ''}<span class="xl-fold-tx"><b>${fmt(f.title)}</b>${f.sub ? `<small>${fmt(f.sub)}</small>` : ''}</span><i class="xs-chev" aria-hidden="true"></i></summary><div class="xl-fold-in">${many(f.blocks, false, `${path}.items.${i}.blocks`)}</div></details>`).join('')}</div>`,
       cards: b => `<ul class="xl-cards${b.cols ? ' is-' + b.cols : ''}">${(b.items || []).map(c => `<li><span class="xl-card-ic">${sv(c.icon || 'tip', 1.9)}</span><span><b>${fmt(c.t)}</b>${c.d ? `<span>${fmt(c.d)}</span>` : ''}</span></li>`).join('')}</ul>`,
       steps: b => `<ol class="xl-steps">${(b.items || []).map((s, i) => `<li><span class="xl-step-n">${esc(s.n || i + 1)}</span><div><b>${fmt(s.t)}</b>${s.d ? `<div class="xl-step-d">${Array.isArray(s.d) ? `<ul>${s.d.map(x => `<li>${fmt(x)}</li>`).join('')}</ul>` : paras(s.d)}</div>` : ''}</div></li>`).join('')}</ol>`,
@@ -113,6 +114,14 @@
       versus: b => `<ol class="xl-vs">${(b.items || []).map((v, i) => { const O = v.options || b.options || ['TRUE', 'FALSE', 'NOT GIVEN'], r = typeof v.answer === 'number' ? v.answer : Math.max(0, O.indexOf(v.answer));
         return `<li data-xl-right="${r}"><div class="xl-vs-pair"><p class="xl-vs-q"><span class="xl-vs-k">${esc(v.qLabel || b.qLabel || 'Question')}</span><span>${fmt(v.q)}</span></p><p class="xl-vs-p"><span class="xl-vs-k">${esc(v.pLabel || b.pLabel || 'Passage')}</span><span>${fmt(v.p)}</span></p></div>
           <div class="xl-opts is-row"><span class="xl-cn">${esc(v.n || i + 1)}</span>${O.map((o, j) => `<button type="button" data-xl-opt="${j}">${fmt(o)}</button>`).join('')}</div><p class="xl-why" hidden><b class="xl-verdict"></b> ${fmt(v.why)}</p></li>`; }).join('')}</ol>`,
+      /* the one idea to remember, large */
+      key: b => `<aside class="xl-key-idea"><span class="xl-key-ic">${sv(b.icon || 'star', 2)}</span><div>${b.title ? `<span class="xl-key-k">${fmt(b.title)}</span>` : ''}<p>${fmt(b.text)}</p>${b.sub ? `<small>${fmt(b.sub)}</small>` : ''}</div></aside>`,
+      /* worked examples: the passage, the question, the answer and why, each on its own coloured line; hide: true puts the answer behind a button */
+      examples: b => { const nl = t => fmt(t).replace(/\n/g, '<br>'); return `<div class="xl-egs${(b.items || []).length > 1 && b.cols !== 1 ? ' is-grid' : ''}${[2, 4].includes((b.items || []).length) || b.cols === 2 ? ' is-2' : ''}">${(b.items || []).map((x, i) => { const ans = `${x.a ? `<p class="xl-eg-a"><span class="xl-eg-k">${esc(x.aLabel || b.aLabel || 'Answer')}</span><b>${nl(x.a)}</b></p>` : ''}${x.why ? `<p class="xl-eg-why">${sv('tip', 2)}<span>${nl(x.why)}</span></p>` : ''}`;
+        return `<article class="xl-eg"><header>${esc(x.label || b.label || 'Example')}${(b.items || []).length > 1 && !x.label ? ` ${i + 1}` : ''}</header>${x.p ? `<p class="xl-eg-p"><span class="xl-eg-k">${esc(x.pLabel || b.pLabel || 'Passage')}</span><span>${nl(x.p)}</span></p>` : ''}${x.q ? `<p class="xl-eg-q"><span class="xl-eg-k">${esc(x.qLabel || b.qLabel || 'Question')}</span><span>${nl(x.q)}</span></p>` : ''}
+          ${b.hide || x.hide ? `<button type="button" class="xl-show" data-xl-show>Show the answer</button><div class="xl-eg-hid" hidden>${ans}</div>` : ans}</article>`; }).join('')}</div>`; },
+      /* the end-of-lesson summary */
+      recap: b => `<ul class="xl-recap">${(b.items || []).map((t, i) => `<li><span class="xl-recap-n">${i + 1}</span><span>${fmt(t)}</span></li>`).join('')}</ul>`,
       /* a scale from 100% down to 0%: words of quantity or certainty, strongest first */
       scale: b => `<ol class="xl-scale">${(b.items || []).map((x, i, a) => `<li style="--p:${Math.max(4, Number(x.p ?? (100 - i * 100 / Math.max(1, a.length - 1))) || 4)}%"><span class="xl-sc-v">${esc(x.v)}</span><span class="xl-sc-bar" aria-hidden="true"><i></i></span><span class="xl-sc-w">${(x.words || []).map(w => `<em>${fmt(w)}</em>`).join('')}${x.note ? `<small>${fmt(x.note)}</small>` : ''}</span></li>`).join('')}</ol>`,
       divider: b => `<div class="xl-divider" role="separator">${b.title ? `<span>${esc(b.title)}</span>` : ''}</div>`,
@@ -126,7 +135,7 @@
     const walk = bs => (bs || []).flatMap(b => [b, ...walk(b.blocks), ...(b.items || []).flatMap(t => walk(t && t.blocks))]);
     const all = walk(blocks), nVid = all.filter(b => b.type === 'videos').reduce((n, b) => n + (b.items || []).length, 0), nEx = all.filter(b => b.type === 'exercises').reduce((n, b) => n + (b.items || []).length, 0);
     const crumbs = (ctx.trail || []).map(t => `<a href="${esc(t.href)}">${esc(t.label)}</a><span aria-hidden="true">›</span>`).join('');
-    const jump = (L.learn.jump || []).length ? `<nav class="xl-jump" aria-label="On this page">${L.learn.jump.map(([href, label, ic]) => `<a href="#${esc(href)}" data-xl-jump>${ic ? sv(ic, 1.9) : ''}<span>${esc(label)}</span></a>`).join('')}</nav>` : '';
+    const jump = (L.learn.jump || []).length ? `<nav class="xl-jump" aria-label="On this page" data-xl-nav><span class="xl-jump-k">On this page</span><div class="xl-jump-in">${L.learn.jump.map(([href, label, ic], i) => `<a href="#${esc(href)}" data-xl-jump><i>${i + 1}</i><span>${esc(label)}</span></a>`).join('')}</div><span class="xl-jump-bar" aria-hidden="true"><b></b></span></nav>` : '';
     return `<article class="xs xl" style="--xs-soft:${ctx.soft || '#e6f3f1'}${ctx.acc ? `;--xs-acc:${ctx.acc}` : ''}">
       <nav class="xs-trail" aria-label="Where you are">${ctx.back ? `<a class="xs-back" href="${esc(ctx.back.href)}">${icon('left')}<span>${esc(ctx.back.label)}</span></a>` : ''}<span class="xs-crumbs">${crumbs}<b>${esc(ctx.name || '')}</b></span></nav>
       <header class="xs-hero"><div class="xs-hero-tx"><span class="xs-eyebrow">${esc(ctx.eyebrow || 'Learn')}</span><h1>${esc(L.title)}</h1>${L.journey ? `<p>${esc(L.journey)}</p>` : ''}
@@ -144,12 +153,25 @@
     if (t) { const box = t.closest('[data-xl-tabs]'), i = +t.dataset.xlTab; box.querySelectorAll(':scope > .xl-tabbar [data-xl-tab]').forEach((b, j) => { b.setAttribute('aria-selected', j === i); b.tabIndex = j === i ? 0 : -1; });
       box.querySelectorAll(':scope > .xl-panel').forEach((p, j) => { p.hidden = j !== i; }); t.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' }); return; }
     const s = e.target.closest?.('[data-xl-show]'); if (s) { s.hidden = true; s.nextElementSibling.hidden = false; return; }
+    const g = e.target.closest?.('[data-xl-tabgo]');
+    if (g) { const box = g.closest('[data-xl-tabs]'), t = box.querySelector(`:scope > .xl-tabbar [data-xl-tab="${g.dataset.xlTabgo}"]`); if (t) { t.click(); const top = box.getBoundingClientRect().top + scrollY - navTop() - 70; scrollTo({ top, behavior: 'smooth' }); } return; }
     const o = e.target.closest?.('[data-xl-opt]');
     if (o) { const li = o.closest('li'), right = +li.dataset.xlRight, j = +o.dataset.xlOpt; li.querySelectorAll('[data-xl-opt]').forEach(b => { b.classList.toggle('is-pick', b === o); b.classList.toggle('is-ans', +b.dataset.xlOpt === right); });
       li.classList.toggle('is-right', j === right); li.classList.toggle('is-wrong', j !== right); const w = li.querySelector('.xl-why'); w.hidden = false; w.querySelector('.xl-verdict').textContent = j === right ? 'Right.' : 'Not quite.'; return; }
     const a = e.target.closest?.('[data-xl-jump]');
-    if (a) { const el = document.getElementById(a.getAttribute('href').slice(1)); if (el) { e.preventDefault(); if (el.tagName === 'DETAILS') el.open = true; el.scrollIntoView({ behavior: 'smooth', block: 'start' }); } }
+    if (a) { const el = document.getElementById(a.getAttribute('href').slice(1)); if (el) { e.preventDefault(); if (el.tagName === 'DETAILS') el.open = true; scrollTo({ top: el.getBoundingClientRect().top + scrollY - navTop() - 64, behavior: 'smooth' }); } }
   });
+  /* the "on this page" bar: it sticks under the page header, lights up the section you are reading and fills as you read */
+  const navTop = () => document.querySelector('.masthead')?.offsetHeight || 0;
+  let spyQ = false;
+  const spy = () => { spyQ = false; const nav = document.querySelector('[data-xl-nav]'); if (!nav) return; const top = navTop(); nav.style.top = top + 'px';
+    const links = [...nav.querySelectorAll('[data-xl-jump]')], line = top + nav.offsetHeight + 90; let on = -1;
+    links.forEach((l, i) => { const el = document.getElementById(l.getAttribute('href').slice(1)); if (el && el.getBoundingClientRect().top < line) on = i; });
+    links.forEach((l, i) => l.classList.toggle('is-on', i === on)); nav.classList.toggle('is-stuck', nav.getBoundingClientRect().top <= top + 1);
+    const art = nav.closest('.xl'), r = art?.getBoundingClientRect(), p = r ? Math.min(1, Math.max(0, (innerHeight - r.top) / r.height)) : 0; nav.style.setProperty('--xl-p', p.toFixed(3));
+    const cur = links[on]; if (cur && nav.dataset.on !== String(on)) { nav.dataset.on = on; const box = cur.parentElement; box.scrollTo({ left: cur.offsetLeft - box.clientWidth / 2 + cur.offsetWidth / 2, behavior: 'smooth' }); } };
+  addEventListener('scroll', () => { if (!spyQ) { spyQ = true; requestAnimationFrame(spy); } }, { passive: true });
+  addEventListener('resize', () => requestAnimationFrame(spy)); addEventListener('hashchange', () => setTimeout(spy, 400)); setTimeout(spy, 600);
   document.addEventListener('keydown', e => { const t = e.target.closest?.('[data-xl-tab]'); if (!t || !['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) return; e.preventDefault();
     const tabs = [...t.parentElement.querySelectorAll('[data-xl-tab]')], i = tabs.indexOf(t), n = tabs.length, j = e.key === 'Home' ? 0 : e.key === 'End' ? n - 1 : (i + (e.key === 'ArrowRight' ? 1 : -1) + n) % n; tabs[j].focus(); tabs[j].click(); });
   /* an exercise opened: the others in the page close, so only one recording and one set of questions is open at a time */

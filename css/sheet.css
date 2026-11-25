@@ -784,3 +784,80 @@ mark.xs-hl.has-note.is-hl { background: #ffd65c; }
 .xl-parts.is-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 @media (max-width: 1100px) { .xl-parts.is-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (max-width: 860px) { .xl-parts.is-3 { grid-template-columns: 1fr; } }
+
+/* ───────── Reading pass 2: a page that is easy to follow ───────── */
+/* the "on this page" bar: sticky, numbered, lights up the current section, fills as you read */
+.xl-jump { position: sticky; top: 54px; z-index: 12; display: flex; align-items: center; gap: 12px; padding: 8px 10px 10px 16px; margin: 0 -2px; border-radius: 18px; background: rgba(255, 255, 255, .9); -webkit-backdrop-filter: saturate(1.4) blur(14px); backdrop-filter: saturate(1.4) blur(14px); border: 1px solid var(--xs-line); box-shadow: 0 1px 2px rgba(24, 33, 63, .04); overflow: hidden; transition: box-shadow .2s, border-radius .2s; }
+.xl-jump.is-stuck { border-radius: 0 0 16px 16px; box-shadow: 0 12px 26px -18px rgba(24, 33, 63, .45); }
+.xl-jump-k { flex: none; font: 800 .66rem/1 var(--sans, system-ui); letter-spacing: .12em; text-transform: uppercase; color: var(--muted, #6a7391); }
+.xl-jump-in { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; min-width: 0; padding: 2px; }
+.xl-jump-in::-webkit-scrollbar { display: none; }
+.xl-jump a { flex: none; display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 14px 0 6px; border-radius: 999px; background: transparent; border: 1px solid transparent; box-shadow: none; font: 650 .86rem var(--sans, system-ui); color: #4a5373; text-decoration: none; transition: background .15s, color .15s, border-color .15s; }
+.xl-jump a i { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: #eef0f6; font: 800 .72rem/1 var(--sans, system-ui); font-style: normal; color: #59627f; transition: background .15s, color .15s; }
+.xl-jump a:hover { background: #f4f6fa; color: var(--xs-ink); border-color: transparent; }
+.xl-jump a.is-on { background: var(--xs-soft); color: var(--xs-ink); border-color: color-mix(in srgb, var(--xs-acc) 30%, #fff); }
+.xl-jump a.is-on i { background: var(--xs-acc); color: #fff; }
+.xl-jump-bar { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: transparent; }
+.xl-jump-bar b { display: block; height: 100%; width: calc(var(--xl-p, 0) * 100%); background: linear-gradient(90deg, color-mix(in srgb, var(--xs-acc) 55%, #fff), var(--xs-acc)); border-radius: 0 3px 3px 0; transition: width .2s linear; }
+.xl .xl-band { scroll-margin-top: 130px; }
+
+/* numbered section labels, matching the bar */
+.xl-k { display: inline-flex; align-items: center; gap: 8px; }
+.xl-kn { display: inline-grid; place-items: center; min-width: 26px; height: 20px; padding: 0 6px; border-radius: 6px; background: var(--xs-acc); color: #fff; font: 800 .68rem/1 var(--sans, system-ui); font-style: normal; letter-spacing: .02em; }
+.xl-h h2 { text-wrap: balance; }
+.xl-h p { font-size: 1.02rem; line-height: 1.6; color: #3d4668; max-width: 68ch; }
+
+/* text: comfortable line length, clearer emphasis */
+.xl-text, .xl-lead { max-width: 72ch; }
+.xl-text p, .xl-lead { line-height: 1.7; }
+.xl b, .xl strong { color: var(--xs-ink); font-weight: 750; }
+.xl-lead { font-size: 1rem; color: #3d4668; padding: 12px 16px; border-radius: 12px; background: #f7f8fb; border-left: 3px solid var(--xs-acc); }
+.xl-list li { line-height: 1.6; }
+
+/* tabs: "1 of 3 · Next: …" at the end of each panel */
+.xl-tabnext { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 22px; padding-top: 16px; border-top: 1px dashed var(--xs-line-2); }
+.xl-tabnext span { font: 700 .76rem/1 var(--sans, system-ui); letter-spacing: .06em; text-transform: uppercase; color: var(--muted, #6a7391); }
+.xl-tabnext button { display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 16px 0 18px; border-radius: 999px; border: 0; background: var(--xs-ink); color: #fff; font: 700 .88rem var(--sans, system-ui); cursor: pointer; transition: transform .15s, background .15s; }
+.xl-tabnext button:hover { background: var(--xs-acc); transform: translateX(2px); }
+.xl-tabnext svg { width: 17px; height: 17px; }
+
+/* the one idea to remember */
+.xl-key-idea { display: flex; gap: 18px; align-items: flex-start; padding: 22px 26px; border-radius: 22px; color: #fff; background: radial-gradient(circle at 92% 8%, rgba(255, 255, 255, .22), transparent 42%), linear-gradient(135deg, var(--xs-acc), color-mix(in srgb, var(--xs-acc) 62%, #18213f)); box-shadow: 0 18px 40px -26px color-mix(in srgb, var(--xs-acc) 80%, #000); }
+.xl-key-ic { flex: none; display: grid; place-items: center; width: 46px; height: 46px; border-radius: 14px; background: rgba(255, 255, 255, .18); }
+.xl-key-ic svg { width: 24px; height: 24px; }
+.xl-key-k { display: block; margin-bottom: 4px; font: 800 .7rem/1 var(--sans, system-ui); letter-spacing: .14em; text-transform: uppercase; opacity: .8; }
+.xl-key-idea p { margin: 0; font: 650 clamp(1.12rem, 2.4vw, 1.4rem)/1.35 var(--serif, Georgia, serif); text-wrap: balance; }
+.xl-key-idea small { display: block; margin-top: 8px; font-size: .92rem; line-height: 1.5; opacity: .9; }
+.xl-key-idea b { color: #fff; } .xl-key-idea mark { background: rgba(255, 255, 255, .22); color: #fff; border-radius: 4px; padding: 0 .2em; }
+
+/* worked examples */
+.xl-egs { display: grid; gap: 12px; }
+.xl-egs.is-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); }
+.xl-eg { display: grid; gap: 8px; align-content: start; padding: 14px; border-radius: 18px; background: #fff; border: 1px solid var(--xs-line); box-shadow: 0 1px 2px rgba(24, 33, 63, .04); }
+.xl-eg > header { font: 800 .7rem/1 var(--sans, system-ui); letter-spacing: .12em; text-transform: uppercase; color: var(--muted, #6a7391); padding: 2px 2px 4px; }
+.xl-eg p { margin: 0; display: grid; gap: 4px; padding: 10px 12px 11px; border-radius: 12px; line-height: 1.5; font-size: .96rem; }
+.xl-eg-k { font: 800 .64rem/1 var(--sans, system-ui); letter-spacing: .12em; text-transform: uppercase; }
+.xl-eg-p { background: #f7f5ef; border: 1px solid #ebe5d6; font-family: var(--serif, Georgia, serif); } .xl-eg-p .xl-eg-k { color: #8a7a4f; font-family: var(--sans, system-ui); }
+.xl-eg-q { background: color-mix(in srgb, var(--xs-acc) 7%, #fff); border: 1px solid color-mix(in srgb, var(--xs-acc) 22%, #fff); } .xl-eg-q .xl-eg-k { color: var(--xs-acc); }
+.xl-eg-a { background: #eef8f2; border: 1px solid #c4e5d2; } .xl-eg-a .xl-eg-k { color: #1f7a4f; } .xl-eg-a b { color: #14532d; font-size: 1.02rem; }
+p.xl-eg-why { display: flex; gap: 8px; align-items: flex-start; padding: 2px 4px 0; background: none; font-size: .9rem; color: #3a4466; }
+.xl-eg-why svg { flex: none; width: 16px; height: 16px; margin-top: 3px; color: #e0a316; }
+.xl-eg .xl-show { justify-self: start; }
+.xl-eg-hid { display: grid; gap: 8px; } .xl-eg-hid[hidden] { display: none; }
+
+/* the end-of-lesson summary */
+.xl-band.is-recap { background: radial-gradient(circle at 100% 0, color-mix(in srgb, var(--xs-acc) 14%, transparent), transparent 46%), linear-gradient(180deg, color-mix(in srgb, var(--xs-acc) 6%, #fff), #fff); border-color: color-mix(in srgb, var(--xs-acc) 26%, #fff); }
+.xl-recap { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 10px; }
+.xl-recap li { display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; border-radius: 14px; background: #fff; border: 1px solid var(--xs-line); line-height: 1.5; font-size: .95rem; }
+.xl-recap-n { flex: none; display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--xs-acc); color: #fff; font: 800 .78rem/1 var(--sans, system-ui); }
+
+@media (max-width: 720px) {
+  .xl-jump { top: 57px; margin: 0 -6px; padding: 6px 6px 8px 8px; gap: 6px; border-radius: 14px; }
+  .xl-jump-k { display: none; }
+  .xl-jump a { height: 34px; padding: 0 12px 0 5px; font-size: .82rem; }
+  .xl-key-idea { padding: 18px; gap: 12px; } .xl-key-ic { width: 38px; height: 38px; }
+  .xl-tabnext { flex-wrap: wrap; } .xl-tabnext button { flex: 1; justify-content: center; }
+  .xl .xl-band { scroll-margin-top: 120px; }
+}
+.xl-egs.is-grid.is-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (max-width: 720px) { .xl-egs.is-grid.is-2 { grid-template-columns: minmax(0, 1fr); } }

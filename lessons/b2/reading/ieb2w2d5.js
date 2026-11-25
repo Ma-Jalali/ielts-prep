@@ -10,9 +10,10 @@ window.DEC15_LESSON = {
   finish: { title: 'Next', text: 'Summary completion' },
   learn: {
     tags: ['Question types 4 and 5'],
-    jump: [['xl-tips', 'Tips', 'tip'], ['xl-ex', 'Exercises', 'pen']],
+    jump: [['xl-tips', 'Tips', 'tip'], ['xl-ex', 'Exercises', 'pen'], ['xl-sum', 'Remember', 'ok']],
     blocks: [
-      { type: 'tabs', anchor: 'xl-tips', kicker: 'Tips', title: 'Two kinds of sentence completion',
+      { type: 'key', title: 'The test of a good answer', text: 'Read the sentence **with your answer in it**. It must be **true** to the passage, **grammatically correct** and make **sense**.' },
+      { type: 'tabs', anchor: 'xl-tips', kicker: 'Tips', title: 'Two kinds of sentence completion', intro: 'Four tabs: the method, two short practices, then the version with a box.',
         items: [
           { label: 'Without a box', icon: 'pen', lead: 'You complete each sentence with words from the passage, for example **NO MORE THAN THREE WORDS AND/OR A NUMBER**.', blocks: [
             { type: 'list', items: [
@@ -25,16 +26,19 @@ window.DEC15_LESSON = {
               { t: 'Read ONE sentence carefully', d: ['**Understand** it.', '**Predict** the answer. *Grammar:* a noun (singular, plural or uncountable), an adjective, a verb. *Meaning:* a person, a place, a number, a date, an object …', '**Choose words you can trust**, to find the place faster.'] },
               { t: 'Find the PLACE of the answer', d: 'Scan the passage for your trusted words.' },
               { t: 'Find the ANSWER', d: 'Read that sentence from the beginning to the end, several times if necessary, and use **grammar**, **meaning** and **the question** to find the answer.' }] },
-            { type: 'reveal', title: 'Try it', items: [
-              { q: 'There is a blue ______ on the desk.\n*Passage: On the desk you can see some beautiful pencils, a blue handkerchief and a pleasant-smelling Japanese pen.*', a: '**handkerchief**. *A* needs a singular noun, and the *blue* thing is the handkerchief. Do not repeat *blue*.' },
-              { q: 'The interview is in the ______.\n*Passage: The interview is next week, on Monday morning at 9 o’clock.*', a: '**morning**: *in the morning*.' },
-              { q: 'First, you should ______ by describing yourself and your abilities.\n*Passage: The first step is to complete the application form by describing yourself and your abilities.*', a: '**complete the application** (or *complete the application form*, if four words are allowed). *Should* needs a verb.' }] },
-            { type: 'reveal', title: 'Why are these answers wrong?', items: [
-              { q: '**Japanese student** go on a trip every year.', a: '**Grammar**: *go* needs a plural subject: *Japanese students*.' },
-              { q: 'Those **mice** who do research need to have health insurance.', a: '**Meaning**: mice do not do research. (The passage meant *scientists*.)' },
-              { q: 'Living in Australia is really **phantastic**.', a: '**Spelling**: *fantastic*.' },
-              { q: 'You need to get **over 7** in IELTS or above.', a: '**An extra word**: *or above* already means *over*. Write *7*.' },
-              { q: '**Birds** are becoming extinct.', a: '**Too general**: which birds? *North African birds*.' }] }] },
+            ] },
+          { label: 'Try the steps', icon: 'pen', lead: 'Predict the answer first, then tap to check.', blocks: [
+            { type: 'examples', hide: true, cols: 1, items: [
+              { p: 'On the desk you can see some beautiful pencils, a blue ==handkerchief== and a pleasant-smelling Japanese pen.', q: 'There is a **blue** ______ on the desk.', a: 'handkerchief', why: '*A* needs a **singular** noun, and the blue thing is the handkerchief. Do not repeat *blue*.' },
+              { p: 'The interview is next week, on Monday ==morning== at 9 o’clock.', q: 'The interview is **in the** ______.', a: 'morning', why: '*In the* + a part of the day: *in the morning*.' },
+              { p: 'The first step is to ==complete the application== form by describing yourself and your abilities.', q: '**First**, you should ______ by describing yourself and your abilities.', a: 'complete the application', why: '*Should* needs a **verb**. (*complete the application form* is right if four words are allowed.)' }] }] },
+          { label: 'Spot the mistake', icon: 'warn', lead: 'Each answer loses the mark. Can you say why? Tap to check.', blocks: [
+            { type: 'examples', hide: true, qLabel: 'Answer given', aLabel: 'The problem', items: [
+              { q: '==Japanese student== go on a trip every year.', a: 'Grammar', why: '*Go* needs a plural subject: *Japanese students*.' },
+              { q: 'Those ==mice== who do research need to have health insurance.', a: 'Meaning', why: 'Mice do not do research. (The passage meant *scientists*.)' },
+              { q: 'Living in Australia is really ==phantastic==.', a: 'Spelling', why: 'It is spelled *fantastic*.' },
+              { q: 'You need to get ==over 7== in IELTS or above.', a: 'An extra word', why: '*Or above* already means *over*. Write *7*.' },
+              { q: '==Birds== are becoming extinct.', a: 'Too general', why: 'Which birds? *North African birds*.' }] }] },
           { label: 'With a box', icon: 'list', lead: 'You choose the best ending for each sentence from a box of options. (This type is also called *matching sentence endings*.)', blocks: [
             { type: 'list', items: [
               'The answers are **in passage order**.',
@@ -46,7 +50,7 @@ window.DEC15_LESSON = {
               { t: 'Read ONE sentence beginning carefully', d: 'Underline its key words.' },
               { t: 'Find the right place in the passage', d: 'Be careful not to choose the wrong area: a word from the question may appear in several places.' },
               { t: 'Read that part very carefully', d: 'Then come to the box and read **all** the endings.' },
-              { t: 'Choose the closest ending', d: ['Do **not** cross out an ending you have used: one may be needed again in a later exercise of the same kind.', 'If two endings seem possible, write both and come back later.'] }] },
+              { t: 'Choose the closest ending', d: ['Do **not** cross out an ending as soon as you use it: if a later sentence fits it better, you can still change your mind.', 'If two endings seem possible, write both and come back later.'] }] },
             { type: 'note', tone: 'tip', text: 'Grammar helps here too: the beginning and the ending must make one correct sentence. *By winning the scholarship, you have the chance to …* needs a **verb**.' }] }
         ] },
       { type: 'exercises', anchor: 'xl-ex', kicker: 'Exercises', title: 'Try them', intro: 'Open an exercise, read the passage and answer the questions. The answers, with the reasons, are folded at the bottom.',
@@ -68,7 +72,9 @@ window.DEC15_LESSON = {
                 { q: 'You can only join the internship programme …', answer: 'E', why: 'It is *designed especially for post-secondary students*, so you must have finished secondary education. It is not after university (D).' },
                 { q: 'The length of an internship …', answer: 'F', why: 'The college or university *decides how long each assignment will last*. Four months is usual, not always (G).' },
                 { q: 'Students who want to join the work experience programme must …', answer: 'H', why: '*Applicants must apply in person at our office.*' }] }] }
-        ] }
+        ] },
+      { type: 'recap', anchor: 'xl-sum', title: 'Remember',
+        items: ['Sentence completion answers are **in passage order**.', 'Predict the **grammar** of the gap before you read: noun, verb, adjective?', 'Read the finished sentence: **true**, **correct** and **sensible**?', 'With a box: read **all** the endings and choose the **closest** one.', 'Check for the five mistakes: **grammar**, **meaning**, **spelling**, **extra words**, **too general**.'] }
     ]
   },
   sections: [{
