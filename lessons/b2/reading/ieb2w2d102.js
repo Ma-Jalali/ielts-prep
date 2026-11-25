@@ -51,7 +51,7 @@ window.DEC15_LESSON = {
          "instruction": "Answer the questions below. Write **NO MORE THAN THREE WORDS** for each answer.",
          "rule": "NO MORE THAN THREE WORDS",
          "max": 3,
-         "text": "What do men look for when they drive, according to Professor McKenna? [[thrills|a thrill]]\nWhat is women's motivation for driving? [[independence]]\nWhich group of drivers has grown in number in recent years? [[women drivers|women]]\nWhat is the most important factor in accident patterns? [[age]]\nAfter what age do men and women drive equally safely in the dark? [[55|fifty-five|the age of 55]]",
+         "text": "What do men look for when they drive, according to Professor McKenna? [[thrills|thrill|a thrill]]\nWhat is women's motivation for driving? [[independence]]\nWhich group of drivers has grown in number in recent years? [[women drivers|women]]\nWhat is the most important factor in accident patterns? [[age]]\nAfter what age do men and women drive equally safely in the dark? [[55|fifty-five|the age of 55]]",
          "why": [
           "*Men look for thrills behind the wheel.*",
           "*While women look for independence.*",

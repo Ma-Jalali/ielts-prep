@@ -50,9 +50,9 @@ window.DEC15_LESSON = {
          "instruction": "Answer the questions below. Choose **NO MORE THAN THREE WORDS AND/OR A NUMBER** from the passage for each answer.",
          "rule": "NO MORE THAN THREE WORDS AND/OR A NUMBER",
          "max": 3,
-         "text": "According to the writer, what do coral reefs look like? [[flat beds of rock]]\nHow many countries have a coral reef close to their coastline? [[over one hundred|over 100|more than one hundred|more than 100]]\nWhat proportion of workers in the Maldives fish for a living? [[25%|25 per cent|25 percent]]\nWhich activity is more than half of the Maldives' economy based on? [[reef-based tourism|tourism]]\nHow can people usually get to reef fisheries? [[on foot]]\nWhat do Indian women often help to make? [[fishing equipment]]\nWhat is usually exchanged for wood by women on Ulithi Atoll? [[cloth]]",
+         "text": "According to the writer, what do coral reefs look like? [[beds of rock|beds of rocks]]\nHow many countries have a coral reef close to their coastline? [[over one hundred|over 100|more than one hundred|more than 100]]\nWhat proportion of workers in the Maldives fish for a living? [[25%|25 per cent|25 percent]]\nWhich activity is more than half of the Maldives' economy based on? [[reef-based tourism|tourism]]\nHow can people usually get to reef fisheries? [[on foot]]\nWhat do Indian women often help to make? [[fishing equipment]]\nWhat is usually exchanged for wood by women on Ulithi Atoll? [[cloth]]",
          "why": [
-          "*They look like flat beds of rock.*",
+          "*They look like flat beds of rock.* Four words is too many, so write *beds of rock*.",
           "*Near the coastline of over one hundred countries.*",
           "*25% of the workforce is employed in fishing.*",
           "56% of the economy (more than half) comes from *reef-based tourism*.",
