@@ -189,3 +189,48 @@ a.sk-row:hover .sk-st:not(.is-done) { background: var(--accent); color: #fff; bo
   .sk-row { grid-template-columns: auto minmax(0, 1fr) auto; padding: 12px 14px; } .sk-row-bar { display: none; } .sk-st { grid-column: 3; }
   .sk-vbtn span { display: none; }
 }
+
+/* ───────── Learn lessons as a list (Listening: one column; Reading: two, filled down the columns) ───────── */
+.ll-list { list-style: none; margin: 18px 0 0; padding: 0; display: grid; gap: 12px; }
+.ll-list.is-two { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(var(--rows), auto); grid-auto-flow: column; column-gap: 16px; }
+.ll-list li > a, .ll-list li > div { position: relative; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 16px; height: 100%; box-sizing: border-box; padding: 16px 18px 16px 16px; border-radius: 20px; background: #fff; border: 1px solid var(--line, rgba(24, 33, 63, .1)); box-shadow: 0 1px 2px rgba(24, 33, 63, .04), 0 10px 24px -22px rgba(24, 33, 63, .5); color: inherit; text-decoration: none; overflow: hidden; transition: transform .18s, box-shadow .18s, border-color .18s; }
+.ll-list li > a::before, .ll-list li > div::before { content: ''; position: absolute; left: 0; top: 14px; bottom: 14px; width: 4px; border-radius: 0 4px 4px 0; background: var(--dc); opacity: .85; }
+.ll-list li > a:hover { transform: translateY(-2px); border-color: color-mix(in srgb, var(--dc) 35%, #fff); box-shadow: 0 1px 2px rgba(24, 33, 63, .05), 0 18px 34px -24px color-mix(in srgb, var(--dc) 60%, #000); }
+.ll-list li > a:focus-visible { outline: 3px solid color-mix(in srgb, var(--dc) 55%, #fff); outline-offset: 2px; }
+.ll-n { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 50%; color: #fff; font: 750 1.2rem/1 var(--serif, 'Outfit', sans-serif); background: radial-gradient(circle at 32% 28%, color-mix(in srgb, var(--dc) 55%, #fff), var(--dc) 62%); box-shadow: 0 8px 16px -10px var(--dc), inset 0 -2px 0 rgba(0, 0, 0, .12); }
+.ll-n svg { width: 22px; height: 22px; }
+.ll-tx { min-width: 0; display: grid; gap: 3px; }
+.ll-k { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font: 800 .7rem/1.2 var(--sans, system-ui); letter-spacing: .14em; text-transform: uppercase; color: var(--dc); }
+.ll-tx b { font: 700 1.08rem/1.3 var(--serif, 'Outfit', sans-serif); color: var(--ink, #18213f); letter-spacing: -.005em; }
+.ll-tx small { font-size: .88rem; line-height: 1.4; color: var(--muted, #5a6382); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ll-st { display: inline-flex; align-items: center; gap: 4px; height: 20px; padding: 0 8px; border-radius: 999px; font: 750 .64rem/1 var(--sans, system-ui); letter-spacing: .06em; }
+.ll-st svg { width: 12px; height: 12px; }
+.ll-st small { font-size: .64rem; opacity: .8; }
+.ll-st.is-done { background: #e6f5ec; color: #1f7a4f; }
+.ll-st.is-on { background: color-mix(in srgb, var(--dc) 12%, #fff); color: var(--dc); }
+.ll-st.is-next { background: var(--dc); color: #fff; }
+.ll-st.is-soon { background: #f1f2f6; color: #6a7391; }
+.ll-bar { display: block; height: 4px; margin-top: 4px; border-radius: 99px; background: #eef0f5; overflow: hidden; max-width: 220px; }
+.ll-bar i { display: block; height: 100%; border-radius: inherit; background: var(--dc); }
+.ll-go { display: inline-flex; align-items: center; gap: 6px; height: 38px; padding: 0 16px; border-radius: 999px; font: 750 .86rem/1 var(--sans, system-ui); color: var(--dc); background: color-mix(in srgb, var(--dc) 10%, #fff); border: 1px solid color-mix(in srgb, var(--dc) 22%, #fff); white-space: nowrap; transition: background .15s, color .15s; }
+.ll-go svg { width: 16px; height: 16px; }
+.ll-go.is-main, .ll-list li > a:hover .ll-go { background: var(--dc); color: #fff; border-color: var(--dc); }
+.ll-list li.is-done .ll-n { background: #1f8a5b; box-shadow: 0 8px 16px -10px #1f8a5b; }
+.ll-list li.is-now > a { border-color: color-mix(in srgb, var(--dc) 40%, #fff); background: linear-gradient(90deg, color-mix(in srgb, var(--dc) 6%, #fff), #fff 60%); }
+.ll-list li.is-soon > div { opacity: .7; } .ll-list li.is-soon .ll-n { filter: grayscale(.7); }
+/* a single column: room for a little more */
+.ll-list:not(.is-two) li > a, .ll-list:not(.is-two) li > div { padding: 18px 22px 18px 18px; gap: 20px; }
+.ll-list:not(.is-two) .ll-n { width: 54px; height: 54px; font-size: 1.32rem; }
+.ll-list:not(.is-two) .ll-tx b { font-size: 1.16rem; }
+.ll-list:not(.is-two) .ll-tx small { white-space: normal; }
+@media (max-width: 980px) { .ll-list.is-two { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; grid-auto-flow: row; } }
+@media (max-width: 720px) {
+  .ll-list { gap: 8px; margin-top: 12px; }
+  .ll-list li > a, .ll-list li > div, .ll-list:not(.is-two) li > a, .ll-list:not(.is-two) li > div { gap: 12px; padding: 12px 12px 12px 12px; border-radius: 18px; }
+  .ll-n, .ll-list:not(.is-two) .ll-n { width: 42px; height: 42px; font-size: 1.05rem; }
+  .ll-tx b, .ll-list:not(.is-two) .ll-tx b { font-size: 1rem; }
+  .ll-tx small, .ll-list:not(.is-two) .ll-tx small { white-space: nowrap; font-size: .8rem; }
+  .ll-go { height: 32px; padding: 0 12px; font-size: .78rem; }
+  .ll-go svg { display: none; }
+}
+@media (min-width: 721px) { .ll-list.is-two .ll-tx small { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; } }
