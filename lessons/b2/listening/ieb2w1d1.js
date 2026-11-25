@@ -12,14 +12,14 @@ window.DEC15_LESSON = {
   finish: { title: 'Next', text: 'Part 1: everyday conversation' },
   learn: {
     tags: ['4 parts', '40 questions'],
-    jump: [['xl-videos', 'Videos', 'play'], ['xl-test', 'The test', 'list'], ['xl-score', 'A better score', 'star'], ['xl-check', 'Check yourself', 'ok']],
+    jump: [['xl-videos', 'Videos', 'play'], ['xl-glance', 'At a glance', 'info'], ['xl-test', 'The test', 'list'], ['xl-score', 'A better score', 'star'], ['xl-sum', 'Remember', 'star'], ['xl-check', 'Check yourself', 'ok']],
     blocks: [
       { type: 'videos', anchor: 'xl-videos', kicker: 'Watch first', title: 'Two videos from your teacher', intro: 'Watch them in order. You can pause, go back and watch again as often as you like.',
         items: [
           { title: 'Basic information and tips', note: 'What the Listening test is, how it is organised, and the tips that matter most.', src: 'https://drive.google.com/file/d/1QXj5lt7lH2U99KSa6ElWZC4RcOxREADL/view' },
           { title: 'Examples and practice', note: 'Real examples of the question types, and practice with them step by step.', src: 'https://drive.google.com/file/d/1s0hOrHXrWP5uwtPXLHJAxQ33ETtE7HOg/view' }
         ] },
-      { type: 'facts', kicker: 'At a glance', title: 'The test in six numbers',
+      { type: 'facts', anchor: 'xl-glance', kicker: 'At a glance', title: 'The test in six numbers',
         items: [['4', 'parts, each harder than the one before'], ['40', 'questions: 10 in each part'], ['30', 'minutes of recordings, more or less'], ['1×', 'you hear each recording **once** only'], ['1', 'mark for each correct answer, and **no** minus marks'], ['1–9', 'band score, with half bands such as 6.5']] },
       { type: 'parts', kicker: 'The four parts', title: 'What you will hear',
         intro: 'Parts 1 and 2 are about everyday life; Parts 3 and 4 are about study and academic life. The answers always come **in the same order** as the recording.',
@@ -30,6 +30,7 @@ window.DEC15_LESSON = {
           { n: 4, qs: 'Questions 31–40', who: 'One speaker', what: 'A lecture or talk on an academic subject.', eg: 'a university lecture on marine biology' }
         ],
         foot: 'Each recording lasts a few minutes. The instructions are on the recording, and before each part you get time to read the questions.' },
+      { type: 'key', title: 'The big idea', text: 'You hear each recording **once**. So the real work happens **before** you listen: read the questions and **predict** the answers.', sub: 'Every lesson in this section shows you how to do that for one part of the test.' },
       { type: 'tabs', anchor: 'xl-test', kicker: 'Know the test', title: 'How the test works',
         items: [
           { label: 'How it runs', icon: 'clock', blocks: [
@@ -86,6 +87,8 @@ window.DEC15_LESSON = {
             { type: 'note', tone: 'info', title: 'Short forms you can use', text: 'Measurements and symbols are fine in your answers: cm, m, km, g, kg, °C, $, £, %. Other short forms (such as "St" for "Street" or "Mon" for "Monday") are best written in full.' },
             { type: 'note', tone: 'warn', title: 'Keep to the word limit', text: 'If the instructions say NO MORE THAN TWO WORDS, an answer of three words is wrong, even if it has the right idea. A number counts as one word.' }] }
         ] },
+      { type: 'recap', anchor: 'xl-sum', title: 'Remember',
+        items: ['**4 parts, 40 questions**, about 30 minutes. You hear everything **once**.', 'The answers come **in the same order** as the recording.', 'Use the time before each part to **read and predict**.', 'Spelling counts; capital letters do not. There are **no minus marks**.', 'After each practice, **study your mistakes** with the recording script.'] },
       { type: 'check', anchor: 'xl-check', kicker: 'Check yourself', title: 'True or false?', intro: 'Tap True or False to see the answer.',
         items: [
           { s: 'You can listen to each recording twice.', answer: false, why: 'You hear each recording once only.' },
