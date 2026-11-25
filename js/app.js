@@ -1029,6 +1029,13 @@ const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch (e) { /* ign
 const isDone = d => { const [a, b] = dayProgress(d); return !!b && a === b; };
 function groupLessons(w, g) { const at = {}; w.days.forEach(d => { if (d.day > g.base && d.day < g.base + 100) at[d.day - g.base] = d; }); return at; }
 function groupStats(w, groups) { let ready = 0, done = 0, total = 0; groups.forEach(g => { const at = groupLessons(w, g); total += g.size; Object.values(at).forEach(d => { if (d.status === 'ready') { ready++; if (isDone(d)) done++; } }); }); return { ready, done, total }; }
+/* Practise: each part has its own colour; each exercise shows its question types as coloured chips */
+const PART_TINT = ['#1f8a7a', '#c2562f', '#7a4a8c', '#2f6db5', '#b07d12'];
+const partTint = i => { const c = PART_TINT[i % PART_TINT.length]; return `--accent:${c};--accent-bg:color-mix(in srgb, ${c} 9%, #fff);--pc:${c}`; };
+const QTYPES = [['mc', 'Multiple choice', /multiple|multiple-answer/i], ['match', 'Matching', /match|classif/i], ['label', 'Labelling', /label/i], ['short', 'Short answers', /short/i], ['list', 'Listing', /^listing$/i], ['fill', 'Completion', /complet|timetable|correct|fact sheet|flow chart/i]];
+const qparts = sub => String(sub || '').split(/,\s*|\s+and\s+/).map(x => x.trim().replace(/^an?\s+/i, '')).filter(Boolean)
+  .map((t, i, all) => { if (QTYPES.some(([, , re]) => re.test(t)) || /\s/.test(t) && !/^[A-Z]?[a-z]+$/.test(t)) return t; const nx = all.slice(i + 1).find(x => /\s(completion|labelling)$/i.test(x)); return nx ? `${t} ${nx.split(/\s+/).pop()}` : t; })
+  .map(t => { const q = QTYPES.find(([, , re]) => re.test(t)); return { t: t.charAt(0).toUpperCase() + t.slice(1), k: q ? q[0] : 'fill' }; });
 /* Learn lessons as a clean list: a coloured number, the lesson, one line about it, and where you are.
    One column for a short list, two (filled down the columns: 1–5, then 6–10) for a longer one. */
 function learnList(g, at) {
@@ -1068,8 +1075,9 @@ function sectionPage(w, secId, grpId) {
     const g = sec.groups.find(x => x.id === grpId) || sec.groups.find(x => x.id === lsGet(remember + '-grp', '')) || sec.groups[0]; lsSet(remember + '-grp', g.id);
     const PI = { part1: '<path d="M4 6h10v7H8l-4 3z"/><path d="M14 9h6v7l-3-2h-6v-2"/>', part2: '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M8 21h8"/>', part3: '<circle cx="7" cy="8" r="2.5"/><circle cx="17" cy="8" r="2.5"/><circle cx="12" cy="6" r="2.5"/><path d="M3 18c0-3 2-5 4-5s4 2 4 5M13 18c0-3 2-5 4-5s4 2 4 5M8 15c1-3 2-4 4-4s3 1 4 4"/>', part4: '<rect x="3" y="4" width="18" height="11" rx="1.5"/><path d="M7 19l3-4M17 19l-3-4M7 9h6M7 12h9"/>' };
     const pic = x => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${PI[x.id] || '<path d="M5 12h14"/>'}</svg>`;
-    body += `<ol class="sk-parts" style="${partStyle(w)}">${sec.groups.map(x => { const st = groupStats(w, [x]), on = x.id === g.id;
-      return `<li><a class="sk-part${on ? ' is-on' : ''}" href="#/skill/${w.n}/${sec.id}/${x.id}"${on ? ' aria-current="page"' : ''} style="--pp:${st.ready ? Math.round(100 * st.done / st.ready) : 0}%" aria-label="${esc(x.title)}${x.qs ? `, ${esc(x.qs)}` : ''}, ${st.done} of ${st.ready || x.size} done"><span class="sk-part-ic">${pic(x)}</span>
+    const gi = sec.groups.indexOf(g);
+    body += `<ol class="sk-parts" style="${partStyle(w)}">${sec.groups.map((x, xi) => { const st = groupStats(w, [x]), on = x.id === g.id;
+      return `<li style="${partTint(xi)}"><a class="sk-part${on ? ' is-on' : ''}" href="#/skill/${w.n}/${sec.id}/${x.id}"${on ? ' aria-current="page"' : ''} style="--pp:${st.ready ? Math.round(100 * st.done / st.ready) : 0}%" aria-label="${esc(x.title)}${x.qs ? `, ${esc(x.qs)}` : ''}, ${st.done} of ${st.ready || x.size} done"><span class="sk-part-ic">${pic(x)}</span>
         <span class="sk-part-tx"><b>${esc(x.title)}</b><small>${esc(x.sub || '')}</small></span><span class="sk-part-meta">${x.qs ? `<em><span class="sk-q-long">${esc(x.qs)}</span><span class="sk-q-short">${esc(x.qs.replace(/^Questions\s*/, 'Q '))}</span></em>` : ''}<span>${st.ready ? `${st.done} / ${st.ready}` : 'Coming soon'}</span></span>
         <span class="sk-part-bar"><i style="width:${st.ready ? Math.round(100 * st.done / st.ready) : 0}%"></i></span></a></li>`; }).join('')}</ol>`;
     const at = groupLessons(w, g), st = groupStats(w, [g]), view = lsGet(CLS.id + '-ex-view', 'list');
@@ -1077,15 +1085,18 @@ function sectionPage(w, secId, grpId) {
     const items = [...Array(g.size)].map((_, i) => { const n = i + 1, d = at[n], ready = d?.status === 'ready', [a, b] = d ? dayProgress(d) : [0, 0], done = ready && b && a === b; return { n, d, ready, a, b, done }; })
       .filter(x => !g.open || x.ready);   // an open group (pages built in Studio) lists only the pages that exist
     const noun = g.noun || 'Exercise';
-    const list = `<ol class="sk-list">${items.map(({ n, d, ready, a, b, done }) => { const inner = `<span class="sk-n${done ? ' is-done' : ''}">${done ? icon('check') : n}</span><span class="sk-row-tx"><b>${esc(ready ? d.title : `${noun} ${n}`)}</b>${ready && d.sub ? `<small>${esc(d.sub)}</small>` : ''}</span>${ready && a && !done ? `<span class="sk-row-bar"><i style="width:${Math.round(100 * a / b)}%"></i></span>` : ''}${status(d, a, b, done)}`;
-      return `<li>${ready ? `<a class="sk-row${done ? ' is-done' : ''}" href="#/${d.id}" aria-label="${noun} ${n}: ${esc(d.title)}${done ? ', done' : ''}">${inner}</a>` : `<div class="sk-row is-soon">${inner}</div>`}</li>`; }).join('')}</ol>`;
-    const grid = `<ol class="ex-grid">${items.map(({ n, d, ready, a, b, done }) => { const inner = `<span class="ex-n">${done ? icon('check') : n}</span><span class="ex-t">${esc(ready ? d.title : 'Coming soon')}</span>${ready && a && !done ? `<span class="ex-bar"><i style="width:${Math.round(100 * a / b)}%"></i></span>` : ''}`;
-      return `<li>${ready ? `<a class="ex-tile${done ? ' is-done' : a ? ' is-on' : ''}" href="#/${d.id}" aria-label="Exercise ${n}: ${esc(d.title)}${done ? ', done' : ''}">${inner}</a>` : `<div class="ex-tile is-soon" aria-label="Exercise ${n}: coming soon">${inner}</div>`}</li>`; }).join('')}</ol>`;
+    const cats = {}; items.forEach(x => { if (x.ready) [...new Set(qparts(x.d.sub).map(q => q.k))].forEach(k => { cats[k] = (cats[k] || 0) + 1; }); });
+    const filters = Object.keys(cats).length > 1 ? `<div class="sk-filter" role="group" aria-label="Show exercises with"><button type="button" class="is-on" data-sk-filter="" aria-pressed="true">All <small>${items.filter(x => x.ready).length}</small></button>${QTYPES.filter(([k]) => cats[k]).map(([k, label]) => `<button type="button" class="qt-${k}" data-sk-filter="${k}" aria-pressed="false"><i aria-hidden="true"></i>${label} <small>${cats[k]}</small></button>`).join('')}</div>` : '';
+    const list = `<ol class="sk-list">${items.map(({ n, d, ready, a, b, done }) => { const qs = ready ? qparts(d.sub) : [];
+      const inner = `<span class="sk-n${done ? ' is-done' : ''}">${done ? icon('check') : n}</span><span class="sk-row-tx"><b>${esc(ready ? d.title : `${noun} ${n}`)}</b>${qs.length ? `<span class="sk-types">${qs.map(q => `<span class="qt qt-${q.k}">${esc(q.t)}</span>`).join('')}</span>` : ''}</span>${ready && a && !done ? `<span class="sk-row-bar"><i style="width:${Math.round(100 * a / b)}%"></i></span>` : ''}${status(d, a, b, done)}`;
+      return `<li data-cats="${[...new Set(qs.map(q => q.k))].join(' ')}">${ready ? `<a class="sk-row${done ? ' is-done' : ''}" href="#/${d.id}" aria-label="${noun} ${n}: ${esc(d.title)}${done ? ', done' : ''}">${inner}</a>` : `<div class="sk-row is-soon">${inner}</div>`}</li>`; }).join('')}</ol>`;
+    const grid = `<ol class="ex-grid">${items.map(({ n, d, ready, a, b, done }) => { const ks = ready ? [...new Set(qparts(d.sub).map(q => q.k))] : []; const inner = `<span class="ex-n">${done ? icon('check') : n}</span><span class="ex-t">${esc(ready ? d.title : 'Coming soon')}</span>${ks.length ? `<span class="ex-dots" aria-hidden="true">${ks.map(k => `<i class="qt-${k}"></i>`).join('')}</span>` : ''}${ready && a && !done ? `<span class="ex-bar"><i style="width:${Math.round(100 * a / b)}%"></i></span>` : ''}`;
+      return `<li data-cats="${ks.join(' ')}">${ready ? `<a class="ex-tile${done ? ' is-done' : a ? ' is-on' : ''}" href="#/${d.id}" aria-label="Exercise ${n}: ${esc(d.title)}${done ? ', done' : ''}">${inner}</a>` : `<div class="ex-tile is-soon" aria-label="Exercise ${n}: coming soon">${inner}</div>`}</li>`; }).join('')}</ol>`;
     const vbtn = (v, label, path) => `<button type="button" class="sk-vbtn${view === v ? ' is-on' : ''}" data-ex-view="${v}" aria-pressed="${view === v}" title="${label}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true">${path}</svg><span>${label}</span></button>`;
-    body += `<section class="set-panel sk-panel" style="${partStyle(w)}"><header><div><h2>${esc(g.title)}${g.qs ? ` <small>${esc(g.qs)}</small>` : ''}</h2>${g.sub ? `<p>${esc(g.sub)}</p>` : ''}</div>
+    body += `<section class="set-panel sk-panel" style="${partStyle(w)};${partTint(Math.max(0, gi))}"><header><div><h2>${esc(g.title)}${g.qs ? ` <small>${esc(g.qs)}</small>` : ''}</h2>${g.sub ? `<p>${esc(g.sub)}</p>` : ''}</div>
       <div class="sk-panel-tools"><span class="set-count">${st.ready ? `<b>${st.done}</b> of ${st.ready} done` : g.open ? 'Coming soon' : `${g.size} exercises · coming soon`}</span>
         <div class="sk-view" role="group" aria-label="Show exercises as">${vbtn('list', 'List', '<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/>')}${vbtn('grid', 'Grid', '<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/>')}</div></div></header>
-      ${g.open && !items.length ? `<p class="sk-empty">${icon('sprout')}<span>The ${esc(noun.toLowerCase())}s for ${esc(w.theme)} will appear here soon.</span></p>` : view === 'grid' ? grid : list}
+      ${filters}${g.open && !items.length ? `<p class="sk-empty">${icon('sprout')}<span>The ${esc(noun.toLowerCase())}s for ${esc(w.theme)} will appear here soon.</span></p>` : view === 'grid' ? grid : list}
       ${g.open && builder?.on() ? `<button type="button" class="sk-new" data-pb-new="${w.n}:${g.base}:${esc(noun)}">${icon('plus')}New ${esc(noun.toLowerCase())}</button>` : ''}</section>`;
   }
   return `<section class="week sec-page" aria-label="${esc(w.theme)}">${head}${tabs}${body}</section>`;
@@ -2445,6 +2456,10 @@ document.addEventListener('click', e => {
   const t = e.target.closest('button,a,[data-week-tab]'); if (!t) return;
   const d = t.dataset;
   if (d.exView) { lsSet(CLS.id + '-ex-view', d.exView); render(); return; }   // list or grid of exercises (a skill's Practise page)
+  if (d.skFilter !== undefined) { const box = t.closest('.sk-panel'), k = d.skFilter;   // show only the exercises with one type of question
+    box.querySelectorAll('[data-sk-filter]').forEach(b => { const on = b === t; b.classList.toggle('is-on', on); b.setAttribute('aria-pressed', on); });
+    box.querySelectorAll('.sk-list > li, .ex-grid > li').forEach(li => { li.hidden = !!k && !(li.dataset.cats || '').split(' ').includes(k); });
+    box.classList.toggle('is-filtered', !!k); box.dataset.filter = k; return; }
   if (play && play.onClick(t, d)) return;
   if (kit && kit.onClick(t, d)) return;
   if (ielts && ielts.onClick(t, d)) return;
