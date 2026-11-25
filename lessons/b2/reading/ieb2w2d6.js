@@ -1,4 +1,4 @@
-/* IELTS · Reading · Learn · Lesson 6 — Sentence completion.
+/* IELTS · Reading · Learn · Lesson 6 — Sentence completion without a box.
    One lesson per type of question, in the same order and with the same name as Reading → Practise (the teacher's booklet
    "Reading Exercises"). Built from the old lesson 5 (without a box) of the teacher's training notes "Reading" (RAD TIME).
    Ids (lesson, activities, exercise blocks) are the keys of students' saved work: never rename them. */
@@ -8,7 +8,7 @@ window.DEC15_LESSON = {
  "day": 6,
  "sheet": true,
  "illus": "health",
- "title": "Sentence completion",
+ "title": "Sentence completion without a box",
  "duration": "About 40 minutes",
  "journey": "Complete sentences with words from the passage. Learn the four steps and the five mistakes that lose marks, then try an exercise.",
  "finish": {
@@ -184,7 +184,7 @@ window.DEC15_LESSON = {
      {
       "id": "ieb2w2d5-e1",
       "title": "Medicine for the healthy",
-      "kind": "Sentence completion",
+      "kind": "Sentence completion without a box",
       "go": "Read",
       "tip": "The six answers come in passage order, about one in each paragraph from B to D. Predict the grammar of each gap first.",
       "passage": {
@@ -218,14 +218,14 @@ window.DEC15_LESSON = {
     "type": "note",
     "tone": "info",
     "title": "More practice",
-    "text": "When you are ready, go to **Practise → Sentence completion** for more exercises of this type: [open the exercises](#/skill/2/practise/sent)."
+    "text": "When you are ready, go to **Practise → Sentence completion without a box** for more exercises of this type: [open the exercises](#/skill/2/practise/sent)."
    },
    {
     "type": "recap",
     "anchor": "xl-sum",
     "title": "Remember",
     "items": [
-     "Sentence completion answers are **in passage order**.",
+     "The answers are **in passage order**.",
      "Predict the **grammar** of the gap before you read: noun, verb, adjective?",
      "Copy the words **exactly**, within the **word limit**.",
      "Read the finished sentence: is it **true**, **correct** and **sensible**?",
@@ -241,7 +241,7 @@ window.DEC15_LESSON = {
    "minutes": 40,
    "tone": "blue",
    "art": "reading",
-   "title": "Sentence completion",
+   "title": "Sentence completion without a box",
    "subtitle": "Tips and an exercise in class",
    "outcome": "Know how to answer sentence completion questions.",
    "activities": [

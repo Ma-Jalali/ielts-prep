@@ -747,7 +747,8 @@ function courseMapRich(current, stops = course.map, opt = {}) {
   /* labels alternate below / above the road so neighbours never collide; the "You are here" bubble then sits higher */
   const up = i => i % 2 === 1 && i < N - 1;   // the finish keeps its label below, clear of the flag
   /* the week you are in: its own label becomes the navy "You are here · …" pill, so no second bubble can sit on a neighbour's label */
-  const lab = (w, i) => { const y = pts[i][1], now = w.st ? w.st === 'now' : w.n === current, txt = now ? (opt.nowText || 'You are here') + ' · ' + w.label : w.label, t = esc(txt), wd = Math.round(txt.length * (now ? 6.3 : 6.5) + (now ? 34 : 20)), ty = y + (up(i) ? -33 : 42);
+  const lab = (w, i) => { const y = pts[i][1], now = w.st ? w.st === 'now' : w.n === current; if (opt.bare && !now) return '';   // a long road: numbers only, and a plain "Up next"
+    const txt = now ? (opt.bare ? (opt.nowText || 'You are here') : (opt.nowText || 'You are here') + ' · ' + w.label) : w.label, t = esc(txt), wd = Math.round(txt.length * (now ? 6.3 : 6.5) + (now ? 34 : 20)), ty = y + (up(i) ? -33 : 42);
     const x = Math.max(wd / 2 + 8, Math.min(1000 - wd / 2 - 8, pts[i][0] + (i === N - 1 && N > 1 ? 22 : 0)));
     return now
       ? `<g class="cm-label cm-label-now"><rect x="${x - wd / 2}" y="${ty - 14.5}" width="${wd}" height="22" rx="11" fill="#18213f"/><circle cx="${x - wd / 2 + 12}" cy="${ty - 3.5}" r="3" fill="#e3a843"/><text x="${x + 7}" y="${ty}" text-anchor="middle" font-size="11.5" font-weight="700" font-family="Manrope, sans-serif" fill="#fff">${t}</text></g>`
@@ -1055,9 +1056,8 @@ function learnList(g, at, w) {
   const rows = [...Array(n)].map((_, i) => { const k = i + 1, d = at[k], ready = d?.status === 'ready', [a, b] = ready ? dayProgress(d) : [0, 0], done = ready && b && a === b, now = ready && !done && !next ? (next = true) : false;
     const st = !ready ? '<span class="ll-st is-soon">Coming soon</span>' : done ? `<span class="ll-st is-done">${icon('check')}Complete</span>` : a ? `<span class="ll-st is-on">In progress <small>${a}/${b}</small></span>` : now ? '<span class="ll-st is-next">Up next</span>' : '';
     const go = !ready ? '' : `<span class="ll-go${now || (a && !done) ? ' is-main' : ''}">${done ? 'Review' : a ? 'Continue' : 'Start'}${icon('arrow')}</span>`;
-    const t = tint(i);
-    const inner = `<span class="ll-n${t ? ' is-type' : ''}" aria-hidden="true">${done ? icon('check') : t ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${t.ic}</svg>` : k}</span><span class="ll-tx"><span class="ll-k">Lesson ${k}${t ? `<em class="ll-type">Type ${t.n}</em>` : ''}${st}</span><b>${esc(ready ? d.title : g.slots?.[i] || `Lesson ${k}`)}</b>${ready && d.sub ? `<small>${esc(d.sub)}</small>` : ''}${ready && a && !done ? `<span class="ll-bar"><i style="width:${Math.round(100 * a / b)}%"></i></span>` : ''}</span>${go}`;
-    return `<li class="${done ? 'is-done' : ''}${now ? ' is-now' : ''}${ready ? '' : ' is-soon'}" style="--dc:${t ? t.c : g.kinds ? '#2b67d1' : DAY_TINT[i % 5]}">${ready ? `<a href="#/${d.id}">${inner}</a>` : `<div>${inner}</div>`}</li>`; }).join('');
+    const inner = `<span class="ll-n" aria-hidden="true">${done ? icon('check') : k}</span><span class="ll-tx"><span class="ll-k">Lesson ${k}${st}</span><b>${esc(ready ? d.title : g.slots?.[i] || `Lesson ${k}`)}</b>${ready && d.sub ? `<small>${esc(d.sub)}</small>` : ''}${ready && a && !done ? `<span class="ll-bar"><i style="width:${Math.round(100 * a / b)}%"></i></span>` : ''}</span>${go}`;
+    return `<li class="${done ? 'is-done' : ''}${now ? ' is-now' : ''}${ready ? '' : ' is-soon'}" style="--dc:${w?.color || '#2b67d1'}">${ready ? `<a href="#/${d.id}">${inner}</a>` : `<div>${inner}</div>`}</li>`; }).join('');
   return `<ol class="ll-list${two ? ' is-two' : ''}" style="--rows:${Math.ceil(n / 2)}">${rows}</ol>`;
 }
 function sectionPage(w, secId, grpId) {
@@ -1076,7 +1076,7 @@ function sectionPage(w, secId, grpId) {
     const stops = [...Array(g.size)].map((_, i) => { const n = i + 1, d = at[n], ready = d?.status === 'ready', done = ready && isDone(d), name = g.slots?.[i] || `Lesson ${n}`;
       const st = done ? 'past' : ready && !next ? (next = true, 'now') : 'next';
       return { n, label: name.length > 24 ? name.slice(0, 22).trim() + '…' : name, sub: '', st, go: ready ? '#/' + d.id : '', aria: `${name}${ready ? '' : ' (coming soon)'}` }; });
-    body += `<section class="course-map skill-map" aria-label="${esc(g.title)} in order">${courseMapRich(0, stops, { nowText: 'Up next' })}</section>
+    body += `<section class="course-map skill-map" aria-label="${esc(g.title)} in order">${courseMapRich(0, stops, { nowText: 'Up next', bare: g.size > 6 })}</section>
       ${learnList(g, at, w)}`;
   } else if (sec.groups.some(g => g.test)) {   // Test: one card per practice test
     const g = sec.groups[0], at = groupLessons(w, g);
@@ -1097,12 +1097,22 @@ function sectionPage(w, secId, grpId) {
     const items = [...Array(g.size)].map((_, i) => { const n = i + 1, d = at[n], ready = d?.status === 'ready', [a, b] = d ? dayProgress(d) : [0, 0], done = ready && b && a === b; return { n, d, ready, a, b, done }; })
       .filter(x => !g.open || x.ready);   // an open group (pages built in Studio) lists only the pages that exist
     const noun = g.noun || 'Exercise';
-    const cats = {}; items.forEach(x => { if (x.ready) [...new Set(qparts(x.d.sub).map(q => q.k))].forEach(k => { cats[k] = (cats[k] || 0) + 1; }); });
-    const filters = Object.keys(cats).length > 1 ? `<div class="sk-filter" role="group" aria-label="Show exercises with"><button type="button" class="is-on" data-sk-filter="" aria-pressed="true">All <small>${items.filter(x => x.ready).length}</small></button>${QTYPES.filter(([k]) => cats[k]).map(([k, label]) => `<button type="button" class="qt-${k}" data-sk-filter="${k}" aria-pressed="false"><i aria-hidden="true"></i>${label} <small>${cats[k]}</small></button>`).join('')}</div>` : '';
-    const list = `<ol class="sk-list">${items.map(({ n, d, ready, a, b, done }) => { const qs = ready ? qparts(d.sub) : [];
-      const inner = `<span class="sk-n${done ? ' is-done' : ''}">${done ? icon('check') : n}</span><span class="sk-row-tx"><b>${esc(ready ? d.title : `${noun} ${n}`)}</b>${qs.length ? `<span class="sk-types">${qs.map(q => `<span class="qt qt-${q.k}">${esc(q.t)}</span>`).join('')}</span>` : ''}</span>${ready && a && !done ? `<span class="sk-row-bar"><i style="width:${Math.round(100 * a / b)}%"></i></span>` : ''}${status(d, a, b, done)}`;
-      return `<li data-cats="${[...new Set(qs.map(q => q.k))].join(' ')}">${ready ? `<a class="sk-row${done ? ' is-done' : ''}" href="#/${d.id}" aria-label="${noun} ${n}: ${esc(d.title)}${done ? ', done' : ''}">${inner}</a>` : `<div class="sk-row is-soon">${inner}</div>`}</li>`; }).join('')}</ol>`;
-    const grid = `<ol class="ex-grid">${items.map(({ n, d, ready, a, b, done }) => { const ks = ready ? [...new Set(qparts(d.sub).map(q => q.k))] : []; const inner = `<span class="ex-n">${done ? icon('check') : n}</span><span class="ex-t">${esc(ready ? d.title : 'Coming soon')}</span>${ks.length ? `<span class="ex-dots" aria-hidden="true">${ks.map(k => `<i class="qt-${k}"></i>`).join('')}</span>` : ''}${ready && a && !done ? `<span class="ex-bar"><i style="width:${Math.round(100 * a / b)}%"></i></span>` : ''}`;
+    // Chips name the types of question in each exercise, but only where a group mixes types: when every exercise has the
+    // same types, the group's name already says it. One neutral colour, no dots. Filter keys are the chip names themselves
+    // (so True / False / Not Given and Yes / No / Not Given stay apart), or broad categories when there are too many names.
+    const slug = t => t.toLowerCase().replace(/[^a-z]+/g, '-').replace(/^-|-$/g, '');
+    const chipsOf = x => x.ready ? qparts(x.d.sub) : [], sig = x => chipsOf(x).map(q => q.t).join('|');
+    const readyItems = items.filter(x => x.ready), mixed = new Set(readyItems.map(sig)).size > 1;
+    const names = {}; readyItems.forEach(x => [...new Set(chipsOf(x).map(q => q.t))].forEach(t => { names[t] = (names[t] || 0) + 1; }));
+    const byName = Object.keys(names).length <= 6;
+    const keysOf = x => [...new Set(chipsOf(x).map(q => byName ? slug(q.t) : q.k))];
+    const cats = {}; if (mixed) readyItems.forEach(x => keysOf(x).forEach(k => { cats[k] = (cats[k] || 0) + 1; }));
+    const fbtn = (k, label) => `<button type="button" data-sk-filter="${k}" aria-pressed="false">${esc(label)} <small>${cats[k]}</small></button>`;
+    const filters = Object.keys(cats).length > 1 ? `<div class="sk-filter" role="group" aria-label="Show exercises with"><button type="button" class="is-on" data-sk-filter="" aria-pressed="true">All <small>${readyItems.length}</small></button>${byName ? Object.keys(names).map(t => fbtn(slug(t), t)).join('') : QTYPES.filter(([k]) => cats[k]).map(([k, label]) => fbtn(k, label)).join('')}</div>` : '';
+    const list = `<ol class="sk-list">${items.map(x => { const { n, d, ready, a, b, done } = x, qs = mixed ? chipsOf(x) : [];
+      const inner = `<span class="sk-n${done ? ' is-done' : ''}">${done ? icon('check') : n}</span><span class="sk-row-tx"><b>${esc(ready ? d.title : `${noun} ${n}`)}</b>${qs.length ? `<span class="sk-types">${qs.map(q => `<span class="qt">${esc(q.t)}</span>`).join('')}</span>` : ''}</span>${ready && a && !done ? `<span class="sk-row-bar"><i style="width:${Math.round(100 * a / b)}%"></i></span>` : ''}${status(d, a, b, done)}`;
+      return `<li data-cats="${mixed ? keysOf(x).join(' ') : ''}">${ready ? `<a class="sk-row${done ? ' is-done' : ''}" href="#/${d.id}" aria-label="${noun} ${n}: ${esc(d.title)}${done ? ', done' : ''}">${inner}</a>` : `<div class="sk-row is-soon">${inner}</div>`}</li>`; }).join('')}</ol>`;
+    const grid = `<ol class="ex-grid">${items.map(x => { const { n, d, ready, a, b, done } = x, ks = mixed ? keysOf(x) : []; const inner = `<span class="ex-n">${done ? icon('check') : n}</span><span class="ex-t">${esc(ready ? d.title : 'Coming soon')}</span>${ready && a && !done ? `<span class="ex-bar"><i style="width:${Math.round(100 * a / b)}%"></i></span>` : ''}`;
       return `<li data-cats="${ks.join(' ')}">${ready ? `<a class="ex-tile${done ? ' is-done' : a ? ' is-on' : ''}" href="#/${d.id}" aria-label="Exercise ${n}: ${esc(d.title)}${done ? ', done' : ''}">${inner}</a>` : `<div class="ex-tile is-soon" aria-label="Exercise ${n}: coming soon">${inner}</div>`}</li>`; }).join('')}</ol>`;
     const vbtn = (v, label, path) => `<button type="button" class="sk-vbtn${view === v ? ' is-on' : ''}" data-ex-view="${v}" aria-pressed="${view === v}" title="${label}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true">${path}</svg><span>${label}</span></button>`;
     body += `<section class="set-panel sk-panel" style="${partStyle(w)};${partTint(Math.max(0, gi))}"><header><div><h2>${esc(g.title)}${g.qs ? ` <small>${esc(g.qs)}</small>` : ''}</h2>${g.sub ? `<p>${esc(g.sub)}</p>` : ''}</div>
@@ -2619,7 +2629,10 @@ if (course.sideColours?.length) {
     paint(); pick.querySelector('[aria-checked="true"]')?.focus();
   };
 }
-window.addEventListener('hashchange', () => { render(); window.scrollTo(0, 0); $('#main').focus({ preventScroll: true }); });
+let lastHash = location.hash;
+window.addEventListener('hashchange', () => { const a = lastHash.match(/^#\/skill\/(\d+)\/([\w-]+)/), b = location.hash.match(/^#\/skill\/(\d+)\/([\w-]+)/); lastHash = location.hash;
+  const same = a && b && a[1] === b[1] && a[2] === b[2], y = window.scrollY;   // another part or type in the same section: stay where you are
+  render(); if (same) window.scrollTo(0, y); else window.scrollTo(0, 0); $('#main').focus({ preventScroll: true }); });
 render(); save(false);
 cloud = window.createDEC15Cloud({
   cfg, lessonId: lesson.id, getState: () => state,

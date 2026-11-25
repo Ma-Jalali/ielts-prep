@@ -1,4 +1,4 @@
-/* IELTS · Reading · Learn · Lesson 5 — True / False / Not Given.
+/* IELTS · Reading · Learn · Lesson 5 — True / False / Not Given and Yes / No / Not Given.
    One lesson per type of question, in the same order and with the same name as Reading → Practise (the teacher's booklet
    "Reading Exercises"). Built from the old lesson 4 of the teacher's training notes "Reading" (RAD TIME).
    Ids (lesson, activities, exercise blocks) are the keys of students' saved work: never rename them. */
@@ -8,12 +8,12 @@ window.DEC15_LESSON = {
  "day": 5,
  "sheet": true,
  "illus": "map",
- "title": "True / False / Not Given",
+ "title": "True / False / Not Given and Yes / No / Not Given",
  "duration": "About 60 minutes",
  "journey": "The question type students fear most, and the one that rewards careful reading most. Learn the difference between FALSE and NOT GIVEN, the five ways statements are built, and Yes / No / Not Given, then try an exercise.",
  "finish": {
   "title": "Next",
-  "text": "Sentence completion"
+  "text": "Sentence completion without a box"
  },
  "learn": {
   "tags": [],
@@ -660,7 +660,7 @@ window.DEC15_LESSON = {
     "type": "note",
     "tone": "info",
     "title": "More practice",
-    "text": "When you are ready, go to **Practise → True / False / Not Given** for more exercises of this type: [open the exercises](#/skill/2/practise/tfng)."
+    "text": "When you are ready, go to **Practise → True / False / Not Given and Yes / No / Not Given** for more exercises of this type: [open the exercises](#/skill/2/practise/tfng)."
    },
    {
     "type": "recap",
@@ -711,9 +711,9 @@ window.DEC15_LESSON = {
    "minutes": 60,
    "tone": "blue",
    "art": "reading",
-   "title": "True / False / Not Given",
+   "title": "True / False / Not Given and Yes / No / Not Given",
    "subtitle": "Question type 3",
-   "outcome": "Tell FALSE from NOT GIVEN, and recognise the five ways statements are built.",
+   "outcome": "Tell FALSE from NOT GIVEN, recognise the five ways statements are built, and answer Yes / No / Not Given too.",
    "activities": [
     {
      "id": "tips",
