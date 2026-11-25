@@ -47,7 +47,7 @@ window.DEC15_LESSON = {
        "blocks": [
         {
          "type": "ieMatch",
-         "kindName": "Matching information",
+         "kindName": "Finding information in paragraphs",
          "reuse": true,
          "boxTitle": "Paragraphs",
          "instruction": "The passage has five paragraphs, **A–E**. Which tour contains the following information? Write the correct letter, **A–E**. You may use any letter more than once.",

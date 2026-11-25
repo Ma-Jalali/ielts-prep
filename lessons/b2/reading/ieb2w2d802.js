@@ -46,7 +46,7 @@ window.DEC15_LESSON = {
        "blocks": [
         {
          "type": "ieMatch",
-         "kindName": "Matching features",
+         "kindName": "Matching",
          "reuse": true,
          "boxTitle": "List of countries",
          "instruction": "Match each statement (Questions 1–5) with the correct country, **A–E**. You may use any letter more than once.",

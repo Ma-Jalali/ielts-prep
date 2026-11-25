@@ -1,134 +1,453 @@
-/* IELTS · Reading · Learn · Lesson 4 — True, False, Not Given (and Yes, No, Not Given): question type 3.
-   Source: the teacher's training notes "Reading" (RAD TIME), pages 6–10. The Persian examples are translated into
-   English; a few examples are replaced where the original answer could be argued (the languages of a country, "few"
-   companies) or used violence (the cause-and-effect example). "Welcome to Australia" is adapted (rewritten).
-   Ids (lesson, activities, exercises, blocks) are the keys of students' saved work: never rename them. */
+/* IELTS · Reading · Learn · Lesson 4 — Note, table, flow chart and diagram completion.
+   One lesson per type of question, in the same order and with the same name as Reading → Practise (the teacher's booklet
+   "Reading Exercises"). Built from the old lessons 3 (notes, tables) and 10 (diagrams) of the teacher's training notes "Reading" (RAD TIME).
+   Ids (lesson, activities, exercise blocks) are the keys of students' saved work: never rename them. */
 window.DEC15_LESSON = {
-  id: 'ieb2w2d4', week: 2, day: 4, sheet: true, illus: 'map',
-  title: 'True, False, Not Given',
-  duration: 'About 60 minutes',
-  journey: 'The question type students fear most, and the one that rewards careful reading most. Learn the difference between FALSE and NOT GIVEN, the five ways these statements are built, and then try a full exercise.',
-  finish: { title: 'Next', text: 'Sentence completion' },
-  learn: {
-    tags: ['Question type 3'],
-    jump: [['xl-decide', 'How to decide', 'target'], ['xl-basics', 'The basics', 'info'], ['xl-built', 'Five patterns', 'list'], ['xl-ex', 'Exercise', 'pen'], ['xl-sum', 'Remember', 'ok']],
-    blocks: [
-      { type: 'key', title: 'The difference that matters', text: '**FALSE**: the passage says the **opposite**. **NOT GIVEN**: the passage **does not say**.' },
-      { type: 'steps', anchor: 'xl-decide', kicker: 'How to decide', title: 'Three steps for every statement',
-        items: [
-          { t: 'Find the place', d: 'Choose a word you can trust in the statement (a name, a number, a key noun) and find the sentence in the passage that talks about it.' },
-          { t: 'Compare word by word', d: 'Read the passage sentence from **beginning to end**. Check **every** part of the statement: who, what, when, how much, how sure.' },
-          { t: 'Decide', d: ['Everything in the statement is in the passage → **TRUE**', 'Something in the statement is the opposite of the passage → **FALSE**', 'Something in the statement is not in the passage at all → **NOT GIVEN**'] }] },
-      { type: 'tabs', anchor: 'xl-basics', kicker: 'The basics', title: 'Three answers, one careful reader',
-        items: [
-          { label: 'Tips', icon: 'tip', blocks: [
-            { type: 'list', items: [
-              'The answers are **all in passage order**.',
-              'Read each statement **very** carefully: every word counts.',
-              'When you find the place of the answer, read the sentence in the passage **from the beginning to the end**.',
-              'Do **not** use your general knowledge. Only the passage counts, even if you know the statement is true in real life.'] },
-            { type: 'text', title: 'Every word counts', text: 'Look at how much information there is in one short statement:' },
-            { type: 'table', wide: true, head: ['Statement', 'Who?', 'Does what?', 'When / where?'], rows: [['Emma eats pancakes on Sunday mornings.', 'Emma', 'eats pancakes', 'on ==Sunday mornings=='], ['Jack walks in the park in autumn.', 'Jack', 'walks in the park', 'in ==autumn==']] },
-            { type: 'note', tone: 'tip', text: 'If the passage only says *Emma eats pancakes*, the answer to the first statement is **NOT GIVEN**: the passage says nothing about **Sunday mornings**.' }] },
-          { label: 'False or Not Given?', icon: 'target', blocks: [
-            { type: 'cards', cols: 2, items: [
-              { icon: 'no', t: 'FALSE / NO', d: 'The easiest to recognise: a word in the statement is the **opposite** of the information in the passage. The passage **contradicts** it.' },
-              { icon: 'eye', t: 'NOT GIVEN', d: 'Either there is **no information** about it in the passage, or there is information but it is **not enough** to say true or false.' }] },
-            { type: 'image', src: 'assets/reading/notgiven.svg', alt: 'Two diagrams. Not Given: the question circle is partly outside the passage circle. True: the question circle is completely inside the passage circle.', caption: 'If any part of the question (**b**) is not in the passage, the answer is NOT GIVEN. If everything in the question is in the passage, the answer is TRUE, even when the passage says more.' },
-            { type: 'versus', items: [
-              { q: 'French people like to eat toast **in the morning**.', p: 'French people like to eat toast.', answer: 'NOT GIVEN', why: 'The passage says nothing about **when** they eat it. Q = ax + b, P = ax.' },
-              { q: 'French people like to eat toast.', p: 'French people like to eat toast in the morning, in the afternoon and in the evening.', answer: 'TRUE', why: 'Everything in the statement is in the passage. The passage simply says more. Q = ax, P = ax + b.' }] }] },
-          { label: 'Yes / No / Not Given', icon: 'chat', blocks: [
-            { type: 'cards', cols: 2, items: [
-              { icon: 'book', t: 'TRUE / FALSE / NOT GIVEN', d: 'Asks about **facts**: does the statement agree with the **information** in the passage?' },
-              { icon: 'chat', t: 'YES / NO / NOT GIVEN', d: 'Asks about **opinions**: does the statement agree with the **views or claims of the writer**?' }] },
-            { type: 'note', tone: 'info', text: 'The method is exactly the same. Only the words change: YES = TRUE and NO = FALSE. With YES / NO, look for opinion words: *I believe*, *surprisingly*, *unfortunately*, *it is clear that*, *I doubt*.' }] }
-        ] },
-      { type: 'folds', anchor: 'xl-built', kicker: 'How they are built', title: 'Five ways examiners build a statement', intro: 'Most statements test one of these five things. Learn to notice them and you will know where to look.',
-        items: [
-          { icon: 'repeat', title: '1 · Comparison', sub: 'bigger, the best, more, similar, prefer', blocks: [
-            { type: 'text', text: 'When a statement **compares** two or more things, find the same comparison in the passage. If there is **no** comparison, or a **different** one, the answer is NOT GIVEN. If the same comparison is there, decide between TRUE and FALSE.' },
-            { type: 'chips', title: 'Watch out for', groups: [{ items: ['-er / more … than', 'the -est / the most', 'less / fewer', 'similar', 'identical', 'the same', 'different', 'prefer', 'rather than', 'unlike'] }] },
-            { type: 'note', tone: 'tip', text: 'Statement: *Russia is bigger than Canada.* Passage: *Russia is a bigger producer of gas than Canada.* → **NOT GIVEN**. The statement compares **size**; the passage compares **gas production**.' },
-            { type: 'versus', items: [
-              { q: 'Dr Smith is **the best** doctor in the area.', p: 'Dr Smith is a professional doctor in this area.', answer: 'NOT GIVEN', why: 'The passage does not compare Dr Smith with other doctors.' },
-              { q: 'Egypt is **the most popular** tourist country in Africa.', p: 'Egypt is one of the popular tourist countries in Africa.', answer: 'NOT GIVEN', why: '*One of the popular* countries does not tell us whether it is **the most** popular.' },
-              { q: 'Egypt is one of the popular tourist countries in Africa.', p: 'Egypt is the most popular tourist country in Africa.', answer: 'TRUE', why: 'If it is the most popular, it is certainly one of the popular ones.' },
-              { q: 'We need **more** money to do this research.', p: 'Doing this research costs a great deal of money.', answer: 'NOT GIVEN', why: 'The research is expensive, but the passage does not say we need **more** money than we have.' }] }] },
-          { icon: 'clock', title: '2 · Time', sub: 'already, soon, originally, always, before', blocks: [
-            { type: 'chips', title: 'Watch out for', groups: [{ items: ['already', 'soon', 'early', 'late', 'recently', 'originally', 'used to', 'no longer', 'still', 'yet', 'permanent', 'temporary', 'for good (= forever)', 'in no time (= very quickly)', 'so far (= until now)', 'before', 'after', 'always', 'at any time'] }] },
-            { type: 'versus', items: [
-              { q: 'Nylon has **already** been used in parachutes.', p: 'Scientists hope to use nylon in parachutes.', answer: 'FALSE', why: '*Hope to use* = it has **not** been used yet.' },
-              { q: 'This system will **soon** be used in many hotels.', p: 'Many hotel managers would like to have this system in their hotels, but I doubt it will happen in the near future.', options: ['YES', 'NO', 'NOT GIVEN'], answer: 'NO', why: 'This is the writer’s view: *I doubt it will happen in the near future* = not soon.' },
-              { q: 'This tower **is** covered with limestone slabs.', p: 'This tower was **originally** covered with limestone slabs, all of which have been stolen over the years.', answer: 'FALSE', why: 'It **was** covered, but the slabs have gone.' },
-              { q: 'John Harris broke the record **before** Roger Anderson.', p: 'Roger Anderson was the first person to break the record.', answer: 'FALSE', why: 'If Roger was **first**, John cannot have been before him.' },
-              { q: 'John Harris broke the record **before** Roger Anderson.', p: 'Record breakers: John Harris 1985 · Roger Anderson 1956', answer: 'FALSE', why: 'Roger: 1956. John: 1985, almost thirty years later.' },
-              { q: 'You can call this centre **at any time**.', p: 'The centre is open from 6 am to 11 pm, and during this time you can call whenever you wish.', answer: 'FALSE', why: 'Only between 6 am and 11 pm, not at **any** time.' },
-              { q: 'The **ultimate goal of the founder** of the Olympic Games was to bring countries together, whatever their wars or political problems.', p: 'The purpose of the Olympic Games has always been to bring countries together without considering political problems.', answer: 'NOT GIVEN', why: 'The passage talks about the purpose of **the Games**, not about the goal of **the founder**.' }] }] },
-          { icon: 'hash', title: '3 · Quantity', sub: 'all, most, half, a few, few, only, enough', blocks: [
-            { type: 'scale', items: [
-              { v: '100%', p: 100, words: ['all', 'every', 'each', 'the whole', 'entire'] },
-              { v: '60–70%', p: 66, words: ['most', 'the majority of', 'many', 'much', 'quite a few (≈ many)', 'quite a bit of (≈ much)'] },
-              { v: '50%', p: 50, words: ['half'] },
-              { v: 'Some', p: 25, words: ['some', 'several', 'a few', 'a little'], note: '*A few* and *a little* are positive: = some.' },
-              { v: '≈ 0', p: 6, words: ['few', 'little', 'hardly any'], note: '*Few* and *little* (without *a*) are negative: = almost none.' },
-              { v: '0%', p: 0, words: ['no', 'none', 'not any', 'never'] }] },
-            { type: 'note', tone: 'warn', title: 'Two small words, big changes', text: '**Only** means *nothing else*: *This disease can only be cured by herbal medicine*.\n\n**Enough** means *as much as is needed*: *There is enough water for the city*.' },
-            { type: 'versus', items: [
-              { q: '**All** the students passed the exam.', p: '**Most** of the students passed the exam.', answer: 'FALSE', why: '*Most* means some students did **not** pass.' },
-              { q: 'The **whole** city was destroyed in the earthquake.', p: 'The earthquake destroyed **most of** the city.', answer: 'FALSE', why: '*Most of* is not *the whole*.' },
-              { q: '**Few** people visited the museum last year.', p: 'The museum had more than two million visitors last year.', answer: 'FALSE', why: '*Few* = almost none, but two million is a lot.' },
-              { q: 'This disease can be cured **only** by herbal medicine.', p: '**One of the ways** to cure this illness is herbal medicine.', answer: 'FALSE', why: '*One of the ways* means there are other ways too.' }] }] },
-          { icon: 'signpost', title: '4 · Who did it?', sub: 'one agent or more than one', blocks: [
-            { type: 'text', text: 'A statement often says that **A** did something to **B** (A → B), but the passage names someone else.' },
-            { type: 'cards', cols: 2, items: [
-              { icon: 'no', t: 'Only ONE person can do it → FALSE', d: 'Statement: *Tom won the race.* Passage: *Sara won the race.* A race has one winner, so it cannot be Tom. (The word **only** often does the same job.)' },
-              { icon: 'eye', t: 'MORE THAN ONE can do it → NOT GIVEN', d: 'Statement: *Tom loves Anna.* Passage: *Sam loves Anna.* Many people can love Anna, so we do not know about Tom.' }] }] },
-          { icon: 'star', title: '5 · Certainty', sub: 'definitely, probably, may, might', blocks: [
-            { type: 'scale', items: [
-              { v: '100%', p: 100, words: ['certainly', 'definitely', 'for sure', 'always', 'on all occasions', 'must', 'vital', 'crucial', 'essential'] },
-              { v: 'Likely', p: 70, words: ['be likely to', 'will probably', 'probably'] },
-              { v: 'Possible', p: 40, words: ['may', 'might', 'could', 'possibly', 'perhaps'] }] },
-            { type: 'table', wide: true, head: ['Statement', 'Passage', 'Answer'], rows: [['It will *definitely* happen.', 'It *might* happen.', 'FALSE'], ['It *might* happen.', 'It will *definitely* happen.', 'TRUE']] },
-            { type: 'note', tone: 'warn', title: '*May* has two meanings', text: '*May* can mean **possibly**, or it can mean **are allowed to**:\n\n*You **may** drink water during the test.* (= you are allowed to)\n*You **may not** use your phone in the exam room.* (= you are **not** allowed to)' }] }
-        ] },
-      { type: 'exercises', anchor: 'xl-ex', kicker: 'Exercise', title: 'Try it', intro: 'Read the passage and decide on each statement. The answers, with the reasons, are folded at the bottom.',
-        items: [
-          { id: 'ieb2w2d4-e1', title: 'Welcome to Australia', kind: 'TRUE / FALSE / NOT GIVEN', go: 'Read',
-            tip: 'Before you read, underline the small words that change everything: **only**, **all**, **free**, **possible**, **the most**, **if**.',
-            passage: { title: 'Welcome to Australia', subtitle: 'Information for new residents', text: '### Apply for a Tax File Number\nEveryone who receives any income in Australia needs a Tax File Number. Income includes wages or a salary from a job, money earned from investments, and government payments.\n\n### Register with Medicare\nThe Australian Government helps with medical costs through a scheme called Medicare. You may be able to join Medicare and get immediate access to health services and programmes such as free care in public hospitals, help with the cost of care outside hospital, and cheaper medicines.\n\nTo register with Medicare, wait about ten working days after you arrive in Australia, and then go to a Medicare office with your passport or travel documents. If you need to see a doctor urgently, you can register with Medicare without waiting ten days.\n\nMedicare has a Welcome Kit, which has been translated into 16 languages. It explains Medicare and other government health services, and who can receive benefits and payments. You can get the booklet from Medicare offices or read it on the internet.\n\n### Open a bank account\nPeople in Australia usually keep their money in a bank, a building society or a credit union. It is a good idea to open a bank account within six weeks of your arrival, because during this time you usually need only your passport as identification. After six weeks, you will need more identification to open an account.\n\n### Register with Centrelink\nNew residents can register with the government agency Centrelink to get help with looking for work, having their overseas skills recognised and finding suitable courses. Centrelink also has an application form for Tax File Numbers and can help you send your application to the Tax Office, so that there is no delay in any payments.\n\n### Register for English classes\nEnglish courses for new arrivals are provided under the Adult Migrant English Program. As a new resident, you may be entitled to up to 510 hours of free English lessons.\n\n### Get a driver’s licence\nIf you hold a permanent resident visa and a current driver’s licence from another country, in English or with an official translation, you may drive for your first three months in Australia. After that, you will need an Australian licence. To get one, you usually have to pass a knowledge test, a practical test and an eyesight test. Licences from some countries do not need a practical test.' },
-            blocks: [{ type: 'ieTFNG', id: 'ieb2w2d4-e1-q1', from: 1, kind: 'tfng', instruction: 'Do the following statements agree with the information given in the reading passage? Choose **TRUE**, **FALSE** or **NOT GIVEN**.',
-              items: [
-                { q: 'A Tax File Number is **only** needed by people who are working.', answer: 'FALSE', why: 'Income also includes investments and government payments.' },
-                { q: '**All** healthcare services are free for people registered with Medicare.', answer: 'FALSE', why: 'Only some are free (public hospital care); for others Medicare only helps with the cost.' },
-                { q: 'In certain cases, it is possible to register with Medicare less than ten days after arriving in Australia.', answer: 'TRUE', why: 'If you need to see a doctor urgently, you can register without waiting ten days.' },
-                { q: 'There is a charge for Welcome Kit booklets from Medicare offices.', answer: 'NOT GIVEN', why: 'The passage says where to get the booklet, but not whether it costs anything.' },
-                { q: 'Banks are **the most** commonly used type of financial institution.', answer: 'NOT GIVEN', why: 'Banks, building societies and credit unions are listed, but not compared.' },
-                { q: '**If** you open a bank account in your first six weeks in Australia, you will probably need fewer documents than later on.', answer: 'TRUE', why: 'In the first six weeks you usually need only your passport; after that, more identification.' },
-                { q: 'Centrelink can help you to get your qualifications accepted officially.', answer: 'TRUE', why: '*Having their overseas skills recognised* = getting qualifications accepted.' },
-                { q: 'Centrelink can lend money to new arrivals if necessary.', answer: 'NOT GIVEN', why: 'Payments are mentioned, but nothing about lending money.' },
-                { q: 'English lessons are free for **all** new residents.', answer: 'FALSE', why: 'New residents **may be** entitled to free lessons, so not all of them are.' },
-                { q: 'Whether you need to take an Australian practical driving test depends on which country you come from.', answer: 'TRUE', why: 'Licences from some countries do not need a practical test.' }] }] }
-        ] },
-      { type: 'recap', anchor: 'xl-sum', title: 'Remember',
-        items: ['The answers are **in passage order**.', 'Check **every** word of the statement: who, what, when, how much, how sure.', '**FALSE** = the passage says the opposite. **NOT GIVEN** = the passage does not say.', 'Watch the five patterns: **comparison**, **time**, **quantity**, **who did it**, **certainty**.', 'Never use your **general knowledge**: only the passage counts.'] },
-      { type: 'check', kicker: 'Check yourself', title: 'True or false?', intro: 'Tap True or False to see the answer.',
-        items: [
-          { s: 'If you know from real life that a statement is true, you should answer TRUE.', answer: false, why: 'Only the passage counts.' },
-          { s: 'NOT GIVEN can mean that there is some information, but not enough.', answer: true, why: 'That is the harder kind of NOT GIVEN: Q = ax + b, P = ax.' },
-          { s: 'TRUE / FALSE / NOT GIVEN answers are in passage order.', answer: true, why: 'So the answer to Question 3 comes after the answer to Question 2.' },
-          { s: '*Few people came* and *a few people came* mean the same.', answer: false, why: '*Few* = almost nobody; *a few* = some.' }] }
+ "id": "ieb2w2d4",
+ "week": 2,
+ "day": 4,
+ "sheet": true,
+ "illus": "home",
+ "title": "Note, table, flow chart and diagram completion",
+ "duration": "About 50 minutes",
+ "journey": "Complete notes, tables and flow charts, and label diagrams, with words from the passage. Learn to use the headings and labels, then try the exercises.",
+ "finish": {
+  "title": "Next",
+  "text": "True / False / Not Given"
+ },
+ "learn": {
+  "tags": [],
+  "jump": [
+   [
+    "xl-tips",
+    "Tips",
+    "tip"
+   ],
+   [
+    "xl-ex",
+    "Try it",
+    "pen"
+   ],
+   [
+    "xl-sum",
+    "Remember",
+    "ok"
+   ]
+  ],
+  "blocks": [
+   {
+    "type": "key",
+    "title": "The big idea",
+    "text": "Notes, tables, flow charts and diagrams **organise** the passage for you. Use their **headings and labels** to find your place, then copy the missing words."
+   },
+   {
+    "type": "tabs",
+    "anchor": "xl-tips",
+    "kicker": "Tips",
+    "title": "How to answer them",
+    "intro": "5 short tabs. Read them in order: each one ends with a button to the next.",
+    "items": [
+     {
+      "label": "Notes, tables, flow charts",
+      "icon": "list",
+      "lead": "You complete gaps in notes, a table or a flow chart, with words and/or a number from the passage.",
+      "blocks": [
+       {
+        "type": "cards",
+        "items": [
+         {
+          "icon": "list",
+          "t": "Notes",
+          "d": "Headings and short lines. The headings tell you which part of the passage to read."
+         },
+         {
+          "icon": "hash",
+          "t": "Tables",
+          "d": "Read across the rows and down the columns: the column heading tells you the type of answer."
+         },
+         {
+          "icon": "repeat",
+          "t": "Flow charts",
+          "d": "Steps in a process, in order. Look for words of sequence: *first, then, after, finally*."
+         },
+         {
+          "icon": "eye",
+          "t": "Some information is given",
+          "d": "Use the parts that are already complete: they show you where you are in the passage."
+         }
+        ]
+       },
+       {
+        "type": "note",
+        "tone": "warn",
+        "title": "Not always in order",
+        "text": "Notes and tables may **not** follow the order of the passage. A table may also take its answers from different parts of the text."
+       }
+      ]
+     },
+     {
+      "label": "Diagrams",
+      "icon": "map",
+      "lead": "A picture, a plan or a machine with numbered labels. Follow the passage like a map.",
+      "blocks": [
+       {
+        "type": "cards",
+        "anchor": "xl-tips",
+        "kicker": "Tips",
+        "title": "Follow the passage like a map",
+        "items": [
+         {
+          "icon": "map",
+          "t": "A small area",
+          "d": "The answers are usually in **one or two paragraphs**. Find that part first."
+         },
+         {
+          "icon": "repeat",
+          "t": "Not in order",
+          "d": "The numbers on the diagram may **not** follow the order of the passage."
+         },
+         {
+          "icon": "abc",
+          "t": "Mostly nouns",
+          "d": "The answers are usually **names of parts** (nouns), sometimes with a size or a shape."
+         },
+         {
+          "icon": "eye",
+          "t": "Look at the picture",
+          "d": "Notice the **shape**, **size** and **position** of each part, and the labels that are already there."
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "label": "Position words",
+      "icon": "signpost",
+      "lead": "Passages describe where things are. These words lead you to the right part of the picture.",
+      "blocks": [
+       {
+        "type": "table",
+        "wide": true,
+        "head": [
+         "Words",
+         "Meaning"
+        ],
+        "rows": [
+         [
+          "next to · adjacent to · by · near · in the vicinity of",
+          "close to something"
+         ],
+         [
+          "under · below · beneath · underneath · at the bottom of",
+          "lower than something"
+         ],
+         [
+          "above · over · on top of",
+          "higher than something"
+         ],
+         [
+          "beyond",
+          "on the far side of something; further away than it"
+         ],
+         [
+          "in front of · behind",
+          "before or after something, as you look at it"
+         ],
+         [
+          "across from · facing · opposite",
+          "on the other side, looking at it"
+         ],
+         [
+          "against",
+          "touching something, usually a wall"
+         ],
+         [
+          "along",
+          "1 in a straight line: *go along the road* = go straight on. 2 beside the length of something: *There are restaurants along the street.*"
+         ],
+         [
+          "surrounded by",
+          "with something all around it"
+         ],
+         [
+          "in the centre of · in the corner of",
+          "in the middle · where two walls meet"
+         ],
+         [
+          "leading off",
+          "opening from another room: *a kitchen leading off the living room*"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "label": "Shapes",
+      "icon": "target",
+      "blocks": [
+       {
+        "type": "chips",
+        "groups": [
+         {
+          "label": "Flat shapes",
+          "items": [
+           "triangle",
+           "square",
+           "rectangle",
+           "oval",
+           "circle",
+           "crescent",
+           "pentagon",
+           "hexagon",
+           "octagon",
+           "lozenge (diamond)",
+           "cross"
+          ]
+         },
+         {
+          "label": "Solid shapes",
+          "items": [
+           "cube",
+           "pyramid",
+           "hemisphere",
+           "sphere",
+           "cylinder",
+           "cone"
+          ]
+         }
+        ]
+       },
+       {
+        "type": "note",
+        "tone": "tip",
+        "text": "Adjectives help too: *circular*, *rectangular*, *triangular*, *curved*, *flat*, *pointed*."
+       }
+      ]
+     },
+     {
+      "label": "Try it",
+      "icon": "pen",
+      "blocks": [
+       {
+        "type": "examples",
+        "title": "What does the table tell you?",
+        "items": [
+         {
+          "label": "A column heading",
+          "q": "**Starting time** | 10.00 am | 10.45 am | ______",
+          "a": "a time",
+          "why": "The heading tells you the type of answer: here, a time such as *1 pm*."
+         },
+         {
+          "label": "A note heading",
+          "q": "**People with poor hearing**\n– construction workers\n– ______",
+          "a": "a group of people",
+          "why": "Look for another job or group of people in the passage."
+         }
+        ]
+       }
+      ]
+     }
     ]
-  },
-  sections: [{
-    id: 'learn', number: '04', minutes: 60, tone: 'blue', art: 'reading',
-    title: 'True, False, Not Given', subtitle: 'Question type 3',
-    outcome: 'Tell FALSE from NOT GIVEN, and recognise the five ways statements are built.',
-    activities: [
-      { id: 'tips', short: 'Tips', minutes: 35, grouping: 'Alone', title: 'Learn how the statements work', goal: 'Read the basics and the five ways statements are built.', blocks: [{ type: 'text', title: 'Tips', text: 'The basics and the five ways statements are built.' }] },
-      { id: 'practise', short: 'Exercise', minutes: 25, grouping: 'Alone', title: 'Do the exercise', goal: 'Do the exercise and check your answers.', blocks: [{ type: 'text', title: 'Exercise', text: 'Welcome to Australia.' }] }
+   },
+   {
+    "type": "exercises",
+    "anchor": "xl-ex",
+    "kicker": "In class",
+    "title": "Try it",
+    "intro": "Open an exercise, read the passage and answer the questions. The answers, with the reasons, are folded at the bottom.",
+    "items": [
+     {
+      "id": "ieb2w2d3-e2",
+      "title": "Silence is not always golden",
+      "kind": "Note completion",
+      "go": "Read",
+      "tip": "The notes follow the passage. Questions 2–5 are groups of people: look for jobs.",
+      "passage": {
+       "title": "Silence is not always golden",
+       "text": "A worldwide survey has found that people who live in cities hear better than people who live in quiet villages, and scientists now believe that the ear needs exercise to stay in shape.\n\nA team of scientists at the University of Giessen, in Germany, has spent more than a decade testing the hearing of over 10,000 people around the world. As expected, people exposed to extremely loud noise at work, such as construction workers, had poor hearing. But the hearing of people living in quiet rural areas, such as farmers, was just as bad. Orchestral musicians and airline pilots, by contrast, usually hear well, even though their work is noisy. And there is little difference between people who go to noisy concerts and people who do not.\n\nHearing specialists have long believed that long exposure to very loud noise damages hearing, so industrial standards are based on people’s average exposure to sound energy. However, it is very strong impulses, such as loud bangs, that do the most damage, whereas continual noise ‘trains’ the ear to tolerate it."
+      },
+      "blocks": [
+       {
+        "type": "ieGap",
+        "id": "ieb2w2d3-e2-q1",
+        "from": 1,
+        "layout": "notes",
+        "title": "Hearing research",
+        "instruction": "Complete the notes below. Choose **NO MORE THAN TWO WORDS** from the passage for each answer.",
+        "rule": "NO MORE THAN TWO WORDS",
+        "max": 2,
+        "text": "# The research\n- The ear needs training to work well\n- Length of the study: more than [[a decade|decade]]\n# People with poor hearing\n- [[construction workers|farmers]]\n- [[farmers|construction workers]]\n# People with good hearing\n- [[orchestral musicians|airline pilots]]\n- [[airline pilots|orchestral musicians]]\n# The most dangerous type of noise\n- [[loud bangs|bangs]]",
+        "why": [
+         "*Over a decade* = more than a decade (2 words).",
+         "Answers 2 and 3 can be in either order.",
+         "",
+         "Answers 4 and 5 can be in either order: *by contrast* tells you they hear well.",
+         "",
+         "*It is very strong impulses, such as loud bangs, that do the most damage.*"
+        ]
+       }
+      ]
+     },
+     {
+      "id": "ieb2w2d3-e3",
+      "title": "Monday at the fitness centre",
+      "kind": "Table completion",
+      "go": "Read",
+      "tip": "Read the column headings first: the first gap is something to bring, the third is a time.",
+      "passage": {
+       "title": "Fitness Centre",
+       "subtitle": "Activities for Monday 12 July",
+       "scroll": false,
+       "text": "The fitness centre offers a variety of activities for members of all ages throughout the week.\n\n### Learn to swim\nClasses for pre-school children aged 5 and under start at 10 am. Classes last 30 minutes, and parents must attend with their children. Don’t forget to book, as places are limited, and bring some warm clothes for after the lesson.\n\n### Women’s aerobics\nOne-hour sessions, led by Melissa, begin at 10.45 am. Join us every Monday for an exciting hour of exercise and fun. Leave your children at the nursery and take some time for yourself. Wear a tracksuit or something similar.\n\n### Lunchtime yoga\nTake a break at lunchtime (1 pm – 2 pm) for an hour of meditation and yoga. Enjoy the peace and quiet of our meditation room, with relaxing sessions for active people with busy lives. Use your own mat for floor work, or hire one from us for a small fee."
+      },
+      "blocks": [
+       {
+        "type": "ieTable",
+        "id": "ieb2w2d3-e3-q1",
+        "from": 1,
+        "title": "Monday’s activities",
+        "instruction": "Complete the table below. Choose **NO MORE THAN THREE WORDS AND/OR A NUMBER** from the passage for each answer.",
+        "rule": "NO MORE THAN THREE WORDS AND/OR A NUMBER",
+        "max": 3,
+        "columns": [
+         "Activity",
+         "Starting time",
+         "Need to bring"
+        ],
+        "rows": [
+         [
+          "Pre-school swimming",
+          "10.00 am",
+          "[[warm clothes|some warm clothes]]"
+         ],
+         [
+          "[[women’s aerobics|aerobics]]",
+          "10.45 am",
+          "tracksuit"
+         ],
+         [
+          "Yoga",
+          "[[1 pm|1pm|1.00 pm|1 o’clock]]",
+          "[[own mat|your own mat|mat]]"
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "id": "ieb2w2d10-e1",
+      "title": "A house in Zinacantan",
+      "kind": "Diagram labelling",
+      "go": "Read",
+      "tip": "Start from what you can see: the large room, the kitchen and the trees. Then follow the passage around the house.",
+      "passage": {
+       "title": "Zinacantan",
+       "scroll": false,
+       "text": "The rural village of Zinacantan, high in the hills of southern Mexico, is home to people descended from the ancient Maya. The villages of this area are unusual and interesting in their traditions and way of life.\n\nA typical house has only two rooms: one large room, which is both a living room and a bedroom, and a small kitchen leading off it. A typical home has a row of beds along one wall, and three or four chairs in the middle of the room, from which the family can watch the television. In the kitchen there is an open fire in the centre of the room, a bench for grinding corn, and two large storage bins in the corner. Many different crops are grown on the land around the house, including herbs near the kitchen and fruit trees beyond them. On the outer edge of the property, the family grows sugar cane."
+      },
+      "blocks": [
+       {
+        "type": "ieDiagram",
+        "id": "ieb2w2d10-e1-q1",
+        "from": 1,
+        "title": "A typical house in Zinacantan",
+        "instruction": "Label the plan below. Choose **NO MORE THAN THREE WORDS** from the passage for each answer.",
+        "rule": "NO MORE THAN THREE WORDS",
+        "max": 3,
+        "src": "assets/reading/zinacantan.svg",
+        "alt": "A plan of a house: a large room with a row of beds along the top wall, chairs in the middle and a television on the bottom wall; a kitchen with a fire, a bench and two round bins in the corner; herbs, fruit trees and, on the far right, sugar cane.",
+        "labels": [
+         {
+          "x": 27,
+          "y": 20,
+          "answer": "beds|row of beds|a row of beds"
+         },
+         {
+          "x": 27,
+          "y": 87,
+          "answer": "television|the television"
+         },
+         {
+          "x": 73,
+          "y": 54,
+          "answer": "storage bins|large storage bins|bins"
+         },
+         {
+          "x": 92,
+          "y": 50,
+          "answer": "sugar cane"
+         }
+        ]
+       }
+      ]
+     }
     ]
-  }],
-  extras: [],
-  glossary: []
+   },
+   {
+    "type": "note",
+    "tone": "info",
+    "title": "More practice",
+    "text": "When you are ready, go to **Practise → Note, table, flow chart and diagram completion** for more exercises of this type: [open the exercises](#/skill/2/practise/notes)."
+   },
+   {
+    "type": "recap",
+    "anchor": "xl-sum",
+    "title": "Remember",
+    "items": [
+     "Use the **headings**, **column titles** and **labels** to find your place in the passage.",
+     "Notes and tables **may not** follow the order of the passage.",
+     "Flow charts follow a **process**, in order.",
+     "Diagrams: find the **small part** of the passage that describes the picture, and learn the **position words**.",
+     "Keep to the **word limit** and copy the words exactly."
+    ]
+   }
+  ]
+ },
+ "sections": [
+  {
+   "id": "learn",
+   "number": "04",
+   "minutes": 40,
+   "tone": "blue",
+   "art": "reading",
+   "title": "Note, table, flow chart and diagram completion",
+   "subtitle": "Tips and an exercise in class",
+   "outcome": "Know how to answer note, table, flow chart and diagram completion questions.",
+   "activities": [
+    {
+     "id": "tips",
+     "short": "Tips",
+     "minutes": 15,
+     "grouping": "Alone",
+     "title": "Read the tips",
+     "goal": "Read the tips, the steps and the examples.",
+     "blocks": [
+      {
+       "type": "text",
+       "title": "Tips",
+       "text": "Tips, steps and examples."
+      }
+     ]
+    },
+    {
+     "id": "practise",
+     "short": "Exercise",
+     "minutes": 25,
+     "grouping": "Alone",
+     "title": "Do the exercise",
+     "goal": "Do the exercise and check your answers.",
+     "blocks": [
+      {
+       "type": "text",
+       "title": "Exercise",
+       "text": "The exercise in class."
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "extras": [],
+ "glossary": []
 };

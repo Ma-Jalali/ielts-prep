@@ -34,21 +34,23 @@ window.DEC15_LESSON = {
         ] },
       { type: 'cards', anchor: 'xl-types', kicker: 'Two families', title: 'Every question is one of two kinds', cols: 2,
         items: [
-          { icon: 'pen', t: 'Completion tasks: you write', d: 'You copy **words from the passage** into a gap: short answers, notes, tables, flow charts, sentences, summaries and diagrams. You must **find** answers, not **make** them.' },
-          { icon: 'list', t: 'Selection tasks: you choose', d: 'You choose from what is given: TRUE / FALSE / NOT GIVEN, matching, headings and multiple choice. You write a letter, a number or a word from a list.' }] },
-      { type: 'table', kicker: 'The question types', title: 'A map of the question types', intro: 'Each training lesson teaches one family. The last column matters a lot: when the answers are **in passage order**, each answer comes after the one before it.',
-        head: ['Question type', 'You…', 'In passage order?', 'Lesson'], wide: true,
+          { icon: 'pen', t: 'Completion tasks: you write', d: 'You copy **words from the passage** into a gap: short-answer questions, notes, tables, flow charts, diagrams, sentences and summaries. You must **find** answers, not **make** them.' },
+          { icon: 'list', t: 'Selection tasks: you choose', d: 'You choose from what is given: TRUE / FALSE / NOT GIVEN, boxes of words or endings, matching, classification, paragraphs, headings, multiple choice and pick from a list. You write a letter, a number or a word from a list.' }] },
+      { type: 'table', kicker: 'The question types', title: 'The 12 types of question', intro: 'Learn and Practise follow the same list, in the same order. Lessons 3–14 teach one type each, and Practise has exercises for each type. The third column matters a lot: when the answers are **in passage order**, each answer comes after the one before it.',
+        head: ['Type of question', 'You…', 'In passage order?', 'Lesson'], wide: true,
         rows: [
-          ['Short-answer questions', 'write words from the passage', 'Yes', '3'],
-          ['Note, table and flow-chart completion', 'write words from the passage', 'Not always', '3'],
-          ['TRUE / FALSE / NOT GIVEN, YES / NO / NOT GIVEN', 'choose one of three answers', 'Yes', '4'],
-          ['Sentence completion', 'write words, or choose an ending from a box', 'Yes', '5'],
-          ['Summary completion', 'write words, or choose from a box', 'Mostly', '6'],
-          ['Matching names and classification', 'choose a letter from a list', 'No', '7'],
-          ['Which paragraph contains…?', 'choose a paragraph letter', 'No', '7'],
-          ['Matching headings', 'choose a heading for each paragraph', 'Paragraph by paragraph', '8'],
-          ['Multiple choice', 'choose one or more letters', 'Yes', '9'],
-          ['Diagram labelling', 'write words from the passage', 'No: a small area', '10']] },
+          ['1 · Short-answer questions', 'write words from the passage', 'Yes', '3'],
+          ['2 · Note, table, flow chart and diagram completion', 'write words from the passage', 'Not always', '4'],
+          ['3 · True / False / Not Given (and Yes / No / Not Given)', 'choose one of three answers', 'Yes', '5'],
+          ['4 · Sentence completion', 'write words from the passage', 'Yes', '6'],
+          ['5 · Sentence completion with a box', 'choose an ending from a box', 'Yes', '7'],
+          ['6 · Summary completion', 'write words from the passage', 'Mostly', '8'],
+          ['7 · Summary completion with a box', 'choose words from a box', 'Mostly', '9'],
+          ['8 · Matching', 'choose a name or feature from a list', 'No', '10'],
+          ['9 · Classification', 'choose a group', 'No', '11'],
+          ['10 · Finding information in paragraphs', 'choose a paragraph letter', 'No', '12'],
+          ['11 · Paragraph headings', 'choose a heading for each paragraph', 'Paragraph by paragraph', '13'],
+          ['12 · Multiple choice and pick from a list', 'choose one letter, or several from a longer list', 'Yes', '14']] },
       { type: 'tabs', anchor: 'xl-score', kicker: 'Scores', title: 'From marks to a band score', intro: 'Every correct answer is one mark. Your marks out of 40 become a band from 1 to 9. The numbers can change a little from one test to another.',
         items: [
           { label: 'Academic', icon: 'book', blocks: [
@@ -60,7 +62,7 @@ window.DEC15_LESSON = {
         items: [
           { t: 'Read as much as you can', d: 'Read every day, for 20 minutes or more: news, science magazines, long articles on topics you like. Speed and vocabulary grow from the amount you read.' },
           { t: 'Build good reading habits', d: ['Read groups of words, not one word at a time.', 'Do not say the words in your head or move your lips.', 'Do not stop at every word you do not know: guess from the context and keep going.'] },
-          { t: 'Learn the question types', d: 'There are about 14 types of question, and each one has its own strategy. That is what these training lessons are for.' },
+          { t: 'Learn the question types', d: 'There are 12 types of question, and each one has its own strategy. Lessons 3–14 teach them one by one, and Practise has exercises for each.' },
           { t: 'Grow your vocabulary', d: 'The questions **paraphrase** the passage: they say the same thing in other words. Learn synonyms and word families (*develop, development, developed*).' },
           { t: 'Be your own doctor', d: 'After every practice test, look at **your time** and **your mistakes**. Find out why you lost each mark, then fix that problem first.' }] },
       { type: 'folds', anchor: 'xl-tips', kicker: 'Good to know', title: 'Before the test', intro: 'Four short guides. Open each one in turn.',
@@ -93,7 +95,7 @@ window.DEC15_LESSON = {
           { s: 'In completion tasks, you can use your own words if the meaning is the same.', answer: false, why: 'You must copy words from the passage, exactly as they are written.' },
           { s: 'Passage 3 is usually the hardest.', answer: true, why: 'Plan more time for it: about 22–23 minutes.' },
           { s: 'For band 7 in Academic Reading you need about 30 correct answers.', answer: true, why: '30–32 out of 40 is usually band 7.' },
-          { s: 'Matching headings answers are always in passage order.', answer: false, why: 'You answer paragraph by paragraph, but the headings in the list are in no order.' }] }
+          { s: 'Paragraph headings answers are always in passage order.', answer: false, why: 'You answer paragraph by paragraph, but the headings in the list are in no order.' }] }
     ]
   },
   sections: [{

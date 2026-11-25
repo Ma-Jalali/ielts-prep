@@ -47,7 +47,7 @@ window.DEC15_LESSON = {
        "blocks": [
         {
          "type": "ieMatch",
-         "kindName": "Matching features",
+         "kindName": "Matching",
          "boxTitle": "Types of blue",
          "instruction": "Look at the following descriptions (Questions 1–6) and the list of types of blue below. Match each description with the correct type of blue, **A–G**.",
          "options": [

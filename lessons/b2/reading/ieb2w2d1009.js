@@ -46,7 +46,7 @@ window.DEC15_LESSON = {
        "blocks": [
         {
          "type": "ieMatch",
-         "kindName": "Matching information",
+         "kindName": "Finding information in paragraphs",
          "reuse": true,
          "boxTitle": "Paragraphs",
          "instruction": "The passage has 4 paragraphs, **A–D**. Which paragraph contains the following information? Write the correct letter, **A–D**. You may use any letter more than once.",

@@ -47,7 +47,7 @@ window.DEC15_LESSON = {
        "blocks": [
         {
          "type": "ieMatch",
-         "kindName": "Matching headings",
+         "kindName": "Paragraph headings",
          "numbering": "roman",
          "boxTitle": "List of headings",
          "instruction": "The reading passage has seven paragraphs, **A–G**. Choose the correct heading for each paragraph from the list of headings below. There are more headings than paragraphs, so you will not use them all.",

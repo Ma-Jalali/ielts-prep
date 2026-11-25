@@ -47,7 +47,7 @@ window.DEC15_LESSON = {
        "blocks": [
         {
          "type": "ieMatch",
-         "kindName": "Matching information",
+         "kindName": "Finding information in paragraphs",
          "reuse": true,
          "boxTitle": "Paragraphs",
          "instruction": "The passage describes four attractions, **A–D**. For which attraction is each of the following statements true? Write the correct letter, **A–D**. You may use any letter more than once.",

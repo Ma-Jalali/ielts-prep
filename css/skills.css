@@ -312,3 +312,13 @@ a.sk-row:hover .sk-n:not(.is-done) { background: var(--accent); color: #fff; }
   .sk-parts.is-many .sk-part-tx b { font-size: .78rem; line-height: 1.2; white-space: normal; }
   .sk-parts.is-many .sk-part::after { display: none; }
 }
+
+/* Learn ↔ Practise: a lesson on a type of question wears that type's colour and icon */
+.ll-n.is-type { border-radius: 16px; }
+.ll-n.is-type svg { width: 24px; height: 24px; }
+.ll-type { display: inline-flex; align-items: center; height: 18px; padding: 0 7px; border-radius: 999px; background: color-mix(in srgb, var(--dc) 12%, #fff); color: var(--dc); font: 800 .6rem/1 var(--sans, system-ui); letter-spacing: .08em; font-style: normal; }
+.sk-learn { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px; border-radius: 999px; border: 1px solid color-mix(in srgb, var(--accent) 35%, #fff); background: #fff; color: color-mix(in srgb, var(--accent) 85%, #18213f); font: 700 .82rem/1 var(--sans); text-decoration: none; }
+.sk-learn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+.sk-learn .icon { width: 15px; height: 15px; }
+.qt-pick { --qt: #8b3fd1; --qb: #f4ebfc; } .qt-tf { --qt: #0e7490; --qb: #e3f4f8; } .qt-box { --qt: #b4531a; --qb: #fbeee4; }
+.qt-head { --qt: #4652c0; --qb: #ebedfb; } .qt-para { --qt: #1b8aa6; --qb: #e4f4f8; }

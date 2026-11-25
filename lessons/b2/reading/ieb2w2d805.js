@@ -46,7 +46,7 @@ window.DEC15_LESSON = {
        "blocks": [
         {
          "type": "ieMatch",
-         "kindName": "Matching names",
+         "kindName": "Matching",
          "boxTitle": "List of scientists",
          "instruction": "Look at the following statements (Questions 1–4) and the list of scientists below. Match each statement with the correct scientist, **A–D**.",
          "options": [
