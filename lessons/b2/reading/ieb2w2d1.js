@@ -41,10 +41,10 @@ window.DEC15_LESSON = {
         rows: [
           ['1 · Short-answer questions', 'write words from the passage', 'Yes', '3'],
           ['2 · Note, table, flow chart and diagram completion', 'write words from the passage', 'Not always', '4'],
-          ['3 · True / False / Not Given (and Yes / No / Not Given)', 'choose one of three answers', 'Yes', '5'],
-          ['4 · Sentence completion', 'write words from the passage', 'Yes', '6'],
+          ['3 · True / False / Not Given and Yes / No / Not Given', 'choose one of three answers', 'Yes', '5'],
+          ['4 · Sentence completion without a box', 'write words from the passage', 'Yes', '6'],
           ['5 · Sentence completion with a box', 'choose an ending from a box', 'Yes', '7'],
-          ['6 · Summary completion', 'write words from the passage', 'Mostly', '8'],
+          ['6 · Summary completion without a box', 'write words from the passage', 'Mostly', '8'],
           ['7 · Summary completion with a box', 'choose words from a box', 'Mostly', '9'],
           ['8 · Matching', 'choose a name or feature from a list', 'No', '10'],
           ['9 · Classification', 'choose a group', 'No', '11'],

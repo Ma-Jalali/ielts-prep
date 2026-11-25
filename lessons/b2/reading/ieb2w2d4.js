@@ -13,7 +13,7 @@ window.DEC15_LESSON = {
  "journey": "Complete notes, tables and flow charts, and label diagrams, with words from the passage. Learn to use the headings and labels, then try the exercises.",
  "finish": {
   "title": "Next",
-  "text": "True / False / Not Given"
+  "text": "True / False / Not Given and Yes / No / Not Given"
  },
  "learn": {
   "tags": [],

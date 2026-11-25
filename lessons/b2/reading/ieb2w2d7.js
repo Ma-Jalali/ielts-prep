@@ -13,7 +13,7 @@ window.DEC15_LESSON = {
  "journey": "Choose the right ending for each sentence from a box. Learn how to use grammar and meaning to choose, then try an exercise.",
  "finish": {
   "title": "Next",
-  "text": "Summary completion"
+  "text": "Summary completion without a box"
  },
  "learn": {
   "tags": [],

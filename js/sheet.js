@@ -211,10 +211,10 @@
     const READ = !!(P && P.text && !audios.length);   // a reading exercise: the passage beside the questions
     const readTips = () => `<section class="xs-rtips" aria-label="Before you read"><span class="xs-rtips-k">How to do it</span><ol>
       <li><b>Skim</b><span>Read the title and the first lines of each paragraph: about one minute.</span></li>
-      <li><b>One question at a time</b><span>Predict the answer, then find the place in the passage.</span></li>
+      <li><b>One question at a time</b><span>Predict the answer, then find the place. Select words to highlight them or add a note, as in the real test.</span></li>
       <li><b>Check</b><span>Word limit, spelling and grammar. Then open the answers and mark yourself.</span></li></ol></section>`;
     const passageHTML = P && P.text ? `<article class="xs-text${P.scroll === false ? '' : ' is-scroll'}"><header class="xs-text-h"><span class="xs-text-k">${esc(P.label || 'Reading passage')}</span>${P.title ? `<h3>${esc(P.title)}</h3>` : ''}${P.subtitle ? `<p>${esc(P.subtitle)}</p>` : ''}</header>
-      <div class="xs-text-b" tabindex="0" role="region" aria-label="${esc(P.title || 'The passage')}">${String(P.text).split(/\n\s*\n/).map(par => { const t = par.trim(); if (t.startsWith('### ')) { const [h, ...rest] = t.slice(4).split('\n'); return `<h4>${pfmt(h)}</h4>${rest.join(' ').trim() ? `<p>${pfmt(rest.join('\n')).replace(/\n/g, '<br>')}</p>` : ''}`; } if (t.startsWith('* ')) return `<p class="xs-text-fn">${pfmt(t.slice(2))}</p>`;
+      <div class="xs-text-b" tabindex="0" role="region" aria-label="${esc(P.title || 'The passage')}" data-hl="${esc(L.id)}-passage">${String(P.text).split(/\n\s*\n/).map(par => { const t = par.trim(); if (t.startsWith('### ')) { const [h, ...rest] = t.slice(4).split('\n'); return `<h4>${pfmt(h)}</h4>${rest.join(' ').trim() ? `<p>${pfmt(rest.join('\n')).replace(/\n/g, '<br>')}</p>` : ''}`; } if (t.startsWith('* ')) return `<p class="xs-text-fn">${pfmt(t.slice(2))}</p>`;
         const m = t.match(/^([A-Z])\s{2,}([\s\S]*)$/); return m ? `<p class="has-l"><span class="xs-text-l">${m[1]}</span>${pfmt(m[2]).replace(/\n/g, '<br>')}</p>` : `<p>${pfmt(t).replace(/\n/g, '<br>')}</p>`; }).join('')}</div></article>` : '';
     const total = qs.reduce((n, b) => n + count(b), 0), lastN = qs.reduce((m, b) => Math.max(m, (Number(b.from) || 1) + count(b) - 1), 0);
 

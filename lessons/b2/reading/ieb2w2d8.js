@@ -1,4 +1,4 @@
-/* IELTS · Reading · Learn · Lesson 8 — Summary completion.
+/* IELTS · Reading · Learn · Lesson 8 — Summary completion without a box.
    One lesson per type of question, in the same order and with the same name as Reading → Practise (the teacher's booklet
    "Reading Exercises"). Built from the old lesson 6 (without a box) of the teacher's training notes "Reading" (RAD TIME).
    Ids (lesson, activities, exercise blocks) are the keys of students' saved work: never rename them. */
@@ -8,7 +8,7 @@ window.DEC15_LESSON = {
  "day": 8,
  "sheet": true,
  "illus": "boat",
- "title": "Summary completion",
+ "title": "Summary completion without a box",
  "duration": "About 40 minutes",
  "journey": "Complete a short summary of the passage with words from it. Learn how a summary differs from sentence completion, then try an exercise.",
  "finish": {
@@ -137,7 +137,7 @@ window.DEC15_LESSON = {
      {
       "id": "ieb2w2d6-e1",
       "title": "Up the Mekong",
-      "kind": "Summary completion",
+      "kind": "Summary completion without a box",
       "go": "Read",
       "tip": "The summary follows the journey in order. Gap 2 is a city, gap 4 is a way of travelling, and gap 7 is the name of a place.",
       "passage": {
@@ -176,7 +176,7 @@ window.DEC15_LESSON = {
     "type": "note",
     "tone": "info",
     "title": "More practice",
-    "text": "When you are ready, go to **Practise → Summary completion** for more exercises of this type: [open the exercises](#/skill/2/practise/sum)."
+    "text": "When you are ready, go to **Practise → Summary completion without a box** for more exercises of this type: [open the exercises](#/skill/2/practise/sum)."
    },
    {
     "type": "recap",
@@ -199,7 +199,7 @@ window.DEC15_LESSON = {
    "minutes": 40,
    "tone": "blue",
    "art": "reading",
-   "title": "Summary completion",
+   "title": "Summary completion without a box",
    "subtitle": "Tips and an exercise in class",
    "outcome": "Know how to answer summary completion questions.",
    "activities": [
