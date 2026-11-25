@@ -254,7 +254,10 @@
     const filler = (b, c) => t => esc(t).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/\[\[(.+?)\]\]/g, (_, a) => { const i = c.i++; return field(`${b.id}-${i}`, (Number(b.from) || 1) + i, a, b.bank ? b.bank.map((_, j) => LET[j]) : null, b.bank); });
     const box = (title, opts, keys) => `<div class="xs-box">${title ? `<b class="xs-box-t">${esc(title)}</b>` : ''}<ul>${opts.map((o, j) => `<li><span class="xs-let">${keys[j]}</span><span>${fmt(String(o).replace(/^[A-Z]\s+(?=\S)/, ''))}</span></li>`).join('')}</ul></div>`;
     const range = b => { const f = Number(b.from) || 1, n = count(b); return n > 1 ? `Questions ${f}–${f + n - 1}` : `Question ${f}`; };
-    const rubric = b => `<div class="xs-rubric"><span class="xs-range">${range(b)}</span>${b.instruction ? `<p>${fmt(b.instruction)}</p>` : ''}</div>`;
+    const RULE = /\b(NO MORE THAN [A-Z ]+?(?: AND\/OR (?:A )?NUMBERS?)?|ONE WORD(?: AND\/OR A NUMBER)?(?: ONLY)?|A NUMBER ONLY|ONE OR TWO WORDS)\b/;
+    const ruleOf = b => { const r = b.rule || (String(b.instruction || '').replace(/\*\*/g, '').match(RULE) || [])[1]; return r ? String(r).trim() : ''; };
+    const rubric = b => { const r = ruleOf(b), how = b.type === 'ieChoice' || b.type === 'ieMulti' ? 'Choose letters' : b.type === 'ieMatch' || (b.bank && b.bank.length) ? 'Choose from a box' : b.type === 'ieTFNG' ? 'Choose an answer' : r ? 'Write words' : '';
+      return `<div class="xs-rubric"><div class="xs-rubric-top"><span class="xs-range">${range(b)}</span>${how ? `<span class="xs-how">${esc(how)}</span>` : ''}</div>${b.instruction ? `<p>${fmt(b.instruction)}</p>` : ''}${r ? `<span class="xs-rule"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l4-1 11-11-3-3L5 16z"/></svg>Word limit: <b>${esc(r.charAt(0) + r.slice(1).toLowerCase())}</b></span>` : ''}</div>`; };
 
     const R = {
       ieGap(b) { const c = { i: 0 }, fill = filler(b, c), lines = String(b.text || '').split('\n').filter(l => l.trim()), Lt = b.layout || 'sentences';
@@ -304,7 +307,7 @@
       cur.blocks.push(b); });
     queue.filter(q => !q.done).forEach(q => (parts[0] || (parts[0] = { audios: [], blocks: [] })).audios.push(q));   // a recording no question block claims goes at the top
     const partRange = p => { const q = p.blocks.filter(isQ); if (!q.length) return ''; const a = Number(q[0].from) || 1, z = Math.max(...q.map(b => (Number(b.from) || 1) + count(b) - 1)); return a === z ? `Question ${a}` : `Questions ${a}–${z}`; };
-    const body = parts.map((p, k) => `<section class="xs-part${p.blocks.filter(isQ).length === 1 ? ' is-one' : ''}">${partRange(p) ? `<header class="xs-part-h"><span class="xs-part-n">${String(k + 1).padStart(2, '0')}</span><span class="xs-part-tx"><b>${partRange(p)}</b><small>${esc([...new Set(p.blocks.filter(isQ).map(kindOf).filter(Boolean))].join(' · '))}</small></span>${parts.length > 1 ? `<span class="xs-part-of">Section ${k + 1} of ${parts.length}</span>` : ''}</header>` : ''}${p.audios.length ? `<div class="xs-listen">${p.audios.map(q => player(q.a, q.i)).join('')}</div>` : ''}
+    const body = parts.map((p, k) => `<section id="xs-p${k + 1}" class="xs-part${p.blocks.filter(isQ).length === 1 ? ' is-one' : ''}">${partRange(p) ? `<header class="xs-part-h"><span class="xs-part-n">${String(k + 1).padStart(2, '0')}</span><span class="xs-part-tx"><b>${partRange(p)}</b><small>${esc([...new Set(p.blocks.filter(isQ).map(kindOf).filter(Boolean))].join(' · '))}</small></span>${parts.length > 1 ? `<span class="xs-part-of">Section ${k + 1} of ${parts.length}</span>` : ''}</header>` : ''}${p.audios.length ? `<div class="xs-listen">${p.audios.map(q => player(q.a, q.i)).join('')}</div>` : ''}
       ${p.blocks.map((b, j) => `<div class="xs-q" data-hl="${esc(b.id || `fig-${j}-${String(b.src || '').split('/').pop()}`)}">${(R[b.type] || (() => ''))(b)}</div>`).join('')}</section>`).join('');
 
     /* ── the answer key ── */
@@ -319,14 +322,16 @@
       else if (b.type === 'ieMatch') (b.items || []).forEach((it, i) => { const keys = (b.options || []).map((_, j) => b.numbering === 'roman' ? ROM[j] : LET[j]), j = keys.indexOf(String(it.answer)); key.push({ n: f + i, main: it.answer, also: [], note: String(b.options?.[j] || '').replace(/^[A-Z]\s+(?=\S)/, ''), why: it.why }); });
       else if (b.type === 'ieMulti') { const n = count(b); key.push({ n: n > 1 ? `${f}–${f + n - 1}` : f, main: (b.answers || []).join(', '), also: [], note: `${(b.answers || []).map(x => b.options?.[LET.indexOf(x)]).filter(Boolean).join('; ')} · in any order`, why: b.why, wide: true }); } });
     key.sort((a, b) => parseInt(a.n) - parseInt(b.n));
-    const keyHTML = `<ol class="xs-key">${key.map(k => `<li class="${k.wide ? 'is-wide' : ''}"><span class="xs-kn">${k.n}</span><span class="xs-ka"><b>${esc(k.main)}</b>${k.note ? `<small>${esc(k.note)}</small>` : ''}${k.also.length ? `<small class="xs-also">also accepted: ${k.also.map(esc).join(' · ')}</small>` : ''}${k.why ? `<small class="xs-kwhy">${fmt(k.why)}</small>` : ''}</span></li>`).join('')}</ol>`;
+    const mk = k => `${L.id}-mk-${k.n}`, nMk = key.reduce((a, k) => a + (k.wide ? (String(k.n).includes('–') ? Number(String(k.n).split('–')[1]) - Number(String(k.n).split('–')[0]) + 1 : 1) : 1), 0);
+    const scoreHTML = `<div class="xs-score" data-xs-score data-of="${nMk}"><span class="xs-score-tx"><b>Mark yourself.</b> Tick each answer you got right.</span><span class="xs-score-n"><b>${key.filter(k => ctx.val(mk(k)) === true).reduce((a, k) => a + (k.wide ? Number(String(k.n).split('–')[1] || k.n) - Number(String(k.n).split('–')[0]) + 1 : 1), 0)}</b> / ${nMk}</span></div>`;
+    const keyHTML = scoreHTML + `<ol class="xs-key">${key.map(k => `<li class="${k.wide ? 'is-wide' : ''}"><label class="xs-mk" title="I got this right"><input type="checkbox" data-save="${esc(mk(k))}" data-w="${k.wide && String(k.n).includes('–') ? Number(String(k.n).split('–')[1]) - Number(String(k.n).split('–')[0]) + 1 : 1}"${ctx.val(mk(k)) === true ? ' checked' : ''}><span aria-hidden="true"></span><em class="xs-sr">I got question ${k.n} right</em></label><span class="xs-kn">${k.n}</span><span class="xs-ka"><b>${esc(k.main)}</b>${k.note ? `<small>${esc(k.note)}</small>` : ''}${k.also.length ? `<small class="xs-also">also accepted: ${k.also.map(esc).join(' · ')}</small>` : ''}${k.why ? `<small class="xs-kwhy">${fmt(k.why)}</small>` : ''}</span></li>`).join('')}</ol>`;
 
     /* ── the recording script (when the key has one) ── */
     const scr = [];
     (scriptAct?.blocks || []).forEach(b => {
       if (b.type === 'toggle') { const chat = (b.blocks || []).find(x => x.type === 'chat'); scr.push({ title: String(b.title || 'Recording script').replace(/^Recording script\s*·\s*/, ''), html: chat ? `<div class="xs-script">${(chat.lines || []).map(([who, said]) => `<p><b>${esc(who)}</b><span>${fmt(said)}</span></p>`).join('')}</div>` : (b.blocks || []).filter(x => x.type === 'text').map(x => `<div class="xs-script">${x.text}</div>`).join('') }); }
       else if (b.type === 'text') scr.push({ title: 'Script and answer key', link: true, html: `<div class="xs-script is-link">${b.text}</div>` }); });
-    const scriptHTML = scr.length ? scr.map(s => `<details class="xs-fold is-script"><summary><span class="xs-fold-ic">${icon('book')}</span><span class="xs-fold-tx"><b>Recording script</b><small>${esc(s.link ? 'In the teacher’s key on Google Drive' : s.title)}</small></span><i class="xs-chev" aria-hidden="true"></i></summary>${s.html}</details>`).join('') : '';
+    const scriptHTML = scr.length ? scr.map((s, i) => `<details class="xs-fold is-script"${i ? '' : ' id="xs-script"'}><summary><span class="xs-fold-ic">${icon('book')}</span><span class="xs-fold-tx"><b>Recording script</b><small>${esc(s.link ? 'In the teacher’s key on Google Drive' : s.title)}</small></span><i class="xs-chev" aria-hidden="true"></i></summary>${s.html}</details>`).join('') : '';
 
     const kinds = [...new Set(qs.map(kindOf).filter(Boolean))];
     /* ── before you play: three steps, and tips for the question types in this exercise ── */
@@ -357,7 +362,7 @@
         ['listen', 'Listen once', 'Write your answers as you listen.'],
         ['check', 'Check', 'Spelling and word limit, then see the answers.']];
       if (main) items.push(['tip', main, TIPS[main]]);
-      return `<section class="xs-prep" aria-label="Before you play"><span class="xs-prep-k">Before you play</span>
+      return `<section id="xs-prep" class="xs-prep" aria-label="Before you play"><span class="xs-prep-k">Before you play</span>
         <ul class="xs-tips4">${items.map(([k, t, d]) => `<li class="${k === 'tip' ? 'is-tip' : ''}"><span class="xs-t4-ic">${ic(k)}</span><span><b>${esc(t)}</b>${esc(d)}</span></li>`).join('')}</ul></section>`; }
     /* ── the page ── */
     const sec = (L.sections || [])[0] || {}, doneAll = acts.length && acts.every(a => ctx.done(a.id));
@@ -365,15 +370,18 @@
     /* inside a Learn page: only the recording(s), the questions and the answers (see learnPage, 'exercises') */
     if (ctx.embed) return `<div class="xl-exbody">${passageHTML}${body}<details class="xs-fold is-key xl-key"${ctx.open ? ' open' : ''}><summary><span class="xs-fold-ic">${icon('check')}</span><span class="xs-fold-tx"><b>Answers</b><small>Open them when you have finished</small></span><i class="xs-chev" aria-hidden="true"></i></summary><p class="xs-key-note">Spelling counts; capital letters do not. Other right answers are shown underneath.</p>${keyHTML}</details></div>`;
     return `<article class="xs" style="--xs-soft:${ctx.soft || '#e6f3f1'}${ctx.acc ? `;--xs-acc:${ctx.acc}` : ''}" data-total="${total}">
-      <div class="xs-strip" aria-label="Your progress in this exercise"><b class="xs-strip-t">${esc(L.title)}</b><span class="xs-strip-bar" aria-hidden="true"><i></i></span><span class="xs-strip-n"><b>0</b> / ${total}</span><button type="button" class="xs-strip-go" data-xs-answers>Answers</button></div>
+
       <nav class="xs-trail" aria-label="Where you are">${ctx.back ? `<a class="xs-back" href="${esc(ctx.back.href)}">${icon('left')}<span>${esc(ctx.back.label)}</span></a>` : ''}<span class="xs-crumbs">${crumbs}<b>${esc(ctx.name || '')}</b></span></nav>
       <header class="xs-hero"><div class="xs-hero-tx"><span class="xs-eyebrow">${esc(ctx.eyebrow || 'Listening')}</span><h1>${esc(L.title)}</h1>${L.journey ? `<p>${esc(L.journey)}</p>` : ''}
         <ul class="xs-facts"><li><b>${total}</b> questions</li><li><b>${audios.length || 1}</b> recording${audios.length === 1 ? '' : 's'}</li>${kinds.map(k => `<li>${esc(k)}</li>`).join('')}</ul></div>
         ${window.IELTSSheetArt ? window.IELTSSheetArt(L.illus) : ''}</header>
+      <div class="xs-bar" data-xs-nav aria-label="Your progress in this exercise"><b class="xs-bar-t">${esc(L.title)}</b>
+        <nav class="xs-bar-in" aria-label="Parts of this exercise">${parts.map((p, k) => partRange(p) ? `<a href="#xs-p${k + 1}" data-xs-jump><i>${k + 1}</i><span>${partRange(p).replace('Questions ', 'Q ').replace('Question ', 'Q ')}</span></a>` : '').join('')}${scriptHTML ? `<a href="#xs-script" data-xs-jump><i>${parts.length + 1}</i><span>Script</span></a>` : ''}</nav>
+        <span class="xs-strip-n xs-bar-n"><b>0</b> / ${total}<small> answered</small></span><button type="button" class="xs-bar-go" data-xs-answers>Answers</button><span class="xs-strip-bar xs-bar-line" aria-hidden="true"><i></i></span></div>
       ${passageHTML ? passageHTML : prep()}
       ${body}
       <section class="xs-end" aria-label="Answers">
-        <details class="xs-fold is-key"${ctx.open ? ' open' : ''}><summary><span class="xs-fold-ic">${icon('check')}</span><span class="xs-fold-tx"><b>Check your answers</b><small>Open the answer key when you have finished</small></span><i class="xs-chev" aria-hidden="true"></i></summary>
+        <details id="xs-key" class="xs-fold is-key"${ctx.open ? ' open' : ''}><summary><span class="xs-fold-ic">${icon('check')}</span><span class="xs-fold-tx"><b>Check your answers</b><small>Open the answer key when you have finished</small></span><i class="xs-chev" aria-hidden="true"></i></summary>
           ${(() => { const m = window.IELTS_GATE?.member, L = m && m.lang && m.lang !== 'en' && window.IELTSCharacter?.lang(m.lang); return L ? `<p class="xs-l1"><bdi lang="${L.code}" dir="${L.rtl ? 'rtl' : 'ltr'}">${esc(L.done)}</bdi> <span>Time to check your answers.</span></p>` : ''; })()}<p class="xs-key-note">Compare each answer with yours. Spelling counts; capital letters do not. Where more than one answer is right, the others are shown underneath.</p>${keyHTML}</details>
         ${scriptHTML}
         <footer class="xs-foot"><label class="xs-done"><input type="checkbox" data-sheet-done${doneAll ? ' checked' : ''}><span>I have finished this exercise</span></label>
@@ -386,5 +394,17 @@
     const j = [...sel.options].findIndex(o => o.value === v) - 1, t = j >= 0 ? texts[j] : '';
     const esc2 = x => String(x ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
     box.classList.toggle('has-v', !!v); box.querySelector('.xs-pick-face').innerHTML = v ? `<b>${esc2(v)}</b>${t ? `<small>${esc2(t)}</small>` : ''}` : '<span>Choose</span>'; });
+  /* an exercise: the sticky bar jumps to each set of questions and lights up the one on screen */
+  document.addEventListener('click', e => { const a = e.target.closest?.('[data-xs-jump]'); if (!a) return; const el = document.getElementById(a.getAttribute('href').slice(1)); if (!el) return; e.preventDefault();
+    if (el.tagName === 'DETAILS') el.open = true; const bar = document.querySelector('[data-xs-nav]'); scrollTo({ top: el.getBoundingClientRect().top + scrollY - (document.querySelector('.masthead')?.offsetHeight || 0) - (bar?.offsetHeight || 0) - 14, behavior: 'smooth' }); });
+  let xsQ = false;
+  const xsSpy = () => { xsQ = false; const bar = document.querySelector('[data-xs-nav]'); if (!bar) return; const top = document.querySelector('.masthead')?.offsetHeight || 0; bar.style.top = top + 'px';
+    bar.classList.toggle('is-stuck', bar.getBoundingClientRect().top <= top + 1); const links = [...bar.querySelectorAll('[data-xs-jump]')], line = top + bar.offsetHeight + 120; let on = -1;
+    links.forEach((l, i) => { const el = document.getElementById(l.getAttribute('href').slice(1)); if (el && el.getBoundingClientRect().top < line) on = i; });
+    links.forEach((l, i) => l.classList.toggle('is-on', i === on)); };
+  addEventListener('scroll', () => { if (!xsQ) { xsQ = true; requestAnimationFrame(xsSpy); } }, { passive: true }); addEventListener('resize', () => requestAnimationFrame(xsSpy)); addEventListener('hashchange', () => setTimeout(xsSpy, 400)); setTimeout(xsSpy, 600);
+  /* mark yourself: ticks in the answer key add up to a score */
+  document.addEventListener('change', e => { const c = e.target.closest?.('.xs-mk input'); if (!c) return; const key = c.closest('.xs-fold, .xl-key'), box = key?.querySelector('[data-xs-score]'); if (!box) return;
+    const n = [...key.querySelectorAll('.xs-mk input:checked')].reduce((a, x) => a + (+x.dataset.w || 1), 0), of = +box.dataset.of || 0; box.querySelector('.xs-score-n b').textContent = n; box.classList.toggle('is-done', of && n >= of); });
   window.IELTSSheet = { page };
 })();
