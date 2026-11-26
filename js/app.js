@@ -1068,8 +1068,8 @@ function sectionPage(w, secId, grpId) {
       <h1>${partIcon(w, 'is-on sk-ic')}${esc(w.theme)}</h1>${w.tag ? `<p class="sk-tag">${esc(w.tag)}</p>` : ''}${w.summary ? `<p>${esc(w.summary)}</p>` : ''}
       <div class="sk-stats">${ME() ? `<span class="sk-me">${esc(ME())}’s progress</span>` : ''}<span><b>${all.ready}</b> ready</span><span><b>${all.done}</b> done</span>${all.ready ? `<span class="sk-bar" aria-label="${Math.round(100 * all.done / all.ready)}% done"><i style="width:${Math.round(100 * all.done / all.ready)}%"></i></span>` : ''}</div></div>${art}</header>`;
   const tabs = `<nav class="sk-tabs" aria-label="${esc(w.theme)}: sections" style="${partStyle(w)}">${S.map(x => { const st = groupStats(w, x.groups), on = x.id === sec.id;
-    const what = st.ready ? `${st.done ? `${st.done}/` : ''}${st.ready} ${(x.groups.some(g => g.test) ? 'test' : x.groups.some(g => g.slots) ? 'lesson' : 'exercise') + (st.ready === 1 ? '' : 's')}` : 'Coming soon';
-    return `<a class="sk-tab${on ? ' is-on' : ''}${st.ready ? '' : ' is-soon'}" href="#/skill/${w.n}/${x.id}"${on ? ' aria-current="page"' : ''}><span class="sk-tab-ic">${icon(x.icon || 'book')}</span><b>${esc(x.title)}</b><small>${esc(what)}</small></a>`; }).join('')}</nav>`;
+    const what = st.ready ? '' : 'Coming soon';   // no counts: just the name (and "Coming soon" when nothing is ready)
+    return `<a class="sk-tab${on ? ' is-on' : ''}${st.ready ? '' : ' is-soon'}" href="#/skill/${w.n}/${x.id}"${on ? ' aria-current="page"' : ''}><span class="sk-tab-ic">${icon(x.icon || 'book')}</span><b>${esc(x.title)}</b>${what ? `<small>${esc(what)}</small>` : ''}</a>`; }).join('')}</nav>`;
   let body = `<p class="sec-blurb">${esc(sec.blurb || '')}</p>`;
   if (sec.groups.length === 1 && sec.groups[0].map) {   // Learn: in order, on the road map
     const g = sec.groups[0], at = groupLessons(w, g); let next = false;
@@ -1088,7 +1088,16 @@ function sectionPage(w, secId, grpId) {
     const g = sec.groups.find(x => x.id === grpId) || sec.groups.find(x => x.id === lsGet(remember + '-grp', '')) || sec.groups[0]; lsSet(remember + '-grp', g.id);
     const pic = x => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${PI[x.id] || '<path d="M5 12h14"/>'}</svg>`;
     const gi = sec.groups.indexOf(g);
+    /* Phones, many types (Reading): one button in the chosen type's colour ("Choose your question type" + the type you chose);
+       it opens the list of all the types. The same colours, icons and faint numbers as the cards on a computer. */
+    if (sec.groups.length > 4) body += `<div class="sk-pk" style="${partTint(Math.max(0, gi))}"><button type="button" class="sk-pk-btn" data-sk-pick aria-expanded="false" aria-controls="sk-pk-list">
+        <span class="sk-pk-ic">${pic(g)}</span><span class="sk-pk-tx"><small>Choose your question type</small><b>${esc(g.title)}</b></span><span class="sk-pk-n" aria-hidden="true">${gi + 1}</span>
+        <svg class="sk-pk-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+      <ol class="sk-pk-list" id="sk-pk-list" hidden>${sec.groups.map((x, xi) => `<li style="${partTint(xi)}"><a class="sk-pk-row${x.id === g.id ? ' is-on' : ''}" href="#/skill/${w.n}/${sec.id}/${x.id}"${x.id === g.id ? ' aria-current="page"' : ''}><span class="sk-pk-ic">${pic(x)}</span><b>${esc(x.title)}</b><span class="sk-pk-rn" aria-hidden="true">${xi + 1}</span></a></li>`).join('')}</ol></div>`;
     body += `<ol class="sk-parts${sec.groups.length > 4 ? ' is-many' : ''}" style="${partStyle(w)}">${sec.groups.map((x, xi) => { const st = groupStats(w, [x]), on = x.id === g.id;
+      if (sec.groups.length > 4)   // many types (Reading): icon, name and what you do; no counts
+        return `<li style="${partTint(xi)}"><a class="sk-part sk-tc${on ? ' is-on' : ''}" href="#/skill/${w.n}/${sec.id}/${x.id}"${on ? ' aria-current="page"' : ''} aria-label="${xi + 1}. ${esc(x.title)}"><span class="sk-part-ic">${pic(x)}</span>
+          <span class="sk-part-tx"><b>${esc(x.title)}</b><small>${esc(x.sub || '')}</small></span></a></li>`;
       return `<li style="${partTint(xi)}"><a class="sk-part${on ? ' is-on' : ''}" href="#/skill/${w.n}/${sec.id}/${x.id}"${on ? ' aria-current="page"' : ''} style="--pp:${st.ready ? Math.round(100 * st.done / st.ready) : 0}%" aria-label="${esc(x.title)}${x.qs ? `, ${esc(x.qs)}` : ''}, ${st.done} of ${st.ready || x.size} done"><span class="sk-part-ic">${pic(x)}</span>
         <span class="sk-part-tx"><b>${esc(x.title)}</b><small>${esc(x.sub || '')}</small></span><span class="sk-part-meta">${x.qs ? `<em><span class="sk-q-long">${esc(x.qs)}</span><span class="sk-q-short">${esc(x.qs.replace(/^Questions\s*/, 'Q '))}</span></em>` : ''}<span>${st.ready ? `${st.done} / ${st.ready}` : 'Coming soon'}</span></span>
         <span class="sk-part-bar"><i style="width:${st.ready ? Math.round(100 * st.done / st.ready) : 0}%"></i></span></a></li>`; }).join('')}</ol>`;
@@ -2479,6 +2488,7 @@ document.addEventListener('click', e => {
   const t = e.target.closest('button,a,[data-week-tab]'); if (!t) return;
   const d = t.dataset;
   if (d.exView) { lsSet(CLS.id + '-ex-view', d.exView); render(); return; }   // list or grid of exercises (a skill's Practise page)
+  if (d.skPick !== undefined) { const list = t.parentElement.querySelector('.sk-pk-list'), open = list.hidden; list.hidden = !open; t.setAttribute('aria-expanded', open); t.parentElement.classList.toggle('is-open', open); return; }   // the phone's question-type menu
   if (d.skFilter !== undefined) { const box = t.closest('.sk-panel'), k = d.skFilter;   // show only the exercises with one type of question
     box.querySelectorAll('[data-sk-filter]').forEach(b => { const on = b === t; b.classList.toggle('is-on', on); b.setAttribute('aria-pressed', on); });
     box.querySelectorAll('.sk-list > li, .ex-grid > li').forEach(li => { li.hidden = !!k && !(li.dataset.cats || '').split(' ').includes(k); });
@@ -2633,7 +2643,9 @@ if (course.sideColours?.length) {
 let lastHash = location.hash;
 window.addEventListener('hashchange', () => { const a = lastHash.match(/^#\/skill\/(\d+)\/([\w-]+)/), b = location.hash.match(/^#\/skill\/(\d+)\/([\w-]+)/); lastHash = location.hash;
   const same = a && b && a[1] === b[1] && a[2] === b[2], y = window.scrollY;   // another part or type in the same section: stay where you are
+  const picked = same && !!document.querySelector('.sk-pk.is-open');   // a phone chose a type from the open menu
   render(); if (same) window.scrollTo(0, y); else window.scrollTo(0, 0);
+  if (picked) { const pk = document.querySelector('.sk-pk'); if (pk) window.scrollTo(0, window.scrollY + pk.getBoundingClientRect().top - 124); }   // the menu folds up: show the button and its exercises
   $('#main').focus({ preventScroll: true }); });
 render(); save(false);
 cloud = window.createDEC15Cloud({
