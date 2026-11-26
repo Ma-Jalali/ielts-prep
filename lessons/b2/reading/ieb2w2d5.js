@@ -19,6 +19,11 @@ window.DEC15_LESSON = {
   "tags": [],
   "jump": [
    [
+    "xl-videos",
+    "Video",
+    "play"
+   ],
+   [
     "xl-decide",
     "How to decide",
     "target"
@@ -45,6 +50,20 @@ window.DEC15_LESSON = {
    ]
   ],
   "blocks": [
+   {
+    "type": "videos",
+    "anchor": "xl-videos",
+    "kicker": "Watch first",
+    "title": "A video from your teacher",
+    "intro": "Watch it before you read on. You can pause, go back and watch again as often as you like.",
+    "items": [
+     {
+      "title": "True / False / Not Given and Yes / No / Not Given",
+      "note": "How to tell TRUE, FALSE and NOT GIVEN apart, and how YES / NO / NOT GIVEN works with the writer’s opinions.",
+      "src": "https://drive.google.com/file/d/1tYvT3egJsFKLwf7JgZS91361-Tn4cIZm/view"
+     }
+    ]
+   },
    {
     "type": "key",
     "title": "The difference that matters",
