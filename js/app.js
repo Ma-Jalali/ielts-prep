@@ -1633,12 +1633,12 @@ let wbOpen = null, wbDay = null, wbT = 0, wbHoverAt = 0;
 function paintWeekbar(route = navRoute) {
   const bar = $('#weekbar'); if (!bar) return;
   if (!bar.querySelector('#wb-panel')) bar.innerHTML = `<div class="wb-row" role="menubar" aria-label="${UNITS ? UW + 's' : 'Weeks'}"></div><div class="wb-panel" id="wb-panel" role="region" hidden></div>`;
-  const onSkill = location.hash.match(/^#\/skill\/(\d+)/), cur = onSkill ? +onSkill[1] : route === 'home' ? null : lesson.week;   // the skill of the page you are on
+  const cur = route === 'home' ? null : lesson.week;
   bar.querySelector('.wb-row').innerHTML = `${course.map.map((m, i) => {
       const w = course.weeks.find(x => x.n === m.n), n = w ? w.days.filter(d => d.status === 'ready').length : 0, wp = weekProgress(w);
       return `<button type="button" class="wb-item${wp ? ' has-prog' : ''}${cur === m.n ? ' is-current' : ''}${wbOpen === m.n ? ' open' : ''}${n ? '' : ' is-soon'}" data-wb-week="${m.n}" aria-haspopup="true" aria-expanded="${wbOpen === m.n}" style="--wk:${WB_TONES[i % WB_TONES.length]}" title="${UNITS ? '' : `Week ${m.n} · `}${esc(m.label)}">
-        ${UNITS && w ? `<span class="wb-ic">${partSvg(w)}</span>` : `<span class="wb-num" style="--p:${wp.toFixed(3)}">${m.n}</span>`}<span class="wb-tx">${UNITS ? esc(m.label) : `Week ${m.n}`}</span><span class="wb-chev" aria-hidden="true"></span></button>`; }).join('')}
-      ${route !== 'home' && !UNITS ? `<a class="wb-go" href="${L('overview')}" title="Back to ${esc(whereLong(', '))}: ${esc(lesson.title)}"><span class="wb-go-dot" aria-hidden="true"></span><span>${esc(labHere ? `${labHere.st.short} ${labHere.n}` : whereLong())}</span></a>` : ''}`;
+        <span class="wb-num" style="--p:${wp.toFixed(3)}">${m.n}</span><span class="wb-tx">${UNITS ? esc(m.label) : `Week ${m.n}`}</span><span class="wb-chev" aria-hidden="true"></span></button>`; }).join('')}
+      ${route !== 'home' ? `<a class="wb-go" href="${L('overview')}" title="Back to ${esc(whereLong(', '))}: ${esc(lesson.title)}"><span class="wb-go-dot" aria-hidden="true"></span><span>${esc(labHere ? `${labHere.st.short} ${labHere.n}` : whereLong())}</span></a>` : ''}`;
 }
 /* ───────── tabs, carousels and table column widths ───────── */
 function lensTo(seg) { const on = seg.querySelector('[aria-selected="true"]'), lens = seg.querySelector('.lg-lens'); if (!on || !lens) return; lens.style.width = on.offsetWidth + 'px'; lens.style.transform = `translateX(${on.offsetLeft}px)`; }
@@ -1710,24 +1710,14 @@ function paintPanel(mode) {
   const was = panel.dataset.week ? +panel.dataset.week : 0;
   panel.innerHTML = `<div class="wb-sheet-bar"><b>${esc(unitName(wbOpen))}</b><button type="button" class="wb-close" data-wb-close aria-label="Close the week menu">Close</button></div>` + weekPanel(wbOpen, navRoute); panel.dataset.week = wbOpen;   // .wb-sheet-bar shows on phones only (css/precision.css §17)
   if (panel.hidden || mode === 'open') { panel.hidden = false; panel.classList.remove('in'); void panel.offsetWidth; panel.classList.add('in'); }
-  else { panel.classList.remove('in'); const g = panel.querySelector('.wb-grid, .wb-menu'); if (g) { g.style.setProperty('--dir', wbOpen > was ? '1' : '-1'); g.classList.add('swap'); } }
+  else { panel.classList.remove('in'); const g = panel.querySelector('.wb-grid'); g.style.setProperty('--dir', wbOpen > was ? '1' : '-1'); g.classList.add('swap'); }
   glideDay(panel, true); notch(panel);
 }
 /* how far through a week's activities this student is (0–1), from the saved summaries */
 function weekProgress(w) { if (!w) return 0; let dn = 0, tot = 0; w.days.forEach(d => { if (d.status !== 'ready') return; const [a, b] = dayProgress(d); dn += a; tot += b; }); return tot ? dn / tot : 0; }
 /* a day's picture: the day's own hero drawing where the week has one, otherwise the stage drawing */
 const dayArt = (w, d) => w.image ? `${ROOT}assets/week${w.n}/hero-${d.id}.svg` : artSrc(d.art || 'reading');
-/* The top menu of a skill: a small, simple list. The skill (its overview and progress), then Learn, Practise and Test. */
-function simpleMenu(w, route) {
-  const S = secOf(w), here = lesson.week === w.n && route !== 'home' ? place(lesson.week, lesson.day) : null, all = groupStats(w, (S || []).flatMap(x => x.groups));
-  const unit = g => g.test ? 'test' : g.slots ? 'lesson' : 'exercise';
-  const rows = S ? S.map(x => { const st = groupStats(w, x.groups), u = unit(x.groups[0]), cur = here && here.s === x;
-      return `<li><a class="wb-m-row${cur ? ' is-cur' : ''}${st.ready ? '' : ' is-soon'}" href="#/skill/${w.n}/${x.id}"${cur ? ' aria-current="true"' : ''}><span class="wb-m-ic">${icon(x.icon || 'book')}</span><b>${esc(x.title)}</b><small>${st.ready ? `${st.ready} ${u}${st.ready === 1 ? '' : 's'}` : 'Coming soon'}</small></a></li>`; }).join('')
-    : `<li><span class="wb-m-row is-soon"><span class="wb-m-ic">${icon('sprout')}</span><b>Coming soon</b><small>The lessons are on the way</small></span></li>`;
-  return `<div class="wb-menu" style="--wk:${partColor(w)}"><a class="wb-m-top" href="#/skill/${w.n}"><span class="wb-m-pic">${partSvg(w)}</span><span><b>${esc(w.theme)}</b><small>${all.ready ? `${all.done} of ${all.ready} done` : 'Overview'}</small></span>${icon('arrow')}</a><ol class="wb-m-list">${rows}</ol></div>`;
-}
 function weekPanel(n, route) {
-  if (UNITS) { const w0 = course.weeks.find(x => x.n === n); if (w0) return simpleMenu(w0, route); }
   const m = course.map.find(x => x.n === n) || { n, label: '', sub: '' }, w = course.weeks.find(x => x.n === n), i = course.map.indexOf(m);
   const col = WB_TONES[(i < 0 ? 0 : i) % WB_TONES.length];
   const started = w ? w.days.filter(d => dayProgress(d)[0]).length : 0, ready = w ? w.days.filter(d => d.status === 'ready') : [];
@@ -1896,7 +1886,7 @@ function parseRoute() {
   return { page: routes.includes(m[2]) ? m[2] : 'overview' };
 }
 function render() {
-  const r = parseRoute(); document.body.classList.remove('read-wide');
+  const r = parseRoute();
   { const sh = $('#side-home .side-tx'); if (sh && ME()) sh.textContent = MAP_NAME(); }   // "Isla’s course map"
   if (r.other) {
     const d = days.find(x => x.id === r.other);
@@ -2073,7 +2063,6 @@ function render() {
   const sheet = isSheet() && (route === 'overview' || !!s);
   $('#main').innerHTML = route === 'home' ? courseHome() : sheet ? sheetPage() : s ? stagePage(s) : route === 'sources' ? sourcesPage() : route === 'extra' ? extrasPage() : route === 'notebook' ? notebook() : overview();
   document.body.dataset.page = sheet ? 'sheet' : s ? 'stage' : route;
-  document.body.classList.toggle('read-wide', !!$('#main .xs-read:not(.is-embed)'));   // a reading exercise: the whole screen for the passage and the questions, as in the computer test
   if (changed && !matchMedia('(prefers-reduced-motion: reduce)').matches) { main.classList.remove('route-in'); void main.offsetWidth; main.classList.add('route-in'); clearTimeout(render.t); render.t = setTimeout(() => main.classList.remove('route-in'), 900); }
   if (s) { document.body.style.setProperty('--accent', TONES[s.tone][0]); document.body.style.setProperty('--accent-bg', TONES[s.tone][1]); }
   else { document.body.style.removeProperty('--accent'); document.body.style.removeProperty('--accent-bg'); }
