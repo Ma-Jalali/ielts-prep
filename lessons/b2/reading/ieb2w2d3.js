@@ -19,6 +19,11 @@ window.DEC15_LESSON = {
   "tags": [],
   "jump": [
    [
+    "xl-videos",
+    "Video",
+    "play"
+   ],
+   [
     "xl-tips",
     "Tips",
     "tip"
@@ -35,6 +40,20 @@ window.DEC15_LESSON = {
    ]
   ],
   "blocks": [
+   {
+    "type": "videos",
+    "anchor": "xl-videos",
+    "kicker": "Watch first",
+    "title": "A video from your teacher",
+    "intro": "Watch it before you read on. You can pause, go back and watch again as often as you like.",
+    "items": [
+     {
+      "title": "Short-answer questions",
+      "note": "How to answer short-answer questions with words from the passage.",
+      "src": "https://drive.google.com/file/d/1T0JDh9jWU6GKiVZY3lIWFJMbHC_rLJum/view"
+     }
+    ]
+   },
    {
     "type": "key",
     "title": "In one sentence",

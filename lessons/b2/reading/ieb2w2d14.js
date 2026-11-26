@@ -19,6 +19,11 @@ window.DEC15_LESSON = {
   "tags": [],
   "jump": [
    [
+    "xl-videos",
+    "Video",
+    "play"
+   ],
+   [
     "xl-tips",
     "Tips",
     "tip"
@@ -40,6 +45,20 @@ window.DEC15_LESSON = {
    ]
   ],
   "blocks": [
+   {
+    "type": "videos",
+    "anchor": "xl-videos",
+    "kicker": "Watch first",
+    "title": "A video from your teacher",
+    "intro": "Watch it before you read on. You can pause, go back and watch again as often as you like.",
+    "items": [
+     {
+      "title": "Multiple choice questions",
+      "note": "How to answer multiple choice questions, with one answer or several.",
+      "src": "https://drive.google.com/file/d/1FEOh0yayOrVwcnftWr8aWvDzLKU0SvrN/view"
+     }
+    ]
+   },
    {
     "type": "key",
     "title": "The strategy",

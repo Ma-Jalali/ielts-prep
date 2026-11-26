@@ -19,6 +19,11 @@ window.DEC15_LESSON = {
   "tags": [],
   "jump": [
    [
+    "xl-videos",
+    "Video",
+    "play"
+   ],
+   [
     "xl-tips",
     "Tips",
     "tip"
@@ -35,6 +40,20 @@ window.DEC15_LESSON = {
    ]
   ],
   "blocks": [
+   {
+    "type": "videos",
+    "anchor": "xl-videos",
+    "kicker": "Watch first",
+    "title": "A video from your teacher",
+    "intro": "Watch it before you read on. You can pause, go back and watch again as often as you like.",
+    "items": [
+     {
+      "title": "Which paragraph contains …",
+      "note": "How to find the paragraph that contains a piece of information.",
+      "src": "https://drive.google.com/file/d/1C26W48_GDTAxpMAxxhnRq4jdqNeKO3Jp/view"
+     }
+    ]
+   },
    {
     "type": "key",
     "title": "The big idea",

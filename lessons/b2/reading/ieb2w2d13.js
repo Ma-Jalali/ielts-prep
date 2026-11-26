@@ -19,6 +19,11 @@ window.DEC15_LESSON = {
   "tags": [],
   "jump": [
    [
+    "xl-videos",
+    "Video",
+    "play"
+   ],
+   [
     "xl-tips",
     "Tips",
     "tip"
@@ -40,6 +45,20 @@ window.DEC15_LESSON = {
    ]
   ],
   "blocks": [
+   {
+    "type": "videos",
+    "anchor": "xl-videos",
+    "kicker": "Watch first",
+    "title": "A video from your teacher",
+    "intro": "Watch it before you read on. You can pause, go back and watch again as often as you like.",
+    "items": [
+     {
+      "title": "Matching paragraph headings",
+      "note": "How to find the main idea of each paragraph and choose the right heading.",
+      "src": "https://drive.google.com/file/d/13vT7fmYfCPjFta4_1V37-b8NQZhWDOn_/view"
+     }
+    ]
+   },
    {
     "type": "key",
     "title": "The right heading",

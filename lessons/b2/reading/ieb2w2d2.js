@@ -11,8 +11,10 @@ window.DEC15_LESSON = {
   finish: { title: 'Next', text: 'Short-answer questions' },
   learn: {
     tags: ['Completion tasks', 'The four steps'],
-    jump: [['xl-rules', 'The rules', 'list'], ['xl-limit', 'Word limits', 'hash'], ['xl-mistakes', 'Three mistakes', 'warn'], ['xl-steps', 'Four steps', 'target'], ['xl-try', 'Try it', 'pen'], ['xl-sum', 'Remember', 'ok']],
+    jump: [['xl-videos', 'Video', 'play'], ['xl-rules', 'The rules', 'list'], ['xl-limit', 'Word limits', 'hash'], ['xl-mistakes', 'Three mistakes', 'warn'], ['xl-steps', 'Four steps', 'target'], ['xl-try', 'Try it', 'pen'], ['xl-sum', 'Remember', 'ok']],
     blocks: [
+      { type: 'videos', anchor: 'xl-videos', kicker: 'Watch first', title: 'A video from your teacher', intro: 'Watch it before you read on. You can pause, go back and watch again as often as you like.',
+        items: [{ title: 'Basic exam techniques and gap-fill questions', note: 'The exam techniques that help in every part of the Reading test, and how to answer gap-fill questions.', src: 'https://drive.google.com/file/d/1MZ9jrcBUNGjmepdjRPwsGVQY4kItw8gP/view' }] },
       { type: 'key', title: 'The golden rule', text: '**Find** answers. Do not **make** them.', sub: 'Every answer is already written in the passage. Copy the words exactly: you may **leave words out**, but you may **never change** them.' },
       { type: 'table', anchor: 'xl-rules', kicker: 'The rules', title: 'Copy the words exactly', intro: 'Each row shows the words in the passage, an answer that **loses the mark**, and the rule it breaks.', wide: true,
         head: ['In the passage', 'Wrong answer', 'The rule'],
