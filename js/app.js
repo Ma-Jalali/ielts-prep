@@ -1089,10 +1089,9 @@ function sectionPage(w, secId, grpId) {
     const pic = x => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${PI[x.id] || '<path d="M5 12h14"/>'}</svg>`;
     const gi = sec.groups.indexOf(g);
     body += `<ol class="sk-parts${sec.groups.length > 4 ? ' is-many' : ''}" style="${partStyle(w)}">${sec.groups.map((x, xi) => { const st = groupStats(w, [x]), on = x.id === g.id;
-      if (sec.groups.length > 4) { const all = st.ready && st.done === st.ready;   // many types (Reading): icon, number, name and what you do; no counts
-        return `<li style="${partTint(xi)}"><a class="sk-part sk-tc${on ? ' is-on' : ''}${all ? ' is-done' : ''}" href="#/skill/${w.n}/${sec.id}/${x.id}"${on ? ' aria-current="page"' : ''} aria-label="${xi + 1}. ${esc(x.title)}${all ? ', done' : ''}">
-          <span class="tc-top"><span class="sk-part-ic">${pic(x)}</span><span class="tc-n">${all ? icon('check') : String(xi + 1).padStart(2, '0')}</span></span>
-          <span class="sk-part-tx"><b>${esc(x.title)}</b><small>${esc(x.sub || '')}</small></span></a></li>`; }
+      if (sec.groups.length > 4)   // many types (Reading): icon, name and what you do; no counts
+        return `<li style="${partTint(xi)}"><a class="sk-part sk-tc${on ? ' is-on' : ''}" href="#/skill/${w.n}/${sec.id}/${x.id}"${on ? ' aria-current="page"' : ''} aria-label="${xi + 1}. ${esc(x.title)}"><span class="sk-part-ic">${pic(x)}</span>
+          <span class="sk-part-tx"><b>${esc(x.title)}</b><small>${esc(x.sub || '')}</small></span></a></li>`;
       return `<li style="${partTint(xi)}"><a class="sk-part${on ? ' is-on' : ''}" href="#/skill/${w.n}/${sec.id}/${x.id}"${on ? ' aria-current="page"' : ''} style="--pp:${st.ready ? Math.round(100 * st.done / st.ready) : 0}%" aria-label="${esc(x.title)}${x.qs ? `, ${esc(x.qs)}` : ''}, ${st.done} of ${st.ready || x.size} done"><span class="sk-part-ic">${pic(x)}</span>
         <span class="sk-part-tx"><b>${esc(x.title)}</b><small>${esc(x.sub || '')}</small></span><span class="sk-part-meta">${x.qs ? `<em><span class="sk-q-long">${esc(x.qs)}</span><span class="sk-q-short">${esc(x.qs.replace(/^Questions\s*/, 'Q '))}</span></em>` : ''}<span>${st.ready ? `${st.done} / ${st.ready}` : 'Coming soon'}</span></span>
         <span class="sk-part-bar"><i style="width:${st.ready ? Math.round(100 * st.done / st.ready) : 0}%"></i></span></a></li>`; }).join('')}</ol>`;
