@@ -216,7 +216,7 @@ window.DEC15Dictionary = (() => {
     const exs = (d.examples || []).slice(0, max), mk = d.examplesMk || [], terms = [d.phrase, head].filter(Boolean).join(', ').split(', ');
     return `${d.phrase ? `<span class="dx-phrase">${esc(d.phrase)}</span>` : ''}${d.label ? `<span class="dx-label">${esc(d.label)}</span>` : ''}${d.definition ? `<span class="dx-def">${esc(d.definition)}</span>` : ''}
       ${exList(exs, mk, terms)}
-      ${(d.notes || []).map(n => `<div class="dx-note">${n.expr ? `<button type="button" class="dx-expr" data-dx-say="${esc(n.expr.replace(/\s*\(.*?\)/g, ''))}">${esc(n.expr)}</button>` : `<span class="dx-note-t"><i>i</i>${n.textMk && n.textMk.includes('') ? hl(n.text, n.textMk, []) : esc(n.text)}</span>`}
+      ${(d.notes || []).map(n => `<div class="dx-note">${n.expr ? `<button type="button" class="dx-expr" data-dx-say="${esc(n.expr.replace(/\s*\(.*?\)/g, ''))}">${esc(n.expr)}</button>` : `<span class="dx-note-t"><i>i</i><span>${n.textMk && n.textMk.includes('') ? hl(n.text, n.textMk, []) : esc(n.text)}</span></span>`}
         ${exList((n.examples || []).slice(0, 2), n.examplesMk, [n.expr, head])}</div>`).join('')}
       ${(d.see || []).length ? `<span class="dx-see">See ${d.see.map(w => `<button type="button" data-dx-go="${esc(w)}">${esc(w)}</button>`).join(', ')}</span>` : ''}`;
   }

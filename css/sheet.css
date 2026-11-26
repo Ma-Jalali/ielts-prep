@@ -962,3 +962,14 @@ p.xl-eg-why { display: flex; gap: 8px; align-items: flex-start; padding: 2px 4px
   .xs-read-q .xs-part { padding: 16px 12px 20px; }
 }
 .xs-rule { display: inline-block; line-height: 1.45; } .xs-rule svg { display: inline-block; vertical-align: -2px; margin-right: 6px; }
+
+/* a score table as tiles: one per band, across the whole width (Reading overview → Scores) */
+.xl-bands { list-style: none; margin: 4px 0 0; padding: 0; display: grid; grid-template-columns: repeat(var(--n, 5), minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 1100px) { .xl-bands { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+.xl-bands li { display: grid; justify-items: center; gap: 2px; padding: 16px 8px 14px; border-radius: 16px; background: #fff; box-shadow: inset 0 0 0 1px var(--xs-line); text-align: center; }
+.xl-bands b { font: 700 1.9rem/1 var(--serif); color: var(--xs-ink, #18213f); font-variant-numeric: tabular-nums; }
+.xl-bands span { margin-top: 6px; font: 750 .95rem/1.2 var(--sans); color: #3b4566; font-variant-numeric: tabular-nums; }
+.xl-bands small { font: 600 .68rem/1.2 var(--sans); letter-spacing: .04em; color: var(--muted, #6b7390); }
+.xl-bands li.is-mark { background: var(--xs-acc, #2b67d1); box-shadow: 0 12px 24px -16px var(--xs-acc, #2b67d1); }
+.xl-bands li.is-mark :is(b, span, small) { color: #fff; }
+@media (max-width: 720px) { .xl-bands { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; } .xl-bands li { padding: 12px 4px 10px; } .xl-bands b { font-size: 1.5rem; } }
