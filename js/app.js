@@ -1091,9 +1091,8 @@ function sectionPage(w, secId, grpId) {
     /* Many types of question (Reading has 12, with long names): a vertical menu, one name per line, beside the exercises on a
        wide screen; on a phone it folds into one button that shows the chosen type and opens the full list. One colour. */
     const navRow = (x, xi) => { const st = groupStats(w, [x]), on = x.id === g.id, all = st.ready && st.done === st.ready;
-      return `<li><a class="sk-tn${on ? ' is-on' : ''}${all ? ' is-done' : ''}" href="#/skill/${w.n}/${sec.id}/${x.id}"${on ? ' aria-current="page"' : ''} style="--tp:${st.ready ? Math.round(100 * st.done / st.ready) : 0}%" aria-label="${xi + 1}. ${esc(x.title)}, ${st.done} of ${st.ready || 0} done"><span class="sk-tn-n">${all ? icon('check') : xi + 1}</span><span class="sk-tn-t">${esc(x.title)}</span><span class="sk-tn-c">${st.ready ? `${st.done}/${st.ready}` : '–'}</span></a></li>`; };
+      return `<li><a class="sk-tn${on ? ' is-on' : ''}${all ? ' is-done' : ''}" href="#/skill/${w.n}/${sec.id}/${x.id}"${on ? ' aria-current="page"' : ''} aria-label="${xi + 1}. ${esc(x.title)}, ${st.done} of ${st.ready || 0} done"><span class="sk-tn-n">${all ? icon('check') : xi + 1}</span><span class="sk-tn-t">${esc(x.title)}</span><span class="sk-tn-c">${st.ready ? `${st.done}/${st.ready}` : '–'}</span></a></li>`; };
     const nav = many ? `<nav class="sk-nav" aria-label="Types of question"><button type="button" class="sk-pick" data-sk-pick aria-expanded="false"><span class="sk-tn-n">${gi + 1}</span><span class="sk-pick-t"><small>Type of question</small><b>${esc(g.title)}</b></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
-      ${(() => { const t = groupStats(w, sec.groups); return `<header class="sk-nav-h"><b>Types of question</b><small>${sec.groups.length} types · ${t.ready} exercises</small><span class="sk-nav-bar" aria-hidden="true"><i style="width:${t.ready ? Math.round(100 * t.done / t.ready) : 0}%"></i></span><small class="sk-nav-done"><b>${t.done}</b> of ${t.ready} done</small></header>`; })()}
       <ol class="sk-tnav">${sec.groups.map(navRow).join('')}</ol></nav>` : '';
     if (!many) body += `<ol class="sk-parts${sec.groups.length > 4 ? ' is-many' : ''}" style="${partStyle(w)}">${sec.groups.map((x, xi) => { const st = groupStats(w, [x]), on = x.id === g.id;
       return `<li style="${partTint(xi)}"><a class="sk-part${on ? ' is-on' : ''}" href="#/skill/${w.n}/${sec.id}/${x.id}"${on ? ' aria-current="page"' : ''} style="--pp:${st.ready ? Math.round(100 * st.done / st.ready) : 0}%" aria-label="${esc(x.title)}${x.qs ? `, ${esc(x.qs)}` : ''}, ${st.done} of ${st.ready || x.size} done"><span class="sk-part-ic">${pic(x)}</span>
@@ -1116,21 +1115,17 @@ function sectionPage(w, secId, grpId) {
     const cats = {}; if (mixed) readyItems.forEach(x => keysOf(x).forEach(k => { cats[k] = (cats[k] || 0) + 1; }));
     const fbtn = (k, label) => `<button type="button" data-sk-filter="${k}" aria-pressed="false">${esc(label)} <small>${cats[k]}</small></button>`;
     const filters = Object.keys(cats).length > 1 ? `<div class="sk-filter" role="group" aria-label="Show exercises with"><button type="button" class="is-on" data-sk-filter="" aria-pressed="true">All <small>${readyItems.length}</small></button>${byName ? Object.keys(names).map(t => fbtn(slug(t), t)).join('') : QTYPES.filter(([k]) => cats[k]).map(([k, label]) => fbtn(k, label)).join('')}</div>` : '';
-    const pace = /reading/i.test(w.theme || '') ? 1.5 : 0, nextUp = items.find(x => x.ready && !x.done);   // Reading: about 1½ minutes a question, as in the test (60 minutes, 40 questions)
-    const meta = d => d?.qn ? `<span class="sk-meta">${d.qn} question${d.qn === 1 ? '' : 's'}${pace ? ` · about ${Math.max(5, Math.round(d.qn * pace / 5) * 5)} min` : ''}</span>` : '';
     const list = `<ol class="sk-list">${items.map(x => { const { n, d, ready, a, b, done } = x, qs = mixed ? chipsOf(x) : [];
-      const inner = `<span class="sk-n${done ? ' is-done' : ''}">${done ? icon('check') : n}</span><span class="sk-row-tx"><b>${esc(ready ? d.title : `${noun} ${n}`)}${x === nextUp && many ? '<em class="sk-next">Up next</em>' : ''}</b>${ready ? meta(d) : ''}${qs.length ? `<span class="sk-types">${qs.map(q => `<span class="qt">${esc(q.t)}</span>`).join('')}</span>` : ''}</span>${ready && a && !done ? `<span class="sk-row-bar"><i style="width:${Math.round(100 * a / b)}%"></i></span>` : ''}${status(d, a, b, done)}`;
+      const inner = `<span class="sk-n${done ? ' is-done' : ''}">${done ? icon('check') : n}</span><span class="sk-row-tx"><b>${esc(ready ? d.title : `${noun} ${n}`)}</b>${qs.length ? `<span class="sk-types">${qs.map(q => `<span class="qt">${esc(q.t)}</span>`).join('')}</span>` : ''}</span>${ready && a && !done ? `<span class="sk-row-bar"><i style="width:${Math.round(100 * a / b)}%"></i></span>` : ''}${status(d, a, b, done)}`;
       return `<li data-cats="${mixed ? keysOf(x).join(' ') : ''}">${ready ? `<a class="sk-row${done ? ' is-done' : ''}" href="#/${d.id}" aria-label="${noun} ${n}: ${esc(d.title)}${done ? ', done' : ''}">${inner}</a>` : `<div class="sk-row is-soon">${inner}</div>`}</li>`; }).join('')}</ol>`;
     const grid = `<ol class="ex-grid">${items.map(x => { const { n, d, ready, a, b, done } = x, ks = mixed ? keysOf(x) : []; const inner = `<span class="ex-n">${done ? icon('check') : n}</span><span class="ex-t">${esc(ready ? d.title : 'Coming soon')}</span>${ready && a && !done ? `<span class="ex-bar"><i style="width:${Math.round(100 * a / b)}%"></i></span>` : ''}`;
       return `<li data-cats="${ks.join(' ')}">${ready ? `<a class="ex-tile${done ? ' is-done' : a ? ' is-on' : ''}" href="#/${d.id}" aria-label="Exercise ${n}: ${esc(d.title)}${done ? ', done' : ''}">${inner}</a>` : `<div class="ex-tile is-soon" aria-label="Exercise ${n}: coming soon">${inner}</div>`}</li>`; }).join('')}</ol>`;
     const vbtn = (v, label, path) => `<button type="button" class="sk-vbtn${view === v ? ' is-on' : ''}" data-ex-view="${v}" aria-pressed="${view === v}" title="${label}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true">${path}</svg><span>${label}</span></button>`;
-    body += `${many ? `<div class="sk-split" style="${partStyle(w)}">${nav}` : ''}<section class="set-panel sk-panel" style="${partStyle(w)}${many ? '' : `;${partTint(Math.max(0, gi))}`}"><header><div>${many ? `<span class="sk-eyebrow">Type ${gi + 1} of ${sec.groups.length}</span>` : ''}<h2>${esc(g.title)}${g.qs ? ` <small>${esc(g.qs)}</small>` : ''}</h2>${g.sub ? `<p>${esc(g.sub)}</p>` : ''}</div>
+    body += `${many ? `<div class="sk-split" style="${partStyle(w)}">${nav}` : ''}<section class="set-panel sk-panel" style="${partStyle(w)}${many ? '' : `;${partTint(Math.max(0, gi))}`}"><header><div><h2>${esc(g.title)}${g.qs ? ` <small>${esc(g.qs)}</small>` : ''}</h2>${g.sub ? `<p>${esc(g.sub)}</p>` : ''}</div>
       <div class="sk-panel-tools">${g.learn && course.weeks.some(x => x.days.some(d => d.id === g.learn && d.status === 'ready')) ? `<a class="sk-learn" href="#/${g.learn}">${icon('book')}<span>The lesson</span></a>` : ''}<span class="set-count">${st.ready ? `<b>${st.done}</b> of ${st.ready} done` : g.open ? 'Coming soon' : `${g.size} exercises · coming soon`}</span>
         <div class="sk-view" role="group" aria-label="Show exercises as">${vbtn('list', 'List', '<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/>')}${vbtn('grid', 'Grid', '<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/>')}</div></div></header>
       ${filters}${g.open && !items.length ? `<p class="sk-empty">${icon('sprout')}<span>The ${esc(noun.toLowerCase())}s for ${esc(w.theme)} will appear here soon.</span></p>` : view === 'grid' ? grid : list}
-      ${g.open && builder?.on() ? `<button type="button" class="sk-new" data-pb-new="${w.n}:${g.base}:${esc(noun)}">${icon('plus')}New ${esc(noun.toLowerCase())}</button>` : ''}
-      ${many ? (() => { const pv = sec.groups[gi - 1], nx = sec.groups[gi + 1], go = (x, k, dir) => x ? `<a class="sk-step is-${dir}" href="#/skill/${w.n}/${sec.id}/${x.id}">${dir === 'prev' ? icon('left') : ''}<span><small>${dir === 'prev' ? 'Previous' : 'Next'} type · ${k + 1}</small><b>${esc(x.title)}</b></span>${dir === 'next' ? icon('arrow') : ''}</a>` : '<span></span>';
-        return `<nav class="sk-steps" aria-label="Other types of question">${go(pv, gi - 1, 'prev')}${go(nx, gi + 1, 'next')}</nav>`; })() : ''}</section>${many ? '</div>' : ''}`;
+      ${g.open && builder?.on() ? `<button type="button" class="sk-new" data-pb-new="${w.n}:${g.base}:${esc(noun)}">${icon('plus')}New ${esc(noun.toLowerCase())}</button>` : ''}</section>${many ? '</div>' : ''}`;
   }
   return `<section class="week sec-page" aria-label="${esc(w.theme)}">${head}${tabs}${body}</section>`;
 }
@@ -1638,12 +1633,12 @@ let wbOpen = null, wbDay = null, wbT = 0, wbHoverAt = 0;
 function paintWeekbar(route = navRoute) {
   const bar = $('#weekbar'); if (!bar) return;
   if (!bar.querySelector('#wb-panel')) bar.innerHTML = `<div class="wb-row" role="menubar" aria-label="${UNITS ? UW + 's' : 'Weeks'}"></div><div class="wb-panel" id="wb-panel" role="region" hidden></div>`;
-  const cur = route === 'home' ? null : lesson.week;
+  const onSkill = location.hash.match(/^#\/skill\/(\d+)/), cur = onSkill ? +onSkill[1] : route === 'home' ? null : lesson.week;   // the skill of the page you are on
   bar.querySelector('.wb-row').innerHTML = `${course.map.map((m, i) => {
       const w = course.weeks.find(x => x.n === m.n), n = w ? w.days.filter(d => d.status === 'ready').length : 0, wp = weekProgress(w);
       return `<button type="button" class="wb-item${wp ? ' has-prog' : ''}${cur === m.n ? ' is-current' : ''}${wbOpen === m.n ? ' open' : ''}${n ? '' : ' is-soon'}" data-wb-week="${m.n}" aria-haspopup="true" aria-expanded="${wbOpen === m.n}" style="--wk:${WB_TONES[i % WB_TONES.length]}" title="${UNITS ? '' : `Week ${m.n} · `}${esc(m.label)}">
-        <span class="wb-num" style="--p:${wp.toFixed(3)}">${m.n}</span><span class="wb-tx">${UNITS ? esc(m.label) : `Week ${m.n}`}</span><span class="wb-chev" aria-hidden="true"></span></button>`; }).join('')}
-      ${route !== 'home' ? `<a class="wb-go" href="${L('overview')}" title="Back to ${esc(whereLong(', '))}: ${esc(lesson.title)}"><span class="wb-go-dot" aria-hidden="true"></span><span>${esc(labHere ? `${labHere.st.short} ${labHere.n}` : whereLong())}</span></a>` : ''}`;
+        ${UNITS && w ? `<span class="wb-ic">${partSvg(w)}</span>` : `<span class="wb-num" style="--p:${wp.toFixed(3)}">${m.n}</span>`}<span class="wb-tx">${UNITS ? esc(m.label) : `Week ${m.n}`}</span><span class="wb-chev" aria-hidden="true"></span></button>`; }).join('')}
+      ${route !== 'home' && !UNITS ? `<a class="wb-go" href="${L('overview')}" title="Back to ${esc(whereLong(', '))}: ${esc(lesson.title)}"><span class="wb-go-dot" aria-hidden="true"></span><span>${esc(labHere ? `${labHere.st.short} ${labHere.n}` : whereLong())}</span></a>` : ''}`;
 }
 /* ───────── tabs, carousels and table column widths ───────── */
 function lensTo(seg) { const on = seg.querySelector('[aria-selected="true"]'), lens = seg.querySelector('.lg-lens'); if (!on || !lens) return; lens.style.width = on.offsetWidth + 'px'; lens.style.transform = `translateX(${on.offsetLeft}px)`; }
@@ -1715,14 +1710,24 @@ function paintPanel(mode) {
   const was = panel.dataset.week ? +panel.dataset.week : 0;
   panel.innerHTML = `<div class="wb-sheet-bar"><b>${esc(unitName(wbOpen))}</b><button type="button" class="wb-close" data-wb-close aria-label="Close the week menu">Close</button></div>` + weekPanel(wbOpen, navRoute); panel.dataset.week = wbOpen;   // .wb-sheet-bar shows on phones only (css/precision.css §17)
   if (panel.hidden || mode === 'open') { panel.hidden = false; panel.classList.remove('in'); void panel.offsetWidth; panel.classList.add('in'); }
-  else { panel.classList.remove('in'); const g = panel.querySelector('.wb-grid'); g.style.setProperty('--dir', wbOpen > was ? '1' : '-1'); g.classList.add('swap'); }
+  else { panel.classList.remove('in'); const g = panel.querySelector('.wb-grid, .wb-menu'); if (g) { g.style.setProperty('--dir', wbOpen > was ? '1' : '-1'); g.classList.add('swap'); } }
   glideDay(panel, true); notch(panel);
 }
 /* how far through a week's activities this student is (0–1), from the saved summaries */
 function weekProgress(w) { if (!w) return 0; let dn = 0, tot = 0; w.days.forEach(d => { if (d.status !== 'ready') return; const [a, b] = dayProgress(d); dn += a; tot += b; }); return tot ? dn / tot : 0; }
 /* a day's picture: the day's own hero drawing where the week has one, otherwise the stage drawing */
 const dayArt = (w, d) => w.image ? `${ROOT}assets/week${w.n}/hero-${d.id}.svg` : artSrc(d.art || 'reading');
+/* The top menu of a skill: a small, simple list. The skill (its overview and progress), then Learn, Practise and Test. */
+function simpleMenu(w, route) {
+  const S = secOf(w), here = lesson.week === w.n && route !== 'home' ? place(lesson.week, lesson.day) : null, all = groupStats(w, (S || []).flatMap(x => x.groups));
+  const unit = g => g.test ? 'test' : g.slots ? 'lesson' : 'exercise';
+  const rows = S ? S.map(x => { const st = groupStats(w, x.groups), u = unit(x.groups[0]), cur = here && here.s === x;
+      return `<li><a class="wb-m-row${cur ? ' is-cur' : ''}${st.ready ? '' : ' is-soon'}" href="#/skill/${w.n}/${x.id}"${cur ? ' aria-current="true"' : ''}><span class="wb-m-ic">${icon(x.icon || 'book')}</span><b>${esc(x.title)}</b><small>${st.ready ? `${st.ready} ${u}${st.ready === 1 ? '' : 's'}` : 'Coming soon'}</small></a></li>`; }).join('')
+    : `<li><span class="wb-m-row is-soon"><span class="wb-m-ic">${icon('sprout')}</span><b>Coming soon</b><small>The lessons are on the way</small></span></li>`;
+  return `<div class="wb-menu" style="--wk:${partColor(w)}"><a class="wb-m-top" href="#/skill/${w.n}"><span class="wb-m-pic">${partSvg(w)}</span><span><b>${esc(w.theme)}</b><small>${all.ready ? `${all.done} of ${all.ready} done` : 'Overview'}</small></span>${icon('arrow')}</a><ol class="wb-m-list">${rows}</ol></div>`;
+}
 function weekPanel(n, route) {
+  if (UNITS) { const w0 = course.weeks.find(x => x.n === n); if (w0) return simpleMenu(w0, route); }
   const m = course.map.find(x => x.n === n) || { n, label: '', sub: '' }, w = course.weeks.find(x => x.n === n), i = course.map.indexOf(m);
   const col = WB_TONES[(i < 0 ? 0 : i) % WB_TONES.length];
   const started = w ? w.days.filter(d => dayProgress(d)[0]).length : 0, ready = w ? w.days.filter(d => d.status === 'ready') : [];
@@ -1754,13 +1759,11 @@ function skillPanel(w, col, route) {
     return `<li><a class="wb-set${cur ? ' is-cur' : ''}${st.ready ? '' : ' is-soon'}" href="${href}"${cur ? ' aria-current="true"' : ''}><b>${esc(g.title)}</b><small>${st.ready ? `${st.done ? `${st.done}/` : ''}${st.ready} ${(g.test ? 'test' : g.slots ? 'lesson' : 'exercise') + (st.ready === 1 ? '' : 's')}` : 'Coming soon'}</small>${st.ready ? `<span class="wb-set-bar"><i style="width:${Math.round(100 * st.done / st.ready)}%"></i></span>` : ''}</a></li>`; };
   const secs = S.map(x => { const rows = [...new Set(x.groups.map(g => g.by || ''))];
     return `<section class="wb-sec"><a class="wb-sec-h" href="#/skill/${w.n}/${x.id}"><span class="wb-sec-ic">${icon(x.icon || 'book')}</span><b>${esc(x.title)}</b>${x.groups.length === 1 ? (() => { const g = x.groups[0], st = groupStats(w, [g]); return `<small class="wb-sec-n">${st.ready ? `${st.done ? `${st.done}/` : ''}${st.ready} ${(g.test ? 'test' : g.slots ? 'lesson' : 'exercise') + (st.ready === 1 ? '' : 's')}` : 'Coming soon'}</small>`; })() : ''}</a>
-      ${x.groups.length > 4 ? `<ol class="wb-list">${x.groups.map((g, k) => { const st = groupStats(w, [g]), cur = here && here.g === g;   // many sets (Reading's 12 types): one name per line
-          return `<li><a class="wb-li${cur ? ' is-cur' : ''}" href="#/skill/${w.n}/${x.id}/${g.id}"${cur ? ' aria-current="true"' : ''} title="${esc(g.title)}"><span class="wb-li-n">${k + 1}</span><span class="wb-li-t">${esc(g.title)}</span><span class="wb-li-c">${st.ready ? `${st.done}/${st.ready}` : 'Soon'}</span></a></li>`; }).join('')}</ol>`
-      : x.groups.length > 1 ? rows.map(by => `${by && rows.length > 1 ? `<p class="wb-by">${esc(by)}</p>` : ''}<ul class="wb-sets">${x.groups.filter(g => (g.by || '') === by).map(g => setLink(x, g)).join('')}</ul>`).join('') : ''}</section>`; }).join('');
+      ${x.groups.length > 1 ? rows.map(by => `${by && rows.length > 1 ? `<p class="wb-by">${esc(by)}</p>` : ''}<ul class="wb-sets">${x.groups.filter(g => (g.by || '') === by).map(g => setLink(x, g)).join('')}</ul>`).join('') : ''}</section>`; }).join('');
   const d = here ? w.days.find(x => x.id === lesson.id) : w.days.find(x => x.status === 'ready' && !isDone(x)) || w.days.find(x => x.status === 'ready');
   const pl = d && place(w.n, d.day);
   const card = d ? `<a class="wb-here" href="#/${d.id}"><span class="wb-here-k">${here ? 'You are here' : 'Up next'}</span><b>${esc(d.title)}</b><small>${esc(pl ? [pl.s.title, pl.g.slots || pl.g.test ? null : pl.g.title, pl.name].filter(Boolean).join(' · ') : '')}</small><span class="wb-here-go">${here ? 'Back to it' : 'Start'} ${icon('arrow')}</span></a>` : '';
-  return `<div class="wb-grid is-skill" style="--wk:${col}">${intro}<div class="wb-col wb-secs">${secs}</div><div class="wb-col wb-parts-col">${card}</div></div>`;
+  return `<div class="wb-grid is-skill">${intro}<div class="wb-col wb-secs">${secs}</div><div class="wb-col wb-parts-col">${card}</div></div>`;
 }
 function dayParts(w, d, route) {
   const head = `<header class="wb-dhead"><img class="wb-dart" src="${esc(dayArt(w, d))}" data-fallback="${esc(artSrc(d.art || 'reading'))}" alt="" width="96" height="64" loading="lazy" onerror="if(this.dataset.fallback){this.src=this.dataset.fallback;delete this.dataset.fallback}"><div><p class="wb-h">${DW} ${d.day}</p><h3>${esc(d.title)}</h3></div></header>`;
@@ -1893,7 +1896,7 @@ function parseRoute() {
   return { page: routes.includes(m[2]) ? m[2] : 'overview' };
 }
 function render() {
-  const r = parseRoute();
+  const r = parseRoute(); document.body.classList.remove('read-wide');
   { const sh = $('#side-home .side-tx'); if (sh && ME()) sh.textContent = MAP_NAME(); }   // "Isla’s course map"
   if (r.other) {
     const d = days.find(x => x.id === r.other);
@@ -2070,6 +2073,7 @@ function render() {
   const sheet = isSheet() && (route === 'overview' || !!s);
   $('#main').innerHTML = route === 'home' ? courseHome() : sheet ? sheetPage() : s ? stagePage(s) : route === 'sources' ? sourcesPage() : route === 'extra' ? extrasPage() : route === 'notebook' ? notebook() : overview();
   document.body.dataset.page = sheet ? 'sheet' : s ? 'stage' : route;
+  document.body.classList.toggle('read-wide', !!$('#main .xs-read:not(.is-embed)'));   // a reading exercise: the whole screen for the passage and the questions, as in the computer test
   if (changed && !matchMedia('(prefers-reduced-motion: reduce)').matches) { main.classList.remove('route-in'); void main.offsetWidth; main.classList.add('route-in'); clearTimeout(render.t); render.t = setTimeout(() => main.classList.remove('route-in'), 900); }
   if (s) { document.body.style.setProperty('--accent', TONES[s.tone][0]); document.body.style.setProperty('--accent-bg', TONES[s.tone][1]); }
   else { document.body.style.removeProperty('--accent'); document.body.style.removeProperty('--accent-bg'); }
