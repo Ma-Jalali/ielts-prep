@@ -46,7 +46,7 @@
   --shadow-lift: 0 2px 4px rgba(24, 33, 63,.05), 0 12px 28px -8px rgba(24, 33, 63,.18);
   --ease: cubic-bezier(.2,.7,.2,1);
   --side: 300px;
-  --content: 1180px;
+  --content: 1280px;   /* one width for every page */
   --prose: 70ch;
   --fs: 17px;
 }

@@ -973,3 +973,13 @@ p.xl-eg-why { display: flex; gap: 8px; align-items: flex-start; padding: 2px 4px
 .xl-bands li.is-mark { background: var(--xs-acc, #2b67d1); box-shadow: 0 12px 24px -16px var(--xs-acc, #2b67d1); }
 .xl-bands li.is-mark :is(b, span, small) { color: #fff; }
 @media (max-width: 720px) { .xl-bands { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; } .xl-bands li { padding: 12px 4px 10px; } .xl-bands b { font-size: 1.5rem; } }
+
+/* a reading exercise uses the whole screen, as in the computer-delivered test: the side menu steps aside
+   (the top menu and the breadcrumb still lead everywhere) and the passage and the questions get the width */
+@media (min-width: 1081px) {
+  body.read-wide { display: block; }
+  body.read-wide .sidebar { display: none !important; }
+  body.read-wide::before { left: 0; }
+  body.read-wide main { max-width: 1560px; }   /* wide, but lines stay readable (about 75 characters) */
+  body.read-wide .xs-read { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 22px; }
+}
