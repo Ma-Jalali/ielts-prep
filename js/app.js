@@ -1068,8 +1068,8 @@ function sectionPage(w, secId, grpId) {
       <h1>${partIcon(w, 'is-on sk-ic')}${esc(w.theme)}</h1>${w.tag ? `<p class="sk-tag">${esc(w.tag)}</p>` : ''}${w.summary ? `<p>${esc(w.summary)}</p>` : ''}
       <div class="sk-stats">${ME() ? `<span class="sk-me">${esc(ME())}’s progress</span>` : ''}<span><b>${all.ready}</b> ready</span><span><b>${all.done}</b> done</span>${all.ready ? `<span class="sk-bar" aria-label="${Math.round(100 * all.done / all.ready)}% done"><i style="width:${Math.round(100 * all.done / all.ready)}%"></i></span>` : ''}</div></div>${art}</header>`;
   const tabs = `<nav class="sk-tabs" aria-label="${esc(w.theme)}: sections" style="${partStyle(w)}">${S.map(x => { const st = groupStats(w, x.groups), on = x.id === sec.id;
-    const what = st.ready ? `${st.done ? `${st.done}/` : ''}${st.ready} ${(x.groups.some(g => g.test) ? 'test' : x.groups.some(g => g.slots) ? 'lesson' : 'exercise') + (st.ready === 1 ? '' : 's')}` : 'Coming soon';
-    return `<a class="sk-tab${on ? ' is-on' : ''}${st.ready ? '' : ' is-soon'}" href="#/skill/${w.n}/${x.id}"${on ? ' aria-current="page"' : ''}><span class="sk-tab-ic">${icon(x.icon || 'book')}</span><b>${esc(x.title)}</b><small>${esc(what)}</small></a>`; }).join('')}</nav>`;
+    const what = st.ready ? '' : 'Coming soon';   // no counts: just the name (and "Coming soon" when nothing is ready)
+    return `<a class="sk-tab${on ? ' is-on' : ''}${st.ready ? '' : ' is-soon'}" href="#/skill/${w.n}/${x.id}"${on ? ' aria-current="page"' : ''}><span class="sk-tab-ic">${icon(x.icon || 'book')}</span><b>${esc(x.title)}</b>${what ? `<small>${esc(what)}</small>` : ''}</a>`; }).join('')}</nav>`;
   let body = `<p class="sec-blurb">${esc(sec.blurb || '')}</p>`;
   if (sec.groups.length === 1 && sec.groups[0].map) {   // Learn: in order, on the road map
     const g = sec.groups[0], at = groupLessons(w, g); let next = false;
@@ -1089,6 +1089,10 @@ function sectionPage(w, secId, grpId) {
     const pic = x => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${PI[x.id] || '<path d="M5 12h14"/>'}</svg>`;
     const gi = sec.groups.indexOf(g);
     body += `<ol class="sk-parts${sec.groups.length > 4 ? ' is-many' : ''}" style="${partStyle(w)}">${sec.groups.map((x, xi) => { const st = groupStats(w, [x]), on = x.id === g.id;
+      if (sec.groups.length > 4) { const all = st.ready && st.done === st.ready;   // many types (Reading): icon, number, name and what you do; no counts
+        return `<li style="${partTint(xi)}"><a class="sk-part sk-tc${on ? ' is-on' : ''}${all ? ' is-done' : ''}" href="#/skill/${w.n}/${sec.id}/${x.id}"${on ? ' aria-current="page"' : ''} aria-label="${xi + 1}. ${esc(x.title)}${all ? ', done' : ''}">
+          <span class="tc-top"><span class="sk-part-ic">${pic(x)}</span><span class="tc-n">${all ? icon('check') : String(xi + 1).padStart(2, '0')}</span></span>
+          <span class="sk-part-tx"><b>${esc(x.title)}</b><small>${esc(x.sub || '')}</small></span></a></li>`; }
       return `<li style="${partTint(xi)}"><a class="sk-part${on ? ' is-on' : ''}" href="#/skill/${w.n}/${sec.id}/${x.id}"${on ? ' aria-current="page"' : ''} style="--pp:${st.ready ? Math.round(100 * st.done / st.ready) : 0}%" aria-label="${esc(x.title)}${x.qs ? `, ${esc(x.qs)}` : ''}, ${st.done} of ${st.ready || x.size} done"><span class="sk-part-ic">${pic(x)}</span>
         <span class="sk-part-tx"><b>${esc(x.title)}</b><small>${esc(x.sub || '')}</small></span><span class="sk-part-meta">${x.qs ? `<em><span class="sk-q-long">${esc(x.qs)}</span><span class="sk-q-short">${esc(x.qs.replace(/^Questions\s*/, 'Q '))}</span></em>` : ''}<span>${st.ready ? `${st.done} / ${st.ready}` : 'Coming soon'}</span></span>
         <span class="sk-part-bar"><i style="width:${st.ready ? Math.round(100 * st.done / st.ready) : 0}%"></i></span></a></li>`; }).join('')}</ol>`;
