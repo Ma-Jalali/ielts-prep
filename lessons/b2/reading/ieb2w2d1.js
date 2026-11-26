@@ -54,9 +54,9 @@ window.DEC15_LESSON = {
       { type: 'tabs', anchor: 'xl-score', kicker: 'Scores', title: 'From marks to a band score', intro: 'Every correct answer is one mark. Your marks out of 40 become a band from 1 to 9. The numbers can change a little from one test to another.',
         items: [
           { label: 'Academic', icon: 'book', blocks: [
-            { type: 'table', tiles: true, head: ['Correct answers', 'Band'], rows: [['39–40', '9'], ['37–38', '8.5'], ['35–36', '8'], ['33–34', '7.5'], ['==30–32==', '==7=='], ['27–29', '6.5'], ['23–26', '6'], ['19–22', '5.5'], ['15–18', '5']] }] },
+            { type: 'table', head: ['Correct answers', 'Band'], rows: [['39–40', '9'], ['37–38', '8.5'], ['35–36', '8'], ['33–34', '7.5'], ['==30–32==', '==7=='], ['27–29', '6.5'], ['23–26', '6'], ['19–22', '5.5'], ['15–18', '5']] }] },
           { label: 'General Training', icon: 'people', blocks: [
-            { type: 'table', tiles: true, head: ['Correct answers', 'Band'], rows: [['40', '9'], ['39', '8.5'], ['37–38', '8'], ['36', '7.5'], ['34–35', '7'], ['==32–33==', '==6.5=='], ['30–31', '6'], ['27–29', '5.5'], ['23–26', '5']] }] }
+            { type: 'table', head: ['Correct answers', 'Band'], rows: [['40', '9'], ['39', '8.5'], ['37–38', '8'], ['36', '7.5'], ['34–35', '7'], ['==32–33==', '==6.5=='], ['30–31', '6'], ['27–29', '5.5'], ['23–26', '5']] }] }
         ] },
       { type: 'steps', anchor: 'xl-better', kicker: 'Improve', title: 'Five ways to a better score',
         items: [
