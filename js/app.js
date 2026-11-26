@@ -2548,6 +2548,7 @@ document.addEventListener('click', e => {
     if (open) setTimeout(() => item.scrollIntoView({ block: 'nearest', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }), 340);
     return; }
   if (t.id === 'side-settings') { const m = $('#side-menu'), open = m.hidden; m.hidden = !open; t.setAttribute('aria-expanded', String(open)); if (open) m.querySelector('button')?.focus(); return; }
+  if (t.id === 'side-fold') { setMini(!document.documentElement.classList.contains('side-mini')); return; }
   if (t.id === 'menu-btn') { setSide(!document.body.classList.contains('side-open')); return; }
   if (t.tagName === 'A' && t.closest('.sidebar')) { setSide(false); if ($('#side-search').value) { $('#side-search').value = ''; setTimeout(runSearch); } }
   if (d.go) { const sec = lesson.sections.find(x => x.activities.some(a => a.id === d.go)); if (sec) { state.active[sec.id] = d.go; save(false); }
@@ -2639,6 +2640,30 @@ if (course.sideColours?.length) {
     paint(); pick.querySelector('[aria-checked="true"]')?.focus();
   };
 }
+/* ───────── the side panel folds into a slim rail of icons (wide screens); the choice is remembered ─────────
+   More room for the page: a reading exercise shows its passage and its questions side by side. On the rail each icon
+   names itself in a small label when you point at it; the search and the settings open the full panel again. */
+const railOn = () => document.documentElement.classList.contains('side-mini') && matchMedia('(min-width: 901px)').matches;
+function setMini(on) {
+  document.documentElement.classList.toggle('side-mini', on); try { localStorage.setItem('ielts-side-mini', on ? '1' : ''); } catch (e) { /* private window */ }
+  const b = $('#side-fold'); if (b) { const tx = on ? 'Open the side panel' : 'Fold the side panel'; b.setAttribute('aria-pressed', String(on)); b.setAttribute('aria-label', tx); b.title = on ? '' : tx; }
+  sideTip(null); requestAnimationFrame(() => paintLayout());
+}
+let tipEl = null;
+function sideTip(el) {
+  if (!tipEl) { tipEl = document.createElement('div'); tipEl.className = 'side-tip'; tipEl.setAttribute('aria-hidden', 'true'); document.body.append(tipEl); }
+  if (!el || !railOn()) { tipEl.classList.remove('is-on'); return; }
+  const tx = el.id === 'side-fold' ? 'Open the side panel' : el.classList.contains('side-search') ? 'Search' : el.classList.contains('side-prog') ? ($('#progress-label')?.textContent || '') : el.querySelector('.side-tx')?.textContent || el.getAttribute('aria-label') || '';
+  if (!tx.trim()) { tipEl.classList.remove('is-on'); return; }
+  const r = el.getBoundingClientRect(); tipEl.textContent = tx.trim(); tipEl.style.left = Math.round(r.right + 12) + 'px'; tipEl.style.top = Math.round(r.top + r.height / 2) + 'px'; tipEl.classList.add('is-on');
+}
+const tipTarget = e => e.target.closest?.('#sidebar .side-link, #sidebar .side-fold, #sidebar .side-gear, #sidebar .side-search, #sidebar .side-prog');
+document.addEventListener('mouseover', e => { if (railOn()) sideTip(tipTarget(e)); });
+document.addEventListener('focusin', e => { if (!railOn()) return; if (e.target.id === 'side-search') { setMini(false); e.target.focus(); return; } sideTip(tipTarget(e)); });
+document.addEventListener('focusout', () => sideTip(null));
+document.addEventListener('click', e => { if (railOn() && e.target.closest?.('#side-settings')) setMini(false); }, true);   // the settings open in the full panel
+document.addEventListener('scroll', () => tipEl?.classList.remove('is-on'), true);
+setMini(document.documentElement.classList.contains('side-mini'));
 let lastHash = location.hash;
 window.addEventListener('hashchange', () => { const a = lastHash.match(/^#\/skill\/(\d+)\/([\w-]+)/), b = location.hash.match(/^#\/skill\/(\d+)\/([\w-]+)/); lastHash = location.hash;
   const same = a && b && a[1] === b[1] && a[2] === b[2], y = window.scrollY;   // another part or type in the same section: stay where you are
