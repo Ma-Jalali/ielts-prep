@@ -57,7 +57,7 @@
 [data-course="ielts"][data-side="cocoa"] { --side-bg: #5a3e32; --side-top: #664739; --side-end: #4d352b; }
 .side-colours .sc-row { flex-wrap: wrap; }
 /* Band score calculator (#/band) */
-.bc-page { max-width: 980px; }
+.bc-page { max-width: none; container-type: inline-size; }   /* the same width as every other page */
 .bc-head h1 { margin: 4px 0 6px; font-size: clamp(2rem, 4vw, 2.8rem); }
 .bc-head p { margin: 0 0 22px; color: var(--muted); max-width: 62ch; }
 .bc-grid { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 18px; align-items: start; }
@@ -98,6 +98,11 @@
 .bc-o-bar i { position: absolute; inset: 0 auto 0 0; width: calc(var(--p) * 100%); border-radius: inherit; background: linear-gradient(90deg, var(--gold), var(--brand)); transition: width .4s var(--ease, ease); }
 .bc-o-bar em { position: absolute; top: -4px; bottom: -4px; left: calc(var(--t) * 100%); width: 2px; background: var(--ink); border-radius: 2px; }
 @media (max-width: 760px) { .bc-grid { grid-template-columns: 1fr; } .bc-out { position: static; order: -1; } .bc-row, .bc-row.is-writing { grid-template-columns: 1fr 56px; } .bc-row > select, .bc-tasks { grid-column: 1 / -1; grid-row: 2; } .bc-band { grid-row: 1; grid-column: 2; } }
+@container (max-width: 860px) {   /* a narrow page (the dictionary docked beside it): the results under the form, the writing tasks on their own line */
+  .bc-grid { grid-template-columns: minmax(0, 1fr); }
+  .bc-row.is-writing { grid-template-columns: minmax(0, 1fr) 74px; }
+  .bc-row.is-writing .bc-tasks { grid-column: 1 / -1; grid-row: 2; }
+}
 [data-course="ielts"] .sidebar .side-link.t-band { --tc: #d6283c; }
 /* The page area takes focus when a page opens (so screen readers start there): no ring around it, ever. */
 [data-course="ielts"] #main:is(:focus, :focus-visible), [data-course="ielts"] main[tabindex="-1"]:is(:focus, :focus-visible) { outline: none !important; box-shadow: none !important; }

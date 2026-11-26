@@ -120,7 +120,7 @@ window.DEC15Dictionary = (() => {
     const entries = (matches.length ? matches : objs).slice(0, 6).map(e => { const p0 = ((e.hwi && e.hwi.prs) || [])[0] || {}, ipa = p0.ipa || p0.mw || '';
       return { word: String((e.hwi && e.hwi.hw) || w).replace(/\*/g, ''), phonetic: ipa ? '/' + ipa + '/' : '', audio: p0.sound ? audioUrl(p0.sound.audio) : '', meanings: [{ partOfSpeech: e.fl || '', definitions: senses(e) }], source: 'mw', mw: extras(e) }; })
       .filter(e => e.meanings[0].definitions.length);
-    return entries.length ? { entries } : null;
+    return entries.length ? { entries, exact: !!(exact.length || matches.length) } : null;
   }
   async function freeLookup(w, signal) {   // dictionaryapi.dev, when Merriam-Webster is not available
     const r = await fetch(FREE_URL + encodeURIComponent(w), { signal }); if (!r.ok) return null;
@@ -133,6 +133,52 @@ window.DEC15Dictionary = (() => {
   const norm = w => String(w || '').replace(/[‘’]/g, "'").replace(/[“”"]/g, '').replace(/\s+/g, ' ').trim().toLowerCase().replace(/^[^a-z0-9]+|[^a-z0-9)'.]+$/g, '');
   function remember(w) { S.recent = [w, ...S.recent.filter(x => x !== w)].slice(0, 12); store(); }
   function putCache(w, v) { cache.words[w] = v; cache.order = [w, ...cache.order.filter(x => x !== w)].slice(0, 300); for (const k of Object.keys(cache.words)) if (!cache.order.includes(k)) delete cache.words[k]; storeCache(); }
+  /* ───────── phrases: "make a mistake" is found inside the entry for "mistake" (or "make") ───────── */
+  const STOP = new Set('a an the to of in on at for with by from into as be is are was were been being it its one one\'s someone somebody something sb sth your my his her their our up out off'.split(' '));
+  const IRR = { make: 'made', take: 'took taken', do: 'did done does', have: 'had has', get: 'got gotten', give: 'gave given', go: 'went gone goes', come: 'came', keep: 'kept', pay: 'paid', bring: 'brought', catch: 'caught', run: 'ran', lose: 'lost', break: 'broke broken', say: 'said', see: 'saw seen', find: 'found', hold: 'held', tell: 'told', think: 'thought', fall: 'fell fallen', meet: 'met', leave: 'left', feel: 'felt', put: 'put', set: 'set', let: 'let', speak: 'spoke spoken', draw: 'drew drawn', throw: 'threw thrown', win: 'won', stand: 'stood', send: 'sent', spend: 'spent', build: 'built', buy: 'bought', teach: 'taught', bear: 'bore borne', grow: 'grew grown', know: 'knew known', show: 'showed shown', rise: 'rose risen', drive: 'drove driven', write: 'wrote written', be: 'is am are was were been' };
+  const forms = w => { const f = [w, w + 's', w + 'es', w + 'ed', w + 'd', w + 'ing', w.replace(/e$/, '') + 'ing', w.replace(/y$/, 'ies'), w.replace(/y$/, 'ied'), w + w.slice(-1) + 'ed', w + w.slice(-1) + 'ing'].concat((IRR[w] || '').split(' ').filter(Boolean)); return [...new Set(f)]; };
+  const rxEsc = t => t.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&');
+  function phraseRe(q) {   // "make a mistake" also matches "made a big mistake", "making mistakes", "make an awful mistake"
+    const all = q.split(' ').filter(Boolean), core = all.filter(w => !STOP.has(w)), ws = core.length > 1 ? core : all;
+    const tok = w => `(?:${forms(w).map(rxEsc).join('|')})`, gap = core.length > 1 ? "(?:\\s+[\\w'’-]+){0,3}?\\s+" : "(?:\\s+[\\w'’-]+)?\\s+";
+    return new RegExp('\\b' + ws.map(tok).join(gap) + '\\b', 'i');
+  }
+  function findPhrase(entries, q) {   // the best place a phrase appears in an entry: a set phrase, an expression, then an example
+    const re = phraseRe(q), strip = t => String(t || '').replace(/\s*\(.*?\)\s*/g, ' ').replace(/\s+/g, ' ').trim();
+    const hit = (score, d) => (!best || score > best.score) && (best = Object.assign({ score }, d));
+    let best = null;
+    entries.forEach(en => {
+      ((en.mw && en.mw.phrases) || []).forEach(p => p.phrase.split(', ').forEach(ph => { if (re.test(strip(ph))) hit(3, { phrase: ph, def: p.definition, exs: p.examples, mk: p.examplesMk, label: p.label, see: p.see || [] }); }));
+      en.meanings.forEach(m => (m.definitions || []).reduce((a, d) => a.concat([d], d.subs || []), []).forEach(d => {
+        if (d.phrase) d.phrase.split(', ').forEach(ph => { if (re.test(strip(ph))) hit(3, { phrase: ph, def: d.definition, exs: d.examples, mk: d.examplesMk, label: d.label, see: d.see || [] }); });
+        (d.notes || []).forEach(n => { const ex = (n.examples || []).filter(x => re.test(x));
+          if (n.expr && re.test(strip(n.expr))) hit(2.5, { phrase: n.expr, def: d.definition, exs: n.examples || [], mk: n.examplesMk, label: d.label, see: [] });
+          else if (ex.length) hit(1, { phrase: '', def: d.definition, exs: ex, mk: [], label: d.label, see: [] }); });
+        const ex = (d.examples || []).filter(x => re.test(x)); if (ex.length) hit(1 + Math.min(ex.length, 3) / 10, { phrase: '', def: d.definition, exs: ex, mk: [], label: d.label, see: [] });
+      }));
+    });
+    return best;
+  }
+  async function phraseLookup(w, signal) {   // look up each main word of the phrase and search inside its entry
+    const words = [...new Set(w.split(' ').filter(x => !STOP.has(x) && x.length > 1))].sort((a, b) => b.length - a.length);
+    let found = null;
+    for (const word of words.slice(0, 4)) {
+      let res = cache.words[word];
+      if (!res) { try { res = await mwLookup(word, signal); } catch (e) { res = null; } if (!res) { try { res = await freeLookup(word, signal); } catch (e) { res = null; } } if (res && res.entries) putCache(word, res); }
+      if (!res || !res.entries) continue;
+      const f = findPhrase(res.entries, w);
+      if (f && (!found || f.score > found.f.score)) found = { f, word, res };
+      if (found && found.f.score >= 2.5) break;
+    }
+    return found ? { entries: found.res.entries, found: Object.assign(found.f, { query: w, in: found.word }) } : null;
+  }
+  function phraseCard(f, q) {
+    const title = f.phrase || q;
+    return `<section class="dx-found" aria-label="The phrase ${esc(title)}"><span class="dx-found-k">Phrase</span>
+      <div class="dx-found-top"><h2>${esc(title)}</h2><button type="button" class="dx-say-sm" data-dx-say="${esc(title.replace(/\s*\(.*?\)/g, ''))}" aria-label="Listen">${o.icon('sound')}</button></div>
+      ${f.label ? `<span class="dx-label">${esc(f.label)}</span>` : ''}${f.def ? `<div class="dx-def">${esc(f.def)}</div>` : ''}${(f.exs || []).length ? `<ul class="dx-exs">${f.exs.slice(0, 3).map(x => `<li class="dx-ex">${esc(x).replace(phraseRe(q), '<b>$&</b>')}</li>`).join('')}</ul>` : ''}
+      <p class="dx-found-in">Found in the entry for <button type="button" data-dx-go="${esc(f.in)}">${esc(f.in)}</button>, below.</p></section>`;
+  }
   async function lookup(raw, from = 'typed') {
     const w = norm(raw); if (!w) return; if (w.length > 60) { o.toast?.('Select a shorter word or phrase.'); return; }
     show(); input.value = raw.trim(); const my = ++seq; cur = { q: w, raw: raw.trim() };
@@ -142,11 +188,13 @@ window.DEC15Dictionary = (() => {
       const ctrl = new AbortController(), t = setTimeout(() => ctrl.abort(), 9000);
       try { res = await mwLookup(w, ctrl.signal); src = 'mw'; } catch (e) { res = null; }
       if (!res) { try { res = await freeLookup(w, ctrl.signal); if (res) src = 'free'; } catch (e) { res = null; } }
+      if (w.includes(' ') && !(res && res.entries && (res.exact || (res.entries[0].word || '').toLowerCase() === w))) {   // a phrase with no entry of its own
+        try { const ph = await phraseLookup(w, ctrl.signal); if (ph) res = ph; } catch (e) { /* keep what we have */ } }
       clearTimeout(t);
       if (res && res.entries) putCache(w, res);
     }
     if (my !== seq) return;
-    if (res && res.entries) { remember(w); body.innerHTML = entryHTML(res.entries, w); setStatus(`${res.entries[0].word}: ${res.entries[0].meanings[0].definitions[0]?.definition || ''}`); body.scrollTop = 0; if (from === 'page' || from === 'reading') input.blur(); return; }
+    if (res && res.entries) { remember(w); body.innerHTML = (res.found ? phraseCard(res.found, w) : '') + entryHTML(res.entries, res.found ? res.found.in : w); setStatus(res.found ? `${res.found.phrase || w}: ${res.found.def || ''}` : `${res.entries[0].word}: ${res.entries[0].meanings[0].definitions[0]?.definition || ''}`); body.scrollTop = 0; if (from === 'page' || from === 'reading') input.blur(); return; }
     let sug = (res && res.suggestions) || [];
     if (!sug.length && navigator.onLine) { try { const r = await fetch(SUG_URL + encodeURIComponent(w)); sug = ((await r.json()) || []).map(x => x.word).filter(x => x !== w).slice(0, 6); } catch (e) { /* none */ } }
     if (my !== seq) return;
@@ -162,13 +210,14 @@ window.DEC15Dictionary = (() => {
     for (const words of list) { const re = new RegExp('(^|[^A-Za-z])(' + words.map(w => w.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&') + '[a-z]{0,4}').join('(?:\\s+[a-z]+){0,2}\\s+') + ')(?![a-z])', 'i'); if (re.test(html)) return html.replace(re, '$1<b>$2</b>'); }
     return html;
   }
+  const exList = (xs, mk, terms) => xs.length ? `<ul class="dx-exs">${xs.map((x, i) => `<li class="dx-ex">${hl(x, (mk || [])[i], terms)}</li>`).join('')}</ul>` : '';   // examples as bullet points
   const chip = (w, extra = '') => `<button type="button" class="dx-chip" data-dx-go="${esc(w)}">${esc(w)}${extra}</button>`;
   function senseHTML(d, head, max) {
     const exs = (d.examples || []).slice(0, max), mk = d.examplesMk || [], terms = [d.phrase, head].filter(Boolean).join(', ').split(', ');
     return `${d.phrase ? `<span class="dx-phrase">${esc(d.phrase)}</span>` : ''}${d.label ? `<span class="dx-label">${esc(d.label)}</span>` : ''}${d.definition ? `<span class="dx-def">${esc(d.definition)}</span>` : ''}
-      ${exs.map((x, i) => `<span class="dx-ex">“${hl(x, mk[i], terms)}”</span>`).join('')}
+      ${exList(exs, mk, terms)}
       ${(d.notes || []).map(n => `<div class="dx-note">${n.expr ? `<button type="button" class="dx-expr" data-dx-say="${esc(n.expr.replace(/\s*\(.*?\)/g, ''))}">${esc(n.expr)}</button>` : `<span class="dx-note-t"><i>i</i>${n.textMk && n.textMk.includes('') ? hl(n.text, n.textMk, []) : esc(n.text)}</span>`}
-        ${(n.examples || []).slice(0, 2).map((x, i) => `<span class="dx-ex">“${hl(x, (n.examplesMk || [])[i], [n.expr, head])}”</span>`).join('')}</div>`).join('')}
+        ${exList((n.examples || []).slice(0, 2), n.examplesMk, [n.expr, head])}</div>`).join('')}
       ${(d.see || []).length ? `<span class="dx-see">See ${d.see.map(w => `<button type="button" data-dx-go="${esc(w)}">${esc(w)}</button>`).join(', ')}</span>` : ''}`;
   }
   function entryHTML(entries, q) {
@@ -191,7 +240,7 @@ window.DEC15Dictionary = (() => {
         <ol class="dx-senses">${g.defs.slice(0, 30).map(d => `<li class="dx-sense${d.subs && d.subs.length ? ' has-subs' : ''}">${senseHTML(d, head, 3)}
           ${(d.subs || []).map(sb => `<div class="dx-sub"><span class="dx-letter">${esc(sb.letter)}</span><div>${senseHTML(sb, head, 3)}</div></div>`).join('')}</li>`).join('')}</ol></section>`).join('')}
       ${exprs.length ? `<section class="dx-box"><h3>Expressions with “${esc(head)}”</h3>${exprs.slice(0, 10).map(it => `<div class="dx-item"><div class="dx-item-top"><b>${esc(it.expr)}</b><button type="button" class="dx-say-sm" data-dx-say="${esc(it.expr.replace(/\s*\(.*?\)/g, ''))}" aria-label="Listen">${o.icon('sound')}</button></div>
-        ${it.label ? `<span class="dx-label">${esc(it.label)}</span>` : ''}${it.def ? `<div class="dx-def">${esc(it.def)}</div>` : ''}${it.exs.slice(0, 2).map((x, i) => `<span class="dx-ex">“${hl(x, it.exsMk[i], [it.expr])}”</span>`).join('')}
+        ${it.label ? `<span class="dx-label">${esc(it.label)}</span>` : ''}${it.def ? `<div class="dx-def">${esc(it.def)}</div>` : ''}${exList(it.exs.slice(0, 2), it.exsMk, [it.expr])}
         ${it.see.length ? `<span class="dx-see">See ${it.see.map(w => `<button type="button" data-dx-go="${esc(w)}">${esc(w)}</button>`).join(', ')}</span>` : ''}</div>`).join('')}</section>` : ''}
       ${fam.length ? `<section class="dx-chips-sec"><h3>Word family</h3><div class="dx-chips">${fam.map(r => chip(r.word, r.pos ? `<i>${esc(r.pos)}</i>` : '')).join('')}</div></section>` : ''}
       ${see.length ? `<section class="dx-chips-sec"><h3>See also</h3><div class="dx-chips">${see.map(w => chip(w)).join('')}</div></section>` : ''}
