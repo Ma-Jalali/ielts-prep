@@ -1087,8 +1087,14 @@ function sectionPage(w, secId, grpId) {
   } else {   // Practise: choose a part (one card each), then its exercises as a list (or a grid, the student's choice)
     const g = sec.groups.find(x => x.id === grpId) || sec.groups.find(x => x.id === lsGet(remember + '-grp', '')) || sec.groups[0]; lsSet(remember + '-grp', g.id);
     const pic = x => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${PI[x.id] || '<path d="M5 12h14"/>'}</svg>`;
-    const gi = sec.groups.indexOf(g);
-    body += `<ol class="sk-parts${sec.groups.length > 4 ? ' is-many' : ''}" style="${partStyle(w)}">${sec.groups.map((x, xi) => { const st = groupStats(w, [x]), on = x.id === g.id;
+    const gi = sec.groups.indexOf(g), many = sec.groups.length > 4;
+    /* Many types of question (Reading has 12, with long names): a vertical menu, one name per line, beside the exercises on a
+       wide screen; on a phone it folds into one button that shows the chosen type and opens the full list. One colour. */
+    const navRow = (x, xi) => { const st = groupStats(w, [x]), on = x.id === g.id, all = st.ready && st.done === st.ready;
+      return `<li><a class="sk-tn${on ? ' is-on' : ''}${all ? ' is-done' : ''}" href="#/skill/${w.n}/${sec.id}/${x.id}"${on ? ' aria-current="page"' : ''} aria-label="${xi + 1}. ${esc(x.title)}, ${st.done} of ${st.ready || 0} done"><span class="sk-tn-n">${all ? icon('check') : xi + 1}</span><span class="sk-tn-t">${esc(x.title)}</span><span class="sk-tn-c">${st.ready ? `${st.done}/${st.ready}` : '–'}</span></a></li>`; };
+    const nav = many ? `<nav class="sk-nav" aria-label="Types of question"><button type="button" class="sk-pick" data-sk-pick aria-expanded="false"><span class="sk-tn-n">${gi + 1}</span><span class="sk-pick-t"><small>Type of question</small><b>${esc(g.title)}</b></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+      <ol class="sk-tnav">${sec.groups.map(navRow).join('')}</ol></nav>` : '';
+    if (!many) body += `<ol class="sk-parts${sec.groups.length > 4 ? ' is-many' : ''}" style="${partStyle(w)}">${sec.groups.map((x, xi) => { const st = groupStats(w, [x]), on = x.id === g.id;
       return `<li style="${partTint(xi)}"><a class="sk-part${on ? ' is-on' : ''}" href="#/skill/${w.n}/${sec.id}/${x.id}"${on ? ' aria-current="page"' : ''} style="--pp:${st.ready ? Math.round(100 * st.done / st.ready) : 0}%" aria-label="${esc(x.title)}${x.qs ? `, ${esc(x.qs)}` : ''}, ${st.done} of ${st.ready || x.size} done"><span class="sk-part-ic">${pic(x)}</span>
         <span class="sk-part-tx"><b>${esc(x.title)}</b><small>${esc(x.sub || '')}</small></span><span class="sk-part-meta">${x.qs ? `<em><span class="sk-q-long">${esc(x.qs)}</span><span class="sk-q-short">${esc(x.qs.replace(/^Questions\s*/, 'Q '))}</span></em>` : ''}<span>${st.ready ? `${st.done} / ${st.ready}` : 'Coming soon'}</span></span>
         <span class="sk-part-bar"><i style="width:${st.ready ? Math.round(100 * st.done / st.ready) : 0}%"></i></span></a></li>`; }).join('')}</ol>`;
@@ -1115,11 +1121,11 @@ function sectionPage(w, secId, grpId) {
     const grid = `<ol class="ex-grid">${items.map(x => { const { n, d, ready, a, b, done } = x, ks = mixed ? keysOf(x) : []; const inner = `<span class="ex-n">${done ? icon('check') : n}</span><span class="ex-t">${esc(ready ? d.title : 'Coming soon')}</span>${ready && a && !done ? `<span class="ex-bar"><i style="width:${Math.round(100 * a / b)}%"></i></span>` : ''}`;
       return `<li data-cats="${ks.join(' ')}">${ready ? `<a class="ex-tile${done ? ' is-done' : a ? ' is-on' : ''}" href="#/${d.id}" aria-label="Exercise ${n}: ${esc(d.title)}${done ? ', done' : ''}">${inner}</a>` : `<div class="ex-tile is-soon" aria-label="Exercise ${n}: coming soon">${inner}</div>`}</li>`; }).join('')}</ol>`;
     const vbtn = (v, label, path) => `<button type="button" class="sk-vbtn${view === v ? ' is-on' : ''}" data-ex-view="${v}" aria-pressed="${view === v}" title="${label}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true">${path}</svg><span>${label}</span></button>`;
-    body += `<section class="set-panel sk-panel" style="${partStyle(w)};${partTint(Math.max(0, gi))}"><header><div><h2>${esc(g.title)}${g.qs ? ` <small>${esc(g.qs)}</small>` : ''}</h2>${g.sub ? `<p>${esc(g.sub)}</p>` : ''}</div>
+    body += `${many ? `<div class="sk-split" style="${partStyle(w)}">${nav}` : ''}<section class="set-panel sk-panel" style="${partStyle(w)}${many ? '' : `;${partTint(Math.max(0, gi))}`}"><header><div><h2>${esc(g.title)}${g.qs ? ` <small>${esc(g.qs)}</small>` : ''}</h2>${g.sub ? `<p>${esc(g.sub)}</p>` : ''}</div>
       <div class="sk-panel-tools">${g.learn && course.weeks.some(x => x.days.some(d => d.id === g.learn && d.status === 'ready')) ? `<a class="sk-learn" href="#/${g.learn}">${icon('book')}<span>The lesson</span></a>` : ''}<span class="set-count">${st.ready ? `<b>${st.done}</b> of ${st.ready} done` : g.open ? 'Coming soon' : `${g.size} exercises · coming soon`}</span>
         <div class="sk-view" role="group" aria-label="Show exercises as">${vbtn('list', 'List', '<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/>')}${vbtn('grid', 'Grid', '<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/>')}</div></div></header>
       ${filters}${g.open && !items.length ? `<p class="sk-empty">${icon('sprout')}<span>The ${esc(noun.toLowerCase())}s for ${esc(w.theme)} will appear here soon.</span></p>` : view === 'grid' ? grid : list}
-      ${g.open && builder?.on() ? `<button type="button" class="sk-new" data-pb-new="${w.n}:${g.base}:${esc(noun)}">${icon('plus')}New ${esc(noun.toLowerCase())}</button>` : ''}</section>`;
+      ${g.open && builder?.on() ? `<button type="button" class="sk-new" data-pb-new="${w.n}:${g.base}:${esc(noun)}">${icon('plus')}New ${esc(noun.toLowerCase())}</button>` : ''}</section>${many ? '</div>' : ''}`;
   }
   return `<section class="week sec-page" aria-label="${esc(w.theme)}">${head}${tabs}${body}</section>`;
 }
@@ -1171,13 +1177,14 @@ function homePhone() {
 }
 function courseHome() {
   const n = nextUp(), done = coreActivities.filter(a => state.done[a.id]).length, pct = Math.round(100 * done / coreActivities.length);
-  return `${homePhone()}<header class="home-head">
+  const myPic = UNITS && window.IELTSCharacter && window.IELTS_GATE?.member ? window.IELTSCharacter.portrait(window.IELTS_GATE.member.gender, 104, window.IELTS_GATE.member.avatar) : '';   // the student's own character, beside the title
+  return `${homePhone()}<header class="home-head${myPic ? ' has-pic' : ''}">${myPic ? `<span class="home-pic" aria-hidden="true">${myPic}</span>` : ''}<div class="home-head-tx">
       <span class="eyebrow">${esc(course.code)} · ${esc(course.topic)}</span>
       <h1>${ME() ? `${esc(ME())}’s course map` : 'Your course map'}</h1>
       ${course.intro === '' ? '' : `<p>${ME() ? `${L1HI() ? `<b class="home-l1">${L1HI()}</b> ` : ''}<b class="home-hi">${GREET()}, ${esc(ME())}.</b> ` : ''}${esc(course.intro || 'Pick up where you left off, or open any lesson below.')}</p>`}
       ${classToday ? (() => { const { d, week, day } = classToday, ready = d.status === 'ready', inner = `<span class="ht-dot" aria-hidden="true"></span><span class="ht-hi">${GREET()}</span><span class="ht-txt">Today in class · ${WEEKDAY[day - 1]}, Week ${week}</span><b>${esc(d.title)}</b>${ready ? icon('arrow') : '<small>Coming soon</small>'}`;
         return ready ? `<a class="home-today" href="#/${d.id}">${inner}</a>` : `<span class="home-today is-soon">${inner}</span>`; })() : ''}
-    </header>
+    </div></header>
     ${UNITS ? campusMap() + skillGrid() : `<section class="course-map" aria-label="Course map">${courseMap(lesson.week)}</section>`}
     ${lesson.week ? `<section class="resume" style="${tone(n ? n.s : lesson.sections[lesson.sections.length - 1])}">
       <img class="resume-art" src="${artSrc(n ? n.s.art : 'writing')}" alt="" width="220" height="170">
@@ -2478,6 +2485,7 @@ document.addEventListener('click', e => {
   const t = e.target.closest('button,a,[data-week-tab]'); if (!t) return;
   const d = t.dataset;
   if (d.exView) { lsSet(CLS.id + '-ex-view', d.exView); render(); return; }   // list or grid of exercises (a skill's Practise page)
+  if (d.skPick !== undefined) { const nav = t.closest('.sk-nav'), on = !nav.classList.contains('is-open'); nav.classList.toggle('is-open', on); t.setAttribute('aria-expanded', on); return; }   // the phone's type-of-question menu
   if (d.skFilter !== undefined) { const box = t.closest('.sk-panel'), k = d.skFilter;   // show only the exercises with one type of question
     box.querySelectorAll('[data-sk-filter]').forEach(b => { const on = b === t; b.classList.toggle('is-on', on); b.setAttribute('aria-pressed', on); });
     box.querySelectorAll('.sk-list > li, .ex-grid > li').forEach(li => { li.hidden = !!k && !(li.dataset.cats || '').split(' ').includes(k); });
@@ -2632,7 +2640,10 @@ if (course.sideColours?.length) {
 let lastHash = location.hash;
 window.addEventListener('hashchange', () => { const a = lastHash.match(/^#\/skill\/(\d+)\/([\w-]+)/), b = location.hash.match(/^#\/skill\/(\d+)\/([\w-]+)/); lastHash = location.hash;
   const same = a && b && a[1] === b[1] && a[2] === b[2], y = window.scrollY;   // another part or type in the same section: stay where you are
-  render(); if (same) window.scrollTo(0, y); else window.scrollTo(0, 0); $('#main').focus({ preventScroll: true }); });
+  const picked = same && document.querySelector('.sk-nav.is-open');   // a phone chose from the open type-of-question menu
+  render(); if (same) window.scrollTo(0, y); else window.scrollTo(0, 0);
+  if (picked) { const sp = document.querySelector('.sk-split'); if (sp && sp.getBoundingClientRect().top < 70) window.scrollTo(0, window.scrollY + sp.getBoundingClientRect().top - 76); }   // the menu folds up: bring it and the exercises back into view
+  $('#main').focus({ preventScroll: true }); });
 render(); save(false);
 cloud = window.createDEC15Cloud({
   cfg, lessonId: lesson.id, getState: () => state,
