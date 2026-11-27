@@ -121,3 +121,77 @@ html.av-open { overflow: hidden; }
   .av-opts { overflow: visible; padding: 4px 16px 18px; }
   .av-foot { padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); }
 }
+
+/* ───────── characters in motion (js/character.js): they blink, breathe and walk; pets, balloons and stars move ───────── */
+.ch-portrait :is(.ch-eyes, .ch-pet, .ch-ears, .ch-twinkle, .ch-tassel), .ch-leg, .ch-pet-walk, .ch-flag { transform-box: fill-box; transform-origin: center; }
+.ch-portrait .ch-eyes { animation: chBlink 4.6s infinite; }
+@keyframes chBlink { 0%, 44%, 48%, 100% { transform: scaleY(1); } 46% { transform: scaleY(.1); } }
+.ch-portrait .ch-person { animation: chBreathe 4.2s ease-in-out infinite; }
+@keyframes chBreathe { 50% { transform: translateY(.5px); } }
+.ch-portrait .ch-head { transform-origin: 32px 44px; transition: transform .35s cubic-bezier(.3, 1.6, .5, 1); }
+:is(.home-pic, .hm-pic, .av-big, .stu-av, .gate-hello):hover .ch-head { transform: rotate(-5deg); }
+.ch-portrait .ch-pet { transform-origin: 50% 100%; animation: chPet 2.6s ease-in-out infinite; }
+@keyframes chPet { 0%, 100% { transform: translateY(0) rotate(0); } 30% { transform: translateY(-1.4px) rotate(-5deg); } 60% { transform: translateY(0) rotate(4deg); } }
+.ch-ears { transform-origin: 50% 100%; animation: chEars 3.4s ease-in-out infinite; }
+@keyframes chEars { 0%, 82%, 100% { transform: rotate(0); } 88% { transform: rotate(-7deg); } 94% { transform: rotate(6deg); } }
+.ch-twinkle { animation: chTwinkle 2.4s ease-in-out infinite; }
+@keyframes chTwinkle { 50% { opacity: .35; transform: scale(.7); } }
+.ch-rays { transform-origin: 32px 32px; animation: chSpin 40s linear infinite; }
+@keyframes chSpin { to { transform: rotate(360deg); } }
+.ch-cloud { animation: chDrift 9s ease-in-out infinite alternate; }
+@keyframes chDrift { to { transform: translateX(-9px); } }
+.ch-confetti { animation: chFloat 5s ease-in-out infinite alternate; }
+@keyframes chFloat { to { transform: translateY(2.4px); } }
+.ch-tassel { transform-origin: 50% 0; animation: chSwing 2.8s ease-in-out infinite; }
+@keyframes chSwing { 0%, 100% { transform: rotate(-9deg); } 50% { transform: rotate(9deg); } }
+/* the walker on the maps: the legs step, the pet hops behind, the balloon sways */
+.ch-leg-a { transform-origin: 100% 0; animation: chStepA .9s ease-in-out infinite; }
+.ch-leg-b { transform-origin: 0 0; animation: chStepB .9s ease-in-out infinite; }
+@keyframes chStepA { 0%, 100% { transform: rotate(13deg); } 50% { transform: rotate(-16deg); } }
+@keyframes chStepB { 0%, 100% { transform: rotate(-16deg); } 50% { transform: rotate(13deg); } }
+.ch-pet-walk { transform-origin: 50% 100%; animation: chHop .9s ease-in-out infinite; }
+@keyframes chHop { 0%, 100% { transform: translateY(0) rotate(4deg); } 50% { transform: translateY(-2.6px) rotate(-4deg); } }
+.ch-balloon { transform-origin: 7px 1px; animation: chSway 3.2s ease-in-out infinite; }
+@keyframes chSway { 0%, 100% { transform: rotate(-7deg); } 50% { transform: rotate(8deg); } }
+.ch-flag { transform-origin: 0 50%; animation: chWave 1.6s ease-in-out infinite; }
+@keyframes chWave { 50% { transform: skewY(-9deg) scaleX(.92); } }
+/* a tap on your own picture: a happy jump */
+.home-pic, .hm-pic { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+:is(.home-pic, .hm-pic):active svg { animation: chJump .5s cubic-bezier(.3, 1.6, .5, 1); }
+@keyframes chJump { 40% { transform: translateY(-7px) scale(1.06) rotate(-4deg); } }
+/* small pictures in the designer's tiles stay still */
+:is(.av-tile, .av-mini) :is(.ch-eyes, .ch-person, .ch-pet, .ch-ears, .ch-twinkle, .ch-rays, .ch-cloud, .ch-confetti, .ch-tassel) { animation: none; }
+@media (prefers-reduced-motion: reduce) { .ch-portrait *, .ch-leg, .ch-pet-walk, .ch-balloon, .ch-flag, .ch-ears, :is(.home-pic, .hm-pic) svg { animation: none !important; transition: none !important; } }
+
+/* ───────── the designer: tabs, a stage with a spotlight, a picture that pops when it changes ───────── */
+.av-tabs { position: sticky; top: 0; z-index: 3; display: flex; gap: 4px; margin: 0 -24px; padding: 12px 24px 10px; background: linear-gradient(#fff 82%, rgba(255, 255, 255, 0)); overflow-x: auto; scrollbar-width: none; }
+.av-tabs::-webkit-scrollbar { display: none; }
+.av-tab { flex: none; height: 38px; padding: 0 16px; border: 0; border-radius: 999px; background: #f1f3f8; color: #3b4566; font: 700 .86rem/1 var(--sans, system-ui); cursor: pointer; transition: background .15s, color .15s, transform .15s; }
+.av-tab:hover { background: #e4e7f0; } .av-tab:active { transform: scale(.96); }
+.av-tab.on { background: #18213f; color: #fff; box-shadow: 0 8px 16px -10px rgba(24, 33, 63, .7); }
+.av-stage { background: radial-gradient(circle at 50% 24%, #fff 0, #eef7f5 38%, #f6f7fb 78%); }
+.av-big { position: relative; }
+.av-big::after { content: ''; position: absolute; left: 12%; right: 12%; bottom: -12px; height: 12px; border-radius: 50%; background: rgba(24, 33, 63, .16); filter: blur(5px); z-index: -1; }
+.av-big.is-pop svg { animation: avPop .42s cubic-bezier(.3, 1.6, .5, 1); }
+@keyframes avPop { 0% { transform: scale(.9) rotate(-4deg); } 60% { transform: scale(1.05) rotate(2deg); } }
+.av-dice { display: inline-flex; align-items: center; gap: 7px; }
+.av-dice svg { width: 17px; height: 17px; transition: transform .5s cubic-bezier(.3, 1.6, .5, 1); }
+.av-dice:hover svg { transform: rotate(180deg); } .av-dice:active svg { transform: rotate(360deg) scale(.9); }
+.av-tile { transition: border-color .12s, transform .15s, box-shadow .15s; }
+.av-tile:hover { transform: translateY(-3px); box-shadow: 0 10px 18px -14px rgba(24, 33, 63, .6); }
+.av-tile.on svg { animation: avPop .4s cubic-bezier(.3, 1.6, .5, 1); }
+.av-nopet { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 50%; background: #f1f3f8; }
+.av-nopet::before { content: ''; width: 22px; height: 2.5px; border-radius: 2px; background: #b9c0d4; transform: rotate(-45deg); }
+.av-dot.on { transform: scale(1.1); }
+@media (max-width: 760px) { .av-tabs { position: static; margin: 0 -16px; padding: 10px 16px 4px; background: none; } .av-tab { height: 34px; padding: 0 13px; font-size: .8rem; } }
+@media (prefers-reduced-motion: reduce) { .av-big.is-pop svg, .av-tile.on svg { animation: none; } }
+
+/* your own picture is a button: a small pencil says it can be changed */
+button:is(.home-pic, .hm-pic) { position: relative; padding: 0; border: 0; overflow: visible; font: inherit; transition: transform .2s cubic-bezier(.3, 1.6, .5, 1); }
+button:is(.home-pic, .hm-pic) > svg.ch-portrait { border-radius: 50%; }
+button:is(.home-pic, .hm-pic):hover { transform: scale(1.04); }
+button:is(.home-pic, .hm-pic):focus-visible { outline: 3px solid #2b67d1; outline-offset: 4px; }
+.pic-edit { position: absolute; right: -2px; bottom: -2px; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: #18213f; color: #fff; box-shadow: 0 0 0 3px #fff, 0 6px 12px -6px rgba(24, 33, 63, .7); transition: transform .2s, background .2s; }
+.pic-edit svg { width: 14px; height: 14px; animation: none !important; }
+button:is(.home-pic, .hm-pic):hover .pic-edit { background: #2b67d1; transform: rotate(-12deg) scale(1.08); }
+.hm-pic .pic-edit { width: 22px; height: 22px; box-shadow: 0 0 0 2px #fff; } .hm-pic .pic-edit svg { width: 11px; height: 11px; }

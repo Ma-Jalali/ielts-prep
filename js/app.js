@@ -1169,7 +1169,7 @@ function homePhone() {
   const pic = window.IELTSCharacter ? window.IELTSCharacter.portrait(gender, 58, window.IELTS_GATE?.member?.avatar) : '';
   const art = next && window.IELTSSheetArt ? window.IELTSSheetArt(({ listening: 'headset', reading: 'books' })[w?.art] || 'headset', 'hm-art') : '';
   return `<section class="hm" aria-label="Your start">
-    <header class="hm-hi"><span class="hm-pic">${pic}</span><div class="hm-hi-tx">${L1HI() ? `<em class="hm-l1">${L1HI()}</em>` : ''}<span>${GREET()}${me ? ',' : ''}</span><b>${esc(me || 'Welcome')}</b></div>
+    <header class="hm-hi"><button type="button" class="hm-pic" data-my-look aria-label="Design your character">${pic}<i class="pic-edit" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg></i></button><div class="hm-hi-tx">${L1HI() ? `<em class="hm-l1">${L1HI()}</em>` : ''}<span>${GREET()}${me ? ',' : ''}</span><b>${esc(me || 'Welcome')}</b></div>
       <span class="hm-ring" style="--p:${pct}" aria-label="${pct}% of the ready lessons done"><b>${pct}<small>%</small></b></span></header>
     ${next ? `<a class="hm-next" href="#/${next.id}" style="${w ? partStyle(w) : ''}"><span class="hm-next-tx"><span class="hm-next-k">${done.length ? 'Continue' : 'Start here'}</span>
       <b>${esc(next.title)}</b><small>${esc(pl ? [w?.theme, pl.g.slots || pl.g.test ? null : pl.g.title, pl.name].filter(Boolean).join(' · ') : '')}</small>
@@ -1180,7 +1180,7 @@ function homePhone() {
 function courseHome() {
   const n = nextUp(), done = coreActivities.filter(a => state.done[a.id]).length, pct = Math.round(100 * done / coreActivities.length);
   const myPic = UNITS && window.IELTSCharacter && window.IELTS_GATE?.member ? window.IELTSCharacter.portrait(window.IELTS_GATE.member.gender, 104, window.IELTS_GATE.member.avatar) : '';   // the student's own character, beside the title
-  return `${homePhone()}<header class="home-head${myPic ? ' has-pic' : ''}">${myPic ? `<span class="home-pic" aria-hidden="true">${myPic}</span>` : ''}<div class="home-head-tx">
+  return `${homePhone()}<header class="home-head${myPic ? ' has-pic' : ''}">${myPic ? `<button type="button" class="home-pic" data-my-look aria-label="Design your character" title="Design your character">${myPic}<i class="pic-edit" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg></i></button>` : ''}<div class="home-head-tx">
       <span class="eyebrow">${esc(course.code)} · ${esc(course.topic)}</span>
       <h1>${ME() ? `${esc(ME())}’s course map` : 'Your course map'}</h1>
       ${course.intro === '' ? '' : `<p>${ME() ? `${L1HI() ? `<b class="home-l1">${L1HI()}</b> ` : ''}<b class="home-hi">${GREET()}, ${esc(ME())}.</b> ` : ''}${esc(course.intro || 'Pick up where you left off, or open any lesson below.')}</p>`}
@@ -2548,6 +2548,7 @@ document.addEventListener('click', e => {
     if (open) setTimeout(() => item.scrollIntoView({ block: 'nearest', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }), 340);
     return; }
   if (t.id === 'side-settings') { const m = $('#side-menu'), open = m.hidden; m.hidden = !open; t.setAttribute('aria-expanded', String(open)); if (open) m.querySelector('button')?.focus(); return; }
+  if (d.myLook !== undefined) { window.IELTSStudents?.openMine?.(); return; }   // your own character, from your picture on the home page
   if (t.id === 'side-fold') { setMini(!document.documentElement.classList.contains('side-mini')); return; }
   if (t.id === 'menu-btn') { setSide(!document.body.classList.contains('side-open')); return; }
   if (t.tagName === 'A' && t.closest('.sidebar')) { setSide(false); if ($('#side-search').value) { $('#side-search').value = ''; setTimeout(runSearch); } }
@@ -2664,6 +2665,7 @@ document.addEventListener('focusout', () => sideTip(null));
 document.addEventListener('click', e => { if (railOn() && e.target.closest?.('#side-settings')) setMini(false); }, true);   // the settings open in the full panel
 document.addEventListener('scroll', () => tipEl?.classList.remove('is-on'), true);
 setMini(document.documentElement.classList.contains('side-mini'));
+window.addEventListener('ielts-look', () => { render(); toast('Your character is saved.'); });
 let lastHash = location.hash;
 window.addEventListener('hashchange', () => { const a = lastHash.match(/^#\/skill\/(\d+)\/([\w-]+)/), b = location.hash.match(/^#\/skill\/(\d+)\/([\w-]+)/); lastHash = location.hash;
   const same = a && b && a[1] === b[1] && a[2] === b[2], y = window.scrollY;   // another part or type in the same section: stay where you are

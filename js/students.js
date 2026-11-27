@@ -46,6 +46,9 @@ window.IELTSStudents = (() => {
 
   /* ───────── the character designer ───────── */
   const chip = (k, v, label, on, extra = '') => `<button type="button" class="av-chip${on ? ' on' : ''}" data-av="${k}" data-v="${esc(v)}" aria-pressed="${on}">${extra}${esc(label)}</button>`;
+  const tile = (k, v, label, on, picture) => `<button type="button" class="av-tile${on ? ' on' : ''}" data-av="${k}" data-v="${v}" aria-pressed="${on}">${picture}<small>${esc(label)}</small></button>`;
+  const TABS = [['basics', 'Basics'], ['face', 'Face'], ['hair', 'Hair &amp; head'], ['clothes', 'Clothes'], ['fun', 'Pet &amp; scene']];
+  let tab = 'basics';
   const dot = (k, v, label, colour, on) => `<button type="button" class="av-dot${on ? ' on' : ''}" data-av="${k}" data-v="${v}" aria-pressed="${on}" title="${esc(label)}" aria-label="${esc(label)}" style="--c:${colour}"></button>`;
   function edHTML() {
     const C = CH(), L = C.resolve(ed.gender, ed.avatar), O = C.OPTIONS, look = over => Object.assign({}, ed.avatar, over);
@@ -53,29 +56,39 @@ window.IELTSStudents = (() => {
     const langs = Object.entries(C.LANGS).map(([k, v]) => [k, v[0]]).sort((a, b) => a[1].localeCompare(b[1]));
     const sec = (t, body, cls = '') => `<section class="av-sec${cls}"><h4>${t}</h4><div class="av-row">${body}</div></section>`;
     return `<div class="av-card" role="dialog" aria-modal="true" aria-labelledby="av-title">
-      <header class="av-head"><h3 id="av-title">${esc(ed.name ? `${ed.name}’s character` : 'New student’s character')}</h3><button type="button" class="av-x" data-av-close aria-label="Close">×</button></header>
+      <header class="av-head"><h3 id="av-title">${esc(ed.mine ? 'Your character' : ed.name ? `${ed.name}’s character` : 'New student’s character')}</h3><button type="button" class="av-x" data-av-close aria-label="Close">×</button></header>
       <div class="av-body">
-        <div class="av-stage"><span class="av-big">${C.portrait(ed.gender, 150, ed.avatar)}</span>${road}
+        <div class="av-stage"><span class="av-big${pop ? ' is-pop' : ''}">${C.portrait(ed.gender, 150, ed.avatar)}</span>${road}
           ${ed.lang && ed.lang !== 'en' ? `<p class="av-hi">${C.hello(ed.lang, ed.name || '')}</p>` : ''}<p class="av-sum">${esc(summary(ed))}</p>
-          <button type="button" class="btn-quiet btn-sm" data-av-random>Surprise me</button></div>
+          <button type="button" class="btn-quiet btn-sm av-dice" data-av-random><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="4"/><circle cx="9" cy="9" r="1" fill="currentColor"/><circle cx="15" cy="15" r="1" fill="currentColor"/><circle cx="15" cy="9" r="1" fill="currentColor"/><circle cx="9" cy="15" r="1" fill="currentColor"/></svg>Surprise me</button></div>
         <div class="av-opts">
-          ${sec('Body', Object.entries(C.LABELS).map(([k, v]) => chip('gender', k, v, ed.gender === k, `<span class="av-mini">${C.portrait(k, 30)}</span>`)).join(''))}
-          ${sec('Quick start <small>sets the skin and hair; change anything after</small>', Object.entries(C.HERITAGE).map(([k, h]) => chip('heritage', k, h.label, L.heritage === k)).join(''))}
-          ${sec('Skin tone', Object.entries(O.skin).map(([k, v]) => dot('skin', k, v, C.SWATCH.skin(k), L.skin === k)).join(''))}
-          ${sec('Hair style', Object.entries(O.hair).map(([k, v]) => `<button type="button" class="av-tile${L.hair === k ? ' on' : ''}" data-av="hair" data-v="${k}" aria-pressed="${L.hair === k}">${C.portrait(ed.gender, 52, look({ hair: k }))}<small>${esc(v)}</small></button>`).join(''), ' is-tiles')}
-          ${sec('Hair colour', Object.entries(O.hairColor).map(([k, v]) => dot('hairColor', k, v, C.SWATCH.hairColor(k), L.hairColor === k)).join(''))}
-          ${sec('Clothes colour', Object.entries(O.top).map(([k, v]) => dot('top', k, v, C.SWATCH.top(k), L.top === k)).join(''))}
-          ${sec('Clothes', Object.entries(O.outfit).map(([k, v]) => chip('outfit', k, v, L.outfit === k)).join(''))}
-          ${sec('Glasses', Object.entries(O.glasses).map(([k, v]) => chip('glasses', k, v, L.glasses === k)).join(''))}
-          ${sec('Beard', Object.entries(O.beard).map(([k, v]) => chip('beard', k, v, L.beard === k)).join(''))}
-          ${sec('Earrings', Object.entries(O.earrings).map(([k, v]) => chip('earrings', k, v, L.earrings === k)).join(''))}
-          <section class="av-sec"><h4>First language <small>a hello on their home page, and a “well done” above the answer key</small></h4>
-            <select class="av-lang" data-av-lang><option value="">Not set</option>${langs.map(([k, v]) => `<option value="${k}"${ed.lang === k ? ' selected' : ''}>${esc(v)}</option>`).join('')}</select></section>
+          <nav class="av-tabs" role="tablist" aria-label="Parts of the character">${TABS.map(([id, label]) => `<button type="button" role="tab" class="av-tab${tab === id ? ' on' : ''}" data-av-tab="${id}" aria-selected="${tab === id}">${label}</button>`).join('')}</nav>
+          ${tab === 'basics' ? sec('Body', Object.entries(C.LABELS).map(([k, v]) => chip('gender', k, v, ed.gender === k, `<span class="av-mini">${C.portrait(k, 30)}</span>`)).join(''))
+            + sec('Quick start <small>sets the skin and hair; change anything after</small>', Object.entries(C.HERITAGE).map(([k, h]) => chip('heritage', k, h.label, L.heritage === k)).join(''))
+            + sec('Skin tone', Object.entries(O.skin).map(([k, v]) => dot('skin', k, v, C.SWATCH.skin(k), L.skin === k)).join(''))
+            + `<section class="av-sec"><h4>First language <small>a hello on ${ed.mine ? 'your' : 'their'} home page, and a “well done” above the answer key</small></h4>
+            <select class="av-lang" data-av-lang><option value="">Not set</option>${langs.map(([k, v]) => `<option value="${k}"${ed.lang === k ? ' selected' : ''}>${esc(v)}</option>`).join('')}</select></section>` : ''}
+          ${tab === 'face' ? sec('Expression', Object.entries(O.expression).map(([k, v]) => tile('expression', k, v, L.expression === k, C.portrait(ed.gender, 52, look({ expression: k })))).join(''), ' is-tiles')
+            + sec('Eye colour', Object.entries(O.eyes).map(([k, v]) => dot('eyes', k, v, C.SWATCH.eyes(k), L.eyes === k)).join(''))
+            + sec('On the cheeks', Object.entries(O.face).map(([k, v]) => chip('face', k, v, L.face === k)).join(''))
+            + sec('Glasses', Object.entries(O.glasses).map(([k, v]) => chip('glasses', k, v, L.glasses === k)).join(''))
+            + sec('Beard', Object.entries(O.beard).map(([k, v]) => chip('beard', k, v, L.beard === k)).join('')) : ''}
+          ${tab === 'hair' ? sec('Hair style', Object.entries(O.hair).map(([k, v]) => tile('hair', k, v, L.hair === k, C.portrait(ed.gender, 52, look({ hair: k, hat: 'none' })))).join(''), ' is-tiles')
+            + sec('Hair colour', Object.entries(O.hairColor).map(([k, v]) => dot('hairColor', k, v, C.SWATCH.hairColor(k), L.hairColor === k)).join(''))
+            + sec('On the head', Object.entries(O.hat).map(([k, v]) => tile('hat', k, v, L.hat === k, C.portrait(ed.gender, 52, look({ hat: k })))).join(''), ' is-tiles') : ''}
+          ${tab === 'clothes' ? sec('Clothes colour', Object.entries(O.top).map(([k, v]) => dot('top', k, v, C.SWATCH.top(k), L.top === k)).join(''))
+            + sec('Clothes', Object.entries(O.outfit).map(([k, v]) => chip('outfit', k, v, L.outfit === k)).join(''))
+            + sec('Earrings', Object.entries(O.earrings).map(([k, v]) => chip('earrings', k, v, L.earrings === k)).join(''))
+            + sec('In the hand <small>on the road maps</small>', Object.entries(O.carry).map(([k, v]) => chip('carry', k, v, L.carry === k)).join('')) : ''}
+          ${tab === 'fun' ? sec(`A pet <small>it sits beside ${ed.mine ? 'you' : 'them'}, and walks behind ${ed.mine ? 'you' : 'them'} on the maps</small>`, Object.entries(O.pet).map(([k, v]) => tile('pet', k, v, L.pet === k, k === 'none' ? '<span class="av-nopet" aria-hidden="true"></span>' : C.petFace(k, 52))).join(''), ' is-tiles')
+            + sec('Background', Object.entries(O.bg).map(([k, v]) => dot('bg', k, v, C.SWATCH.bg(k), L.bg === k)).join('')) : ''}
+
         </div></div>
       <footer class="av-foot"><button type="button" class="btn-quiet btn-sm" data-av-reset>Start again</button><span></span><button type="button" class="btn-quiet" data-av-close>Cancel</button><button type="button" class="btn" data-av-save>${ed.who ? 'Save' : 'Use this'}</button></footer></div>`;
   }
   let edEl = null;
-  function openEd(state) { ed = JSON.parse(JSON.stringify(state)); ed.avatar = ed.avatar || {};
+  let pop = false;
+  function openEd(state) { ed = JSON.parse(JSON.stringify(state)); ed.avatar = ed.avatar || {}; tab = 'basics'; pop = false;
     edEl = document.createElement('div'); edEl.className = 'av-ed is-new'; setTimeout(() => edEl?.classList.remove('is-new'), 400); document.body.appendChild(edEl); document.documentElement.classList.add('av-open'); paintEd(); edEl.querySelector('.av-x').focus(); }
   function paintEd() { const sc = edEl.querySelector('.av-opts')?.scrollTop || 0, ws = edEl.querySelector('.av-body')?.scrollTop || 0; edEl.innerHTML = edHTML();
     const o = edEl.querySelector('.av-opts'); if (o) o.scrollTop = sc; const b = edEl.querySelector('.av-body'); if (b) b.scrollTop = ws; }
@@ -84,21 +97,29 @@ window.IELTSStudents = (() => {
     if (k === 'gender') { ed.gender = v; ['hair', 'outfit', 'earrings', 'beard'].forEach(x => delete ed.avatar[x]); const h = C.HERITAGE[ed.avatar.heritage]; if (h?.hair?.[v]) ed.avatar.hair = h.hair[v]; }
     else if (k === 'heritage') { const h = C.HERITAGE[v]; ed.avatar.heritage = v; ed.avatar.skin = h.skin; ed.avatar.hairColor = h.hairColor; if (h.hair?.[ed.gender]) ed.avatar.hair = h.hair[ed.gender]; else if (['afro', 'curly'].includes(ed.avatar.hair)) delete ed.avatar.hair; }
     else ed.avatar[k] = v;
-    paintEd(); }
+    pop = true; paintEd(); }
   function randomLook() { const C = CH(), O = C.OPTIONS, any = o => { const k = Object.keys(o); return k[Math.floor(Math.random() * k.length)]; };
     const g = C.norm(ed.gender), hairs = Object.keys(O.hair).filter(h => !['cap', 'hijab', 'bald'].includes(h) && (g === 'male' ? !['long', 'wavy', 'curlylong', 'braid', 'bun', 'ponytail'].includes(h) || Math.random() < .1 : g === 'female' ? !['buzz', 'spiky', 'manbun'].includes(h) : true));
     ed.avatar = { skin: any(O.skin), hair: hairs[Math.floor(Math.random() * hairs.length)], hairColor: Math.random() < .8 ? ['black', 'darkbrown', 'brown', 'auburn', 'ginger', 'blonde'][Math.floor(Math.random() * 6)] : any(O.hairColor), top: any(O.top),
-      outfit: g === 'female' ? (Math.random() < .5 ? 'dress' : any(O.outfit)) : g === 'male' ? 'trousers' : any(O.outfit), glasses: Math.random() < .3 ? any(O.glasses) : 'none', beard: g === 'male' && Math.random() < .4 ? any(O.beard) : 'none', earrings: g === 'male' ? 'none' : any(O.earrings) };
-    paintEd(); }
+      outfit: g === 'female' ? (Math.random() < .5 ? 'dress' : any(O.outfit)) : g === 'male' ? 'trousers' : any(O.outfit), glasses: Math.random() < .3 ? any(O.glasses) : 'none', beard: g === 'male' && Math.random() < .4 ? any(O.beard) : 'none', earrings: g === 'male' ? 'none' : any(O.earrings),
+      expression: any(O.expression), eyes: any(O.eyes), face: Math.random() < .35 ? any(O.face) : 'none', hat: Math.random() < .45 ? any(O.hat) : 'none', pet: Math.random() < .6 ? any(O.pet) : 'none', carry: Math.random() < .4 ? any(O.carry) : 'none', bg: any(O.bg) };
+    pop = true; paintEd(); }
   document.addEventListener('click', async e => { if (!edEl || !edEl.contains(e.target)) return;
     if (e.target === edEl || e.target.closest('[data-av-close]')) { closeEd(); return; }
     const b = e.target.closest('[data-av]'); if (b) { setAv(b.dataset.av, b.dataset.v); return; }
     if (e.target.closest('[data-av-random]')) { randomLook(); return; }
+    const tb = e.target.closest('[data-av-tab]'); if (tb) { tab = tb.dataset.avTab; pop = false; paintEd(); const o = edEl.querySelector('.av-opts'); if (o) o.scrollTop = 0; edEl.querySelector('.av-tab.on')?.focus(); return; }
     if (e.target.closest('[data-av-reset]')) { ed.avatar = {}; paintEd(); return; }
     const s = e.target.closest('[data-av-save]'); if (!s) return;
     const look = { gender: CH().norm(ed.gender), avatar: ed.avatar, lang: ed.lang || '' };
     if (!ed.who) { addLook = look; closeEd(); paint(); return; }
     s.disabled = true; s.textContent = 'Saving…';
+    if (ed.mine) {   // a student (or the teacher) saving their own character: only their own row can change
+      try { await call({ action: 'mylook', gender: look.gender, avatar: look.avatar, first_language: look.lang }); const m = window.IELTS_GATE.member; m.gender = look.gender; m.avatar = look.avatar; m.lang = look.lang;
+        const me = list?.find(x => x.user_id === m.id); if (me) { me.gender = look.gender; me.avatar = look.avatar; me.first_language = look.lang; }
+        closeEd(); window.dispatchEvent(new Event('ielts-look')); }
+      catch (err) { s.disabled = false; s.textContent = 'Save'; alert(err.message); }
+      return; }
     try { await call({ action: 'look', user_id: ed.who, gender: look.gender, avatar: look.avatar, first_language: look.lang }); const m = list.find(x => x.user_id === ed.who);
       if (m) { m.gender = look.gender; m.avatar = look.avatar; m.first_language = look.lang; } const name = ed.name; closeEd(); say(`${name}’s character is saved. They will see it the next time they open the site.`); }
     catch (err) { s.disabled = false; s.textContent = 'Save'; alert(err.message); } });
@@ -127,5 +148,7 @@ window.IELTSStudents = (() => {
         try { await call({ action: 'password', user_id: m.user_id, password: p }); msg = { kind: 'ok', html: `New password for <b>${esc(m.first_name)}</b>: <code>${esc(p)}</code>` }; paint(); } catch (err) { say(err.message, 'err'); } }
     });
   }
-  return { html, mount };
+  /* your own character: opened from your picture on the home page */
+  function openMine() { const m = window.IELTS_GATE?.member; if (!m || !CH() || edEl) return; openEd({ who: 'me', mine: true, name: m.first_name || '', gender: m.gender, avatar: m.avatar || {}, lang: m.lang || '' }); }
+  return { html, mount, openMine };
 })();
