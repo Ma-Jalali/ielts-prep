@@ -2666,6 +2666,13 @@ document.addEventListener('click', e => { if (railOn() && e.target.closest?.('#s
 document.addEventListener('scroll', () => tipEl?.classList.remove('is-on'), true);
 setMini(document.documentElement.classList.contains('side-mini'));
 window.addEventListener('ielts-look', () => { render(); toast('Your character is saved.'); });
+/* the eyes of the big character pictures follow the pointer (home page, the designer) */
+let lookRaf = 0;
+document.addEventListener('pointermove', e => { if (e.pointerType === 'touch' || lookRaf) return; lookRaf = requestAnimationFrame(() => { lookRaf = 0;
+  document.querySelectorAll(':is(.home-pic, .av-big, .gate-hello) svg.ch-portrait').forEach(svg => { const r = svg.getBoundingClientRect(); if (!r.width) return;
+    const dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height * .48), d = Math.hypot(dx, dy) || 1, k = Math.min(1.25, d / 140) / d;
+    svg.classList.add('is-tracking'); svg.querySelectorAll('.ch-look').forEach(g => { g.style.transform = `translate(${(dx * k).toFixed(2)}px, ${(dy * k * .8).toFixed(2)}px)`; }); }); }); }, { passive: true });
+document.addEventListener('pointerleave', () => document.querySelectorAll('svg.ch-portrait.is-tracking').forEach(svg => { svg.classList.remove('is-tracking'); svg.querySelectorAll('.ch-look').forEach(g => { g.style.transform = ''; }); }));
 let lastHash = location.hash;
 window.addEventListener('hashchange', () => { const a = lastHash.match(/^#\/skill\/(\d+)\/([\w-]+)/), b = location.hash.match(/^#\/skill\/(\d+)\/([\w-]+)/); lastHash = location.hash;
   const same = a && b && a[1] === b[1] && a[2] === b[2], y = window.scrollY;   // another part or type in the same section: stay where you are
