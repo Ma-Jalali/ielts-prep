@@ -56,7 +56,7 @@ window.IELTSStudents = (() => {
     const langs = Object.entries(C.LANGS).map(([k, v]) => [k, v[0]]).sort((a, b) => a[1].localeCompare(b[1]));
     const sec = (t, body, cls = '') => `<section class="av-sec${cls}"><h4>${t}</h4><div class="av-row">${body}</div></section>`;
     return `<div class="av-card" role="dialog" aria-modal="true" aria-labelledby="av-title">
-      <header class="av-head"><h3 id="av-title">${esc(ed.name ? `${ed.name}’s character` : 'New student’s character')}</h3><button type="button" class="av-x" data-av-close aria-label="Close">×</button></header>
+      <header class="av-head"><h3 id="av-title">${esc(ed.mine ? 'Your character' : ed.name ? `${ed.name}’s character` : 'New student’s character')}</h3><button type="button" class="av-x" data-av-close aria-label="Close">×</button></header>
       <div class="av-body">
         <div class="av-stage"><span class="av-big${pop ? ' is-pop' : ''}">${C.portrait(ed.gender, 150, ed.avatar)}</span>${road}
           ${ed.lang && ed.lang !== 'en' ? `<p class="av-hi">${C.hello(ed.lang, ed.name || '')}</p>` : ''}<p class="av-sum">${esc(summary(ed))}</p>
@@ -66,7 +66,7 @@ window.IELTSStudents = (() => {
           ${tab === 'basics' ? sec('Body', Object.entries(C.LABELS).map(([k, v]) => chip('gender', k, v, ed.gender === k, `<span class="av-mini">${C.portrait(k, 30)}</span>`)).join(''))
             + sec('Quick start <small>sets the skin and hair; change anything after</small>', Object.entries(C.HERITAGE).map(([k, h]) => chip('heritage', k, h.label, L.heritage === k)).join(''))
             + sec('Skin tone', Object.entries(O.skin).map(([k, v]) => dot('skin', k, v, C.SWATCH.skin(k), L.skin === k)).join(''))
-            + `<section class="av-sec"><h4>First language <small>a hello on their home page, and a “well done” above the answer key</small></h4>
+            + `<section class="av-sec"><h4>First language <small>a hello on ${ed.mine ? 'your' : 'their'} home page, and a “well done” above the answer key</small></h4>
             <select class="av-lang" data-av-lang><option value="">Not set</option>${langs.map(([k, v]) => `<option value="${k}"${ed.lang === k ? ' selected' : ''}>${esc(v)}</option>`).join('')}</select></section>` : ''}
           ${tab === 'face' ? sec('Expression', Object.entries(O.expression).map(([k, v]) => tile('expression', k, v, L.expression === k, C.portrait(ed.gender, 52, look({ expression: k })))).join(''), ' is-tiles')
             + sec('Eye colour', Object.entries(O.eyes).map(([k, v]) => dot('eyes', k, v, C.SWATCH.eyes(k), L.eyes === k)).join(''))
@@ -80,7 +80,7 @@ window.IELTSStudents = (() => {
             + sec('Clothes', Object.entries(O.outfit).map(([k, v]) => chip('outfit', k, v, L.outfit === k)).join(''))
             + sec('Earrings', Object.entries(O.earrings).map(([k, v]) => chip('earrings', k, v, L.earrings === k)).join(''))
             + sec('In the hand <small>on the road maps</small>', Object.entries(O.carry).map(([k, v]) => chip('carry', k, v, L.carry === k)).join('')) : ''}
-          ${tab === 'fun' ? sec('A pet <small>it sits beside them, and walks behind them on the maps</small>', Object.entries(O.pet).map(([k, v]) => tile('pet', k, v, L.pet === k, k === 'none' ? '<span class="av-nopet" aria-hidden="true"></span>' : C.petFace(k, 52))).join(''), ' is-tiles')
+          ${tab === 'fun' ? sec(`A pet <small>it sits beside ${ed.mine ? 'you' : 'them'}, and walks behind ${ed.mine ? 'you' : 'them'} on the maps</small>`, Object.entries(O.pet).map(([k, v]) => tile('pet', k, v, L.pet === k, k === 'none' ? '<span class="av-nopet" aria-hidden="true"></span>' : C.petFace(k, 52))).join(''), ' is-tiles')
             + sec('Background', Object.entries(O.bg).map(([k, v]) => dot('bg', k, v, C.SWATCH.bg(k), L.bg === k)).join('')) : ''}
 
         </div></div>
@@ -114,6 +114,12 @@ window.IELTSStudents = (() => {
     const look = { gender: CH().norm(ed.gender), avatar: ed.avatar, lang: ed.lang || '' };
     if (!ed.who) { addLook = look; closeEd(); paint(); return; }
     s.disabled = true; s.textContent = 'Saving…';
+    if (ed.mine) {   // a student (or the teacher) saving their own character: only their own row can change
+      try { await call({ action: 'mylook', gender: look.gender, avatar: look.avatar, first_language: look.lang }); const m = window.IELTS_GATE.member; m.gender = look.gender; m.avatar = look.avatar; m.lang = look.lang;
+        const me = list?.find(x => x.user_id === m.id); if (me) { me.gender = look.gender; me.avatar = look.avatar; me.first_language = look.lang; }
+        closeEd(); window.dispatchEvent(new Event('ielts-look')); }
+      catch (err) { s.disabled = false; s.textContent = 'Save'; alert(err.message); }
+      return; }
     try { await call({ action: 'look', user_id: ed.who, gender: look.gender, avatar: look.avatar, first_language: look.lang }); const m = list.find(x => x.user_id === ed.who);
       if (m) { m.gender = look.gender; m.avatar = look.avatar; m.first_language = look.lang; } const name = ed.name; closeEd(); say(`${name}’s character is saved. They will see it the next time they open the site.`); }
     catch (err) { s.disabled = false; s.textContent = 'Save'; alert(err.message); } });
@@ -142,5 +148,7 @@ window.IELTSStudents = (() => {
         try { await call({ action: 'password', user_id: m.user_id, password: p }); msg = { kind: 'ok', html: `New password for <b>${esc(m.first_name)}</b>: <code>${esc(p)}</code>` }; paint(); } catch (err) { say(err.message, 'err'); } }
     });
   }
-  return { html, mount };
+  /* your own character: opened from your picture on the home page */
+  function openMine() { const m = window.IELTS_GATE?.member; if (!m || !CH() || edEl) return; openEd({ who: 'me', mine: true, name: m.first_name || '', gender: m.gender, avatar: m.avatar || {}, lang: m.lang || '' }); }
+  return { html, mount, openMine };
 })();

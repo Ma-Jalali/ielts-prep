@@ -183,5 +183,15 @@ html.av-open { overflow: hidden; }
 .av-nopet { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 50%; background: #f1f3f8; }
 .av-nopet::before { content: ''; width: 22px; height: 2.5px; border-radius: 2px; background: #b9c0d4; transform: rotate(-45deg); }
 .av-dot.on { transform: scale(1.1); }
-@media (max-width: 760px) { .av-tabs { margin: 0 -16px; padding: 10px 16px 8px; top: 0; } .av-tab { height: 34px; padding: 0 13px; font-size: .8rem; } }
+@media (max-width: 760px) { .av-tabs { position: static; margin: 0 -16px; padding: 10px 16px 4px; background: none; } .av-tab { height: 34px; padding: 0 13px; font-size: .8rem; } }
 @media (prefers-reduced-motion: reduce) { .av-big.is-pop svg, .av-tile.on svg { animation: none; } }
+
+/* your own picture is a button: a small pencil says it can be changed */
+button:is(.home-pic, .hm-pic) { position: relative; padding: 0; border: 0; overflow: visible; font: inherit; transition: transform .2s cubic-bezier(.3, 1.6, .5, 1); }
+button:is(.home-pic, .hm-pic) > svg.ch-portrait { border-radius: 50%; }
+button:is(.home-pic, .hm-pic):hover { transform: scale(1.04); }
+button:is(.home-pic, .hm-pic):focus-visible { outline: 3px solid #2b67d1; outline-offset: 4px; }
+.pic-edit { position: absolute; right: -2px; bottom: -2px; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: #18213f; color: #fff; box-shadow: 0 0 0 3px #fff, 0 6px 12px -6px rgba(24, 33, 63, .7); transition: transform .2s, background .2s; }
+.pic-edit svg { width: 14px; height: 14px; animation: none !important; }
+button:is(.home-pic, .hm-pic):hover .pic-edit { background: #2b67d1; transform: rotate(-12deg) scale(1.08); }
+.hm-pic .pic-edit { width: 22px; height: 22px; box-shadow: 0 0 0 2px #fff; } .hm-pic .pic-edit svg { width: 11px; height: 11px; }
