@@ -191,7 +191,7 @@ button:is(.home-pic, .hm-pic) { position: relative; padding: 0; border: 0; overf
 button:is(.home-pic, .hm-pic) > svg.ch-portrait { border-radius: 50%; }
 button:is(.home-pic, .hm-pic):hover { transform: scale(1.04); }
 button:is(.home-pic, .hm-pic):focus-visible { outline: 3px solid #2b67d1; outline-offset: 4px; }
-.pic-edit { position: absolute; left: -2px; bottom: -2px; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: #18213f; color: #fff; box-shadow: 0 0 0 3px #fff, 0 6px 12px -6px rgba(24, 33, 63, .7); transition: transform .2s, background .2s; }
+.pic-edit { position: absolute; right: -2px; top: -2px; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: #18213f; color: #fff; box-shadow: 0 0 0 3px #fff, 0 6px 12px -6px rgba(24, 33, 63, .7); transition: transform .2s, background .2s; }
 .pic-edit svg { width: 14px; height: 14px; animation: none !important; }
 button:is(.home-pic, .hm-pic):hover .pic-edit { background: #2b67d1; transform: rotate(12deg) scale(1.08); }
 .hm-pic .pic-edit { width: 22px; height: 22px; box-shadow: 0 0 0 2px #fff; } .hm-pic .pic-edit svg { width: 11px; height: 11px; }
